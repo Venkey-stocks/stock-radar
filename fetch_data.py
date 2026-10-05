@@ -6,10 +6,24 @@ import yfinance as yf
 TEST_LIMIT = 50
 BATCH = 100
 
-URL = "https://nsearchives.nseindia.com/content/equity_l.csv"
-r = requests.get(URL, headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
-r.raise_for_status()
-lst = pd.read_csv(io.StringIO(r.text))
+URLS = [
+    "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv",
+    "https://archives.nseindia.com/content/equities/EQUITY_L.csv",
+]
+text = None
+for u in URLS:
+    try:
+        r = requests.get(u, headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
+        print("Tried:", u, "status:", r.status_code)
+        if r.status_code == 200:
+            text = r.text
+            break
+    except Exception as e:
+        print("Failed:", u, e)
+if text is None:
+    raise SystemExit("Could not download NSE stock list")
+
+lst = pd.read_csv(io.StringIO(text))
 lst.columns = [c.strip() for c in lst.columns]
 lst = lst[lst["SERIES"].str.strip() == "EQ"]
 symbols = lst["SYMBOL"].str.strip().tolist()
