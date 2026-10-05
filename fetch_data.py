@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import yfinance as yf
 
-TEST_LIMIT = 50
+TEST_LIMIT = None
 BATCH = 100
 
 URLS = [
