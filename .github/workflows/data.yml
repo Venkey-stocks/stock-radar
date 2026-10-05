@@ -1,6 +1,8 @@
 name: Fetch data
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 11 * * 1-5"
 permissions:
   contents: write
 jobs:
