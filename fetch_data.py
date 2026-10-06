@@ -63,3 +63,23 @@ if frames:
 with open("data/failed.txt", "w") as f:
     f.write("\n".join(failed))
 print("Failed:", len(failed))
+
+# ---------- Index data (Nifty 50 మరియు Nifty 500) ----------
+# ఇది విఫలమైనా stocks data పై ప్రభావం ఉండదు
+INDEXES = {"NIFTY50": "^NSEI", "NIFTY500": "^CRSLDX"}
+idx_frames = []
+for name, tk in INDEXES.items():
+    try:
+        d = yf.Ticker(tk).history(period="1y", interval="1d", auto_adjust=True)
+        if d is None or d.empty:
+            print("Index no data:", name, tk)
+            continue
+        d.index = d.index.tz_localize(None).normalize()
+        d = d.reset_index().rename(columns={d.index.name or "Date": "Date"})
+        d["Symbol"] = name
+        idx_frames.append(d[["Symbol", "Date", "Open", "High", "Low", "Close", "Volume"]])
+        print("Index saved:", name, len(d), "rows")
+    except Exception as e:
+        print("Index failed:", name, tk, e)
+if idx_frames:
+    pd.concat(idx_frames, ignore_index=True).to_csv("data/index.csv", index=False)
