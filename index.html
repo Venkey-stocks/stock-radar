@@ -29,6 +29,7 @@ label{color:var(--mut);font-size:13px}
 .stop b{color:var(--r)}.tgt b{color:var(--g)}
 .exp{color:var(--mut);font-size:13px;margin-top:4px}
 .warn{margin-top:8px;color:var(--y);font-size:12.5px}
+.goodl{margin-top:8px;color:var(--g);font-size:12.5px}
 .foot{color:var(--mut);font-size:12px;margin-top:22px;border-top:1px solid var(--line);padding-top:10px}
 .err{color:var(--r)}
 .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:12px}
@@ -48,6 +49,7 @@ th{color:var(--mut);font-weight:600}
 .fund .row span:first-child{color:var(--mut)}
 .fund .row b{font-weight:600;text-align:right}
 .na{color:var(--mut);font-weight:400!important}
+.note{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:12.5px;color:var(--mut)}
 </style>
 </head>
 <body>
@@ -56,6 +58,7 @@ th{color:var(--mut);font-weight:600}
 <div class="tabs">
   <button id="t_ultra" class="on" onclick="show('ultra')">Ultra Short (1-5 days)</button>
   <button id="t_short" onclick="show('short')">Short Term (1-20 days)</button>
+  <button id="t_multi" onclick="show('multi')">Multibagger (1-3 years)</button>
   <button id="t_perf" onclick="show('perf')">Performance</button>
   <button id="t_miss" onclick="show('miss')">Miss Report</button>
 </div>
@@ -68,6 +71,23 @@ th{color:var(--mut);font-weight:600}
   <select id="status" onchange="draw()"><option value="">All status</option></select>
 </div>
 <div class="grid" id="list"></div>
+
+<div id="multi" style="display:none">
+  <div class="note">Weekly scan (updated every Saturday). Quality companies with fast 3-year sales and profit growth, high ROCE, positive cash flow and a price that has not already run up. Meant for 1-3 years. Stop-loss is wide (20-25%), so the suggested quantity is small. Ranked by score; you pick the top few. Always verify ROCE and growth on screener.in before buying. Not checked: auditor changes and related-party transactions.</div>
+  <div class="bar" id="bar_multi">
+    <select id="mband2" onchange="drawMulti()">
+      <option value="">All bands</option>
+      <option>High Conviction</option><option>Good Setup</option><option>Early Watch</option>
+    </select>
+    <select id="mcap" onchange="drawMulti()">
+      <option value="">Any market cap</option>
+      <option value="5000">Up to Rs 5,000 crore</option>
+      <option value="10000">Up to Rs 10,000 crore</option>
+    </select>
+    <select id="msector" onchange="drawMulti()"><option value="">All sectors</option></select>
+  </div>
+  <div class="grid" id="list_multi"></div>
+</div>
 
 <div id="perf" style="display:none">
   <div class="bar">
@@ -111,7 +131,7 @@ Stocks on the NSE ASM or GSM lists are removed automatically. Scores are estimat
 Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv'};
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv'};
 let cur='ultra',DATA={};
 const $=id=>document.getElementById(id);
 
@@ -206,6 +226,53 @@ function draw(){
   $('meta').textContent='Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
+function drawMulti(){
+  const rows=DATA.multi||[];
+  const sel=$('msector');
+  const secs=[...new Set(rows.map(r=>r.Sector).filter(Boolean))].sort();
+  if(sel.options.length-1!=secs.length){
+    const v=sel.value;
+    sel.innerHTML='<option value="">All sectors</option>'+secs.map(s=>'<option>'+s+'</option>').join('');
+    sel.value=secs.includes(v)?v:'';
+  }
+  const b=$('mband2').value, mc=$('mcap').value, sc=sel.value;
+  const list=rows.filter(r=>(!b||r.Band==b)&&(!sc||r.Sector==sc)&&(!mc||(+r.MarketCapCr)<=(+mc))).sort((a,c)=>c.Score-a.Score);
+  const na='<b class="na">n/a</b>';
+  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
+  $('list_multi').innerHTML=list.length?list.map(r=>{
+    const cls=r.Band.split(' ')[0];
+    const pos=has(r.Positives)?r.Positives.split('; '):[];
+    const warn=has(r.Warning)?r.Warning.split('; '):[];
+    const pl=has(r.PledgeOfPromoterPct)?'<b class="'+(+r.PledgeOfPromoterPct>=25?'neg':(+r.PledgeOfPromoterPct>=10?'amb':''))+'">'+r.PledgeOfPromoterPct+'% of promoter shares</b>':na;
+    const de=has(r.DebtEquity)?'<b class="'+(+r.DebtEquity>1?'amb':'')+'">'+r.DebtEquity+'</b>':na;
+    return '<div class="card"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span></div>'
+    +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
+    +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
+    +'<div class="n tgt"><small>Minimum goal (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
+    +'<div class="exp">Quality growth company for a 1-3 year hold. The goal shown is only a minimum 1:2 reward-to-risk level, not a forecast. Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital; the wide stop makes the position small).</div>'
+    +'<div class="fund"><div class="ft">Quality and growth</div>'
+    +row('ROCE','<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr a year)','<b>'+r.SalesCAGR3+'%</b>')
+    +row('Profit growth (3-yr a year)','<b>'+r.ProfitCAGR3+'%</b>')
+    +row('Latest quarter sales vs last year',has(r.QSalesYoY)?'<b>'+r.QSalesYoY+'%</b>':na)
+    +row('Latest quarter profit vs last year',has(r.QProfitYoY)?'<b>'+r.QProfitYoY+'%</b>':na)
+    +row('Debt / Equity',de)+'</div>'
+    +'<div class="fund"><div class="ft">Ownership and valuation</div>'
+    +row('Market cap',has(r.MarketCapCr)?'<b>Rs '+fmt(r.MarketCapCr)+' crore</b>':na)
+    +row('Promoter holding',has(r.PromoterPct)?'<b>'+r.PromoterPct+'%</b>':na)
+    +row('Promoter pledge',pl)
+    +row('Institutions hold',has(r.InstPct)?'<b>'+r.InstPct+'%</b>':na)
+    +row('Analysts covering',has(r.Analysts)?'<b>'+r.Analysts+'</b>':na)
+    +row('PEG ratio',has(r.PEG)?'<b>'+r.PEG+'</b>':na)
+    +row('Price change, 1 year',has(r.Ret1Y)?'<b>'+r.Ret1Y+'%</b>':na)+'</div>'
+    +(pos.length?'<div class="goodl">'+pos.map(p=>'&#10003; '+p).join('<br>')+'</div>':'')
+    +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+p).join('<br>')+'</div>':'')
+    +'</div>';
+  }).join(''):'<div class="exp">No stocks match.</div>';
+  const d=rows[0]?rows[0].Date:'-';
+  $('meta').textContent='Multibagger scan (weekly) | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
+}
+
 function resetPerf(){$('pscan').value='';$('pclass').value='';$('pfrom').value='';$('pto').value='';drawPerf();}
 
 function drawPerf(){
@@ -260,14 +327,16 @@ function drawMiss(){
 
 function show(k){
   cur=k;
-  ['ultra','short','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  ['ultra','short','multi','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
   $('perf').style.display=k=='perf'?'block':'none';
   $('miss').style.display=k=='miss'?'block':'none';
+  $('multi').style.display=k=='multi'?'block':'none';
   $('bar_scan').style.display=scanTab?'flex':'none';
   $('list').style.display=scanTab?'grid':'none';
   if(k=='perf'){drawPerf();return;}
   if(k=='miss'){drawMiss();return;}
+  if(k=='multi'){drawMulti();return;}
   $('status').innerHTML='<option value="">All status</option>';
   draw();
 }
@@ -276,6 +345,7 @@ const load=k=>fetch(FILES[k]+'?v='+Date.now()).then(r=>{if(!r.ok)throw new Error
 Promise.all([load('ultra'),load('short')])
  .then(()=>load('perf').catch(()=>{DATA.perf=[];}))
  .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
+ .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
  .then(()=>show('ultra'))
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
 </script>
