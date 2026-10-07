@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Health - Venkey's Stock Radar</title>
+<style>
+:root{--bg:#0e1117;--card:#161b22;--line:#262d38;--tx:#e6edf3;--mut:#8b96a5;--g:#2ea043;--y:#d29922;--r:#f85149;--b:#388bfd}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,Arial,sans-serif;padding:16px;max-width:800px;margin:auto}
+h1{margin:0 0 4px;font-size:22px}
+a{color:var(--b)}
+.sub{color:var(--mut);font-size:13px;margin-bottom:14px}
+.big{border-radius:14px;padding:18px;margin-bottom:14px;border:1px solid var(--line);background:var(--card)}
+.badge{display:inline-block;font-size:26px;font-weight:800;padding:4px 16px;border-radius:10px;color:#fff}
+.Favorable{background:var(--g)}.Cautious{background:var(--y)}.Weak{background:var(--r)}.Unknown{background:#444c56}
+.score{font-size:15px;color:var(--mut);margin-left:10px}
+.adv{margin-top:10px}
+.bar{height:10px;background:#0e1117;border-radius:6px;margin-top:12px;overflow:hidden}
+.bar i{display:block;height:100%}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.row:last-child{border:none}
+.row small{color:var(--mut)}
+.ok{color:var(--g)}.no{color:var(--r)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+td,th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--mut)}
+.foot{color:var(--mut);font-size:12px;margin-top:18px;border-top:1px solid var(--line);padding-top:10px}
+</style>
+</head>
+<body>
+<h1>Market Health</h1>
+<div class="sub"><a href="/">&larr; Back to Stock Radar</a> &nbsp;|&nbsp; <span id="meta">Loading...</span></div>
+<div class="big" id="big"></div>
+<div class="card"><b>What we checked</b><div id="checks"></div></div>
+<div class="card"><b>Recent days</b><table id="hist"></table></div>
+<div class="foot">Based on end-of-day prices of liquid NSE stocks (price Rs 50+, traded value Rs 10 crore+) and the Nifty index. The score weights and the Favorable / Cautious / Weak limits (65 and 40) are estimates and may be tuned later. This is a general guide to market conditions, not a prediction or advice. The decision is yours.</div>
+<script>
+const $=id=>document.getElementById(id);
+fetch('data/market_health.json?v='+Date.now()).then(r=>{if(!r.ok)throw new Error('market_health.json not found');return r.json();}).then(d=>{
+  $('meta').textContent='Data date: '+d.Date+' | Index used: '+d.Index+' | '+d.LiquidStocks+' liquid stocks';
+  const col={Favorable:'var(--g)',Cautious:'var(--y)',Weak:'var(--r)',Unknown:'#444c56'}[d.Status];
+  $('big').innerHTML='<span class="badge '+d.Status+'">'+d.Status+'</span><span class="score">Score '+d.Score+' / 100</span>'
+    +'<div class="bar"><i style="width:'+d.Score+'%;background:'+col+'"></i></div><div class="adv">'+d.Advice+'</div>';
+  $('checks').innerHTML=d.Checks.map(c=>'<div class="row"><span><span class="'+(c.good?'ok':'no')+'">'+(c.good?'&#10003;':'&#10007;')+'</span> <b>'+c.name+'</b><br><small>'+c.text+'</small></span><span>'+c.points+' / '+c.max+'</span></div>').join('');
+}).catch(e=>{$('meta').innerHTML='<span style="color:var(--r)">Error: '+e.message+'</span>';});
+fetch('data/market_health_history.csv?v='+Date.now()).then(r=>r.ok?r.text():'').then(t=>{
+  const rows=t.trim().split('\n').slice(1).map(l=>l.split(',')).reverse().slice(0,15);
+  $('hist').innerHTML='<tr><th>Date</th><th>Score</th><th>Status</th></tr>'+(rows.length?rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join(''):'<tr><td colspan="3">History will build up day by day.</td></tr>');
+}).catch(()=>{});
+</script>
+</body>
+</html>
