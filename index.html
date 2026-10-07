@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stock Radar</title>
+<title>Venkey's Stock Radar</title>
 <style>
 :root{--bg:#0e1117;--card:#161b22;--line:#262d38;--tx:#e6edf3;--mut:#8b96a5;--g:#2ea043;--y:#d29922;--b:#388bfd;--r:#f85149}
 *{box-sizing:border-box}
@@ -35,20 +35,23 @@ label{color:var(--mut);font-size:13px}
 .st{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
 .st small{display:block;color:var(--mut);font-size:11px}
 .st b{font-size:18px}
-.pos{color:var(--g)}.neg{color:var(--r)}
+.pos{color:var(--g)}.neg{color:var(--r)}.amb{color:var(--y)}
 .wrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}
 th{color:var(--mut);font-weight:600}
+.rs{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px}
+.rs div{display:flex;justify-content:space-between;gap:12px;padding:2px 0}
 </style>
 </head>
 <body>
-<h1>Stock Radar</h1>
+<h1>Venkey's Stock Radar</h1>
 <div class="sub" id="meta">Loading...</div>
 <div class="tabs">
   <button id="t_ultra" class="on" onclick="show('ultra')">Ultra Short (1-5 days)</button>
   <button id="t_short" onclick="show('short')">Short Term (1-20 days)</button>
   <button id="t_perf" onclick="show('perf')">Performance</button>
+  <button id="t_miss" onclick="show('miss')">Miss Report</button>
 </div>
 
 <div class="bar" id="bar_scan">
@@ -77,13 +80,31 @@ th{color:var(--mut);font-weight:600}
   <div class="exp">Dates filter by the day a stock first appeared on the radar. If stop-loss and target are both touched on the same day, it is counted as a stop-loss (conservative). Pending = waiting for price to reach the entry. Expired = time window ended without hitting target or stop (shown at the window's last close).</div>
 </div>
 
+<div id="miss" style="display:none">
+  <div class="bar">
+    <select id="mscan" onchange="drawMiss()">
+      <option value="">Both scans</option><option value="ultra">Ultra Short (15% in 5 days)</option><option value="short">Short Term (15% in 20 days)</option>
+    </select>
+    <select id="mres" onchange="drawMiss()">
+      <option value="">All results</option><option>Missed</option><option>Caught</option><option>Unknown</option>
+    </select>
+    <label>From</label><input type="date" id="mfrom" onchange="drawMiss()">
+    <label>To</label><input type="date" id="mto" onchange="drawMiss()">
+    <button onclick="resetMiss()">Reset</button>
+  </div>
+  <div class="stats" id="mstats"></div>
+  <div class="rs" id="mreasons"></div>
+  <div class="wrap"><table id="mtable"></table></div>
+  <div class="exp">A "big mover" is a stock (price Rs 50+, average traded value Rs 10 crore+) whose close rose 15%+ within 5 trading days (Ultra) or 20 trading days (Short Term). Caught = it was on our list that day (or in the 2 days before). Missed = we had a snapshot and it was not listed. Unknown = no snapshot exists for that day (older dates), so the reason is only an approximation from price data. Date filter = the day the move started.</div>
+</div>
+
 <div class="foot">
 Data: Yahoo Finance end-of-day prices (via yfinance), scanned automatically after market close.
 Scores are estimates from price and volume only; results dates, debt and pledge are not checked yet.
 Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv'};
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv'};
 let cur='ultra',DATA={};
 const $=id=>document.getElementById(id);
 
@@ -102,7 +123,6 @@ function parseCSV(t){
   return rows.filter(x=>x.length==h.length).map(x=>Object.fromEntries(h.map((k,i)=>[k,x[i]])));
 }
 
-// scan ఫైళ్ళలోని Telugu పదాలను English లోకి మారుస్తుంది
 function tr(s){
   if(!s) return '';
   return s
@@ -179,14 +199,43 @@ function drawPerf(){
   $('meta').textContent='Performance of every stock from the day it first appeared on the radar | '+rows.length+' signals';
 }
 
+function resetMiss(){$('mscan').value='';$('mres').value='';$('mfrom').value='';$('mto').value='';drawMiss();}
+
+function drawMiss(){
+  const sc=$('mscan').value, rs=$('mres').value, f=$('mfrom').value, t=$('mto').value;
+  const all=(DATA.miss||[]).filter(r=>(!sc||r.Scan==sc)&&(!f||r.Date>=f)&&(!t||r.Date<=t));
+  const rows=all.filter(r=>!rs||r.Result==rs).sort((a,b)=>b.Date.localeCompare(a.Date)||(+b.GainPct)-(+a.GainPct));
+  const c=k=>all.filter(r=>r.Result==k).length;
+  const caught=c('Caught'), missed=c('Missed');
+  const rate=(caught+missed)?Math.round(caught*100/(caught+missed))+'%':'-';
+  const box=(l,v,k)=>'<div class="st"><small>'+l+'</small><b class="'+(k||'')+'">'+v+'</b></div>';
+  $('mstats').innerHTML=box('Big movers (15%+)',all.length)+box('Caught',caught,'pos')+box('Missed',missed,'neg')
+    +box('Unknown (no snapshot)',c('Unknown'),'amb')+box('Catch rate (caught vs missed)',rate);
+  const cntR={};
+  all.filter(r=>r.Result!='Caught').forEach(r=>{
+    const k=r.Reason.replace('No snapshot that day. Approx: ','').replace(/\s*\(.*\)\s*$/,'');
+    cntR[k]=(cntR[k]||0)+1;
+  });
+  const ks=Object.keys(cntR).sort((a,b)=>cntR[b]-cntR[a]);
+  $('mreasons').innerHTML='<b>Why we missed them (most common first)</b>'+(ks.length?ks.map(k=>'<div><span>'+k+'</span><b>'+cntR[k]+'</b></div>').join(''):'<div><span>Nothing to show yet.</span></div>');
+  $('mtable').innerHTML='<tr><th>Move started</th><th>Scan</th><th>Stock</th><th>Close</th><th>Peak close</th><th>Gain %</th><th>Days</th><th>Result</th><th>Listed as</th><th>Reason (approx.)</th></tr>'
+   +(rows.length?rows.map(r=>{
+     const k=r.Result=='Caught'?'pos':(r.Result=='Missed'?'neg':'amb');
+     return '<tr><td>'+r.Date+'</td><td>'+(r.Scan=='ultra'?'Ultra':'Short')+'</td><td><b>'+r.Symbol+'</b></td><td>'+fmt(r.Close)+'</td><td>'+fmt(r.PeakClose)+'</td><td class="pos">+'+r.GainPct+'%</td><td>'+r.Days+'</td><td class="'+k+'">'+r.Result+'</td><td>'+(r.ListedStatus||'-')+'</td><td>'+(r.Reason||'-')+'</td></tr>';
+   }).join(''):'<tr><td colspan="10">No big movers in this range.</td></tr>');
+  $('meta').textContent='Stocks that rose 15%+ (5 days Ultra / 20 days Short Term) and whether our radar had them | '+rows.length+' shown';
+}
+
 function show(k){
   cur=k;
-  ['ultra','short','perf'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
-  const isPerf=k=='perf';
-  $('perf').style.display=isPerf?'block':'none';
-  $('bar_scan').style.display=isPerf?'none':'flex';
-  $('list').style.display=isPerf?'none':'grid';
-  if(isPerf){drawPerf();return;}
+  ['ultra','short','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  const scanTab=(k=='ultra'||k=='short');
+  $('perf').style.display=k=='perf'?'block':'none';
+  $('miss').style.display=k=='miss'?'block':'none';
+  $('bar_scan').style.display=scanTab?'flex':'none';
+  $('list').style.display=scanTab?'grid':'none';
+  if(k=='perf'){drawPerf();return;}
+  if(k=='miss'){drawMiss();return;}
   $('status').innerHTML='<option value="">All status</option>';
   draw();
 }
@@ -194,6 +243,7 @@ function show(k){
 const load=k=>fetch(FILES[k]+'?v='+Date.now()).then(r=>{if(!r.ok)throw new Error(FILES[k]+' not found');return r.text();}).then(t=>{DATA[k]=parseCSV(t);});
 Promise.all([load('ultra'),load('short')])
  .then(()=>load('perf').catch(()=>{DATA.perf=[];}))
+ .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
  .then(()=>show('ultra'))
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
 </script>
