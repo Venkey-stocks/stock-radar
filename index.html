@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stock Radar</title>
+<style>
+:root{--bg:#0e1117;--card:#161b22;--line:#262d38;--tx:#e6edf3;--mut:#8b96a5;--g:#2ea043;--y:#d29922;--b:#388bfd;--r:#f85149}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,Arial,sans-serif;padding:16px;max-width:1100px;margin:auto}
+h1{margin:0 0 4px;font-size:22px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:14px}
+.tabs,.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+button,select{background:var(--card);color:var(--tx);border:1px solid var(--line);padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer}
+button.on{background:var(--b);border-color:var(--b)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.sym{font-size:18px;font-weight:700}
+.score{font-weight:700;border-radius:6px;padding:2px 8px;font-size:13px}
+.High{background:var(--g)}.Good{background:var(--b)}.Early{background:#444c56}
+.tags{margin:6px 0;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:20px;padding:1px 8px;color:var(--mut)}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.n{background:#0e1117;border-radius:8px;padding:6px 8px}
+.n small{display:block;color:var(--mut);font-size:11px}
+.n b{font-size:15px}
+.stop b{color:var(--r)}.tgt b{color:var(--g)}
+.exp{color:var(--mut);font-size:13px}
+.warn{margin-top:8px;color:var(--y);font-size:12.5px}
+.foot{color:var(--mut);font-size:12px;margin-top:22px;border-top:1px solid var(--line);padding-top:10px}
+.err{color:var(--r)}
+</style>
+</head>
+<body>
+<h1>Stock Radar</h1>
+<div class="sub" id="meta">Loading...</div>
+<div class="tabs">
+  <button id="t_ultra" class="on" onclick="show('ultra')">Ultra Short (1-5 days)</button>
+  <button id="t_short" onclick="show('short')">Short Term (1-20 days)</button>
+</div>
+<div class="bar">
+  <select id="band" onchange="draw()">
+    <option value="">All bands</option>
+    <option>High Conviction</option><option>Good Setup</option><option>Early Watch</option>
+  </select>
+  <select id="status" onchange="draw()"><option value="">All status</option></select>
+</div>
+<div class="grid" id="list"></div>
+<div class="foot">
+Data: Yahoo Finance end-of-day prices (via yfinance), scanned automatically after market close.
+Scores are estimates from price and volume only; results dates, debt and pledge are not checked yet.
+Always verify on your own chart. This is a research aid, not investment advice.
+</div>
+<script>
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv'};
+let cur='ultra',DATA={};
+
+function parseCSV(t){
+  const rows=[];let r=[],f='',q=false;
+  for(let i=0;i<t.length;i++){
+    const c=t[i];
+    if(q){ if(c=='"'){ if(t[i+1]=='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c=='"') q=true;
+    else if(c==','){r.push(f);f='';}
+    else if(c=='\n'){r.push(f);rows.push(r);r=[];f='';}
+    else if(c!='\r') f+=c;
+  }
+  if(f.length||r.length){r.push(f);rows.push(r);}
+  const h=rows.shift()||[];
+  return rows.filter(x=>x.length==h.length).map(x=>Object.fromEntries(h.map((k,i)=>[k,x[i]])));
+}
+
+function explain(s,k){
+  const e=+s.Entry;
+  if(s.Status=='Breakout') return 'Price closed above its recent high on higher-than-normal volume. This is the breakout signal.';
+  if(s.Status=='Near Miss') return 'Price is very close to breaking out, but one condition (usually volume or close level) is not fully met yet. Keep on watch.';
+  if(s.Status=='Setup') return 'Price is tightening just below a resistance level. Wait for a close above Rs '+e.toFixed(2)+' with strong volume.';
+  if(s.Status=='Pullback') return 'Stock is in an uptrend, dipped to its moving average and is now bouncing back with rising volume.';
+  return '';
+}
+
+function fmt(x){return (+x).toLocaleString('en-IN',{maximumFractionDigits:2});}
+
+function draw(){
+  const rows=(DATA[cur]||[]);
+  const sel=document.getElementById('status');
+  const sts=[...new Set(rows.map(r=>r.Status))];
+  if(sel.options.length-1!=sts.length){
+    const v=sel.value;
+    sel.innerHTML='<option value="">All status</option>'+sts.map(s=>'<option>'+s+'</option>').join('');
+    sel.value=sts.includes(v)?v:'';
+  }
+  const b=document.getElementById('band').value, st=sel.value;
+  const list=rows.filter(r=>(!b||r.Band==b)&&(!st||r.Status==st)).sort((a,c)=>c.Score-a.Score);
+  document.getElementById('list').innerHTML=list.length?list.map(r=>{
+    const cls=r.Band.split(' ')[0];
+    const tags=[r.Status,r.Class,r.Setup,r.Gap=='Yes'?'Gap-up':''].filter(Boolean).map(t=>'<span class="tag">'+t+'</span>').join('');
+    return '<div class="card"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags">'+tags+'</div>'
+    +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
+    +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
+    +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
+    +'<div class="exp">'+explain(r)+' Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital). Last close: '+fmt(r.Close)+'.</div>'
+    +(r.Boosters?'<div class="exp">Boosters: '+r.Boosters+'</div>':'')
+    +(r.Warning?'<div class="warn">&#9888; '+r.Warning+'</div>':'')
+    +'</div>';
+  }).join(''):'<div class="exp">No stocks match today.</div>';
+  const d=rows[0]?rows[0].Date:'-';
+  document.getElementById('meta').textContent='Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
+}
+
+function show(k){
+  cur=k;
+  document.getElementById('t_ultra').className=k=='ultra'?'on':'';
+  document.getElementById('t_short').className=k=='short'?'on':'';
+  document.getElementById('status').innerHTML='<option value="">All status</option>';
+  draw();
+}
+
+Promise.all(Object.keys(FILES).map(k=>fetch(FILES[k]+'?v='+Date.now()).then(r=>{if(!r.ok)throw new Error(FILES[k]+' not found');return r.text();}).then(t=>{DATA[k]=parseCSV(t);})))
+.then(()=>show('ultra'))
+.catch(e=>{document.getElementById('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
+</script>
+</body>
+</html>
