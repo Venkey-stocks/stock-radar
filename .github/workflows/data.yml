@@ -22,6 +22,9 @@ jobs:
       - name: Performance tracker
         run: python track_performance.py
         continue-on-error: true
+      - name: Miss report
+        run: python miss_report.py
+        continue-on-error: true
       - name: Save data
         run: |
           git config user.name "bot"
