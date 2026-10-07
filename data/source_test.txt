@@ -1,0 +1,18 @@
+NSE home page: status 403
+NSE ASM list: status 200, size 52451 | {"longterm":{"data":[{"asmSurvIndicator":"Stage I","asmTime":"07-Oct-2026","companyName":"A2Z Infra Engineering Limited","isin":"INE619I01012","series
+NSE GSM list: status 200, size 19198 | [{"companyName":"AGS Transact Technologies Limited","gsmStage":"LVIII","gsmTime":"06-Oct-2026 08:07:02","isin":"INE583L01014","survCode":"IBC I & GSM 
+NSE results calendar: status 200, size 48071 | [{"symbol":"GMBREW","company":"GM Breweries Limited","purpose":"Financial Results","bm_desc":"To consider and approve the financial results for the pe
+NSE financial results: status 200, size 2910901 | [{"audited":"Un-Audited","bank":"N","broadCastDate":"30-Jul-2026 17:17:53","companyName":"V.S.T Tillers Tractors Limited","consolidated":"Consolidated
+NSE pledge data: status 200, size 659 | {"comNameList":["Reliance Industries Limited"],"data":[{"broadcastDt":"06-Oct-2026 16:30:13","comName":"Reliance Industries Limited","compBroadcastDat
+NSE shareholding: status 200, size 40154 | [{"broadcastDate":"16-JUL-2026 19:24:44","cgTimeStamp":null,"countString":null,"date":"30-JUN-2026","desc":"NEW_1","employeeTrusts":"0","format":null,
+NSE bulk deals: status 200, size 52317 | {"as_on_date":"06-Oct-2026","BULK_DEALS_DATA":[{"buySell":"SELL","clientName":"ANUPAMA SHETTY","date":"06-Oct-2026","name":"One Mobikwik Systems Ltd",
+BSE script list: status 403, size 420 | <HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1>   You don't have permission to access "http&#58;&#47;&#47;api&#46;bsein
+yfinance info RELIANCE: {'marketCap': 16482551463936, 'debtToEquity': 46.278, 'returnOnEquity': None, 'heldPercentInsiders': 0.51798, 'heldPercentInstitutions': 0.28047, 'earningsGrowth': -0.224, 'revenueGrowth': 0.297, 'trailingPE': 22.057224, 'sector': 'Energy'}
+yfinance calendar RELIANCE: {'Ex-Dividend Date': datetime.date(2026, 6, 5), 'Earnings Date': [datetime.date(2026, 10, 16)], 'Earnings High': 18.95, 'Earnings Low': 13.6, 'Earnings Average': 16.41667, 'Revenue High': 322745700000
+yfinance quarterly RELIANCE: columns=5 rows=37
+yfinance info LGEINDIA: {'marketCap': 1193689219072, 'debtToEquity': 5.99, 'returnOnEquity': None, 'heldPercentInsiders': 0.85, 'heldPercentInstitutions': 0.0731, 'earningsGrowth': 0.272, 'revenueGrowth': 0.155, 'trailingPE': 65.39978, 'sector': 'Technology'}
+yfinance calendar LGEINDIA: {'Earnings Date': [], 'Earnings High': 9.2, 'Earnings Low': 5.87, 'Earnings Average': 7.4675, 'Revenue High': 72214000000, 'Revenue Low': 67900000000, 'Revenue Average': 71003702710}
+yfinance quarterly LGEINDIA: columns=5 rows=37
+yfinance info AKUMS: {'marketCap': 124724600832, 'debtToEquity': 5.756, 'returnOnEquity': None, 'heldPercentInsiders': 0.84928, 'heldPercentInstitutions': 0.12505999, 'earningsGrowth': 0.573, 'revenueGrowth': 0.139, 'trailingPE': 42.763783, 'sector': 'Healthcare'}
+yfinance calendar AKUMS: {'Ex-Dividend Date': datetime.date(2026, 7, 3), 'Earnings Date': [], 'Earnings High': None, 'Earnings Low': None, 'Earnings Average': None, 'Revenue High': None, 'Revenue Low': None, 'Revenue Average'
+yfinance quarterly AKUMS: columns=6 rows=43
