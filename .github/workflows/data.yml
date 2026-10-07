@@ -19,14 +19,14 @@ jobs:
       - name: Short term scan
         run: python scan_short.py
         continue-on-error: true
+      - name: Fundamentals
+        run: python fetch_fundamentals.py
+        continue-on-error: true
       - name: Performance tracker
         run: python track_performance.py
         continue-on-error: true
       - name: Miss report
         run: python miss_report.py
-        continue-on-error: true
-      - name: Source test
-        run: python test_sources.py
         continue-on-error: true
       - name: Save data
         run: |
