@@ -1,3 +1,4 @@
 Date,Symbol,Status,Score,Band,Close,Entry,Stop,Target,StopDistPct,Qty,VolRatio,TargetPct,Resistance,High52,Gap,Warning,MarketCapCr,DebtEquity,PledgeOfPromoterPct,PromoterPct,Sector,NextResults,FundChecked
-2026-10-07,AKUMS,Setup,50.9,Early Watch,824.2,840.48,795.55,966.55,5.35,22,0.42,15.0,838.8,838.8,,,12609,0.06,,75.26,Healthcare,,Yes
-2026-10-07,LAURUSLABS,Setup,37.0,Early Watch,2051.4,2059.41,1950.15,2368.32,5.31,9,0.64,15.0,2055.3,2055.3,,Promoter pledge 23.2% of promoter shares,110813,0.46,23.2,27.47,Healthcare,,Yes
+2026-10-07,FINCABLES,Setup,51.9,Early Watch,1481.7,1501.0,1427.47,1726.15,4.9,13,0.34,15.0,1498.0,1498.0,,,22705,0.0,5.6,35.86,Industrials,,Yes
+2026-10-07,AKUMS,Setup,51.5,Early Watch,824.9,840.48,795.5,966.55,5.35,22,0.52,15.0,838.8,838.8,,,12607,0.06,,75.26,Healthcare,,Yes
+2026-10-07,LAURUSLABS,Setup,37.1,Early Watch,2052.0,2059.41,1950.15,2368.32,5.31,9,0.87,15.0,2055.3,2055.3,,Promoter pledge 23.2% of promoter shares,110802,0.46,23.2,27.47,Healthcare,,Yes
