@@ -1,5 +1,4 @@
-Date,Symbol,Status,Score,Band,Close,Entry,Stop,Target,StopDistPct,Qty,VolRatio,TargetPct,Resistance,High52,Gap,Warning
-2026-10-06,PANAMAPET,Near Miss,71.3,Good Setup,504.1,504.1,474.72,579.72,5.83,34,3.39,15.0,505.0,595.87,,
-2026-10-06,SHREEJISPG,Near Miss,71.0,Good Setup,796.5,796.5,760.49,915.97,4.52,27,1.26,15.0,788.1,788.1,,
-2026-10-06,PTC,Near Miss,45.4,Early Watch,151.64,151.64,147.63,174.39,2.64,249,2.83,15.0,152.84,196.42,,"పైన 6.6% వద్ద పాత high (Rs 161.7), 15% target కి అడ్డు కావచ్చు"
-2026-10-06,LAURUSLABS,Setup,44.8,Early Watch,2050.0,2059.41,1950.15,2368.32,5.31,9,1.4,15.0,2055.3,2055.3,,
+Date,Symbol,Status,Score,Band,Close,Entry,Stop,Target,StopDistPct,Qty,VolRatio,TargetPct,Resistance,High52,Gap,Warning,MarketCapCr,DebtEquity,PledgeOfPromoterPct,PromoterPct,Sector,NextResults,FundChecked
+2026-10-06,PANAMAPET,Near Miss,71.3,Good Setup,504.1,504.1,474.72,579.72,5.83,34,3.39,15.0,505.0,595.87,,,3049,0.08,3.4,63.16,Energy,,Yes
+2026-10-06,LAURUSLABS,Setup,39.8,Early Watch,2050.0,2059.41,1950.15,2368.32,5.31,9,1.4,15.0,2055.3,2055.3,,Promoter pledge 23.2% of promoter shares,110764,0.46,23.2,27.47,Healthcare,,Yes
+2026-10-06,PTC,Near Miss,35.4,Early Watch,151.64,151.64,147.63,174.39,2.64,249,2.83,15.0,152.84,196.42,,"పైన 6.6% వద్ద పాత high (Rs 161.7), 15% target కి అడ్డు కావచ్చు; High promoter pledge: 49.8% of promoter shares",4651,0.25,49.8,16.22,Utilities,,Yes
