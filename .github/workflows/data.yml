@@ -2,7 +2,7 @@ name: Fetch data
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 11 * * 1-5"
+    - cron: "40 11 * * 1-5"
 permissions:
   contents: write
 jobs:
@@ -18,6 +18,9 @@ jobs:
       - run: python scan_ultra.py
       - name: Short term scan
         run: python scan_short.py
+        continue-on-error: true
+      - name: Performance tracker
+        run: python track_performance.py
         continue-on-error: true
       - name: Save data
         run: |
