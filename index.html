@@ -42,6 +42,12 @@ th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-
 th{color:var(--mut);font-weight:600}
 .rs{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px}
 .rs div{display:flex;justify-content:space-between;gap:12px;padding:2px 0}
+.fund{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.fund .ft{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.fund .row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:1px 0}
+.fund .row span:first-child{color:var(--mut)}
+.fund .row b{font-weight:600;text-align:right}
+.na{color:var(--mut);font-weight:400!important}
 </style>
 </head>
 <body>
@@ -100,7 +106,8 @@ th{color:var(--mut);font-weight:600}
 
 <div class="foot">
 Data: Yahoo Finance end-of-day prices (via yfinance), scanned automatically after market close.
-Scores are estimates from price and volume only; results dates, debt and pledge are not checked yet.
+Company details come from NSE and Yahoo Finance and can be missing or slightly delayed; "n/a" means unknown, not zero.
+Stocks on the NSE ASM or GSM lists are removed automatically. Scores are estimates, not guarantees.
 Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 <script>
@@ -144,6 +151,30 @@ function explain(s){
 }
 
 function fmt(x){return (+x).toLocaleString('en-IN',{maximumFractionDigits:2});}
+function has(v){return v!==undefined&&v!==null&&String(v).trim()!=='';}
+
+function fundBox(r){
+  if(r.FundChecked!=='Yes') return '';
+  const na='<b class="na">n/a</b>';
+  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
+  const mc=has(r.MarketCapCr)?'<b>Rs '+fmt(r.MarketCapCr)+' crore</b>':na;
+  const sec=has(r.Sector)?'<b>'+r.Sector+'</b>':na;
+  const pro=has(r.PromoterPct)?'<b>'+r.PromoterPct+'%</b>':na;
+  let pl=na;
+  if(has(r.PledgeOfPromoterPct)){
+    const p=+r.PledgeOfPromoterPct;
+    pl='<b class="'+(p>=25?'neg':(p>=10?'amb':''))+'">'+p+'% of promoter shares</b>';
+  }
+  let de=na;
+  if(has(r.DebtEquity)){
+    const d=+r.DebtEquity;
+    de='<b class="'+(d>2?'neg':(d>1?'amb':''))+'">'+d+'</b>';
+  }
+  const nr=has(r.NextResults)?row('Next results','<b>'+r.NextResults+'</b>'):'';
+  return '<div class="fund"><div class="ft">Company snapshot</div>'
+    +row('Market cap',mc)+row('Sector',sec)+row('Promoter holding',pro)
+    +row('Promoter pledge',pl)+row('Debt / Equity',de)+nr+'</div>';
+}
 
 function draw(){
   const rows=(DATA[cur]||[]);
@@ -167,6 +198,7 @@ function draw(){
     +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
     +'<div class="exp">'+explain(r)+' Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital). Last close: '+fmt(r.Close)+'.</div>'
     +(r.Boosters?'<div class="exp">Boosters: '+tr(r.Boosters)+'</div>':'')
+    +fundBox(r)
     +(r.Warning?'<div class="warn">&#9888; '+tr(r.Warning).split('; ').join('<br>&#9888; ')+'</div>':'')
     +'</div>';
   }).join(''):'<div class="exp">No stocks match today.</div>';
