@@ -50,6 +50,17 @@ for s in SYMS:
         cf = t.cashflow
         k = pick(cf, ["Operating Cash Flow", "Cash Flow From Continuing Operating Activities"])
         log("cash flow: %d years | OCF [%s]: %s" % (len(cf.columns), k, None if k is None else vals(cf, k)))
+        kf = pick(cf, ["Free Cash Flow"])
+        log("  FreeCashFlow [%s]: %s" % (kf, None if kf is None else vals(cf, kf)))
+        kc = pick(cf, ["Capital Expenditure", "Purchase Of PPE"])
+        log("  Capex [%s]: %s" % (kc, None if kc is None else vals(cf, kc)))
+        if k is not None and kc is not None:
+            calc = []
+            for a, b in zip(cf.loc[k].values, cf.loc[kc].values):
+                calc.append(None if (a != a or b != b) else round((a + b) / 1e7, 1))
+            log("  OCF + Capex (calculated FCF): %s" % calc)
+        extra = [str(i) for i in cf.index if ("free" in str(i).lower() or "capital" in str(i).lower())]
+        log("  rows containing free/capital: %s" % extra)
     except Exception as e:
         log("cash flow FAILED: %s" % e)
     try:
