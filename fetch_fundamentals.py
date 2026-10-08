@@ -52,6 +52,59 @@ def num(x):
         return None
 
 
+def pct_ok(v):
+    # శాతం 0 నుంచి 100 లోపే ఉండాలి, లేకపోతే data error
+    return v is not None and 0 <= v <= 100
+
+
+def yf_data(sym):
+    """yfinance నుంచి market cap, debt/equity, sector (retry తో)"""
+    res = {"mc": None, "de": None, "sector": "", "err": ""}
+    t = yf.Ticker(sym + ".NS")
+    for attempt in range(3):
+        try:
+            info = t.info or {}
+            if info.get("marketCap") or info.get("sector"):
+                res["mc"] = info.get("marketCap")
+                de = info.get("debtToEquity")
+                if de is not None:
+                    res["de"] = de / 100.0      # yfinance శాతంలో ఇస్తుంది
+                res["sector"] = info.get("sector") or ""
+                break
+            res["err"] = "info ఖాళీ"
+        except Exception as e:
+            res["err"] = str(e)[:150]
+        time.sleep(2 * (attempt + 1))
+
+    if res["mc"] is None:
+        try:
+            fi = t.fast_info
+            mc = None
+            try:
+                mc = fi["market_cap"]
+            except Exception:
+                mc = getattr(fi, "market_cap", None)
+            if mc:
+                res["mc"] = mc
+        except Exception as e:
+            res["err"] += " | fast_info: " + str(e)[:100]
+
+    if res["de"] is None:
+        try:
+            bs = t.balance_sheet
+            if bs is not None and not bs.empty:
+                col = bs.iloc[:, 0]
+                debt = col.get("Total Debt")
+                eq = col.get("Stockholders Equity")
+                if eq is None or pd.isna(eq):
+                    eq = col.get("Common Stock Equity")
+                if debt is not None and eq is not None and not pd.isna(debt) and not pd.isna(eq) and eq > 0:
+                    res["de"] = float(debt) / float(eq)
+        except Exception as e:
+            res["err"] += " | balance_sheet: " + str(e)[:100]
+    return res
+
+
 # ---------- candidates: ఈ రోజు scans లో వచ్చిన stocks ----------
 cands = set()
 for f in ("data/ultra_short.csv", "data/short_term.csv"):
@@ -129,6 +182,7 @@ print("Results calendar:", "OK" if cal_ok else "FAILED", "| upcoming:", len(res_
 
 # ---------- ఒక్కో candidate కి ----------
 rows = []
+yf_fail = 0
 for n, sym in enumerate(cands):
     row = {"Symbol": sym, "ISIN": isin_of.get(sym, ""),
            "ASM": flag(sym, asm_i, asm_s), "GSM": flag(sym, gsm_i, gsm_s),
@@ -141,17 +195,17 @@ for n, sym in enumerate(cands):
     elif cal_ok:
         row["DaysToResults"] = 999      # 999 = calendar లో results తేదీ లేదు
 
-    try:
-        info = yf.Ticker(sym + ".NS").info or {}
-        mc = info.get("marketCap")
-        de = info.get("debtToEquity")
-        if mc:
-            row["MarketCapCr"] = round(mc / 1e7, 0)
-        if de is not None:
-            row["DebtEquity"] = round(de / 100.0, 2)    # yfinance శాతంలో ఇస్తుంది
-        row["Sector"] = info.get("sector") or ""
-    except Exception as e:
-        print("yfinance", sym, e)
+    y = yf_data(sym)
+    if y["mc"]:
+        row["MarketCapCr"] = round(y["mc"] / 1e7, 0)
+    if y["de"] is not None:
+        row["DebtEquity"] = round(y["de"], 2)
+    row["Sector"] = y["sector"]
+    if not y["mc"] and not y["sector"]:
+        yf_fail += 1
+        if yf_fail <= 10:
+            debug.append("YF FAIL %s: %s" % (sym, y["err"]))
+    time.sleep(0.6)
 
     # promoter %
     sh = nse("https://www.nseindia.com/api/corporate-share-holdings-master?index=equities&symbol=" + sym)
@@ -168,8 +222,10 @@ for n, sym in enumerate(cands):
                     if "promoter" in k.lower() and num(val) is not None:
                         v = num(val)
                         break
-            if v is not None:
+            if pct_ok(v):
                 row["PromoterPct"] = round(v, 2)
+            elif v is not None:
+                debug.append("PROMOTER data error %s: %s" % (sym, v))
     except Exception as e:
         print("shareholding", sym, e)
 
@@ -184,7 +240,11 @@ for n, sym in enumerate(cands):
             for k, val in rec.items():
                 kl = k.lower()
                 if "pledg" in kl and ("perc" in kl or "per" in kl) and num(val) is not None:
-                    row["PledgePct"] = round(num(val), 2)
+                    v = num(val)
+                    if pct_ok(v):
+                        row["PledgePct"] = round(v, 2)
+                    else:
+                        debug.append("PLEDGE data error %s: %s" % (sym, v))   # n/a గా వదిలేస్తాం
                     break
     except Exception as e:
         print("pledge", sym, e)
@@ -201,8 +261,9 @@ with open("data/fund_debug.txt", "w", encoding="utf-8") as f:
     f.write("\n".join(debug))
 
 print("fundamentals rows:", len(out))
+print("yfinance పూర్తిగా విఫలమైనవి:", yf_fail)
 if len(out):
     print("ASM yes:", (out["ASM"] == "Yes").sum(), "| GSM yes:", (out["GSM"] == "Yes").sum())
-    for c in ("MarketCapCr", "DebtEquity", "PromoterPct", "PledgePct"):
+    for c in ("MarketCapCr", "DebtEquity", "Sector", "PromoterPct", "PledgePct"):
         print(c, "దొరికినవి:", (out[c].astype(str) != "").sum(), "/", len(out))
     print("results ≤10 రోజుల్లో:", ((pd.to_numeric(out["DaysToResults"], errors="coerce") <= 10)).sum())
