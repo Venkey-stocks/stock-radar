@@ -1,15 +1,15 @@
 {
  "Date": "2026-10-08",
- "Score": 8.5,
+ "Score": 7.7,
  "Status": "Weak",
  "Advice": "Market is weak. Most breakouts tend to fail in such conditions. Fewer or no new trades, and keep stops tight to your plan.",
  "Index": "NIFTY500",
- "LiquidStocks": 911,
+ "LiquidStocks": 919,
  "ChecksMax": 100,
  "Checks": [
   {
    "name": "Index vs 50-day average",
-   "text": "NIFTY500 is 6.3% below its 50-day average",
+   "text": "NIFTY500 is 6.4% below its 50-day average",
    "points": 0.0,
    "max": 20,
    "good": false
@@ -30,36 +30,36 @@
   },
   {
    "name": "Index last 5 days",
-   "text": "NIFTY500 moved -2.0% in 5 trading days (today -2.0%)",
+   "text": "NIFTY500 moved -2.1% in 5 trading days (today -2.0%)",
    "points": 0.0,
    "max": 5,
    "good": false
   },
   {
    "name": "Stocks above 50-day average",
-   "text": "32% of 911 liquid stocks are above their 50-day average",
-   "points": 0.8,
+   "text": "30% of 919 liquid stocks are above their 50-day average",
+   "points": 0.1,
    "max": 20,
    "good": false
   },
   {
    "name": "Stocks above 200-day average",
-   "text": "54% are above their 200-day average",
+   "text": "55% are above their 200-day average",
    "points": 6.1,
    "max": 10,
    "good": true
   },
   {
    "name": "Advancers vs decliners today",
-   "text": "71 stocks rose, 839 fell",
+   "text": "68 stocks rose, 851 fell",
    "points": 0.0,
    "max": 10,
    "good": false
   },
   {
    "name": "Near 52-week highs vs lows",
-   "text": "24 stocks are near a 52-week high, 130 near a 52-week low",
-   "points": 1.6,
+   "text": "24 stocks are near a 52-week high, 138 near a 52-week low",
+   "points": 1.5,
    "max": 10,
    "good": false
   }
