@@ -322,3 +322,30 @@ def analyze(sym, g):
         "RSI": round(rsi, 1), "ADX": round(adx, 1), "Boosters": ", ".join(met),
         "High52": round(high52, 2), "Warning": warning, "Reasons": reasons,
     }
+
+
+rows = []
+for sym, g in groups.items():
+    try:
+        r = analyze(sym, g)
+        if r is not None:
+            rows.append(r)
+    except Exception as e:
+        print("దాటవేసాం", sym, e)
+
+columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close", "Entry", "Stop",
+           "Target", "StopDistPct", "Qty", "TargetPct", "VolRatio", "RSI", "ADX", "Boosters",
+           "High52", "Warning", "Reasons"]
+out = pd.DataFrame(rows, columns=columns)
+out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
+
+os.makedirs("data/history", exist_ok=True)
+out.to_csv("data/short_term.csv", index=False)
+out.to_csv("data/history/short_%s.csv" % date_str, index=False)
+
+print("data తేదీ:", date_str)
+print("మొత్తం ఫలితాలు:", len(out))
+if len(out) > 0:
+    print(out["Status"].value_counts().to_string())
+    print(out["Class"].value_counts().to_string())
+    print(out.head(10)[["Symbol", "Status", "Class", "Score", "Entry", "Stop", "Target"]].to_string(index=False))
