@@ -402,6 +402,7 @@ for s1, info, mcr, m in passed:
     if m["MarginChange"] is not None and m["MarginChange"] > 0.5:
         score += 3
         pos.append("Operating margin improved over 2 years")
+    if promoter is not None:
         if promoter >= 50:
             score += 3
             pos.append("Promoter holds %.1f%%" % promoter)
