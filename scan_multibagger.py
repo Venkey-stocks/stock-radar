@@ -391,7 +391,7 @@ for s1, info, mcr, m in passed:
     elif m["FCFLast"] < 0:
         warn.append("Free cash flow negative last year (Rs %.0f crore), check capex" % m["FCFLast"])
 
-       if m["QSalesYoY"] is not None and m["QSalesYoY"] >= 20:
+     if m["QSalesYoY"] is not None and m["QSalesYoY"] >= 20:
         score += 3
         pos.append("Latest quarter sales up %.0f%% year on year" % m["QSalesYoY"])
     if m["QProfitYoY"] is not None and m["QProfitYoY"] >= 20:
