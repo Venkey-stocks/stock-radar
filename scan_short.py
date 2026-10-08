@@ -152,6 +152,7 @@ def analyze(sym, g):
     status = None
     level = None
     setup_kind = ""
+    base_w = 0
     for N in (15, 25, 40):                # 3, 5, 8 వారాల base
         bh = h[-N - 1:-1].max()
         bl = l[-N - 1:-1].min()
@@ -160,9 +161,11 @@ def analyze(sym, g):
             continue
         if close > bh and close < bh * 1.05 and vol_ratio >= 1.5:
             status, level, setup_kind = "Breakout", bh, "Base %d వారాలు" % (N // 5)
+            base_w = N // 5
             break
         if status is None and close <= bh and (bh / close - 1) <= 0.02 and dry < 1.0:
             status, level, setup_kind = "Near Miss", bh, "Base %d వారాలు" % (N // 5)
+            base_w = N // 5
     if status is None:
         low5 = l[-5:].min()
         touched = (low5 <= sma20 * 1.02) or (low5 <= sma50 * 1.02)
@@ -236,6 +239,35 @@ def analyze(sym, g):
         warns.append("Nifty తన 50-రోజుల average కింద ఉంది")
     warning = "; ".join(warns)
 
+    # ---------- Technical reasons (website లో చూపడానికి, English) ----------
+    rs_ = []
+    if rsi >= 70:
+        rs_.append("RSI %.0f: strong but stretched" % rsi)
+    elif rsi >= 50:
+        rs_.append("RSI %.0f: healthy momentum zone" % rsi)
+    else:
+        rs_.append("RSI %.0f: momentum still building" % rsi)
+    rs_.append("MACD bullish" if mh > 0 else "MACD not yet bullish")
+    rs_.append("Price above 50-DMA and 200-DMA")
+    if wk:
+        rs_.append("Weekly trend is up")
+    if adx >= 20:
+        rs_.append("ADX %.0f: %s" % (adx, "trend strengthening" if adx > adx_prev else "trend present"))
+    if main_ret is not None:
+        rs_.append("3-month return %.0f%% vs index %.0f%%" % (r63 * 100, main_ret * 100))
+    if status == "Breakout":
+        rs_.append("Broke above %d-week base high Rs %.1f on volume %.1fx average" % (base_w, level, vol_ratio))
+    elif status == "Near Miss":
+        rs_.append("Just below %d-week base high Rs %.1f; volume drying up" % (base_w, level))
+    else:
+        rs_.append("Pullback to 20/50-DMA support; volume %.1fx average" % vol_ratio)
+    if len(levels) > 0:
+        lv_ = levels.min()
+        rs_.append("Next resistance Rs %.1f (+%.1f%%)" % (lv_, (lv_ / entry - 1) * 100))
+    else:
+        rs_.append("No major resistance within 15%")
+    reasons = " | ".join(rs_)
+
     # ---------- Score (100 లో, నా అంచనా బరువులు) ----------
     s = {"Breakout": 25, "Pullback": 20, "Near Miss": 12}[status]
     if status == "Pullback":
@@ -288,32 +320,5 @@ def analyze(sym, g):
         "Target": round(target, 2), "StopDistPct": round(stop_pct, 2), "Qty": qty,
         "TargetPct": round(target_pct, 1), "VolRatio": round(vol_ratio, 2),
         "RSI": round(rsi, 1), "ADX": round(adx, 1), "Boosters": ", ".join(met),
-        "High52": round(high52, 2), "Warning": warning,
+        "High52": round(high52, 2), "Warning": warning, "Reasons": reasons,
     }
-
-
-rows = []
-for sym, g in groups.items():
-    try:
-        r = analyze(sym, g)
-        if r is not None:
-            rows.append(r)
-    except Exception as e:
-        print("దాటవేసాం", sym, e)
-
-columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close", "Entry", "Stop",
-           "Target", "StopDistPct", "Qty", "TargetPct", "VolRatio", "RSI", "ADX", "Boosters",
-           "High52", "Warning"]
-out = pd.DataFrame(rows, columns=columns)
-out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
-
-os.makedirs("data/history", exist_ok=True)
-out.to_csv("data/short_term.csv", index=False)
-out.to_csv("data/history/short_%s.csv" % date_str, index=False)
-
-print("data తేదీ:", date_str)
-print("మొత్తం ఫలితాలు:", len(out))
-if len(out) > 0:
-    print(out["Status"].value_counts().to_string())
-    print(out["Class"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Status", "Class", "Score", "Entry", "Stop", "Target"]].to_string(index=False))
