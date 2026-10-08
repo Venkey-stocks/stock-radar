@@ -67,6 +67,17 @@ def weekly_bullish(dates, c):
     return bool(w.iloc[-1] > sma.iloc[-1] and sma.iloc[-1] > sma.iloc[-5])
 
 
+def camarilla_r4(dates, h, l, c):
+    """గత పూర్తి వారం High/Low/Close నుంచి R4 = Close + (High-Low)*1.1/2"""
+    w = pd.DataFrame({"H": h, "L": l, "C": c}, index=pd.DatetimeIndex(dates))
+    w = w.resample("W").agg({"H": "max", "L": "min", "C": "last"}).dropna()
+    if len(w) < 3:
+        return None
+    p = w.iloc[-2]          # చివరి వారం = ఈ వారం (అసంపూర్ణం కావచ్చు), దానికి ముందు వారం = గత పూర్తి వారం
+    r4 = float(p["C"] + (p["H"] - p["L"]) * 1.1 / 2)
+    return r4, float(p["H"]), float(p["L"]), float(p["C"])
+
+
 # ---------- data చదవడం ----------
 df = pd.read_csv("data/prices.csv.gz", parse_dates=["Date"])
 df = df.dropna(subset=["Open", "High", "Low", "Close", "Volume"])
@@ -153,6 +164,7 @@ def analyze(sym, g):
     level = None
     setup_kind = ""
     base_w = 0
+    cam_info = None
     for N in (15, 25, 40):                # 3, 5, 8 వారాల base
         bh = h[-N - 1:-1].max()
         bl = l[-N - 1:-1].min()
@@ -171,6 +183,14 @@ def analyze(sym, g):
         touched = (low5 <= sma20 * 1.02) or (low5 <= sma50 * 1.02)
         if touched and ext <= 6 and close > c[-2] and close > o[-1] and v[-1] > v[-2] and dry < 1.0:
             status, setup_kind = "Pullback", "Pullback"
+    if status is None:
+        # కొత్తది: Camarilla R4 breakout (గత పూర్తి వారం పరిధి పైకి దాటడం)
+        cam = camarilla_r4(g["Date"].values[-30:], h[-30:], l[-30:], c[-30:])
+        if cam is not None:
+            r4 = cam[0]
+            if close > r4 and close <= r4 * 1.05 and vol_ratio >= 1.2 and close > o[-1] and close > c[-2]:
+                status, level, setup_kind = "Breakout", r4, "Camarilla R4"
+                cam_info = cam
     if status is None:
         return None
 
@@ -202,8 +222,7 @@ def analyze(sym, g):
     wk = weekly_bullish(g["Date"].values, c)
     rsr = float(rs_rank.get(sym, 0.0))
     d52 = (high52 / close - 1) * 100
-
-    # ---------- High Potential పరీక్ష ----------
+        # ---------- High Potential పరీక్ష ----------
     tight_base = False
     for N in (30, 40, 60):                # 6-12 వారాలు
         if (h[-N:].max() - l[-N:].min()) / h[-N:].max() <= 0.22:
@@ -255,7 +274,10 @@ def analyze(sym, g):
         rs_.append("ADX %.0f: %s" % (adx, "trend strengthening" if adx > adx_prev else "trend present"))
     if main_ret is not None:
         rs_.append("3-month return %.0f%% vs index %.0f%%" % (r63 * 100, main_ret * 100))
-    if status == "Breakout":
+    if status == "Breakout" and cam_info is not None:
+        rs_.append("Closed above last week's Camarilla R4 Rs %.1f (last week high %.1f, low %.1f, close %.1f) on volume %.1fx average"
+                   % (cam_info[0], cam_info[1], cam_info[2], cam_info[3], vol_ratio))
+    elif status == "Breakout":
         rs_.append("Broke above %d-week base high Rs %.1f on volume %.1fx average" % (base_w, level, vol_ratio))
     elif status == "Near Miss":
         rs_.append("Just below %d-week base high Rs %.1f; volume drying up" % (base_w, level))
