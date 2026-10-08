@@ -135,6 +135,36 @@ def analyze(sym, g):
             (lvl / entry - 1) * 100, lvl)
         penalty = 10
 
+    # ---------- Technical reasons (website కోసం, English) ----------
+    sma50 = c[-50:].mean()
+    sma50_prev = c[-60:-10].mean()
+    rs_ = []
+    if status == "Breakout":
+        rs_.append("Closed above 20-day high Rs %.1f on volume %.1fx average" % (res, vol_ratio))
+        rs_.append("Closed in the top %.0f%% of the day's range" % ((1 - close_pos) * 100 + 0.0001) if close_pos >= 0.7 else "Closed in the upper part of the day's range")
+    elif status == "Near Miss":
+        rs_.append("At the 20-day high Rs %.1f; volume %.1fx average" % (res, vol_ratio))
+    else:
+        rs_.append("Tightening %.1f%% below 20-day high Rs %.1f" % (dist_res, res))
+    if gap:
+        rs_.append("Gap-up open above resistance")
+    if contr < 1.0:
+        rs_.append("Daily range is contracting (price is coiling)")
+    if dry < 1.0:
+        rs_.append("Volume dried up in the last 5 days (quiet before the move)")
+    if close > sma50:
+        rs_.append("Price above 50-day average")
+    if len(c) >= 200 and close > c[-200:].mean():
+        rs_.append("Price above 200-day average")
+    if sma50 > sma50_prev:
+        rs_.append("50-day average is rising")
+    if len(levels) > 0:
+        lv_ = levels.min()
+        rs_.append("Next resistance Rs %.1f (+%.1f%%)" % (lv_, (lv_ / entry - 1) * 100))
+    else:
+        rs_.append("No major resistance within 15%")
+    reasons = " | ".join(rs_)
+
     # ---------- Score (100 లో, నా అంచనా బరువులు) ----------
     s = {"Breakout": 30, "Near Miss": 18, "Setup": 8}[status]
     if status != "Setup":
@@ -143,8 +173,6 @@ def analyze(sym, g):
     s += clip01((1 - contr) / 0.5) * 15
     s += clip01((1 - dry) / 0.4) * 10
     s += float(rs_rank.get(sym, 0.0)) * 15
-    sma50 = c[-50:].mean()
-    sma50_prev = c[-60:-10].mean()
     if close > sma50:
         s += 5
     if len(c) >= 200 and close > c[-200:].mean():
@@ -168,7 +196,7 @@ def analyze(sym, g):
         "VolRatio": round(vol_ratio, 2),
         "TargetPct": round(target_pct, 1), "Resistance": round(res, 2),
         "High52": round(high52, 2), "Gap": "Yes" if gap else "",
-        "Warning": warning,
+        "Warning": warning, "Reasons": reasons,
     }
 
 
@@ -182,7 +210,8 @@ for sym, g in groups.items():
         print("దాటవేసాం", sym, e)
 
 columns = ["Date", "Symbol", "Status", "Score", "Band", "Close", "Entry", "Stop", "Target",
-           "StopDistPct", "Qty", "VolRatio", "TargetPct", "Resistance", "High52", "Gap", "Warning"]
+           "StopDistPct", "Qty", "VolRatio", "TargetPct", "Resistance", "High52", "Gap", "Warning",
+           "Reasons"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
