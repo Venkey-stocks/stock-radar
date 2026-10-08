@@ -391,13 +391,13 @@ for s1, info, mcr, m in passed:
     elif m["FCFLast"] < 0:
         warn.append("Free cash flow negative last year (Rs %.0f crore), check capex" % m["FCFLast"])
 
-    if m["QSalesYoY"] is not None and m["QSalesYoY"] >= 20:
+       if m["QSalesYoY"] is not None and m["QSalesYoY"] >= 20:
         score += 3
         pos.append("Latest quarter sales up %.0f%% year on year" % m["QSalesYoY"])
     if m["QProfitYoY"] is not None and m["QProfitYoY"] >= 20:
         score += 3
         pos.append("Latest quarter profit up %.0f%% year on year" % m["QProfitYoY"])
-            if m["QSalesYoY"] is not None and m["QSalesYoY"] > 100:
+    if m["QSalesYoY"] is not None and m["QSalesYoY"] > 100:
         warn.append("Latest quarter sales more than doubled; please verify (one-time item or data issue?)")
     if m["MarginChange"] is not None and m["MarginChange"] > 0.5:
         score += 3
