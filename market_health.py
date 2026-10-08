@@ -24,7 +24,8 @@ checks = []
 
 
 def add(name, text, pts, mx, good):
-    checks.append({"name": name, "text": text, "points": round(pts, 1), "max": mx, "good": good})
+    checks.append({"name": name, "text": text, "points": round(float(pts), 1),
+                   "max": int(mx), "good": bool(good)})
 
 
 # ---------- Index ----------
@@ -39,10 +40,10 @@ if os.path.exists("data/index.csv"):
 
 ret5 = None
 if ia is not None:
-    last = ia[-1]
-    s50, s200, s50p = ia[-50:].mean(), ia[-200:].mean(), ia[-60:-10].mean()
-    ret5 = (last / ia[-6] - 1) * 100
-    ret1 = (last / ia[-2] - 1) * 100
+    last = float(ia[-1])
+    s50, s200, s50p = float(ia[-50:].mean()), float(ia[-200:].mean()), float(ia[-60:-10].mean())
+    ret5 = (last / float(ia[-6]) - 1) * 100
+    ret1 = (last / float(ia[-2]) - 1) * 100
     add("Index vs 50-day average", "%s is %.1f%% %s its 50-day average" % (idx_name, abs(last / s50 - 1) * 100, "above" if last > s50 else "below"),
         20 if last > s50 else 0, 20, last > s50)
     add("Index vs 200-day average", "%s is %.1f%% %s its 200-day average" % (idx_name, abs(last / s200 - 1) * 100, "above" if last > s200 else "below"),
@@ -87,11 +88,12 @@ else:
     status = "Weak"
     advice = "Market is weak. Most breakouts tend to fail in such conditions. Fewer or no new trades, and keep stops tight to your plan."
 
-out = {"Date": date_str, "Score": score, "Status": status, "Advice": advice, "Index": idx_name or "n/a",
-       "LiquidStocks": n, "ChecksMax": mx, "Checks": checks}
+out = {"Date": date_str, "Score": float(score), "Status": status, "Advice": advice, "Index": idx_name or "n/a",
+       "LiquidStocks": n, "ChecksMax": int(mx), "Checks": checks}
 os.makedirs("data", exist_ok=True)
+text = json.dumps(out, ensure_ascii=False, indent=1)  # ముందు పూర్తిగా తయారు చేస్తాం
 with open("data/market_health.json", "w", encoding="utf-8") as f:
-    json.dump(out, f, ensure_ascii=False, indent=1)
+    f.write(text)
 
 # ---------- history ----------
 hp = "data/market_health_history.csv"
