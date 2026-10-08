@@ -242,6 +242,18 @@ def evaluate(sym):
         conv = float(ocf[c3].sum()) / float(ni[c3].sum())
     m["OCFConv"] = conv
 
+    # ---- Free Cash Flow (హెచ్చరిక కోసం మాత్రమే, తొలగింపు కాదు) ----
+    fcf = sr(cf, ["Free Cash Flow"])
+    if fcf is None:
+        capex = sr(cf, ["Capital Expenditure", "Purchase Of PPE"])
+        if capex is not None:
+            both = (ocf + capex).dropna().sort_index()
+            fcf = both if len(both) else None
+    m["FCFLast"] = None if fcf is None else float(fcf.iloc[-1]) / 1e7      # Rs కోట్లు
+    m["FCF3Sum"] = None
+    if fcf is not None and len(fcf) >= 3:
+        m["FCF3Sum"] = float(fcf.iloc[-3:].sum()) / 1e7
+
     rec = sr(bs, ["Accounts Receivable", "Receivables"])
     rc = cagr(rec, 3)
     m["RecCAGR"] = rc
@@ -370,109 +382,18 @@ for s1, info, mcr, m in passed:
         pos.append("Profit is backed by real cash flow")
     elif m["OCFConv"] is not None:
         warn.append("Cash flow is weak compared with profit")
+
+    # ---- Free Cash Flow హెచ్చరికలు (score మారదు) ----
+    if m["FCFLast"] is None:
+        warn.append("Free cash flow: n/a (not available)")
+    elif m["FCF3Sum"] is not None and m["FCF3Sum"] < 0:
+        warn.append("Free cash flow negative over the last 3 years (total Rs %.0f crore, last year Rs %.0f crore). Heavy spending is eating the cash; check capex and funding before buying" % (m["FCF3Sum"], m["FCFLast"]))
+    elif m["FCFLast"] < 0:
+        warn.append("Free cash flow negative last year (Rs %.0f crore), check capex" % m["FCFLast"])
+
     if m["QSalesYoY"] is not None and m["QSalesYoY"] >= 20:
         score += 3
         pos.append("Latest quarter sales up %.0f%% year on year" % m["QSalesYoY"])
     if m["QProfitYoY"] is not None and m["QProfitYoY"] >= 20:
         score += 3
         pos.append("Latest quarter profit up %.0f%% year on year" % m["QProfitYoY"])
-    if m["QSalesYoY"] is not None and m["QSalesYoY"] > 100:
-        warn.append("Latest quarter sales more than doubled; please verify (one-time item or data issue?)")
-    if m["MarginChange"] is not None and m["MarginChange"] > 0.5:
-        score += 3
-        pos.append("Operating margin improved over 2 years")
-    if promoter is not None:
-        if promoter >= 50:
-            score += 3
-            pos.append("Promoter holds %.1f%%" % promoter)
-        elif promoter < 40:
-            score -= 3
-            warn.append("Promoter holding only %.1f%%" % promoter)
-    if pledge_of_promoter is not None:
-        if pledge_of_promoter >= 25:
-            score -= 10
-            warn.append("High promoter pledge: %.1f%% of promoter shares" % pledge_of_promoter)
-        elif pledge_of_promoter >= 10:
-            score -= 5
-            warn.append("Promoter pledge %.1f%% of promoter shares" % pledge_of_promoter)
-        elif pledge_of_promoter <= 5:
-            score += 2
-    inst = num(info.get("heldPercentInstitutions"))
-    inst = None if inst is None else round(inst * 100, 1)
-    if inst is not None and inst < 15:
-        score += 3
-        pos.append("Institutions hold only %.1f%% (not crowded yet)" % inst)
-    ana = num(info.get("numberOfAnalystOpinions"))
-    if ana is not None and ana <= 3:
-        score += 3
-        pos.append("Few analysts cover it")
-    peg = num(info.get("trailingPegRatio")) or num(info.get("pegRatio"))
-    if peg is not None and peg > 0:
-        if peg <= 1.5:
-            score += 4
-            pos.append("PEG %.2f (price reasonable for the growth)" % peg)
-        elif peg > 2.5:
-            score -= 3
-            warn.append("PEG %.2f looks expensive for the growth" % peg)
-    if s1["Trend"].startswith("Above"):
-        score += 3
-    if s1["Ret1Y"] < 50:
-        score += 3
-        pos.append("Up only %.0f%% in 1 year (still early)" % s1["Ret1Y"])
-    if m["Dilution"] is not None and m["Dilution"] > 5:
-        score -= 8
-        warn.append("Share count rose %.1f%% in 3 years (dilution)" % m["Dilution"])
-    if m["RecCAGR"] is not None and m["RecCAGR"] > m["SalesCAGR"] + 10:
-        score -= 5
-        warn.append("Receivables growing faster than sales")
-    if not lists_ok:
-        warn.append("ASM/GSM list could not be checked")
-    score = round(max(min(score, 100), 0), 1)
-    if score < MIN_SCORE:
-        rejected.append({"Symbol": sym, "Reason": "Score below %d" % MIN_SCORE})
-        continue
-    band = "High Conviction" if score >= 80 else ("Good Setup" if score >= 65 else "Early Watch")
-
-    close = float(s1["Close"])
-    struct = (close - s1["Low120"] * 0.98) / close
-    stop_pct = min(max(struct, 0.20), 0.25)
-    stop = close * (1 - stop_pct)
-    risk = close - stop
-    target = close + 2 * risk
-    qty = int(max(min(CAPITAL * RISK_PCT / risk, CAPITAL / close), 0))
-    rows.append({
-        "Date": date_str, "Symbol": sym, "Score": score, "Band": band,
-        "Close": round(close, 2), "Entry": round(close, 2), "Stop": round(stop, 2), "Target": round(target, 2),
-        "StopDistPct": round(stop_pct * 100, 1), "TargetPct": round((target / close - 1) * 100, 1), "Qty": qty,
-        "MarketCapCr": int(mcr), "Sector": info.get("sector") or "",
-        "ROCE": round(m["ROCE"], 1), "SalesCAGR3": round(m["SalesCAGR"], 1), "ProfitCAGR3": round(m["ProfitCAGR"], 1),
-        "DebtEquity": "" if de is None else de,
-        "QSalesYoY": "" if m["QSalesYoY"] is None else round(m["QSalesYoY"], 1),
-        "QProfitYoY": "" if m["QProfitYoY"] is None else round(m["QProfitYoY"], 1),
-        "PromoterPct": "" if promoter is None else round(promoter, 1),
-        "PledgeOfPromoterPct": "" if pledge_of_promoter is None else pledge_of_promoter,
-        "InstPct": "" if inst is None else inst, "Analysts": "" if ana is None else int(ana),
-        "PEG": "" if peg is None else round(peg, 2), "Ret1Y": round(s1["Ret1Y"], 1), "Trend": s1["Trend"],
-        "Positives": "; ".join(pos), "Warning": "; ".join(warn),
-    })
-
-cols = ["Date", "Symbol", "Score", "Band", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "Qty",
-        "MarketCapCr", "Sector", "ROCE", "SalesCAGR3", "ProfitCAGR3", "DebtEquity", "QSalesYoY", "QProfitYoY",
-        "PromoterPct", "PledgeOfPromoterPct", "InstPct", "Analysts", "PEG", "Ret1Y", "Trend", "Positives", "Warning"]
-out = pd.DataFrame(rows, columns=cols)
-if len(out):
-    out = out.sort_values("Score", ascending=False)
-os.makedirs("data/history", exist_ok=True)
-out.to_csv("data/multibagger.csv", index=False)
-out.to_csv("data/history/multi_%s.csv" % date_str, index=False)
-pd.DataFrame(rejected, columns=["Symbol", "Reason"]).to_csv("data/multibagger_rejected.csv", index=False)
-
-print("---- సారాంశం ----")
-print("తుది ఫలితాలు:", len(out))
-rj = pd.DataFrame(rejected, columns=["Symbol", "Reason"])
-if len(rj):
-    print("తిరస్కరణ కారణాలు:")
-    print(rj["Reason"].value_counts().to_string())
-if len(out):
-    print(out.head(10)[["Symbol", "Score", "ROCE", "SalesCAGR3", "ProfitCAGR3", "MarketCapCr"]].to_string(index=False))
-print("సమయం: %.1f నిమిషాలు" % ((time.time() - START) / 60.0))
