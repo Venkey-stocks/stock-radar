@@ -23,6 +23,8 @@ a{color:var(--b)}
 .row:last-child{border:none}
 .row small{color:var(--mut)}
 .ok{color:var(--g)}.no{color:var(--r)}
+.msg{color:var(--mut);font-size:14px;padding:6px 0}
+.err{color:var(--r)}
 table{border-collapse:collapse;width:100%;font-size:13px}
 td,th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left}
 th{color:var(--mut)}
@@ -32,23 +34,60 @@ th{color:var(--mut)}
 <body>
 <h1>Market Health</h1>
 <div class="sub"><a href="/">&larr; Back to Stock Radar</a> &nbsp;|&nbsp; <span id="meta">Loading...</span></div>
-<div class="big" id="big"></div>
-<div class="card"><b>What we checked</b><div id="checks"></div></div>
+<div class="big" id="big"><div class="msg">Loading...</div></div>
+<div class="card"><b>What we checked</b><div id="checks"><div class="msg">Loading...</div></div></div>
 <div class="card"><b>Recent days</b><table id="hist"></table></div>
 <div class="foot">Based on end-of-day prices of liquid NSE stocks (price Rs 50+, traded value Rs 10 crore+) and the Nifty index. The score weights and the Favorable / Cautious / Weak limits (65 and 40) are estimates and may be tuned later. This is a general guide to market conditions, not a prediction or advice. The decision is yours.</div>
 <script>
 const $=id=>document.getElementById(id);
-fetch('data/market_health.json?v='+Date.now()).then(r=>{if(!r.ok)throw new Error('market_health.json not found');return r.json();}).then(d=>{
-  $('meta').textContent='Data date: '+d.Date+' | Index used: '+d.Index+' | '+d.LiquidStocks+' liquid stocks';
-  const col={Favorable:'var(--g)',Cautious:'var(--y)',Weak:'var(--r)',Unknown:'#444c56'}[d.Status];
-  $('big').innerHTML='<span class="badge '+d.Status+'">'+d.Status+'</span><span class="score">Score '+d.Score+' / 100</span>'
-    +'<div class="bar"><i style="width:'+d.Score+'%;background:'+col+'"></i></div><div class="adv">'+d.Advice+'</div>';
-  $('checks').innerHTML=d.Checks.map(c=>'<div class="row"><span><span class="'+(c.good?'ok':'no')+'">'+(c.good?'&#10003;':'&#10007;')+'</span> <b>'+c.name+'</b><br><small>'+c.text+'</small></span><span>'+c.points+' / '+c.max+'</span></div>').join('');
-}).catch(e=>{$('meta').innerHTML='<span style="color:var(--r)">Error: '+e.message+'</span>';});
-fetch('data/market_health_history.csv?v='+Date.now()).then(r=>r.ok?r.text():'').then(t=>{
-  const rows=t.trim().split('\n').slice(1).map(l=>l.split(',')).reverse().slice(0,15);
-  $('hist').innerHTML='<tr><th>Date</th><th>Score</th><th>Status</th></tr>'+(rows.length?rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join(''):'<tr><td colspan="3">History will build up day by day.</td></tr>');
-}).catch(()=>{});
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function showProblem(msg){
+  $('meta').innerHTML='<span class="err">Market health data not available</span>';
+  $('big').innerHTML='<div class="msg err">'+esc(msg)+'</div>';
+  $('checks').innerHTML='<div class="msg">No data to show.</div>';
+}
+
+fetch('data/market_health.json?v='+Date.now())
+  .then(r=>{
+    if(!r.ok) throw new Error('market_health.json could not be loaded (HTTP '+r.status+'). It is created by the daily "Fetch data" run. Please check that the run finished.');
+    return r.text();
+  })
+  .then(t=>{
+    t=t.trim();
+    if(!t) throw new Error('market_health.json is empty. The daily run may have failed at the Market Health step.');
+    if(t.charAt(0)!=='{') throw new Error('market_health.json was not found, so the site returned another page. The daily run may not have created it yet.');
+    let d;
+    try{ d=JSON.parse(t); }
+    catch(e){ throw new Error('market_health.json is incomplete or damaged. The daily run may have stopped while writing it. Run "Fetch data" again.'); }
+    if(!d || d.Score===undefined || !d.Status) throw new Error('market_health.json is missing required fields.');
+
+    const status=['Favorable','Cautious','Weak','Unknown'].indexOf(d.Status)>=0?d.Status:'Unknown';
+    const score=Number(d.Score);
+    const sc=isFinite(score)?score:0;
+    $('meta').textContent='Data date: '+(d.Date||'n/a')+' | Index used: '+(d.Index||'n/a')+' | '+(d.LiquidStocks!==undefined?d.LiquidStocks:'n/a')+' liquid stocks';
+    const col={Favorable:'var(--g)',Cautious:'var(--y)',Weak:'var(--r)',Unknown:'#444c56'}[status];
+    $('big').innerHTML='<span class="badge '+status+'">'+status+'</span><span class="score">Score '+(isFinite(score)?score:'n/a')+' / 100</span>'
+      +'<div class="bar"><i style="width:'+Math.max(0,Math.min(100,sc))+'%;background:'+col+'"></i></div><div class="adv">'+esc(d.Advice||'')+'</div>';
+    const checks=Array.isArray(d.Checks)?d.Checks:[];
+    $('checks').innerHTML=checks.length?checks.map(c=>'<div class="row"><span><span class="'+(c.good?'ok':'no')+'">'+(c.good?'&#10003;':'&#10007;')+'</span> <b>'+esc(c.name)+'</b><br><small>'+esc(c.text)+'</small></span><span>'+esc(c.points)+' / '+esc(c.max)+'</span></div>').join(''):'<div class="msg">No check details available.</div>';
+  })
+  .catch(e=>showProblem(e.message));
+
+fetch('data/market_health_history.csv?v='+Date.now())
+  .then(r=>r.ok?r.text():'')
+  .then(t=>{
+    t=(t||'').trim();
+    let html='<tr><th>Date</th><th>Score</th><th>Status</th></tr>';
+    if(t.indexOf('Date,')!==0){
+      html+='<tr><td colspan="3">History not available yet. It will build up day by day.</td></tr>';
+    }else{
+      const rows=t.split('\n').slice(1).map(l=>l.split(',')).filter(r=>r.length>=3&&/^\d{4}-\d{2}-\d{2}$/.test(r[0])).reverse().slice(0,15);
+      html+=rows.length?rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td><td>'+esc(r[2])+'</td></tr>').join(''):'<tr><td colspan="3">History will build up day by day.</td></tr>';
+    }
+    $('hist').innerHTML=html;
+  })
+  .catch(()=>{ $('hist').innerHTML='<tr><td>History not available.</td></tr>'; });
 </script>
 </body>
 </html>
