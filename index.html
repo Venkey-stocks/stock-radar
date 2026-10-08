@@ -180,6 +180,13 @@ function explain(s){
 function fmt(x){return (+x).toLocaleString('en-IN',{maximumFractionDigits:2});}
 function has(v){return v!==undefined&&v!==null&&String(v).trim()!=='';}
 
+function pledgeHtml(v,na){
+  if(!has(v)) return na;
+  const p=+v;
+  if(p>100) return '<b class="amb">data error ('+p+'%)</b>';
+  return '<b class="'+(p>=25?'neg':(p>=10?'amb':''))+'">'+p+'% of promoter shares</b>';
+}
+
 function fundBox(r){
   if(r.FundChecked!=='Yes') return '';
   const na='<b class="na">n/a</b>';
@@ -187,12 +194,7 @@ function fundBox(r){
   const mc=has(r.MarketCapCr)?'<b>Rs '+fmt(r.MarketCapCr)+' crore</b>':na;
   const sec=has(r.Sector)?'<b>'+r.Sector+'</b>':na;
   const pro=has(r.PromoterPct)?'<b>'+r.PromoterPct+'%</b>':na;
-  let pl=na;
-  if(has(r.PledgeOfPromoterPct)){
-    const p=+r.PledgeOfPromoterPct;
-    if(p>100) pl='<b class="amb">data error ('+p+'%)</b>';
-    else pl='<b class="'+(p>=25?'neg':(p>=10?'amb':''))+'">'+p+'% of promoter shares</b>';
-  }
+  const pl=pledgeHtml(r.PledgeOfPromoterPct,na);
   let de=na;
   if(has(r.DebtEquity)){
     const d=+r.DebtEquity;
@@ -202,6 +204,16 @@ function fundBox(r){
   return '<div class="fund"><div class="ft">Company snapshot</div>'
     +row('Market cap',mc)+row('Sector',sec)+row('Promoter holding',pro)
     +row('Promoter pledge',pl)+row('Debt / Equity',de)+nr+'</div>';
+}
+
+function fixWarn(w){
+  // "; " తో విడిపోయిన "it may block the 15% target" ముక్కను ముందు వాక్యంతో కలుపుతుంది
+  const out=[];
+  w.forEach(x=>{
+    if(/^it may block/i.test(x.trim())&&out.length) out[out.length-1]+='; '+x.trim();
+    else out.push(x);
+  });
+  return out;
 }
 
 function draw(){
@@ -220,7 +232,7 @@ function draw(){
     const tagList=[...new Set([r.Status,r.Class,tr(r.Setup),r.Gap=='Yes'?'Gap-up':''].filter(Boolean))];
     const tags=tagList.map(t=>'<span class="tag">'+t+'</span>').join('');
     const why=has(r.Reasons)?'<div class="why"><div class="ft">Why this setup?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+x+'</div>').join('')+'</div>':'';
-    let wl=has(r.Warning)?tr(r.Warning).split('; '):[];
+    let wl=has(r.Warning)?fixWarn(tr(r.Warning).split('; ')):[];
     if(has(r.PledgeOfPromoterPct)&&(+r.PledgeOfPromoterPct)>100){
       wl=wl.filter(x=>x.toLowerCase().indexOf('pledge')<0);
       wl.push('Promoter pledge shows '+r.PledgeOfPromoterPct+'% (over 100%), which cannot be right. Treat it as a data error and check screener.in');
@@ -256,8 +268,12 @@ function draw(){
   $('list_multi').innerHTML=list.length?list.map(r=>{
     const cls=r.Band.split(' ')[0];
     const pos=has(r.Positives)?r.Positives.split('; '):[];
-    const warn=has(r.Warning)?r.Warning.split('; '):[];
-    const pl=has(r.PledgeOfPromoterPct)?'<b class="'+(+r.PledgeOfPromoterPct>=25?'neg':(+r.PledgeOfPromoterPct>=10?'amb':''))+'">'+r.PledgeOfPromoterPct+'% of promoter shares</b>':na;
+    let warn=has(r.Warning)?r.Warning.split('; '):[];
+    if(has(r.PledgeOfPromoterPct)&&(+r.PledgeOfPromoterPct)>100){
+      warn=warn.filter(x=>x.toLowerCase().indexOf('pledge')<0);
+      warn.push('Promoter pledge shows '+r.PledgeOfPromoterPct+'% (over 100%), which cannot be right. Treat it as a data error and check screener.in');
+    }
+    const pl=pledgeHtml(r.PledgeOfPromoterPct,na);
     const de=has(r.DebtEquity)?'<b class="'+(+r.DebtEquity>1?'amb':'')+'">'+r.DebtEquity+'</b>':na;
     return '<div class="card"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
     +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span></div>'
