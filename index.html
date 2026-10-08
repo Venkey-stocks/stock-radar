@@ -50,11 +50,15 @@ th{color:var(--mut);font-weight:600}
 .fund .row b{font-weight:600;text-align:right}
 .na{color:var(--mut);font-weight:400!important}
 .note{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:12.5px;color:var(--mut)}
+.mh{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:13px;margin-bottom:12px}
+.mh .dot{width:10px;height:10px;border-radius:50%;background:#444c56;display:inline-block}
+.mh.Favorable .dot{background:var(--g)}.mh.Cautious .dot{background:var(--y)}.mh.Weak .dot{background:var(--r)}
 </style>
 </head>
 <body>
 <h1>Venkey's Stock Radar</h1>
 <div class="sub" id="meta">Loading...</div>
+<a class="mh" id="mh" href="/health"><span class="dot"></span><span id="mh_txt">Market Health</span></a>
 <div class="tabs">
   <button id="t_ultra" class="on" onclick="show('ultra')">Ultra Short (1-5 days)</button>
   <button id="t_short" onclick="show('short')">Short Term (1-20 days)</button>
@@ -348,6 +352,20 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
  .then(()=>show('ultra'))
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
+
+// Market Health badge (separate, never blocks the main page)
+fetch('data/market_health.json?v='+Date.now())
+ .then(r=>r.ok?r.text():'')
+ .then(t=>{
+   t=(t||'').trim();
+   if(t.charAt(0)!=='{') return;
+   const d=JSON.parse(t);
+   const st=['Favorable','Cautious','Weak'].indexOf(d.Status)>=0?d.Status:'Unknown';
+   const sc=isFinite(+d.Score)?(' ('+d.Score+'/100)'):'';
+   $('mh').className='mh '+st;
+   $('mh_txt').textContent='Market Health: '+st+sc;
+ })
+ .catch(()=>{});
 </script>
 </body>
 </html>
