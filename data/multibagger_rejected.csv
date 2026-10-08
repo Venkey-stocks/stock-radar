@@ -5,6 +5,19 @@ DELTACORP,ASM list
 BLUESTONE,ASM list
 AEQUS,ASM list
 SMCGLOBAL,ASM list
+SYNCOMF,ASM list
+KOPRAN,ASM list
+GNA,ASM list
+STLNETWORK,ASM list
+CENTUM,ASM list
+JAYKAY,ASM list
+SUNFLAG,ASM list
+JINDWORLD,ASM list
+KRISHNADEF,ASM list
+TATVA,ASM list
+MVGJL,ASM list
+ALLCARGO,ASM list
+DPWIRES,ASM list
 OLAELEC,Sales growth below 20% a year
 WHIRLPOOL,Sales growth below 20% a year
 APOLLO,ROCE below 15%
@@ -17,3 +30,166 @@ LLOYDSENGG,ROCE below 15%
 TARIL,Operating cash flow negative
 PROTEAN,Sales growth below 20% a year
 WABAG,Sales growth below 20% a year
+MOTISONS,Sales growth below 20% a year
+ELECON,Sales growth below 20% a year
+EDELWEISS,Fewer than 4 years of annual data
+YATHARTH,ROCE below 15%
+BALRAMCHIN,Sales growth below 20% a year
+RITES,Sales growth below 20% a year
+SCI,Sales growth below 20% a year
+UJJIVANSFB,Fewer than 4 years of annual data
+AARTIPHARM,Sales growth below 20% a year
+GNFC,Sales growth below 20% a year
+CARTRADE,ROCE below 15%
+CELLO,Sales growth below 20% a year
+PARAGMILK,Sales growth below 20% a year
+MARKSANS,Sales growth below 20% a year
+RAIN,Sales growth below 20% a year
+BALAMINES,Sales growth below 20% a year
+SOUTHBANK,Fewer than 4 years of annual data
+AXISCADES,Sales growth below 20% a year
+CYIENT,Sales growth below 20% a year
+KTKBANK,Fewer than 4 years of annual data
+VIYASH,Profit looks one-time (jumped or is over half of sales)
+NRBBEARING,Sales growth below 20% a year
+PGEL,ROCE below 15%
+WELENT,Sales growth below 20% a year
+MIDHANI,Sales growth below 20% a year
+TI,Profit growth below 20% a year
+UNIMECH,ROCE below 15%
+JAMNAAUTO,Sales growth below 20% a year
+STYLEBAAZA,ROCE below 15%
+KROSS,Sales growth below 20% a year
+TEXRAIL,ROCE below 15%
+TIMETECHNO,Sales growth below 20% a year
+RHIM,Sales growth below 20% a year
+LEMONTREE,Sales growth below 20% a year
+ROLEXRINGS,Sales growth below 20% a year
+ALKYLAMINE,Sales growth below 20% a year
+EPL,Sales growth below 20% a year
+ACE,Sales growth below 20% a year
+DYNAMATECH,Sales growth below 20% a year
+FIVESTAR,ROCE below 15%
+TITAGARH,Sales growth below 20% a year
+GRAVITA,Sales growth below 20% a year
+KIRIINDUS,Profit looks one-time (jumped or is over half of sales)
+SMLMAH,Sales growth below 20% a year
+ONEPOINT,ROCE below 15%
+BAJAJHIND,Sales growth below 20% a year
+ELECTCAST,Sales growth below 20% a year
+TCI,Sales growth below 20% a year
+MANALIPETC,Profit looks one-time (jumped or is over half of sales)
+KRN,Operating cash flow negative
+HOMEFIRST,ROCE below 15%
+HCC,Sales growth below 20% a year
+ARVIND,Sales growth below 20% a year
+JGCHEM,Sales growth below 20% a year
+VARROC,Sales growth below 20% a year
+NORTHARC,Profit growth below 20% a year
+RENUKA,Sales growth below 20% a year
+RBA,Sales growth below 20% a year
+JTLIND,Sales growth below 20% a year
+SUDEEPPHRM,Sales growth below 20% a year
+LXCHEM,Sales growth below 20% a year
+MOSCHIP,ROCE below 15%
+DEEPINDS,Profit growth below 20% a year
+CAPILLARY,Profit not positive over 3 years
+GOODLUCK,Sales growth below 20% a year
+SENCO,Operating cash flow negative
+DCBBANK,Fewer than 4 years of annual data
+GPPL,Profit looks one-time (jumped or is over half of sales)
+BLUEJET,Sales growth below 20% a year
+CCAVENUE,ROCE below 15%
+PNGJL,Operating cash flow negative
+GOKEX,Profit growth below 20% a year
+JUBLINGREA,Sales growth below 20% a year
+ASKAUTOLTD,Sales growth below 20% a year
+EIEL,Operating cash flow negative
+SIGACHI,Sales growth below 20% a year
+TNPETRO,Sales growth below 20% a year
+NSLNISP,Sales growth not computable
+WSTCSTPAPR,Sales growth below 20% a year
+GMRP&UI,Sales growth below 20% a year
+JKPAPER,Sales growth below 20% a year
+HIKAL,Sales growth below 20% a year
+QUESS,Profit looks one-time (jumped or is over half of sales)
+IDEAFORGE,Sales growth below 20% a year
+DHAMPURSUG,Sales growth below 20% a year
+KRBL,Sales growth below 20% a year
+ORCHPHARMA,Profit growth below 20% a year
+EMBDL,Profit not positive over 3 years
+MBEL,Sales growth below 20% a year
+PANAMAPET,Sales growth below 20% a year
+WENDT,Sales growth below 20% a year
+KRISHANA,Operating cash flow negative
+KIRLOSBROS,Sales growth below 20% a year
+RESPONIND,Sales growth below 20% a year
+GODREJAGRO,Sales growth below 20% a year
+UTKARSHBNK,Fewer than 4 years of annual data
+SATIN,ROCE below 15%
+EQUITASBNK,Fewer than 4 years of annual data
+MINDACORP,Sales growth below 20% a year
+THYROCARE,Sales growth below 20% a year
+SANGHVIMOV,Profit growth below 20% a year
+PRAJIND,Sales growth below 20% a year
+IONEXCHANG,Sales growth below 20% a year
+ARIHANTCAP,Sales growth below 20% a year
+RISHABH,Sales growth below 20% a year
+SHRINGARMS,Operating cash flow negative
+STEELXIND,Sales growth below 20% a year
+PENIND,Sales growth below 20% a year
+UTTAMSUGAR,Sales growth below 20% a year
+GOCLCORP,Profit looks one-time (jumped or is over half of sales)
+VENKEYS,Sales growth below 20% a year
+DMCC,Sales growth below 20% a year
+RICOAUTO,Sales growth below 20% a year
+SURYAROSNI,Sales growth below 20% a year
+FMGOETZE,Sales growth below 20% a year
+HINDOILEXP,Sales growth below 20% a year
+TEMBO,Operating cash flow negative
+ALEMBICLTD,Profit looks one-time (jumped or is over half of sales)
+DREDGECORP,Sales growth below 20% a year
+CRAMC,Fewer than 4 years of annual data
+DCW,Sales growth below 20% a year
+DIFFNKG,Sales growth below 20% a year
+OMAXE,Sales growth below 20% a year
+JUSTDIAL,Sales growth below 20% a year
+EIMCOELECO,Sales growth below 20% a year
+SANDHAR,Sales growth below 20% a year
+TRIDENT,Sales growth below 20% a year
+GIPCL,Sales growth below 20% a year
+BASF,Sales growth below 20% a year
+VISHNU,Sales growth below 20% a year
+BLUSPRING,Fewer than 4 years of annual data
+DHANBANK,Fewer than 4 years of annual data
+MMFL,Sales growth below 20% a year
+SPORTKING,Sales growth below 20% a year
+PROSTARM,Sales growth below 20% a year
+APCOTEXIND,Sales growth below 20% a year
+KOLTEPATIL,Annual data is out of date
+ADOR,Sales growth below 20% a year
+GMBREW,Sales growth below 20% a year
+RIIL,Sales growth below 20% a year
+KAMDHENU,Sales growth below 20% a year
+MMP,Sales growth below 20% a year
+JUNIPER,Sales growth below 20% a year
+LGBBROSLTD,Sales growth below 20% a year
+SINDHUTRAD,Sales growth below 20% a year
+MAHLIFE,Profit looks one-time (jumped or is over half of sales)
+TVSSRICHAK,Sales growth below 20% a year
+DBOL,Sales growth below 20% a year
+MOLDTKPAC,Sales growth below 20% a year
+PNBGILTS,Profit growth below 20% a year
+COSMOFIRST,Sales growth below 20% a year
+TNPL,Profit looks one-time (jumped or is over half of sales)
+MUTHOOTMF,Sales growth below 20% a year
+ESTER,Sales growth below 20% a year
+BHARATWIRE,Sales growth below 20% a year
+ANDHRSUGAR,Sales growth below 20% a year
+DOLLAR,Sales growth below 20% a year
+MAGADSUGAR,Sales growth below 20% a year
+COFFEEDAY,Sales growth below 20% a year
+BALMLAWRIE,Sales growth below 20% a year
+KAMATHOTEL,Sales growth below 20% a year
+BAJEL,Profit not positive over 3 years
+ZUARIIND,Sales growth below 20% a year
