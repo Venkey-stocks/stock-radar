@@ -1,10 +1,10 @@
 {
  "Date": "2026-10-08",
- "Score": 7.7,
+ "Score": 7.9,
  "Status": "Weak",
  "Advice": "Market is weak. Most breakouts tend to fail in such conditions. Fewer or no new trades, and keep stops tight to your plan.",
  "Index": "NIFTY500",
- "LiquidStocks": 919,
+ "LiquidStocks": 913,
  "ChecksMax": 100,
  "Checks": [
   {
@@ -37,28 +37,28 @@
   },
   {
    "name": "Stocks above 50-day average",
-   "text": "30% of 919 liquid stocks are above their 50-day average",
-   "points": 0.1,
+   "text": "30% of 913 liquid stocks are above their 50-day average",
+   "points": 0.2,
    "max": 20,
    "good": false
   },
   {
    "name": "Stocks above 200-day average",
    "text": "55% are above their 200-day average",
-   "points": 6.1,
+   "points": 6.2,
    "max": 10,
    "good": true
   },
   {
    "name": "Advancers vs decliners today",
-   "text": "68 stocks rose, 851 fell",
+   "text": "68 stocks rose, 845 fell",
    "points": 0.0,
    "max": 10,
    "good": false
   },
   {
    "name": "Near 52-week highs vs lows",
-   "text": "24 stocks are near a 52-week high, 138 near a 52-week low",
+   "text": "23 stocks are near a 52-week high, 134 near a 52-week low",
    "points": 1.5,
    "max": 10,
    "good": false
