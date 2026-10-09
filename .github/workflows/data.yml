@@ -34,6 +34,9 @@ jobs:
       - name: Miss report
         run: python miss_report.py
         continue-on-error: true
+      - name: Events
+        run: python fetch_events.py
+        continue-on-error: true
       - name: Save data
         run: |
           git config user.name "bot"
