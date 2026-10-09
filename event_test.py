@@ -1,65 +1,56 @@
-import requests
-import json
+import os
 import time
+import requests
 
-HEADERS = {
+H = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "en-US,en;q=0.9",
     "Referer": "https://www.nseindia.com/",
 }
-
-BASE = "https://www.nseindia.com"
+B = "https://www.nseindia.com/api/"
 URLS = [
-    ("announcements", BASE + "/api/corporate-announcements?index=equities"),
-    ("event_calendar", BASE + "/api/event-calendar"),
-    ("board_meetings", BASE + "/api/corporate-board-meetings?index=equities"),
-    ("corporate_actions", BASE + "/api/corporates-corporateActions?index=equities"),
-    ("financial_results", BASE + "/api/corporate-financial-results?index=equities&period=Quarterly"),
-    ("insider_pit", BASE + "/api/corporates-pit?index=equities"),
-    ("large_deals", BASE + "/api/snapshot-capital-market-largedeal"),
-    ("bulk_csv", "https://nsearchives.nseindia.com/content/equities/bulk.csv"),
-    ("block_csv", "https://nsearchives.nseindia.com/content/equities/block.csv"),
+    ("announcements_range", B + "corporate-announcements?index=equities&from_date=01-10-2026&to_date=09-10-2026"),
+    ("corp_actions_range", B + "corporates-corporateActions?index=equities&from_date=09-10-2026&to_date=31-12-2026"),
+    ("pit_range", B + "corporates-pit?index=equities&from_date=01-10-2026&to_date=09-10-2026"),
+    ("results_a", B + "corporates-financial-results?index=equities&period=Quarterly"),
+    ("results_b", B + "corporates-financial-results?index=equities&period=Quarterly&from_date=01-10-2026&to_date=09-10-2026"),
+    ("board_range", B + "corporate-board-meetings?index=equities&from_date=09-10-2026&to_date=31-10-2026"),
 ]
 
 out = []
 s = requests.Session()
-s.headers.update(HEADERS)
+s.headers.update(H)
 try:
-    r = s.get(BASE, timeout=30)
-    out.append("home page status: " + str(r.status_code))
+    s.get("https://www.nseindia.com", timeout=30)
 except Exception as e:
-    out.append("home page error: " + str(e)[:200])
+    out.append("home error: " + str(e)[:100])
 time.sleep(2)
 
 for name, url in URLS:
     out.append("")
     out.append("== " + name)
-    out.append(url)
     try:
         r = s.get(url, timeout=30)
         out.append("status: " + str(r.status_code) + ", bytes: " + str(len(r.content)))
-        txt = r.text
         try:
             j = r.json()
-            if isinstance(j, list):
-                out.append("json list, items: " + str(len(j)))
-                if j and isinstance(j[0], dict):
-                    out.append("keys: " + ", ".join(list(j[0].keys())[:25]))
-            elif isinstance(j, dict):
-                out.append("json dict, keys: " + ", ".join(list(j.keys())[:25]))
-                for k, v in j.items():
-                    if isinstance(v, list) and v and isinstance(v[0], dict):
-                        out.append("list '" + k + "' items: " + str(len(v)))
-                        out.append("item keys: " + ", ".join(list(v[0].keys())[:25]))
-                        break
         except Exception:
-            out.append("not json. first 250 chars: " + txt[:250].replace("\n", " | "))
+            out.append("not json: " + r.text[:150].replace("\n", " "))
+            j = None
+        if isinstance(j, dict) and isinstance(j.get("data"), list):
+            j = j["data"]
+        if isinstance(j, list):
+            out.append("items: " + str(len(j)))
+            if j and isinstance(j[0], dict):
+                out.append("keys: " + ", ".join(list(j[0].keys())[:40]))
+                out.append("sample: " + str(j[0])[:500])
+        elif isinstance(j, dict):
+            out.append("dict keys: " + ", ".join(list(j.keys())[:20]))
     except Exception as e:
-        out.append("error: " + str(e)[:200])
+        out.append("error: " + str(e)[:150])
     time.sleep(2)
 
-import os
 os.makedirs("data", exist_ok=True)
 with open("data/event_test.txt", "w", encoding="utf-8") as f:
     f.write("\n".join(out))
