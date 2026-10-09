@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Events - Venkey's Stock Radar</title>
+<style>
+:root{--bg:#0e1117;--card:#161b22;--line:#262d38;--tx:#e6edf3;--mut:#8b96a5;--g:#2ea043;--y:#d29922;--b:#388bfd;--r:#f85149}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,Arial,sans-serif;padding:16px;max-width:1100px;margin:auto}
+h1{margin:0 0 4px;font-size:22px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:10px}
+a{color:var(--b)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;align-items:center}
+select,input{background:var(--card);color:var(--tx);border:1px solid var(--line);padding:8px 14px;border-radius:8px;font-size:14px;font-family:inherit}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.st{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.st small{display:block;color:var(--mut);font-size:11px}
+.st b{font-size:18px}
+.wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{color:var(--mut);font-weight:600;white-space:nowrap}
+td.d{white-space:nowrap}
+.pos{color:var(--g)}.neg{color:var(--r)}.amb{color:var(--y)}
+.note{color:var(--mut);font-size:12.5px;margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.err{color:var(--r)}
+</style>
+</head>
+<body>
+<h1>Events (NSE)</h1>
+<div class="sub" id="meta">Loading...</div>
+<a href="/">&larr; Back to Radar</a>
+<div class="bar">
+  <select id="cat" onchange="draw()"><option value="">All categories</option></select>
+  <input id="q" placeholder="Search symbol" oninput="draw()">
+</div>
+<div class="stats" id="stats"></div>
+<div class="wrap"><table id="tbl"></table></div>
+<div class="note">
+Source: NSE corporate announcements (last 7 days), board meetings with financial results (next 30 days), and bulk/block BUY deals of Rs 5 crore or more (trading and quant firms are filtered out). Categories are picked by keywords, so some may be wrong or missed. Red = warning. Amber = results date. Green = positive event. Always read the original filing and verify on screener.in. This is a research aid, not investment advice.
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const BAD=['Default/Insolvency (warning)','Disruption/Suspension (warning)','Auditor change (check)'];
+let ROWS=[];
+
+function parseCSV(t){
+  const rows=[];let r=[],f='',q=false;
+  for(let i=0;i<t.length;i++){
+    const c=t[i];
+    if(q){ if(c=='"'){ if(t[i+1]=='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c=='"') q=true;
+    else if(c==','){r.push(f);f='';}
+    else if(c=='\n'){r.push(f);rows.push(r);r=[];f='';}
+    else if(c!='\r') f+=c;
+  }
+  if(f.length||r.length){r.push(f);rows.push(r);}
+  const h=rows.shift()||[];
+  return rows.filter(x=>x.length==h.length).map(x=>Object.fromEntries(h.map((k,i)=>[k,x[i]])));
+}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function parseD(s){
+  const m={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  const p=String(s||'').trim().split('-');
+  if(p.length!=3) return 0;
+  const mo=m[p[1].slice(0,3).toLowerCase()];
+  if(mo===undefined) return 0;
+  return new Date(+p[2],mo,+p[0]).getTime();
+}
+function cls(c){return BAD.indexOf(c)>=0?'neg':(c=='Results date'?'amb':'pos');}
+
+function draw(){
+  const c=$('cat').value, q=$('q').value.trim().toUpperCase();
+  const list=ROWS.filter(r=>(!c||r.category==c)&&(!q||r.symbol.toUpperCase().indexOf(q)>=0));
+  const cnt={};
+  ROWS.forEach(r=>{cnt[r.category]=(cnt[r.category]||0)+1;});
+  const box=(l,v,k)=>'<div class="st"><small>'+esc(l)+'</small><b class="'+(k||'')+'">'+v+'</b></div>';
+  $('stats').innerHTML=box('All events',ROWS.length)
+    +Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).map(k=>box(k,cnt[k],cls(k))).join('');
+  $('tbl').innerHTML='<tr><th>Date</th><th>Symbol</th><th>Category</th><th>Detail</th><th>Filing</th></tr>'
+    +(list.length?list.map(r=>{
+      const sym=esc(r.symbol);
+      const lk=(r.link&&r.link.indexOf('https://')==0)?'<a href="'+esc(r.link)+'" target="_blank" rel="noopener">PDF</a>':'-';
+      return '<tr><td class="d">'+esc(r.date)+'</td><td><b>'+sym+'</b> <a href="https://www.screener.in/company/'+encodeURIComponent(r.symbol)+'/" target="_blank" rel="noopener">screener</a></td><td class="'+cls(r.category)+'">'+esc(r.category)+'</td><td>'+esc(r.detail)+'</td><td>'+lk+'</td></tr>';
+    }).join(''):'<tr><td colspan="5">No events match.</td></tr>');
+  $('meta').textContent='Showing '+list.length+' of '+ROWS.length+' events (newest date first)';
+}
+
+fetch('data/events.csv?v='+Date.now())
+ .then(r=>{if(!r.ok)throw new Error('data/events.csv not found');return r.text();})
+ .then(t=>{
+   ROWS=parseCSV(t).filter(r=>r.symbol);
+   ROWS.forEach(r=>{r._t=parseD(r.date);});
+   ROWS.sort((a,b)=>b._t-a._t);
+   const cats=[...new Set(ROWS.map(r=>r.category))].sort();
+   $('cat').innerHTML='<option value="">All categories</option>'+cats.map(k=>'<option>'+esc(k)+'</option>').join('');
+   draw();
+ })
+ .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+esc(e.message)+'</span>';});
+</script>
+</body>
+</html>
