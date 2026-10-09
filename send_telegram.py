@@ -29,6 +29,28 @@ def fmt(v):
     return str(v)
 
 
+def event_line(r, c_evt, c_adj):
+    """Events ఉంటే ఒక లైన్ (boost అయితే Events, penalty అయితే warning)."""
+    if not c_evt:
+        return ""
+    try:
+        txt = r[c_evt]
+        if pd.isna(txt) or str(txt).strip() == "":
+            return ""
+        txt = str(txt).strip()
+    except Exception:
+        return ""
+    adj = 0
+    if c_adj:
+        try:
+            adj = int(float(r[c_adj]))
+        except Exception:
+            adj = 0
+    if adj < 0:
+        return f"   WARNING events: {txt} (score {adj:+d})"
+    return f"   Events: {txt} (score {adj:+d})"
+
+
 def top_lines(path, title):
     try:
         df = pd.read_csv(path)
@@ -50,6 +72,8 @@ def top_lines(path, title):
     c_stp = col(df, ["stop", "stoploss", "sl"])
     c_tgt = col(df, ["target", "targetprice"])
     c_set = col(df, ["setup"])
+    c_evt = col(df, ["events"])
+    c_adj = col(df, ["eventadj"])
     lines = [f"{title}: {len(df)} signals (top 3)"]
     for i, (_, r) in enumerate(df.head(3).iterrows(), 1):
         sym = fmt(r[c_sym]) if c_sym else "n/a"
@@ -63,6 +87,9 @@ def top_lines(path, title):
         lines.append(
             f"{i}. {sym} | Entry {ent} | Stop {stp} | Target {tgt} | Score {scr}{extra}"
         )
+        ev = event_line(r, c_evt, c_adj)
+        if ev:
+            lines.append(ev)
     return lines
 
 
