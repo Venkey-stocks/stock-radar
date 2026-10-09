@@ -16,6 +16,14 @@ MIN_TARGET_PCT = 15.0      # కనీస target %
 MIN_SCORE = 40             # దీని కంటే తక్కువ score ఉంటే జాబితాలో చూపం
 MIN_ROWS = 70              # కనీసం ఇన్ని రోజుల data ఉండాలి
 
+# ---- Event score (అంచనా బరువులు) ----
+EV_BOOST_MAIN = 5           # Order win / Acquisition / Buyback
+EV_BOOST_DEAL = 3           # Bulk BUY / Block BUY
+EV_BOOST_CAP = 8
+EV_PEN_DEFAULT = -10        # Default/Insolvency
+EV_PEN_DISRUPT = -5         # Disruption/Suspension
+EV_PEN_AUDITOR = -3         # Auditor change
+
 
 def clip01(x):
     return float(min(max(x, 0.0), 1.0))
@@ -31,6 +39,20 @@ date_str = last_date.strftime("%Y-%m-%d")
 ist = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=5, minutes=30)
 if last_date.date() == ist.date() and (ist.hour, ist.minute) < (15, 45):
     print("హెచ్చరిక: market ఇంకా మూసి ఉండకపోవచ్చు, ఈ రోజు candle అసంపూర్ణం కావచ్చు.")
+
+# ---------- Events (data/events.csv) ----------
+EV = {}
+if os.path.exists("data/events.csv"):
+    try:
+        evdf = pd.read_csv("data/events.csv")
+        for _, e in evdf.iterrows():
+            k = str(e.get("symbol", "")).upper().replace(".NS", "").strip()
+            EV.setdefault(k, set()).add(str(e.get("category", "")).strip())
+        print("events చదివాం, symbols:", len(EV))
+    except Exception as ex:
+        print("హెచ్చరిక: events.csv చదవడం కుదరలేదు:", ex)
+else:
+    print("హెచ్చరిక: data/events.csv లేదు, event score లేకుండా నడుస్తోంది.")
 
 groups = {sym: g.sort_values("Date").reset_index(drop=True) for sym, g in df.groupby("Symbol")}
 
@@ -127,13 +149,43 @@ def analyze(sym, g):
     if entry * 1.03 < high52 <= entry * 1.15:
         levels = np.append(levels, high52)
     levels = levels[(levels > entry * 1.03) & (levels <= entry * 1.15)]
-    warning = ""
+    warns = []
     penalty = 0
     if len(levels) > 0:
         lvl = levels.min()
-        warning = "పైన %.1f%% వద్ద పాత high (Rs %.1f), 15%% target కి అడ్డు కావచ్చు" % (
-            (lvl / entry - 1) * 100, lvl)
+        warns.append("పైన %.1f%% వద్ద పాత high (Rs %.1f), 15%% target కి అడ్డు కావచ్చు" % (
+            (lvl / entry - 1) * 100, lvl))
         penalty = 10
+
+    # ---------- Events (Catalyst boost / penalty) ----------
+    cats = EV.get(sym.upper().replace(".NS", ""), set())
+    boost = 0
+    pen = 0
+    ev_names = []
+    neg_names = []
+    for cat in sorted(cats):
+        cl = cat.lower()
+        if cl.startswith("order win") or cl.startswith("acquisition") or cl.startswith("buyback"):
+            boost += EV_BOOST_MAIN
+            ev_names.append(cat)
+        elif cl.startswith("bulk buy") or cl.startswith("block buy"):
+            boost += EV_BOOST_DEAL
+            ev_names.append(cat)
+        elif cl.startswith("default"):
+            pen += EV_PEN_DEFAULT
+            neg_names.append(cat)
+        elif cl.startswith("disruption"):
+            pen += EV_PEN_DISRUPT
+            neg_names.append(cat)
+        elif cl.startswith("auditor"):
+            pen += EV_PEN_AUDITOR
+            neg_names.append(cat)
+    boost = min(boost, EV_BOOST_CAP)
+    ev_adj = boost + pen
+    events_txt = ", ".join(ev_names + neg_names)
+    if neg_names:
+        warns.append("NSE event హెచ్చరిక: " + ", ".join(neg_names))
+    warning = "; ".join(warns)
 
     # ---------- Technical reasons (website కోసం, English) ----------
     sma50 = c[-50:].mean()
@@ -163,6 +215,8 @@ def analyze(sym, g):
         rs_.append("Next resistance Rs %.1f (+%.1f%%)" % (lv_, (lv_ / entry - 1) * 100))
     else:
         rs_.append("No major resistance within 15%")
+    if events_txt:
+        rs_.append("NSE events (last 7 days): %s, score %+d" % (events_txt, ev_adj))
     reasons = " | ".join(rs_)
 
     # ---------- Score (100 లో, నా అంచనా బరువులు) ----------
@@ -185,6 +239,7 @@ def analyze(sym, g):
     elif d52 <= 10:
         s += 2
     s -= penalty
+    s += ev_adj
     s = round(max(min(s, 100), 0), 1)
 
     band = "High Conviction" if s >= 80 else ("Good Setup" if s >= 65 else "Early Watch")
@@ -197,6 +252,7 @@ def analyze(sym, g):
         "TargetPct": round(target_pct, 1), "Resistance": round(res, 2),
         "High52": round(high52, 2), "Gap": "Yes" if gap else "",
         "Warning": warning, "Reasons": reasons,
+        "Events": events_txt, "EventAdj": ev_adj,
     }
 
 
@@ -211,7 +267,7 @@ for sym, g in groups.items():
 
 columns = ["Date", "Symbol", "Status", "Score", "Band", "Close", "Entry", "Stop", "Target",
            "StopDistPct", "Qty", "VolRatio", "TargetPct", "Resistance", "High52", "Gap", "Warning",
-           "Reasons"]
+           "Reasons", "Events", "EventAdj"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
