@@ -520,4 +520,41 @@ function checkStale(){
   const last=ds.length?ds[ds.length-1]:'';
   const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(last);
   if(!m){
-    box.innerHTML='<div class="stale amb">&#9888; Data date is n/a (no rows found in the Ultra / Short files). Check that the daily "Fetch
+       box.innerHTML='<div class="stale amb">&#9888; Data date is n/a (no rows found in the Ultra / Short files). Check that the daily "Fetch data" run worked.</div>';
+    return;
+  }
+  const d=new Date(+m[1],+m[2]-1,+m[3]);
+  const today=new Date();today.setHours(0,0,0,0);
+  const n=Math.round((today-d)/86400000);
+  if(n>STALE_DAYS){
+    box.innerHTML='<div class="stale">&#9888; Data is old: last update was '+last+' ('+n+' days ago). The daily run may have stopped. Do not trust these signals until the data is updated.</div>';
+  } else {
+    box.innerHTML='';
+  }
+}
+
+const load=k=>fetch(FILES[k]+'?v='+Date.now()).then(r=>{if(!r.ok)throw new Error(FILES[k]+' not found');return r.text();}).then(t=>{DATA[k]=parseCSV(t);});
+Promise.all([load('ultra'),load('short')])
+ .then(()=>load('perf').catch(()=>{DATA.perf=[];}))
+ .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
+ .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
+ .then(()=>load('events').catch(()=>{DATA.events=[];}))
+ .then(()=>{buildEv();checkStale();show('ultra');})
+ .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
+
+// Market Health badge (separate, never blocks the main page)
+fetch('data/market_health.json?v='+Date.now())
+ .then(r=>r.ok?r.text():'')
+ .then(t=>{
+   t=(t||'').trim();
+   if(t.charAt(0)!=='{') return;
+   const d=JSON.parse(t);
+   const st=['Favorable','Cautious','Weak'].indexOf(d.Status)>=0?d.Status:'Unknown';
+   const sc=isFinite(+d.Score)?(' ('+d.Score+'/100)'):'';
+   $('mh').className='mh '+st;
+   $('mh_txt').textContent='Market Health: '+st+sc;
+ })
+ .catch(()=>{});
+</script>
+</body>
+</html>
