@@ -1,52 +1,32 @@
-home page status: 403
 
-== announcements
-https://www.nseindia.com/api/corporate-announcements?index=equities
-status: 200, bytes: 13392
-json list, items: 20
+== announcements_range
+status: 200, bytes: 2558689
+items: 3537
 keys: an_dt, attFileSize, attchmntFile, attchmntText, bflag, csvName, desc, difference, dt, exchdisstime, fileSize, hasXbrl, old_new, orgid, seq_id, smIndustry, sm_isin, sm_name, sort_date, symbol
+sample: {'an_dt': '09-Oct-2026 07:12:58', 'attFileSize': '996.57 KB', 'attchmntFile': 'https://nsearchives.nseindia.com/corporate/BEML_09102026071209_intimation_nse_signed.pdf', 'attchmntText': 'BEML Limited has informed the Exchange about Awarding of order(s)/contract(s)', 'bflag': None, 'csvName': None, 'desc': 'Awarding of order(s)/contract(s)', 'difference': '00:00:01', 'dt': '09102026071258', 'exchdisstime': '09-Oct-2026 07:12:59', 'fileSize': '996.57 KB', 'hasXbrl': True, 'old_new': None, 'orgid':
 
-== event_calendar
-https://www.nseindia.com/api/event-calendar
-status: 200, bytes: 61869
-json list, items: 244
-keys: symbol, company, purpose, bm_desc, date
-
-== board_meetings
-https://www.nseindia.com/api/corporate-board-meetings?index=equities
-status: 200, bytes: 15731
-json list, items: 20
-keys: bm_symbol, bm_date, bm_purpose, bm_desc, sm_indusrty, bm_timestamp, sm_name, sm_isin, diff, sysTime, attFileSize, attachment, intimationType, ixbrl, ixbrlFileSize, meetingType, oriiginalMeetingDate, proposedMeetingDate
-
-== corporate_actions
-https://www.nseindia.com/api/corporates-corporateActions?index=equities
+== corp_actions_range
 status: 200, bytes: 2083
-json list, items: 7
+items: 7
 keys: bcEndDate, bcStartDate, caBroadcastDate, comp, exDate, faceVal, ind, isin, ndEndDate, ndStartDate, recDate, series, subject, symbol
+sample: {'bcEndDate': '-', 'bcStartDate': '-', 'caBroadcastDate': None, 'comp': 'Skyways Air Services Limited', 'exDate': '09-Oct-2026', 'faceVal': '10', 'ind': '-', 'isin': 'INE0PX301025', 'ndEndDate': '-', 'ndStartDate': '-', 'recDate': '09-Oct-2026', 'series': 'EQ', 'subject': 'Interim Dividend - Re 0.25 Per Share', 'symbol': 'SKYWAYS'}
 
-== financial_results
-https://www.nseindia.com/api/corporate-financial-results?index=equities&period=Quarterly
-status: 404, bytes: 382
-not json. first 250 chars: <!DOCTYPE html> | <html lang="en"> | <head> |   <meta charset="UTF-8"> |   <title>Resource not found</title> | </head> | <body style="background-color: #e8e8e8;"> |   <div style="font-size: 32px; padding: 50px 25px; text-align: center;"> |     Resource not found |   <
-
-== insider_pit
-https://www.nseindia.com/api/corporates-pit?index=equities
+== pit_range
 status: 200, bytes: 28
-json dict, keys: acqNameList, data
+items: 0
 
-== large_deals
-https://www.nseindia.com/api/snapshot-capital-market-largedeal
-status: 200, bytes: 53905
-json dict, keys: as_on_date, BULK_DEALS_DATA, BULK_DEALS, SHORT_DEALS, BLOCK_DEALS, SHORT_DEALS_DATA, BLOCK_DEALS_DATA
-list 'BULK_DEALS_DATA' items: 216
-item keys: buySell, clientName, date, name, qty, remarks, symbol, watp
+== results_a
+status: 200, bytes: 2910901
+items: 3816
+keys: audited, bank, broadCastDate, companyName, consolidated, cumulative, difference, exchdisstime, filingDate, financialYear, format, fromDate, indAs, industry, isin, oldNewFlag, params, period, reInd, relatingTo, resultDescription, resultDetailedDataLink, seqNumber, symbol, toDate, xbrl
+sample: {'audited': 'Un-Audited', 'bank': 'N', 'broadCastDate': '30-Jul-2026 17:17:53', 'companyName': 'V.S.T Tillers Tractors Limited', 'consolidated': 'Consolidated', 'cumulative': 'Non-cumulative', 'difference': '00:00:49', 'exchdisstime': '30-Jul-2026 17:18:42', 'filingDate': '30-Jul-2026 17:17', 'financialYear': '01-Apr-2024 To 31-Mar-2025', 'format': 'New', 'fromDate': '01-Oct-2024', 'indAs': 'Ind-AS New', 'industry': '-', 'isin': 'INE764D01017', 'oldNewFlag': 'N', 'params': '01-Oct-202431-Dec-202
 
-== bulk_csv
-https://nsearchives.nseindia.com/content/equities/bulk.csv
-status: 200, bytes: 20131
-not json. first 250 chars: Date,Symbol,Security Name,Client Name,Buy/Sell,Quantity Traded,Trade Price / Wght. Avg. Price,Remarks | 08-OCT-2026,ACEVECTOR,AceVector Limited,QE SECURITIES LLP,BUY,3174081,31.37,- | 08-OCT-2026,ACEVECTOR,AceVector Limited,ALPHAGREP SECURITIES PRIVATE L
+== results_b
+status: 200, bytes: 2
+items: 0
 
-== block_csv
-https://nsearchives.nseindia.com/content/equities/block.csv
-status: 200, bytes: 1016
-not json. first 250 chars: Date,Symbol,Security Name,Client Name,Buy/Sell,Quantity Traded,Trade Price / Wght. Avg. Price | 08-OCT-2026,ICICIBANK,ICICI Bank Ltd.,PI OPPORTUNITIES AIF V LLP,BUY,1921581,1343.00 | 08-OCT-2026,INDGN,Indegene Limited,PI OPPORTUNITIES AIF V LLP,BUY,20184
+== board_range
+status: 200, bytes: 349678
+items: 452
+keys: bm_symbol, bm_date, bm_purpose, bm_desc, sm_indusrty, bm_timestamp, sm_name, sm_isin, diff, sysTime, attFileSize, attachment, intimationType, ixbrl, ixbrlFileSize, meetingType, oriiginalMeetingDate, proposedMeetingDate
+sample: {'bm_symbol': 'AURIONPRO', 'bm_date': '31-Oct-2026', 'bm_purpose': 'Board Meeting Intimation', 'bm_desc': 'AURIONPRO SOLUTIONS LIMITED has informed the Exchange about Board Meeting to be held on 31-Oct-2026 to inter-alia consider and approve the Unaudited Financial results of the Company for the Quarterly ended September 2026 .', 'sm_indusrty': 'Computers - Software', 'bm_timestamp': '05-Oct-2026 19:53:27', 'sm_name': 'Aurionpro Solutions Limited', 'sm_isin': 'INE132H01018', 'diff': '00:00:03', 
