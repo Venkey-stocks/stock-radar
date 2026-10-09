@@ -1,0 +1,84 @@
+TOTAL EVENTS: 385
+BY CATEGORY: {'Results date': 228, 'Bulk BUY': 83, 'Order win': 33, 'Acquisition/Merger': 27, 'Block BUY': 5, 'Auditor change (check)': 3, 'Buyback': 3, 'Open offer': 3}
+
+TOP ANNOUNCEMENT TYPES (count | desc)
+1131 | Certificate under SEBI (Depositories and Participants) Regulations, 2018
+252 | General Updates
+224 | Updates
+141 | Copy of Newspaper Publication
+137 | Shareholders meeting
+103 | Press Release
+96 | Analysts/Institutional Investor Meet/Con. Call Updates
+44 | Credit Rating
+42 | Outcome of Board Meeting
+37 | ESOP/ESOS/ESPS
+37 | Appointment
+32 | Bagging/Receiving of orders/contracts
+30 | Resignation of Director/KMP/SMP
+28 | Trading Window
+26 | Structural Digital Database
+25 | Acquisition
+24 | Resignation
+21 | Corporate Insolvency Resolution Process
+20 | Change in Management
+20 | Pendency of Litigation(s)/dispute(s) or the outcome impacting the Company
+17 | Allotment of Securities
+16 | Action(s) taken or orders passed
+16 | Spurt in Volume
+15 | Price movement
+12 | Change in Director(s)
+11 | Cessation
+8 | Disclosure of material issue
+8 | Agreements
+8 | Record Date
+8 | Monthly Business Updates
+8 | Committee Meeting Updates
+7 | Investor Presentation
+6 | Credit Rating- New
+6 | Action(s) initiated or orders passed
+6 | Credit Rating- Revision
+5 | Amalgamation/Merger
+5 | Extension  of Financial Year
+5 | Memorandum of Understanding/Agreements
+4 | Awarding of order(s)/contract(s)
+4 | Corrigendum
+4 | Credit Rating- Others
+4 | Rumour Verification - Regulation 30(11)
+4 | Commencement of commercial production/operations
+4 | Granting/withdrawal/surrender/cancellation/suspension of key licenses/ regulatory approvals
+3 | Change in Company Secretary/Compliance Officer
+3 | Giving guarantees/indemnity/ becoming a surety for third party
+3 | Capacity addition
+3 | Disruption of Operations
+3 | Scheme of Arrangement
+3 | Address Change
+3 | Defaults on Payment of Interest/Principal
+3 | Disclosure under SEBI Takeover Regulations
+2 | Monitoring Agency Report
+2 | Conversion
+2 | Change in Auditors
+2 | Quarterly Compliance Report on Corporate governance - within 21 days from the end of the quarter
+2 | Dividend
+2 | Resignation of Statutory Auditor
+2 | Product launch
+2 | Amendment to AOA/MOA
+2 | Sale or disposal
+2 | Utilisation of Funds
+2 | Others
+2 | Options to purchase securities
+2 | News Verification
+2 | Integrated Filing- Governance
+2 | Issue of Securities
+1 | Buyback
+1 | Public Announcement - Buyback of Shares
+1 | Revised Record date
+1 | Rights Issue
+1 | Suspension of Trading
+1 | Arrangements for strategic, technical, manufacturing, or marketing tie up
+1 | Qualified Institutional Placement
+1 | Loss of Share Certificates
+1 | Demise
+1 | Rescission/termination(s)
+1 | Name Change
+1 | Closure of Buy Back
+1 | Integrated Filing- Financial
