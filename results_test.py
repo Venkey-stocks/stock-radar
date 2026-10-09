@@ -20,7 +20,6 @@ except Exception as e:
 today = datetime.date.today()
 frm = (today - datetime.timedelta(days=7)).strftime("%d-%m-%Y")
 to = today.strftime("%d-%m-%Y")
-print("range:", frm, "to", to)
 
 r = s.get("https://www.nseindia.com/api/corporate-announcements",
           params={"index": "equities", "from_date": frm, "to_date": to}, timeout=60)
@@ -28,20 +27,25 @@ print("HTTP", r.status_code)
 data = r.json()
 items = data if isinstance(data, list) else data.get("data", [])
 print("announcements:", len(items))
-if items:
-    print("KEYS:", list(items[0].keys()))
 
-res = [x for x in items
-       if "financial result" in str(x.get("desc", "")).lower()
-       or "financial result" in str(x.get("attchmntText", "")).lower()]
-print("announcements mentioning financial results:", len(res))
+print("--- top 15 'desc' categories ---")
+for k, v in collections.Counter(str(x.get("desc")) for x in items).most_common(15):
+    print("  ", v, "|", k)
+
+print("--- hasXbrl values ---")
+print(dict(collections.Counter(str(x.get("hasXbrl")) for x in items)))
+
+xb = [x for x in items if str(x.get("hasXbrl")).lower() in ("true", "1", "y", "yes")]
+print("items with hasXbrl true:", len(xb))
 
 ext = collections.Counter()
-for x in res:
+for x in xb:
     f = str(x.get("attchmntFile") or "")
     ext[f.rsplit(".", 1)[-1].lower() if "." in f else "none"] += 1
-print("attachment file types:", dict(ext))
+print("their attachment types:", dict(ext))
 
-for x in res[:6]:
-    print("-", x.get("symbol"), "|", x.get("an_dt"), "|", x.get("desc"), "|", x.get("attchmntFile"))
-    print("   text:", str(x.get("attchmntText"))[:200].replace("\n", " "))
+for x in xb[:6]:
+    print("-", x.get("symbol"), "|", x.get("an_dt"), "|", x.get("desc"))
+    print("   file:", x.get("attchmntFile"))
+    print("   csvName:", x.get("csvName"), "| bflag:", x.get("bflag"))
+    print("   text:", str(x.get("attchmntText"))[:150].replace("\n", " "))
