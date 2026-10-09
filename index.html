@@ -56,6 +56,8 @@ th{color:var(--mut);font-weight:600}
 .mh{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:13px;margin-bottom:12px}
 .mh .dot{width:10px;height:10px;border-radius:50%;background:#444c56;display:inline-block}
 .mh.Favorable .dot{background:var(--g)}.mh.Cautious .dot{background:var(--y)}.mh.Weak .dot{background:var(--r)}
+.evl{font-size:12.5px;padding:1px 0}
+.evl a{color:var(--b);margin-left:4px}
 </style>
 </head>
 <body>
@@ -138,8 +140,8 @@ Stocks on the NSE ASM or GSM lists are removed automatically. Scores are estimat
 Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv'};
-let cur='ultra',DATA={};
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',events:'data/events.csv'};
+let cur='ultra',DATA={},EV={};
 const $=id=>document.getElementById(id);
 
 function parseCSV(t){
@@ -206,7 +208,57 @@ function fundBox(r){
     +row('Promoter pledge',pl)+row('Debt / Equity',de)+nr+'</div>';
 }
 
-function fixWarn(w){
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function parseD(s){
+  const m={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  const p=String(s||'').trim().split('-');
+  if(p.length!=3) return null;
+  const mo=m[p[1].slice(0,3).toLowerCase()];
+  if(mo===undefined) return null;
+  return new Date(+p[2],mo,+p[0]);
+}
+
+function buildEv(){
+  EV={};
+  (DATA.events||[]).forEach(e=>{
+    if(!e.symbol) return;
+    (EV[e.symbol]=EV[e.symbol]||[]).push(e);
+  });
+}
+
+function evHtml(sym){
+  const list=EV[sym]||[];
+  if(!list.length) return '';
+  const bad=['Default/Insolvency (warning)','Disruption/Suspension (warning)','Auditor change (check)'];
+  const seen={},lines=[];
+  const today=new Date();today.setHours(0,0,0,0);
+  list.forEach(e=>{
+    const k=e.category+'|'+e.date;
+    if(seen[k]) return;
+    seen[k]=1;
+    let cls='pos',txt=esc(e.category)+', '+esc(e.date);
+    if(bad.indexOf(e.category)>=0) cls='neg';
+    if(e.category=='Results date'){
+      cls='amb';
+      const dd=parseD(e.date);
+      if(dd){
+        const n=Math.round((dd-today)/86400000);
+        txt='Results (board meeting) on '+esc(e.date)+(n>=0?' (in '+n+' days)':'');
+      }
+    }
+    if(/BUY$/.test(e.category)) txt+=' | '+esc(e.detail);
+    if(e.link&&e.link.indexOf('https://')==0) txt+=' <a href="'+esc(e.link)+'" target="_blank" rel="noopener">details</a>';
+    lines.push({cls:cls,txt:txt});
+  });
+  const order={neg:0,amb:1,pos:2};
+  lines.sort((a,b)=>order[a.cls]-order[b.cls]);
+  return '<div class="fund"><div class="ft">Recent events (NSE)</div>'
+    +lines.slice(0,5).map(l=>'<div class="evl '+l.cls+'">&#8226; '+l.txt+'</div>').join('')+'</div>';
+}
+
+// ===== END OF PART 1 =====
+  function fixWarn(w){
   // "; " తో విడిపోయిన "it may block the 15% target" ముక్కను ముందు వాక్యంతో కలుపుతుంది
   const out=[];
   w.forEach(x=>{
@@ -246,13 +298,15 @@ function draw(){
     +(r.Boosters?'<div class="exp">Boosters: '+tr(r.Boosters)+'</div>':'')
     +why
     +fundBox(r)
+    +evHtml(r.Symbol)
     +(wl.length?'<div class="warn">&#9888; '+wl.join('<br>&#9888; ')+'</div>':'')
     +'</div>';
   }).join(''):'<div class="exp">No stocks match today.</div>';
   const d=rows[0]?rows[0].Date:'-';
   $('meta').textContent='Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
 }
-  function drawMulti(){
+
+function drawMulti(){
   const rows=DATA.multi||[];
   const sel=$('msector');
   const secs=[...new Set(rows.map(r=>r.Sector).filter(Boolean))].sort();
@@ -295,6 +349,7 @@ function draw(){
     +row('Analysts covering',has(r.Analysts)?'<b>'+r.Analysts+'</b>':na)
     +row('PEG ratio',has(r.PEG)?'<b>'+r.PEG+'</b>':na)
     +row('Price change, 1 year',has(r.Ret1Y)?'<b>'+r.Ret1Y+'%</b>':na)+'</div>'
+    +evHtml(r.Symbol)
     +(pos.length?'<div class="goodl">'+pos.map(p=>'&#10003; '+p).join('<br>')+'</div>':'')
     +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+p).join('<br>')+'</div>':'')
     +'</div>';
@@ -376,7 +431,8 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('perf').catch(()=>{DATA.perf=[];}))
  .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
  .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
- .then(()=>show('ultra'))
+ .then(()=>load('events').catch(()=>{DATA.events=[];}))
+ .then(()=>{buildEv();show('ultra');})
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
 
 // Market Health badge (separate, never blocks the main page)
