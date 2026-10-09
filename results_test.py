@@ -1,5 +1,6 @@
 import re
 import datetime
+import collections
 import requests
 
 H = {
@@ -33,29 +34,35 @@ def d(x):
 
 
 items = sorted(items, key=lambda x: d(x.get("broadCastDate")), reverse=True)
-print("newest broadCastDate:", items[0].get("broadCastDate") if items else None)
-print("oldest broadCastDate:", items[-1].get("broadCastDate") if items else None)
 
-with_x = [x for x in items if str(x.get("xbrl") or "").startswith("http")]
-print("items with xbrl link:", len(with_x), "of", len(items))
-for x in with_x[:5]:
-    print(x.get("symbol"), "|", x.get("broadCastDate"), "|", x.get("relatingTo"), "|", x.get("xbrl"))
+months = collections.Counter(d(x.get("broadCastDate")).strftime("%Y-%m") for x in items)
+print("items per month (last 8 months in list):")
+for m in sorted(months)[-8:]:
+    print("  ", m, months[m])
 
-TAGS = ("ProfitLossForPeriod|RevenueFromOperations|TotalIncome|Income|"
-        "ProfitBeforeTax|BasicEarningsLossPerShareFromContinuingAndDiscontinuedOperations")
-pat = re.compile(r"<(?:\w+:)?(" + TAGS + r")\b([^>]*)>([^<]+)</")
+good = [x for x in items
+        if str(x.get("xbrl") or "").startswith("http") and not str(x.get("xbrl")).endswith("/-")]
+print("items with a real xbrl file link:", len(good), "of", len(items))
 
-for x in with_x[:3]:
+WANT = ("ProfitLossForPeriod", "RevenueFromOperations", "Income", "ProfitBeforeTax",
+        "EarningsPerShare", "ProfitLoss")
+for x in good[:2]:
     print("=" * 60)
-    print("TEST", x.get("symbol"), x.get("broadCastDate"))
+    print("TEST", x.get("symbol"), x.get("broadCastDate"), x.get("relatingTo"))
     try:
         rr = s.get(x["xbrl"], timeout=60)
         print("HTTP", rr.status_code, "| size:", len(rr.text))
-        print("start:", rr.text[:150].replace("\n", " "))
-        found = pat.findall(rr.text)
-        print("number tags found:", len(found))
-        for tag, attrs, val in found[:12]:
-            cr = re.search(r'contextRef="([^"]+)"', attrs)
-            print(" ", tag, "=", val.strip(), "| context:", cr.group(1) if cr else "n/a")
+        found = re.findall(r"<([\w\-]+:[\w\-]+)\b([^>]*)>\s*(-?[0-9][0-9.,]*)\s*</", rr.text)
+        print("numeric tags found:", len(found))
+        shown = 0
+        for tag, attrs, val in found:
+            if any(w in tag for w in WANT):
+                cr = re.search(r'contextRef="([^"]+)"', attrs)
+                print("  ", tag, "=", val, "| context:", cr.group(1) if cr else "n/a")
+                shown += 1
+                if shown >= 15:
+                    break
+        names = sorted(set(t for t, _, _ in found))
+        print("sample tag names:", names[:25])
     except Exception as e:
         print("error:", e)
