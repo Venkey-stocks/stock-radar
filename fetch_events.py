@@ -55,8 +55,33 @@ def add(date, symbol, cat, detail, link=""):
     })
 
 
+def classify(low):
+    if "bagging" in low or "awarding of order" in low:
+        return "Order win"
+    if "acquisition" in low or "amalgamation" in low or "merger" in low:
+        return "Acquisition/Merger"
+    if ("buyback" in low or "buy back" in low) and "closure" not in low:
+        return "Buyback"
+    if "preferential" in low:
+        return "Preferential issue"
+    if "open offer" in low:
+        return "Open offer"
+    if "rights issue" in low or "qualified institutional" in low:
+        return "Fund raise (Rights/QIP)"
+    if "capacity addition" in low or "commencement of commercial" in low:
+        return "Expansion/Production"
+    if "auditor" in low:
+        return "Auditor change (check)"
+    if "insolvency" in low or ("default" in low and "payment" in low):
+        return "Default/Insolvency (warning)"
+    if "suspension of trading" in low or "disruption of operations" in low:
+        return "Disruption/Suspension (warning)"
+    return None
+
+
 # 1) Announcements (last 7 days)
 desc_counts = {}
+credit_samples = []
 url = B + "corporate-announcements?index=equities&from_date=%s&to_date=%s" % (
     d(today - dt.timedelta(days=7)), d(today))
 a = get_json(url)
@@ -65,19 +90,9 @@ if isinstance(a, list):
         desc = str(it.get("desc") or "")
         desc_counts[desc] = desc_counts.get(desc, 0) + 1
         low = desc.lower()
-        cat = None
-        if ("award" in low or "bagging" in low or "order" in low) and "passed" not in low and "action" not in low:
-            cat = "Order win"
-        elif "acquisition" in low or "amalgamation" in low or "merger" in low:
-            cat = "Acquisition/Merger"
-        elif "buy" in low and "back" in low:
-            cat = "Buyback"
-        elif "preferential" in low:
-            cat = "Preferential issue"
-        elif "open offer" in low or "takeover" in low:
-            cat = "Open offer"
-        elif "auditor" in low:
-            cat = "Auditor change (check)"
+        if "credit rating" in low and len(credit_samples) < 8:
+            credit_samples.append(str(it.get("symbol")) + " | " + str(it.get("attchmntText"))[:250])
+        cat = classify(low)
         if cat:
             add(str(it.get("an_dt", ""))[:11], it.get("symbol", ""), cat,
                 it.get("attchmntText", desc), it.get("attchmntFile", ""))
@@ -94,6 +109,7 @@ if isinstance(b, list):
                 "Board meeting for financial results")
 
 # 3) Bulk and block deals (BUY, value >= Rs 5 crore)
+buyers = {}
 for name in ["bulk", "block"]:
     try:
         r = s.get("https://nsearchives.nseindia.com/content/equities/%s.csv" % name, timeout=60)
@@ -106,9 +122,13 @@ for name in ["bulk", "block"]:
         df["price"] = price
         df = df[(df["Buy/Sell"].astype(str).str.upper().str.strip() == "BUY") & (df["value"] >= 5e7)]
         for _, x in df.iterrows():
+            cn = str(x["Client Name"]).strip()
+            buyers.setdefault(cn, [0, 0.0])
+            buyers[cn][0] += 1
+            buyers[cn][1] += x["value"] / 1e7
             add(x["Date"], x["Symbol"], name.capitalize() + " BUY",
                 "%s | qty %d | price %.2f | %.1f Cr" % (
-                    x["Client Name"], x["qty"], x["price"], x["value"] / 1e7))
+                    cn, x["qty"], x["price"], x["value"] / 1e7))
     except Exception as e:
         print(name, "error", str(e)[:150])
 
@@ -121,7 +141,13 @@ ev.to_csv("data/events.csv", index=False)
 with open("data/event_desc_counts.txt", "w", encoding="utf-8") as f:
     f.write("TOTAL EVENTS: %d\n" % len(ev))
     f.write("BY CATEGORY: %s\n\n" % ev["category"].value_counts().to_dict())
-    f.write("TOP ANNOUNCEMENT TYPES (count | desc)\n")
-    for k, v in sorted(desc_counts.items(), key=lambda x: -x[1])[:80]:
+    f.write("TOP BULK/BLOCK BUYERS (deals | total Cr | name)\n")
+    for k, v in sorted(buyers.items(), key=lambda x: -x[1][0])[:40]:
+        f.write("%d | %.0f | %s\n" % (v[0], v[1], k))
+    f.write("\nCREDIT RATING SAMPLES\n")
+    for t in credit_samples:
+        f.write(t + "\n")
+    f.write("\nTOP ANNOUNCEMENT TYPES (count | desc)\n")
+    for k, v in sorted(desc_counts.items(), key=lambda x: -x[1])[:15]:
         f.write("%d | %s\n" % (v, k))
 print("done", len(ev))
