@@ -1,54 +1,55 @@
 Scan,SignalDate,Symbol,SignalStatus,Class,Band,Score,Entry,Stop,Target,Qty,Result,DaysHeld,ResultDate,ExitPrice,PnLPct,PnLRs
-short,2026-10-05,LGEINDIA,Breakout,Standard,High Conviction,81.9,1770.9,1685.51,2036.54,11,Open,4,,1748.8,-1.25,-243.0
+short,2026-10-05,LGEINDIA,Breakout,Standard,High Conviction,81.9,1770.9,1685.51,2036.54,11,Open,4,,1749.8,-1.19,-232.0
 short,2026-10-05,REDINGTON,Near Miss,High Potential,Good Setup,65.8,420.34,392.11,504.41,35,Pending,4,,,,
-ultra,2026-10-05,LGEINDIA,Near Miss,,Early Watch,63.9,1770.9,1691.01,2036.54,12,Open,4,,1748.8,-1.25,-265.0
+ultra,2026-10-05,LGEINDIA,Near Miss,,Early Watch,63.9,1770.9,1691.01,2036.54,12,Open,4,,1749.8,-1.19,-253.0
 short,2026-10-05,LENSKART,Pullback,Standard,Early Watch,61.4,692.75,647.65,796.66,22,Stop hit,3,2026-10-08,647.65,-6.51,-992.0
 short,2026-10-05,JSWINFRA,Pullback,Standard,Early Watch,60.9,359.4,340.61,413.31,53,Stop hit,3,2026-10-08,340.61,-5.23,-996.0
-short,2026-10-05,GODREJAGRO,Pullback,Standard,Early Watch,58.5,640.9,619.38,737.04,46,Open,3,,635.2,-0.89,-262.0
-short,2026-10-05,AEROFLEX,Pullback,Standard,Early Watch,57.2,544.35,507.59,626.0,27,Open,4,,520.15,-4.45,-653.0
+short,2026-10-05,GODREJAGRO,Pullback,Standard,Early Watch,58.5,640.9,619.38,737.04,46,Open,3,,636.15,-0.74,-218.0
+short,2026-10-05,AEROFLEX,Pullback,Standard,Early Watch,57.2,544.35,507.59,626.0,27,Open,4,,516.65,-5.09,-748.0
 short,2026-10-05,CASTROLIND,Near Miss,Standard,Early Watch,56.7,203.81,194.04,234.38,102,Pending,3,,,,
-short,2026-10-05,CYIENTDLM,Pullback,Standard,Early Watch,55.9,946.8,879.42,1088.82,14,Open,3,,960.5,1.45,192.0
-short,2026-10-05,KTKBANK,Pullback,Standard,Early Watch,55.2,326.75,316.33,375.76,96,Open,3,,324.6,-0.66,-206.0
-short,2026-10-05,GRAPHITE,Pullback,Standard,Early Watch,55.2,816.4,756.14,938.86,16,Open,4,,800.4,-1.96,-256.0
-short,2026-10-05,COFORGE,Pullback,Standard,Early Watch,53.0,1852.0,1720.28,2129.8,7,Open,4,,1847.3,-0.25,-33.0
-short,2026-10-05,BALRAMCHIN,Pullback,Standard,Early Watch,52.7,671.5,637.36,772.22,29,Open,4,,687.15,2.33,454.0
-short,2026-10-05,USHAMART,Pullback,Standard,Early Watch,52.1,510.5,480.52,587.07,33,Open,3,,497.05,-2.63,-444.0
+short,2026-10-05,CYIENTDLM,Pullback,Standard,Early Watch,55.9,946.8,879.42,1088.82,14,Open,3,,959.55,1.35,178.0
+short,2026-10-05,KTKBANK,Pullback,Standard,Early Watch,55.2,326.75,316.33,375.76,96,Open,3,,324.55,-0.67,-211.0
+short,2026-10-05,GRAPHITE,Pullback,Standard,Early Watch,55.2,816.4,756.14,938.86,16,Open,4,,800.7,-1.92,-251.0
+short,2026-10-05,COFORGE,Pullback,Standard,Early Watch,53.0,1852.0,1720.28,2129.8,7,Open,4,,1843.1,-0.48,-62.0
+short,2026-10-05,BALRAMCHIN,Pullback,Standard,Early Watch,52.7,671.5,637.36,772.22,29,Open,4,,685.0,2.01,392.0
+short,2026-10-05,USHAMART,Pullback,Standard,Early Watch,52.1,510.5,480.52,587.07,33,Open,3,,498.75,-2.3,-388.0
 short,2026-10-05,PAYTM,Pullback,Standard,Early Watch,51.6,1684.0,1622.78,1936.6,16,Stop hit,3,2026-10-08,1622.78,-3.64,-980.0
 ultra,2026-10-05,PTC,Near Miss,,Early Watch,51.0,157.52,152.99,181.15,220,Stop hit,1,2026-10-06,152.37,-3.27,-1132.0
-short,2026-10-05,HATSUN,Pullback,Standard,Early Watch,49.3,1143.5,1077.22,1315.02,15,Open,3,,1117.0,-2.32,-398.0
-short,2026-10-05,AIIL,Pullback,Standard,Early Watch,49.2,551.6,526.67,634.34,40,Open,3,,549.05,-0.46,-102.0
-short,2026-10-05,RBA,Pullback,Standard,Early Watch,48.4,93.99,89.41,108.09,218,Open,4,,90.49,-3.72,-763.0
+short,2026-10-05,HATSUN,Pullback,Standard,Early Watch,49.3,1143.5,1077.22,1315.02,15,Open,3,,1117.5,-2.27,-390.0
+short,2026-10-05,AIIL,Pullback,Standard,Early Watch,49.2,551.6,526.67,634.34,40,Open,3,,548.55,-0.55,-122.0
+short,2026-10-05,RBA,Pullback,Standard,Early Watch,48.4,93.99,89.41,108.09,218,Open,4,,90.5,-3.71,-761.0
 ultra,2026-10-05,AKUMS,Setup,,Early Watch,48.2,840.48,795.55,966.55,22,Pending,3,,,,
-short,2026-10-05,APARINDS,Pullback,Standard,Early Watch,47.1,18102.0,16938.04,20817.3,0,Open,3,,17982.0,-0.66,-0.0
-ultra,2026-10-05,LAURUSLABS,Setup,,Early Watch,46.2,2059.41,1950.15,2368.32,9,Pending,4,,2017.0,-2.06,-382.0
-short,2026-10-05,TMB,Pullback,Standard,Early Watch,44.5,886.25,844.25,1019.19,23,Open,4,,863.9,-2.52,-514.0
+short,2026-10-05,APARINDS,Pullback,Standard,Early Watch,47.1,18102.0,16938.04,20817.3,0,Open,3,,17922.0,-0.99,-0.0
+ultra,2026-10-05,LAURUSLABS,Setup,,Early Watch,46.2,2059.41,1950.15,2368.32,9,Pending,4,,2018.9,-1.97,-365.0
+short,2026-10-05,TMB,Pullback,Standard,Early Watch,44.5,886.25,844.25,1019.19,23,Open,4,,864.7,-2.43,-496.0
 short,2026-10-05,APOLLO,Pullback,Standard,Early Watch,43.8,401.7,387.61,461.96,70,Stop hit,4,2026-10-09,387.61,-3.51,-986.0
-short,2026-10-05,BEPL,Pullback,Standard,Early Watch,43.5,124.77,120.79,143.49,251,Open,3,,124.31,-0.37,-115.0
+short,2026-10-05,BEPL,Pullback,Standard,Early Watch,43.5,124.77,120.79,143.49,251,Open,3,,124.02,-0.6,-188.0
 short,2026-10-05,CHENNPETRO,Pullback,Standard,Early Watch,42.0,1401.0,1323.77,1611.15,12,Target hit,2,2026-10-07,1611.15,15.0,2522.0
-short,2026-10-05,PERSISTENT,Pullback,Standard,Early Watch,40.5,5530.0,5156.84,6359.5,2,Open,4,,5559.0,0.52,58.0
-short,2026-10-05,GPPL,Near Miss,Standard,Early Watch,40.0,170.24,157.5,195.78,78,Pending,4,,168.47,-1.04,-138.0
-ultra,2026-10-06,PANAMAPET,Near Miss,,Good Setup,71.3,504.1,474.72,579.72,34,Open,2,,494.7,-1.86,-320.0
-short,2026-10-06,PGIL,Pullback,High Potential,Good Setup,69.2,1266.7,1232.47,1520.04,29,Open,2,,1266.5,-0.02,-6.0
+short,2026-10-05,PERSISTENT,Pullback,Standard,Early Watch,40.5,5530.0,5156.84,6359.5,2,Open,4,,5576.5,0.84,93.0
+short,2026-10-05,GPPL,Near Miss,Standard,Early Watch,40.0,170.24,157.5,195.78,78,Pending,4,,168.11,-1.25,-166.0
+ultra,2026-10-06,PANAMAPET,Near Miss,,Good Setup,71.3,504.1,474.72,579.72,34,Open,2,,493.9,-2.02,-347.0
+short,2026-10-06,PGIL,Pullback,High Potential,Good Setup,69.2,1266.7,1232.47,1520.04,29,Open,2,,1267.6,0.07,26.0
 short,2026-10-06,VINCOFE,Pullback,Standard,Early Watch,59.8,187.21,173.46,215.29,72,Stop hit,3,2026-10-09,173.46,-7.34,-990.0
 short,2026-10-06,ACE,Near Miss,High Potential,Early Watch,58.2,1270.54,1178.92,1524.64,10,Pending,3,,,,
 short,2026-10-06,RGL,Pullback,Standard,Early Watch,54.8,163.62,157.85,188.16,173,Stop hit,2,2026-10-08,157.85,-3.53,-998.0
-short,2026-10-06,GLAND,Near Miss,Standard,Early Watch,54.7,3030.05,2838.26,3484.56,5,Pending,2,,3069.0,1.29,195.0
-short,2026-10-06,LAURUSLABS,Near Miss,High Potential,Early Watch,52.4,2059.41,1950.15,2471.29,9,Pending,3,,2017.0,-2.06,-382.0
-short,2026-10-06,SOLARINDS,Pullback,Standard,Early Watch,50.7,20071.0,18631.35,23081.65,0,Open,3,,19845.0,-1.13,-0.0
+short,2026-10-06,GLAND,Near Miss,Standard,Early Watch,54.7,3030.05,2838.26,3484.56,5,Pending,2,,3062.2,1.06,161.0
+short,2026-10-06,LAURUSLABS,Near Miss,High Potential,Early Watch,52.4,2059.41,1950.15,2471.29,9,Pending,3,,2018.9,-1.97,-365.0
+short,2026-10-06,SOLARINDS,Pullback,Standard,Early Watch,50.7,20071.0,18631.35,23081.65,0,Open,3,,19856.0,-1.07,-0.0
 short,2026-10-06,ACMESOLAR,Pullback,Standard,Early Watch,48.6,448.2,423.08,515.43,39,Stop hit,2,2026-10-09,420.4,-6.2,-1084.0
 short,2026-10-06,TALBROAUTO,Pullback,Standard,Early Watch,48.0,429.45,407.59,493.87,45,Stop hit,2,2026-10-09,405.0,-5.69,-1100.0
-short,2026-10-06,MCX,Pullback,Standard,Early Watch,47.0,3310.0,3146.85,3806.5,6,Open,3,,3326.0,0.48,96.0
+short,2026-10-06,MCX,Pullback,Standard,Early Watch,47.0,3310.0,3146.85,3806.5,6,Open,3,,3321.4,0.34,68.0
 short,2026-10-06,HERITGFOOD,Pullback,Standard,Early Watch,46.7,406.1,389.36,467.02,59,Stop hit,2,2026-10-08,389.36,-4.12,-988.0
 short,2026-10-06,TNPETRO,Pullback,Standard,Early Watch,44.6,126.03,118.38,144.93,130,Stop hit,2,2026-10-08,118.38,-6.07,-995.0
-short,2026-10-06,KIRIINDUS,Pullback,Standard,Early Watch,43.3,564.1,531.97,648.71,31,Open,2,,542.6,-3.81,-667.0
+short,2026-10-06,KIRIINDUS,Pullback,Standard,Early Watch,43.3,564.1,531.97,648.71,31,Open,2,,542.0,-3.92,-685.0
 short,2026-10-06,PCBL,Pullback,Standard,Early Watch,39.9,327.7,315.43,376.86,81,Stop hit,3,2026-10-09,315.43,-3.74,-994.0
 short,2026-10-07,SAILIFE,Pullback,Standard,Early Watch,57.1,1561.8,1491.61,1796.07,14,Stop hit,2,2026-10-09,1491.61,-4.49,-983.0
 short,2026-10-07,SUDEEPPHRM,Pullback,Standard,Early Watch,55.2,1170.4,1117.48,1345.96,18,Stop hit,1,2026-10-09,1110.0,-5.16,-1087.0
 short,2026-10-07,KROSS,Pullback,Standard,Early Watch,55.2,263.9,244.51,303.48,51,Stop hit,1,2026-10-08,244.51,-7.35,-989.0
 short,2026-10-07,AEGISVOPAK,Pullback,Standard,Early Watch,52.2,294.25,284.81,338.39,105,Stop hit,1,2026-10-08,284.81,-3.21,-991.0
 short,2026-10-07,ASKAUTOLTD,Pullback,Standard,Early Watch,50.9,626.55,601.4,720.53,39,Stop hit,1,2026-10-08,601.4,-4.01,-981.0
-short,2026-10-07,WELENT,Pullback,Standard,Early Watch,48.6,740.75,712.29,851.86,35,Open,1,,727.2,-1.83,-474.0
-short,2026-10-07,ORCHPHARMA,Pullback,Standard,Early Watch,44.6,1023.95,959.04,1177.54,15,Open,1,,975.5,-4.73,-727.0
+short,2026-10-07,WELENT,Pullback,Standard,Early Watch,48.6,740.75,712.29,851.86,35,Open,1,,726.85,-1.88,-487.0
+short,2026-10-07,ORCHPHARMA,Pullback,Standard,Early Watch,44.6,1023.95,959.04,1177.54,15,Open,1,,973.25,-4.95,-761.0
 short,2026-10-07,GESHIP,Near Miss,Standard,Early Watch,41.5,1586.17,1516.48,1824.09,14,Pending,1,,,,
 short,2026-10-07,JTLIND,Pullback,Standard,Early Watch,40.6,88.2,81.95,101.43,159,Stop hit,1,2026-10-09,81.95,-7.09,-994.0
-short,2026-10-08,PNBHOUSING,Near Miss,Standard,Early Watch,46.7,1156.91,1072.33,1330.45,11,Pending,1,,1157.0,0.01,1.0
+short,2026-10-08,PNBHOUSING,Near Miss,Standard,Early Watch,46.7,1156.91,1072.33,1330.45,11,Pending,1,,1157.4,0.04,5.0
+short,2026-10-09,WSTCSTPAPR,Pullback,Standard,Early Watch,50.8,724.0,699.6,832.6,40,Open,0,,724.0,0.0,0.0
