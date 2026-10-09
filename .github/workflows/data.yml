@@ -15,6 +15,9 @@ jobs:
           python-version: "3.11"
       - run: pip install yfinance pandas requests
       - run: python fetch_data.py
+      - name: Events
+        run: python fetch_events.py
+        continue-on-error: true
       - run: python scan_ultra.py
       - name: Short term scan
         run: python scan_short.py
@@ -34,8 +37,8 @@ jobs:
       - name: Miss report
         run: python miss_report.py
         continue-on-error: true
-      - name: Events
-        run: python fetch_events.py
+      - name: Make charts
+        run: python make_charts.py
         continue-on-error: true
       - name: Save data
         run: |
