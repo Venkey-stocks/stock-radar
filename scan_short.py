@@ -17,6 +17,14 @@ TARGET_HP = 20.0            # High Potential target %
 MIN_SCORE = 40
 MIN_ROWS = 210              # 200-రోజుల average కి కనీసం ఇన్ని రోజుల data
 
+# ---- Event score (అంచనా బరువులు) ----
+EV_BOOST_MAIN = 5           # Order win / Acquisition / Buyback
+EV_BOOST_DEAL = 3           # Bulk BUY / Block BUY
+EV_BOOST_CAP = 8
+EV_PEN_DEFAULT = -10        # Default/Insolvency
+EV_PEN_DISRUPT = -5         # Disruption/Suspension
+EV_PEN_AUDITOR = -3         # Auditor change
+
 
 def clip01(x):
     return float(min(max(x, 0.0), 1.0))
@@ -112,6 +120,20 @@ if "NIFTY50" in idx:
     n50_ret = a[-1] / a[-64] - 1
 print("పోలిక index:", main_name, "| market 50-రోజుల average పైన:", market_ok)
 
+# ---------- Events (data/events.csv) ----------
+EV = {}
+if os.path.exists("data/events.csv"):
+    try:
+        evdf = pd.read_csv("data/events.csv")
+        for _, e in evdf.iterrows():
+            k = str(e.get("symbol", "")).upper().replace(".NS", "").strip()
+            EV.setdefault(k, set()).add(str(e.get("category", "")).strip())
+        print("events చదివాం, symbols:", len(EV))
+    except Exception as ex:
+        print("హెచ్చరిక: events.csv చదవడం కుదరలేదు:", ex)
+else:
+    print("హెచ్చరిక: data/events.csv లేదు, event score లేకుండా నడుస్తోంది.")
+
 groups = {sym: g.sort_values("Date").reset_index(drop=True) for sym, g in df.groupby("Symbol")}
 
 # ---------- Pass 1: 63 రోజుల relative strength ర్యాంక్ ----------
@@ -184,7 +206,7 @@ def analyze(sym, g):
         if touched and ext <= 6 and close > c[-2] and close > o[-1] and v[-1] > v[-2] and dry < 1.0:
             status, setup_kind = "Pullback", "Pullback"
     if status is None:
-        # కొత్తది: Camarilla R4 breakout (గత పూర్తి వారం పరిధి పైకి దాటడం)
+        # Camarilla R4 breakout (గత పూర్తి వారం పరిధి పైకి దాటడం)
         cam = camarilla_r4(g["Date"].values[-30:], h[-30:], l[-30:], c[-30:])
         if cam is not None:
             r4 = cam[0]
@@ -193,8 +215,7 @@ def analyze(sym, g):
                 cam_info = cam
     if status is None:
         return None
-
-    # ---------- Entry / Stop ----------
+            # ---------- Entry / Stop ----------
     entry = close if status in ("Breakout", "Pullback") else level * 1.002
     stop = l[-7:].min() * 0.999
     risk = entry - stop
@@ -222,7 +243,8 @@ def analyze(sym, g):
     wk = weekly_bullish(g["Date"].values, c)
     rsr = float(rs_rank.get(sym, 0.0))
     d52 = (high52 / close - 1) * 100
-        # ---------- High Potential పరీక్ష ----------
+
+    # ---------- High Potential పరీక్ష ----------
     tight_base = False
     for N in (30, 40, 60):                # 6-12 వారాలు
         if (h[-N:].max() - l[-N:].min()) / h[-N:].max() <= 0.22:
@@ -248,6 +270,33 @@ def analyze(sym, g):
     target_pct = (target / entry - 1) * 100
     qty = int(max(min(CAPITAL * RISK_PCT / risk, CAPITAL / entry), 0))
 
+    # ---------- Events (Catalyst boost / penalty) ----------
+    cats = EV.get(sym.upper().replace(".NS", ""), set())
+    boost = 0
+    pen = 0
+    ev_names = []
+    neg_names = []
+    for cat in sorted(cats):
+        cl = cat.lower()
+        if cl.startswith("order win") or cl.startswith("acquisition") or cl.startswith("buyback"):
+            boost += EV_BOOST_MAIN
+            ev_names.append(cat)
+        elif cl.startswith("bulk buy") or cl.startswith("block buy"):
+            boost += EV_BOOST_DEAL
+            ev_names.append(cat)
+        elif cl.startswith("default"):
+            pen += EV_PEN_DEFAULT
+            neg_names.append(cat)
+        elif cl.startswith("disruption"):
+            pen += EV_PEN_DISRUPT
+            neg_names.append(cat)
+        elif cl.startswith("auditor"):
+            pen += EV_PEN_AUDITOR
+            neg_names.append(cat)
+    boost = min(boost, EV_BOOST_CAP)
+    ev_adj = boost + pen
+    events_txt = ", ".join(ev_names + neg_names)
+
     warns = []
     if len(levels) > 0:
         lvl = levels.min()
@@ -256,6 +305,8 @@ def analyze(sym, g):
         warns.append("20-రోజుల average కంటే %.1f%% పైన ఉంది" % ext)
     if not market_ok:
         warns.append("Nifty తన 50-రోజుల average కింద ఉంది")
+    if neg_names:
+        warns.append("NSE event హెచ్చరిక: " + ", ".join(neg_names))
     warning = "; ".join(warns)
 
     # ---------- Technical reasons (website లో చూపడానికి, English) ----------
@@ -288,6 +339,8 @@ def analyze(sym, g):
         rs_.append("Next resistance Rs %.1f (+%.1f%%)" % (lv_, (lv_ / entry - 1) * 100))
     else:
         rs_.append("No major resistance within 15%")
+    if events_txt:
+        rs_.append("NSE events (last 7 days): %s, score %+d" % (events_txt, ev_adj))
     reasons = " | ".join(rs_)
 
     # ---------- Score (100 లో, నా అంచనా బరువులు) ----------
@@ -331,6 +384,7 @@ def analyze(sym, g):
         s -= 10
     if not market_ok:
         s -= 5
+    s += ev_adj
     s = round(max(min(s, 100), 0), 1)
     band = "High Conviction" if s >= 80 else ("Good Setup" if s >= 65 else "Early Watch")
 
@@ -343,6 +397,7 @@ def analyze(sym, g):
         "TargetPct": round(target_pct, 1), "VolRatio": round(vol_ratio, 2),
         "RSI": round(rsi, 1), "ADX": round(adx, 1), "Boosters": ", ".join(met),
         "High52": round(high52, 2), "Warning": warning, "Reasons": reasons,
+        "Events": events_txt, "EventAdj": ev_adj,
     }
 
 
@@ -357,7 +412,7 @@ for sym, g in groups.items():
 
 columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close", "Entry", "Stop",
            "Target", "StopDistPct", "Qty", "TargetPct", "VolRatio", "RSI", "ADX", "Boosters",
-           "High52", "Warning", "Reasons"]
+           "High52", "Warning", "Reasons", "Events", "EventAdj"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
