@@ -58,6 +58,11 @@ th{color:var(--mut);font-weight:600}
 .mh.Favorable .dot{background:var(--g)}.mh.Cautious .dot{background:var(--y)}.mh.Weak .dot{background:var(--r)}
 .evl{font-size:12.5px;padding:1px 0}
 .evl a{color:var(--b);margin-left:4px}
+.chbtn{margin-top:8px;padding:4px 14px;font-size:13px}
+#chmodal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.72);z-index:50;align-items:center;justify-content:center;padding:12px}
+.chbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%;max-width:820px;max-height:95vh;overflow:auto}
+.chhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.chleg{font-size:12px;color:var(--mut);margin-top:6px}
 </style>
 </head>
 <body>
@@ -140,6 +145,14 @@ Company details come from NSE and Yahoo Finance and can be missing or slightly d
 Stocks on the NSE ASM or GSM lists are removed automatically. Scores are estimates, not guarantees.
 Always verify on your own chart. This is a research aid, not investment advice.
 </div>
+
+<div id="chmodal" onclick="if(event.target===this)closeChart()">
+  <div class="chbox">
+    <div class="chhead"><b id="chtitle" style="font-size:18px"></b><button onclick="closeChart()">Close</button></div>
+    <div id="chbody"></div>
+  </div>
+</div>
+
 <script>
 const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',events:'data/events.csv'};
 let cur='ultra',DATA={},EV={};
@@ -257,9 +270,74 @@ function evHtml(sym){
   return '<div class="fund"><div class="ft">Recent events (NSE)</div>'
     +lines.slice(0,5).map(l=>'<div class="evl '+l.cls+'">&#8226; '+l.txt+'</div>').join('')+'</div>';
 }
+  // ===== Chart =====
+let CH=null;
 
-// ===== END OF PART 1 =====
-  function fixWarn(w){
+function chartBtn(r){
+  return '<button class="chbtn" data-s="'+esc(r.Symbol)+'" data-e="'+esc(r.Entry)+'" data-st="'+esc(r.Stop)+'" data-t="'+esc(r.Target)+'" onclick="openChart(this)">Chart</button>';
+}
+
+function openChart(btn){
+  const sym=btn.getAttribute('data-s');
+  const lv={e:btn.getAttribute('data-e'),s:btn.getAttribute('data-st'),t:btn.getAttribute('data-t')};
+  $('chtitle').textContent=sym;
+  $('chbody').innerHTML='<div class="exp">Loading chart...</div>';
+  $('chmodal').style.display='flex';
+  const go=()=>{
+    const d=CH[sym];
+    if(!d||!d.c||d.c.length<2){$('chbody').innerHTML='<div class="exp">Chart data not available for this stock yet (n/a).</div>';return;}
+    $('chbody').innerHTML=drawChart(d,lv);
+  };
+  if(CH){go();return;}
+  fetch('data/charts.json?v='+Date.now())
+    .then(r=>{if(!r.ok)throw new Error('nf');return r.json();})
+    .then(j=>{CH=j;go();})
+    .catch(()=>{$('chbody').innerHTML='<div class="exp">Chart data file (data/charts.json) not found yet. It is created by the daily run.</div>';});
+}
+
+function closeChart(){$('chmodal').style.display='none';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeChart();});
+
+function drawChart(d,lv){
+  const n=d.c.length;
+  const W=720,H=360,L=8,R=64,T=14,B=24;
+  const vals=d.h.concat(d.l);
+  ['e','s','t'].forEach(k=>{if(has(lv[k])&&isFinite(+lv[k])) vals.push(+lv[k]);});
+  let mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals);
+  const pad=(mx-mn)*0.04||1;
+  mn-=pad; mx+=pad;
+  const y=v=>T+(mx-v)/(mx-mn)*(H-T-B);
+  const step=(W-L-R)/n, bw=Math.max(1,step*0.6);
+  let s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;background:#0e1117;border-radius:8px">';
+  for(let i=0;i<=4;i++){
+    const v=mn+(mx-mn)*i/4, yy=y(v);
+    s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="#262d38" stroke-width="1"/>'
+      +'<text x="'+(W-R+4)+'" y="'+(yy+4)+'" fill="#8b96a5" font-size="11">'+v.toFixed(1)+'</text>';
+  }
+  for(let i=0;i<n;i++){
+    const x=L+step*i+step/2;
+    const up=d.c[i]>=d.o[i];
+    const col=up?'#2ea043':'#f85149';
+    s+='<line x1="'+x+'" x2="'+x+'" y1="'+y(d.h[i])+'" y2="'+y(d.l[i])+'" stroke="'+col+'" stroke-width="1"/>';
+    const yt=y(Math.max(d.o[i],d.c[i])), yb=y(Math.min(d.o[i],d.c[i]));
+    s+='<rect x="'+(x-bw/2)+'" y="'+yt+'" width="'+bw+'" height="'+Math.max(1,yb-yt)+'" fill="'+col+'"/>';
+  }
+  const lines=[['e','Entry','#388bfd'],['s','Stop','#f85149'],['t','Target','#2ea043']];
+  lines.forEach(a=>{
+    const v=lv[a[0]];
+    if(!has(v)||!isFinite(+v)) return;
+    const yy=y(+v);
+    s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+a[2]+'" stroke-width="1.5" stroke-dasharray="6 4"/>'
+      +'<text x="'+(L+4)+'" y="'+(yy-4)+'" fill="'+a[2]+'" font-size="12" font-weight="700">'+a[1]+' '+(+v).toFixed(2)+'</text>';
+  });
+  s+='<text x="'+L+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11">'+d.d[0]+'</text>'
+    +'<text x="'+(W-R)+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11" text-anchor="end">'+d.d[n-1]+'</text>';
+  s+='</svg>';
+  s+='<div class="chleg">Daily candles, last '+n+' trading days (green = up day, red = down day). Dashed lines: Entry (blue), Stop-loss (red), Target (green). End-of-day data, verify on your own chart.</div>';
+  return s;
+}
+
+function fixWarn(w){
   // "; " తో విడిపోయిన "it may block the 15% target" ముక్కను ముందు వాక్యంతో కలుపుతుంది
   const out=[];
   w.forEach(x=>{
@@ -296,6 +374,7 @@ function draw(){
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
     +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
     +'<div class="exp">'+explain(r)+' Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital). Last close: '+fmt(r.Close)+'.</div>'
+    +chartBtn(r)
     +(r.Boosters?'<div class="exp">Boosters: '+tr(r.Boosters)+'</div>':'')
     +why
     +fundBox(r)
@@ -336,6 +415,7 @@ function drawMulti(){
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
     +'<div class="n tgt"><small>Minimum goal (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
     +'<div class="exp">Quality growth company for a 1-3 year hold. The goal shown is only a minimum 1:2 reward-to-risk level, not a forecast. Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital; the wide stop makes the position small).</div>'
+    +chartBtn(r)
     +'<div class="fund"><div class="ft">Quality and growth</div>'
     +row('ROCE','<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr a year)','<b>'+r.SalesCAGR3+'%</b>')
     +row('Profit growth (3-yr a year)','<b>'+r.ProfitCAGR3+'%</b>')
