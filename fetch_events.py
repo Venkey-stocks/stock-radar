@@ -15,6 +15,13 @@ B = "https://www.nseindia.com/api/"
 now = dt.datetime.utcnow() + dt.timedelta(hours=5, minutes=30)
 today = now.date()
 
+FUND_WORDS = ["FUND", "AIF", "MUTUAL", "INSURANCE", "ASSURANCE", "PENSION", "OPPORTUNIT"]
+TRADER_WORDS = ["QUANT", "TRADING", "SECURITIES", "BROKING", "ALPHAGREP", "HRTI",
+                "MICROCURVES", "JUNOMONETA", "IMC INDIA", "JUMP", "CAPITAL MARKETS",
+                "RESEARCH", "FINSOL", "FINANCIAL SOLUTIONS", "COMMODIT",
+                "SHARE AND STOCK", "SHARE & STOCK", "HITECH", "PLUTUS", "ELIXIR",
+                "SILVERLEAF", "NEO APEX"]
+
 
 def d(x):
     return x.strftime("%d-%m-%Y")
@@ -80,19 +87,13 @@ def classify(low):
 
 
 # 1) Announcements (last 7 days)
-desc_counts = {}
-credit_samples = []
 url = B + "corporate-announcements?index=equities&from_date=%s&to_date=%s" % (
     d(today - dt.timedelta(days=7)), d(today))
 a = get_json(url)
 if isinstance(a, list):
     for it in a:
         desc = str(it.get("desc") or "")
-        desc_counts[desc] = desc_counts.get(desc, 0) + 1
-        low = desc.lower()
-        if "credit rating" in low and len(credit_samples) < 8:
-            credit_samples.append(str(it.get("symbol")) + " | " + str(it.get("attchmntText"))[:250])
-        cat = classify(low)
+        cat = classify(desc.lower())
         if cat:
             add(str(it.get("an_dt", ""))[:11], it.get("symbol", ""), cat,
                 it.get("attchmntText", desc), it.get("attchmntFile", ""))
@@ -108,8 +109,9 @@ if isinstance(b, list):
             add(it.get("bm_date", ""), it.get("bm_symbol", ""), "Results date",
                 "Board meeting for financial results")
 
-# 3) Bulk and block deals (BUY, value >= Rs 5 crore)
-buyers = {}
+# 3) Bulk and block deals (BUY, value >= Rs 5 crore, trading firms removed)
+kept = {}
+dropped = {}
 for name in ["bulk", "block"]:
     try:
         r = s.get("https://nsearchives.nseindia.com/content/equities/%s.csv" % name, timeout=60)
@@ -120,15 +122,27 @@ for name in ["bulk", "block"]:
         df["value"] = qty * price
         df["qty"] = qty
         df["price"] = price
+        df["client"] = df["Client Name"].astype(str).str.strip()
+        counts = df["client"].value_counts()
         df = df[(df["Buy/Sell"].astype(str).str.upper().str.strip() == "BUY") & (df["value"] >= 5e7)]
         for _, x in df.iterrows():
-            cn = str(x["Client Name"]).strip()
-            buyers.setdefault(cn, [0, 0.0])
-            buyers[cn][0] += 1
-            buyers[cn][1] += x["value"] / 1e7
-            add(x["Date"], x["Symbol"], name.capitalize() + " BUY",
-                "%s | qty %d | price %.2f | %.1f Cr" % (
-                    cn, x["qty"], x["price"], x["value"] / 1e7))
+            cn = x["client"]
+            up = cn.upper()
+            if any(w in up for w in FUND_WORDS):
+                keep = True
+            elif any(w in up for w in TRADER_WORDS):
+                keep = False
+            elif counts.get(cn, 0) >= 3:
+                keep = False
+            else:
+                keep = True
+            if keep:
+                kept[cn] = kept.get(cn, 0) + 1
+                add(x["Date"], x["Symbol"], name.capitalize() + " BUY",
+                    "%s | qty %d | price %.2f | %.1f Cr" % (
+                        cn, x["qty"], x["price"], x["value"] / 1e7))
+            else:
+                dropped[cn] = dropped.get(cn, 0) + 1
     except Exception as e:
         print(name, "error", str(e)[:150])
 
@@ -141,13 +155,10 @@ ev.to_csv("data/events.csv", index=False)
 with open("data/event_desc_counts.txt", "w", encoding="utf-8") as f:
     f.write("TOTAL EVENTS: %d\n" % len(ev))
     f.write("BY CATEGORY: %s\n\n" % ev["category"].value_counts().to_dict())
-    f.write("TOP BULK/BLOCK BUYERS (deals | total Cr | name)\n")
-    for k, v in sorted(buyers.items(), key=lambda x: -x[1][0])[:40]:
-        f.write("%d | %.0f | %s\n" % (v[0], v[1], k))
-    f.write("\nCREDIT RATING SAMPLES\n")
-    for t in credit_samples:
-        f.write(t + "\n")
-    f.write("\nTOP ANNOUNCEMENT TYPES (count | desc)\n")
-    for k, v in sorted(desc_counts.items(), key=lambda x: -x[1])[:15]:
+    f.write("KEPT BUYERS (deals | name)\n")
+    for k, v in sorted(kept.items(), key=lambda x: -x[1]):
+        f.write("%d | %s\n" % (v, k))
+    f.write("\nDROPPED BUYERS (deals | name)\n")
+    for k, v in sorted(dropped.items(), key=lambda x: -x[1]):
         f.write("%d | %s\n" % (v, k))
 print("done", len(ev))
