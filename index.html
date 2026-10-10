@@ -163,6 +163,7 @@ const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data
 const STALE_DAYS=3; // data ఇన్ని రోజులకు మించి పాతదైతే ఎరుపు హెచ్చరిక
 let cur='ultra',DATA={},EV={};
 let NEWSET={ultra:new Set(),short:new Set()},NEWOK=false;
+let HIST={ultra:null,short:null};
 const $=id=>document.getElementById(id);
 
 function parseCSV(t){
@@ -248,7 +249,7 @@ function buildEv(){
   });
 }
 
-// కొత్త stocks: performance.csv లో SignalDate = ఆ scan యొక్క data తేదీ అయిన వాటిని "కొత్త" గా లెక్కిస్తుంది
+// పాత పద్ధతి (నిన్నటి saved జాబితా లేనప్పుడు): performance.csv లో SignalDate = data తేదీ అయిన వాటిని "కొత్త" అంటుంది
 function buildNew(){
   NEWSET={ultra:new Set(),short:new Set()};
   NEWOK=(DATA.perf||[]).length>0;
@@ -260,6 +261,24 @@ function buildNew(){
       if(r.Scan==k&&r.SignalDate==d) NEWSET[k].add(r.Symbol);
     });
   });
+}
+
+// కొత్త పద్ధతి: data/history లో ఈ data తేదీ కంటే ముందున్న చివరి saved జాబితాను తెస్తుంది
+function loadHist(){
+  return fetch('data/history/index.json?v='+Date.now())
+    .then(r=>r.ok?r.json():{})
+    .catch(()=>({}))
+    .then(idx=>Promise.all(['ultra','short'].map(k=>{
+      const first=(DATA[k]||[])[0];
+      const d=first?first.Date:'';
+      const prevs=(idx[k]||[]).filter(x=>x<d);
+      if(!d||!prevs.length){HIST[k]=null;return null;}
+      const p=prevs[prevs.length-1];
+      return fetch('data/history/'+k+'_'+p+'.csv?v='+Date.now())
+        .then(r=>{if(!r.ok)throw new Error('nf');return r.text();})
+        .then(t=>{HIST[k]={date:p,rows:parseCSV(t)};})
+        .catch(()=>{HIST[k]=null;});
+    })));
 }
 
 function evHtml(sym){
@@ -378,7 +397,16 @@ function draw(){
   }
   const b=$('band').value, st=sel.value;
   const list=rows.filter(r=>(!b||r.Band==b)&&(!st||r.Status==st)).sort((a,c)=>c.Score-a.Score);
-  const ns=NEWSET[cur]||new Set();
+  // నిన్నటి saved జాబితా ఉంటే దానితో పోలిక, లేకపోతే పాత పద్ధతి
+  const H=HIST[cur];
+  const curSyms=new Set(rows.map(r=>r.Symbol));
+  let ns;
+  if(H){
+    const ps=new Set(H.rows.map(x=>x.Symbol));
+    ns=new Set(rows.filter(r=>!ps.has(r.Symbol)).map(r=>r.Symbol));
+  } else {
+    ns=NEWSET[cur]||new Set();
+  }
   $('list').innerHTML=list.length?list.map(r=>{
     const cls=r.Band.split(' ')[0];
     const tagList=[...new Set([ns.has(r.Symbol)?'NEW today':'',r.Status,r.Class,tr(r.Setup),r.Gap=='Yes'?'Gap-up':''].filter(Boolean))];
@@ -407,8 +435,17 @@ function draw(){
   $('meta').textContent='Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
   // రోజువారీ మార్పులు
   const nl=rows.filter(r=>ns.has(r.Symbol)).map(r=>r.Symbol);
-  const newTxt=NEWOK?(nl.length?nl.join(', '):'none'):'n/a (performance data not loaded)';
-  $('chg').innerHTML='<div class="note"><b>Changes since yesterday:</b> New today'+(NEWOK?' ('+nl.length+')':'')+': '+newTxt+'. Removed: coming in the next step (needs yesterday\'s list saved).</div>';
+  const okNew=H||NEWOK;
+  const newLine='New today'+(okNew?' ('+nl.length+')':'')+': '+(okNew?(nl.length?nl.join(', '):'none'):'n/a (performance data not loaded)')+'.';
+  let remLine;
+  if(H){
+    const openSet=new Set((DATA.perf||[]).filter(r=>r.Scan==cur&&(r.Result=='Open'||r.Result=='Pending')).map(r=>r.Symbol));
+    const rm=H.rows.filter(x=>!curSyms.has(x.Symbol)).map(x=>x.Symbol+(openSet.has(x.Symbol)?' (open trade)':''));
+    remLine='Removed ('+rm.length+'): '+(rm.length?rm.join(', '):'none')+'. Compared with the list saved on '+H.date+'.';
+  } else {
+    remLine='Removed: n/a (no earlier saved list yet).';
+  }
+  $('chg').innerHTML='<div class="note"><b>Changes since yesterday:</b> '+newLine+'<br>'+remLine+'</div>';
 }
 
 function drawMulti(){
@@ -561,6 +598,7 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
  .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
  .then(()=>load('events').catch(()=>{DATA.events=[];}))
+ .then(()=>loadHist())
  .then(()=>{buildEv();buildNew();checkStale();show('ultra');})
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
 
