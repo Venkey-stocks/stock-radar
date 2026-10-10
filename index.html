@@ -773,4 +773,75 @@ function drawMiss(){
   $('mtable').innerHTML='<tr><th>Move started</th><th>Scan</th><th>Stock</th><th>Close</th><th>Peak close</th><th>Gain %</th><th>Days</th><th>Result</th><th>Listed as</th><th>Reason (approx.)</th></tr>'
    +(rows.length?rows.map(r=>{
      const k=r.Result=='Caught'?'pos':(r.Result=='Missed'?'neg':'amb');
-     return
+     return  '<tr><td>'+r.Date+'</td><td>'+(r.Scan=='ultra'?'Ultra':'Short')+'</td><td><b>'+r.Symbol+'</b></td><td>'+fmt(r.Close)+'</td><td>'+fmt(r.PeakClose)+'</td><td class="pos">+'+r.GainPct+'%</td><td>'+r.Days+'</td><td class="'+k+'">'+r.Result+'</td><td>'+(r.ListedStatus||'-')+'</td><td>'+(r.Reason||'-')+'</td></tr>';
+   }).join(''):'<tr><td colspan="10">No big movers in this range.</td></tr>');
+  $('meta').textContent='Stocks that rose 15%+ (5 days Ultra / 20 days Short Term) and whether our radar had them | '+rows.length+' shown';
+}
+
+function show(k){
+  cur=k;
+  ['ultra','short','multi','mine','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  const scanTab=(k=='ultra'||k=='short');
+  $('perf').style.display=k=='perf'?'block':'none';
+  $('miss').style.display=k=='miss'?'block':'none';
+  $('multi').style.display=k=='multi'?'block':'none';
+  $('mine').style.display=k=='mine'?'block':'none';
+  $('bar_scan').style.display=scanTab?'flex':'none';
+  $('chg').style.display=scanTab?'block':'none';
+  $('list').style.display=scanTab?'grid':'none';
+  if(k=='perf'){drawPerf();return;}
+  if(k=='miss'){drawMiss();return;}
+  if(k=='multi'){drawMulti();return;}
+  if(k=='mine'){drawMine();return;}
+  $('status').innerHTML='<option value="">All status</option>';
+  draw();
+}
+
+// Data status హెచ్చరిక: Ultra/Short csv లలో ఉన్న తాజా Date పాతదైతే పైన బ్యానర్
+function checkStale(){
+  const box=$('stale');
+  const ds=[];
+  ['ultra','short'].forEach(k=>{(DATA[k]||[]).forEach(r=>{if(r.Date) ds.push(r.Date);});});
+  ds.sort();
+  const last=ds.length?ds[ds.length-1]:'';
+  const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(last);
+  if(!m){
+    box.innerHTML='<div class="stale amb">&#9888; Data date is n/a (no rows found in the Ultra / Short files). Check that the daily "Fetch data" run worked.</div>';
+    return;
+  }
+  const d=new Date(+m[1],+m[2]-1,+m[3]);
+  const today=new Date();today.setHours(0,0,0,0);
+  const n=Math.round((today-d)/86400000);
+  if(n>STALE_DAYS){
+    box.innerHTML='<div class="stale">&#9888; Data is old: last update was '+last+' ('+n+' days ago). The daily run may have stopped. Do not trust these signals until the data is updated.</div>';
+  } else {
+    box.innerHTML='';
+  }
+}
+
+const load=k=>fetch(FILES[k]+'?v='+Date.now()).then(r=>{if(!r.ok)throw new Error(FILES[k]+' not found');return r.text();}).then(t=>{DATA[k]=parseCSV(t);});
+Promise.all([load('ultra'),load('short')])
+ .then(()=>load('perf').catch(()=>{DATA.perf=[];}))
+ .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
+ .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
+ .then(()=>load('events').catch(()=>{DATA.events=[];}))
+ .then(()=>loadHist())
+ .then(()=>{buildEv();buildNew();checkStale();updTab();show('ultra');})
+ .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
+
+// Market Health badge (separate, never blocks the main page)
+fetch('data/market_health.json?v='+Date.now())
+ .then(r=>r.ok?r.text():'')
+ .then(t=>{
+   t=(t||'').trim();
+   if(t.charAt(0)!=='{') return;
+   const d=JSON.parse(t);
+   const st=['Favorable','Cautious','Weak'].indexOf(d.Status)>=0?d.Status:'Unknown';
+   const sc=isFinite(+d.Score)?(' ('+d.Score+'/100)'):'';
+   $('mh').className='mh '+st;
+   $('mh_txt').textContent='Market Health: '+st+sc;
+ })
+ .catch(()=>{});
+</script>
+</body>
+</html>
