@@ -22,6 +22,7 @@ label{color:var(--mut);font-size:13px}
 .High{background:var(--g)}.Good{background:var(--b)}.Early{background:#444c56}
 .tags{margin:6px 0;display:flex;gap:6px;flex-wrap:wrap}
 .tag{font-size:12px;border:1px solid var(--line);border-radius:20px;padding:1px 8px;color:var(--mut)}
+.tag.new{border-color:var(--g);color:var(--g);font-weight:700}
 .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
 .n{background:#0e1117;border-radius:8px;padding:6px 8px}
 .n small{display:block;color:var(--mut);font-size:11px}
@@ -88,6 +89,7 @@ th{color:var(--mut);font-weight:600}
   </select>
   <select id="status" onchange="draw()"><option value="">All status</option></select>
 </div>
+<div id="chg"></div>
 <div class="grid" id="list"></div>
 
 <div id="multi" style="display:none">
@@ -160,6 +162,7 @@ Always verify on your own chart. This is a research aid, not investment advice.
 const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',events:'data/events.csv'};
 const STALE_DAYS=3; // data ఇన్ని రోజులకు మించి పాతదైతే ఎరుపు హెచ్చరిక
 let cur='ultra',DATA={},EV={};
+let NEWSET={ultra:new Set(),short:new Set()},NEWOK=false;
 const $=id=>document.getElementById(id);
 
 function parseCSV(t){
@@ -245,6 +248,20 @@ function buildEv(){
   });
 }
 
+// కొత్త stocks: performance.csv లో SignalDate = ఆ scan యొక్క data తేదీ అయిన వాటిని "కొత్త" గా లెక్కిస్తుంది
+function buildNew(){
+  NEWSET={ultra:new Set(),short:new Set()};
+  NEWOK=(DATA.perf||[]).length>0;
+  ['ultra','short'].forEach(k=>{
+    const first=(DATA[k]||[])[0];
+    const d=first?first.Date:'';
+    if(!d) return;
+    (DATA.perf||[]).forEach(r=>{
+      if(r.Scan==k&&r.SignalDate==d) NEWSET[k].add(r.Symbol);
+    });
+  });
+}
+
 function evHtml(sym){
   const list=EV[sym]||[];
   if(!list.length) return '';
@@ -298,8 +315,7 @@ function openChart(btn){
     .then(j=>{CH=j;go();})
     .catch(()=>{$('chbody').innerHTML='<div class="exp">Chart data file (data/charts.json) not found yet. It is created by the daily run.</div>';});
 }
-
-function closeChart(){$('chmodal').style.display='none';}
+  function closeChart(){$('chmodal').style.display='none';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeChart();});
 
 function drawChart(d,lv){
@@ -362,10 +378,11 @@ function draw(){
   }
   const b=$('band').value, st=sel.value;
   const list=rows.filter(r=>(!b||r.Band==b)&&(!st||r.Status==st)).sort((a,c)=>c.Score-a.Score);
+  const ns=NEWSET[cur]||new Set();
   $('list').innerHTML=list.length?list.map(r=>{
     const cls=r.Band.split(' ')[0];
-    const tagList=[...new Set([r.Status,r.Class,tr(r.Setup),r.Gap=='Yes'?'Gap-up':''].filter(Boolean))];
-    const tags=tagList.map(t=>'<span class="tag">'+t+'</span>').join('');
+    const tagList=[...new Set([ns.has(r.Symbol)?'NEW today':'',r.Status,r.Class,tr(r.Setup),r.Gap=='Yes'?'Gap-up':''].filter(Boolean))];
+    const tags=tagList.map(t=>'<span class="tag'+(t=='NEW today'?' new':'')+'">'+t+'</span>').join('');
     const why=has(r.Reasons)?'<div class="why"><div class="ft">Why this setup?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+x+'</div>').join('')+'</div>':'';
     let wl=has(r.Warning)?fixWarn(tr(r.Warning).split('; ')):[];
     if(has(r.PledgeOfPromoterPct)&&(+r.PledgeOfPromoterPct)>100){
@@ -388,6 +405,10 @@ function draw(){
   }).join(''):'<div class="exp">No stocks match today.</div>';
   const d=rows[0]?rows[0].Date:'-';
   $('meta').textContent='Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
+  // రోజువారీ మార్పులు
+  const nl=rows.filter(r=>ns.has(r.Symbol)).map(r=>r.Symbol);
+  const newTxt=NEWOK?(nl.length?nl.join(', '):'none'):'n/a (performance data not loaded)';
+  $('chg').innerHTML='<div class="note"><b>Changes since yesterday:</b> New today'+(NEWOK?' ('+nl.length+')':'')+': '+newTxt+'. Removed: coming in the next step (needs yesterday\'s list saved).</div>';
 }
 
 function drawMulti(){
@@ -503,6 +524,7 @@ function show(k){
   $('miss').style.display=k=='miss'?'block':'none';
   $('multi').style.display=k=='multi'?'block':'none';
   $('bar_scan').style.display=scanTab?'flex':'none';
+  $('chg').style.display=scanTab?'block':'none';
   $('list').style.display=scanTab?'grid':'none';
   if(k=='perf'){drawPerf();return;}
   if(k=='miss'){drawMiss();return;}
@@ -539,7 +561,7 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
  .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
  .then(()=>load('events').catch(()=>{DATA.events=[];}))
- .then(()=>{buildEv();checkStale();show('ultra');})
+ .then(()=>{buildEv();buildNew();checkStale();show('ultra');})
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
 
 // Market Health badge (separate, never blocks the main page)
