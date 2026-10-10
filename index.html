@@ -23,6 +23,7 @@ label{color:var(--mut);font-size:13px}
 .tags{margin:6px 0;display:flex;gap:6px;flex-wrap:wrap}
 .tag{font-size:12px;border:1px solid var(--line);border-radius:20px;padding:1px 8px;color:var(--mut)}
 .tag.new{border-color:var(--g);color:var(--g);font-weight:700}
+.tag.hold{border-color:var(--b);color:var(--b);font-weight:700}
 .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
 .n{background:#0e1117;border-radius:8px;padding:6px 8px}
 .n small{display:block;color:var(--mut);font-size:11px}
@@ -60,6 +61,9 @@ th{color:var(--mut);font-weight:600}
 .evl{font-size:12.5px;padding:1px 0}
 .evl a{color:var(--b);margin-left:4px}
 .chbtn{margin-top:8px;padding:4px 14px;font-size:13px}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.btns button{padding:4px 12px;font-size:13px}
+.bar input[type=text],.bar input[type=number]{width:118px;padding:6px 8px}
 #chmodal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.72);z-index:50;align-items:center;justify-content:center;padding:12px}
 .chbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%;max-width:820px;max-height:95vh;overflow:auto}
 .chhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -78,6 +82,7 @@ th{color:var(--mut);font-weight:600}
   <button id="t_ultra" class="on" onclick="show('ultra')">Ultra Short (1-5 days)</button>
   <button id="t_short" onclick="show('short')">Short Term (1-20 days)</button>
   <button id="t_multi" onclick="show('multi')">Multibagger (1-3 years)</button>
+  <button id="t_mine" onclick="show('mine')">My Stocks</button>
   <button id="t_perf" onclick="show('perf')">Performance</button>
   <button id="t_miss" onclick="show('miss')">Miss Report</button>
 </div>
@@ -107,6 +112,21 @@ th{color:var(--mut);font-weight:600}
     <select id="msector" onchange="drawMulti()"><option value="">All sectors</option></select>
   </div>
   <div class="grid" id="list_multi"></div>
+</div>
+
+<div id="mine" style="display:none">
+  <div class="note">Your own list, saved in this browser only (it will not appear on another phone or computer). Tap "&#9734; Watch" on any radar card to add it, or add any NSE symbol below. Prices are end-of-day from the daily data. A stock that is not on the radar needs a price you enter, and its company flags show n/a. "Touched" for stop-loss or target is checked on daily high/low after the add date (approximate).</div>
+  <div class="bar">
+    <input type="text" id="nsym" placeholder="NSE symbol">
+    <select id="nstat"><option>Watching</option><option>Holding</option></select>
+    <input type="number" id="nprice" placeholder="Price now" step="any">
+    <input type="number" id="nentry" placeholder="Entry" step="any">
+    <input type="number" id="nstop" placeholder="Stop-loss" step="any">
+    <input type="number" id="ntarget" placeholder="Target" step="any">
+    <button onclick="addManual()">Add</button>
+  </div>
+  <div class="stats" id="nstats"></div>
+  <div class="grid" id="list_mine"></div>
 </div>
 
 <div id="perf" style="display:none">
@@ -164,6 +184,7 @@ const STALE_DAYS=3; // data ఇన్ని రోజులకు మించ�
 let cur='ultra',DATA={},EV={};
 let NEWSET={ultra:new Set(),short:new Set()},NEWOK=false;
 let HIST={ultra:null,short:null};
+let OPEN={};
 const $=id=>document.getElementById(id);
 
 function parseCSV(t){
@@ -313,9 +334,16 @@ function evHtml(sym){
   // ===== Chart =====
 let CH=null;
 
-function chartBtn(r){
+function chartOnly(r){
   return '<button class="chbtn" data-s="'+esc(r.Symbol)+'" data-e="'+esc(r.Entry)+'" data-st="'+esc(r.Stop)+'" data-t="'+esc(r.Target)+'" onclick="openChart(this)">Chart</button>';
 }
+
+function watchBtn(r){
+  if(loadMine().some(x=>x.sym==r.Symbol)) return '<button class="chbtn" style="margin-left:6px" disabled>&#9733; In My Stocks</button>';
+  return '<button class="chbtn" style="margin-left:6px" data-s="'+esc(r.Symbol)+'" onclick="addFromCard(this)">&#9734; Watch</button>';
+}
+
+function chartBtn(r){return chartOnly(r)+watchBtn(r);}
 
 function openChart(btn){
   const sym=btn.getAttribute('data-s');
@@ -397,7 +425,6 @@ function draw(){
   }
   const b=$('band').value, st=sel.value;
   const list=rows.filter(r=>(!b||r.Band==b)&&(!st||r.Status==st)).sort((a,c)=>c.Score-a.Score);
-  // నిన్నటి saved జాబితా ఉంటే దానితో పోలిక, లేకపోతే పాత పద్ధతి
   const H=HIST[cur];
   const curSyms=new Set(rows.map(r=>r.Symbol));
   let ns;
@@ -433,7 +460,6 @@ function draw(){
   }).join(''):'<div class="exp">No stocks match today.</div>';
   const d=rows[0]?rows[0].Date:'-';
   $('meta').textContent='Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
-  // రోజువారీ మార్పులు
   const nl=rows.filter(r=>ns.has(r.Symbol)).map(r=>r.Symbol);
   const okNew=H||NEWOK;
   const newLine='New today'+(okNew?' ('+nl.length+')':'')+': '+(okNew?(nl.length?nl.join(', '):'none'):'n/a (performance data not loaded)')+'.';
@@ -501,6 +527,205 @@ function drawMulti(){
   $('meta').textContent='Multibagger scan (weekly) | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
+// ===== My Stocks (Watching / Holding) =====
+function loadMine(){try{return JSON.parse(localStorage.getItem('mystocks')||'[]')||[];}catch(e){return [];}}
+function saveMine(a){try{localStorage.setItem('mystocks',JSON.stringify(a));}catch(e){alert('Could not save in this browser (storage blocked?).');}}
+function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function nz(v){return (v===null||v===undefined||v==='')?'n/a':fmt(v);}
+function updTab(){const n=loadMine().length;$('t_mine').textContent='My Stocks'+(n?' ('+n+')':'');}
+function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='mine')drawMine();else draw();}
+
+function findRow(sym){
+  const order=['short','ultra','multi'];
+  for(let i=0;i<order.length;i++){
+    const r=(DATA[order[i]]||[]).find(x=>x.Symbol==sym);
+    if(r) return r;
+  }
+  return null;
+}
+
+function ensureCH(){
+  if(CH) return Promise.resolve();
+  return fetch('data/charts.json?v='+Date.now())
+    .then(r=>{if(!r.ok)throw new Error('nf');return r.json();})
+    .then(j=>{CH=j;})
+    .catch(()=>{});
+}
+
+function curPrice(m){
+  const d=CH&&CH[m.sym];
+  if(d&&d.c&&d.c.length) return {p:+d.c[d.c.length-1],d:d.d[d.d.length-1]};
+  const r=findRow(m.sym);
+  if(r&&has(r.Close)) return {p:+r.Close,d:r.Date};
+  if(m.lastPrice) return {p:+m.lastPrice,d:(m.lastDate||'entered by you')+' (entered by you)'};
+  return null;
+}
+
+function hitInfo(m){
+  const d=CH&&CH[m.sym];
+  if(!d||!d.d||!d.d.length||!/^\d{4}-\d{2}-\d{2}/.test(String(d.d[0]))) return null;
+  const from=(m.status=='Holding'&&m.holdDate)?m.holdDate:m.addDate;
+  if(!/^\d{4}-\d{2}-\d{2}/.test(String(from))) return null;
+  for(let i=0;i<d.d.length;i++){
+    if(String(d.d[i])<=String(from)) continue;
+    const st=m.stop!=null&&d.l[i]<=m.stop;
+    const tg=m.target!=null&&d.h[i]>=m.target;
+    if(st) return {t:'Stop-loss level touched on '+d.d[i]+(tg?' (target also touched that day; counted as stop)':''),c:'neg'};
+    if(tg) return {t:'Target level touched on '+d.d[i],c:'pos'};
+  }
+  return {t:'Stop-loss and target not touched since '+from,c:'na'};
+}
+
+function mineDetails(m){
+  const r=findRow(m.sym);
+  let h='';
+  if(!r){
+    h+='<div class="exp">This stock is not on today\'s radar lists, so company flags (pledge, debt, valuation) are n/a. Check screener.in.</div>';
+  } else {
+    let wl=has(r.Warning)?fixWarn(tr(r.Warning).split('; ')):[];
+    h+=(wl.length?'<div class="warn">&#9888; '+wl.join('<br>&#9888; ')+'</div>':'<div class="exp">No warnings in today\'s radar data.</div>');
+    h+=fundBox(r);
+    if(has(r.PEG)) h+='<div class="fund"><div class="row"><span>PEG ratio (valuation)</span><b>'+r.PEG+'</b></div></div>';
+  }
+  h+=evHtml(m.sym);
+  return h;
+}
+
+function drawMine(){ensureCH().then(drawMine2);}
+
+function drawMine2(){
+  if(cur!='mine') return;
+  const arr=loadMine();
+  updTab();
+  const rows=arr.slice().sort((a,b)=>(a.status==b.status?0:(a.status=='Holding'?-1:1))||String(b.addDate).localeCompare(String(a.addDate)));
+  const pcts=[];
+  const html=rows.map(m=>{
+    const c=curPrice(m);
+    const base=m.status=='Holding'?+m.buyPrice:+m.addPrice;
+    const pct=(c&&base>0)?(c.p-base)/base*100:null;
+    if(pct!==null) pcts.push(pct);
+    const hit=hitInfo(m);
+    const k=pct===null?'':(pct>=0?'pos':'neg');
+    const since=m.status=='Holding'?('You bought at '+fmt(m.buyPrice)+(m.holdDate?' on '+m.holdDate:'')):('Added on '+m.addDate+' at '+fmt(m.addPrice));
+    let pl='';
+    if(m.status=='Holding'&&m.qty&&c) pl=' | P/L Rs '+fmt((c.p-m.buyPrice)*m.qty)+' ('+m.qty+' shares)';
+    let below='';
+    if(c&&m.stop!=null&&c.p<=m.stop&&!(hit&&hit.c=='neg')) below='<div class="warn">&#9888; Last close is at or below your stop-loss level.</div>';
+    const s=esc(m.sym);
+    const btn=(a,l)=>'<button data-s="'+s+'" onclick="mineAct(this,\''+a+'\')">'+l+'</button>';
+    const lv={Symbol:m.sym,Entry:m.entry==null?'':m.entry,Stop:m.stop==null?'':m.stop,Target:m.target==null?'':m.target};
+    return '<div class="card"><div class="top"><span class="sym">'+s+'</span><span class="'+(k||'exp')+'" style="font-weight:700;font-size:16px">'+(pct===null?'n/a':(pct>=0?'+':'')+pct.toFixed(2)+'%')+'</span></div>'
+    +'<div class="tags"><span class="tag'+(m.status=='Holding'?' hold':'')+'">'+m.status+'</span><span class="tag">'+(m.src=='manual'?'Added manually':'From radar ('+esc(m.src)+')')+'</span></div>'
+    +'<div class="exp">'+since+'.<br>Latest price: <b>'+(c?fmt(c.p):'n/a')+'</b>'+(c?' ('+esc(c.d)+')':'')+pl+'</div>'
+    +'<div class="nums"><div class="n"><small>Entry</small><b>'+nz(m.entry)+'</b></div>'
+    +'<div class="n stop"><small>Stop-loss</small><b>'+nz(m.stop)+'</b></div>'
+    +'<div class="n tgt"><small>Target</small><b>'+nz(m.target)+'</b></div></div>'
+    +(hit?'<div class="exp '+(hit.c=='neg'?'neg':(hit.c=='pos'?'pos':''))+'">'+hit.t+'</div>':'<div class="exp">Stop/target check: n/a (no daily chart data for this stock).</div>')
+    +below
+    +'<div class="btns">'+btn('det',OPEN[m.sym]?'Hide details':'Red flags &amp; events')
+    +btn('edit','Edit levels')
+    +(m.status=='Watching'?btn('hold','Mark as Holding'):btn('watch','Back to Watching'))
+    +btn('price','Update price')+btn('rm','Remove')+'</div>'
+    +(OPEN[m.sym]?mineDetails(m):'')
+    +(c&&CH&&CH[m.sym]?chartOnly(lv):'')
+    +'</div>';
+  }).join('');
+  $('list_mine').innerHTML=html||'<div class="exp">Nothing here yet. Tap "&#9734; Watch" on a radar card, or add a symbol above.</div>';
+  const hold=arr.filter(m=>m.status=='Holding').length, watch=arr.length-hold;
+  const avg=pcts.length?pcts.reduce((a,b)=>a+b,0)/pcts.length:null;
+  const box=(l,v,c)=>'<div class="st"><small>'+l+'</small><b class="'+(c||'')+'">'+v+'</b></div>';
+  $('nstats').innerHTML=box('Holding',hold)+box('Watching',watch)+box('Average change',avg===null?'n/a':(avg>=0?'+':'')+avg.toFixed(2)+'%',avg===null?'':(avg>=0?'pos':'neg'));
+  $('meta').textContent='My Stocks | saved in this browser only | '+arr.length+' stocks';
+}
+
+function addFromCard(btn){
+  const sym=btn.getAttribute('data-s');
+  const r=(DATA[cur]||[]).find(x=>x.Symbol==sym);
+  if(!r) return;
+  const arr=loadMine();
+  if(arr.some(x=>x.sym==sym)){alert(sym+' is already in My Stocks.');return;}
+  const price=has(r.Close)?+r.Close:+r.Entry;
+  arr.push({sym:sym,status:'Watching',src:cur,addDate:r.Date||todayISO(),addPrice:price,
+    entry:has(r.Entry)?+r.Entry:null,stop:has(r.Stop)?+r.Stop:null,target:has(r.Target)?+r.Target:null});
+  saveMine(arr);
+  updTab();
+  redrawCur();
+}
+
+function addManual(){
+  const sym=$('nsym').value.trim().toUpperCase();
+  if(!sym){alert('Enter an NSE symbol first (for example TCS).');return;}
+  const arr=loadMine();
+  if(arr.some(x=>x.sym==sym)){alert(sym+' is already in My Stocks.');return;}
+  const num=s=>{s=String(s).trim();if(s==='')return null;const v=+s;return(isFinite(v)&&v>0)?v:NaN;};
+  let price=num($('nprice').value),en=num($('nentry').value),st=num($('nstop').value),tg=num($('ntarget').value);
+  if([price,en,st,tg].some(v=>v!==null&&isNaN(v))){alert('Prices must be positive numbers.');return;}
+  const r=findRow(sym);
+  const c=curPrice({sym:sym});
+  if(r){
+    if(en===null&&has(r.Entry)) en=+r.Entry;
+    if(st===null&&has(r.Stop)) st=+r.Stop;
+    if(tg===null&&has(r.Target)) tg=+r.Target;
+  }
+  let date=todayISO();
+  if(price===null&&c){price=c.p;date=c.d;}
+  if(price===null){alert('This stock is not in the daily data yet. Please enter its price now.');return;}
+  const stat=$('nstat').value;
+  const m={sym:sym,status:stat,src:r?cur=='multi'?'multi':'radar':'manual',addDate:date,addPrice:price,entry:en,stop:st,target:tg};
+  if(stat=='Holding'){m.buyPrice=price;m.holdDate=todayISO();m.qty=null;}
+  arr.push(m);
+  saveMine(arr);
+  ['nsym','nprice','nentry','nstop','ntarget'].forEach(i=>{$(i).value='';});
+  drawMine();
+}
+
+function mineAct(btn,act){
+  const sym=btn.getAttribute('data-s');
+  let arr=loadMine();
+  const m=arr.find(x=>x.sym==sym);
+  if(!m) return;
+  const ask=(label,v)=>{
+    const s=prompt(label+' (leave empty to keep)',v==null?'':v);
+    if(s===null||String(s).trim()==='') return v;
+    const x=+s;
+    return(isFinite(x)&&x>0)?x:v;
+  };
+  if(act=='det'){OPEN[sym]=!OPEN[sym];}
+  else if(act=='rm'){
+    if(!confirm('Remove '+sym+' from My Stocks?')) return;
+    arr=arr.filter(x=>x.sym!=sym);
+  }
+  else if(act=='edit'){
+    m.entry=ask('Entry price',m.entry);
+    m.stop=ask('Stop-loss price',m.stop);
+    m.target=ask('Target price',m.target);
+  }
+  else if(act=='hold'){
+    const c=curPrice(m);
+    const def=c?c.p:m.addPrice;
+    const b=prompt('Your actual buy price for '+sym+'?',def);
+    if(b===null) return;
+    const bv=+b;
+    if(!isFinite(bv)||bv<=0){alert('Enter a valid price.');return;}
+    const q=prompt('Quantity bought (optional, leave empty to skip)','');
+    m.status='Holding';m.buyPrice=bv;m.holdDate=todayISO();
+    m.qty=(q&&isFinite(+q)&&+q>0)?+q:null;
+  }
+  else if(act=='watch'){
+    m.status='Watching';delete m.buyPrice;delete m.holdDate;delete m.qty;
+  }
+  else if(act=='price'){
+    const c=curPrice(m);
+    const p=prompt('Latest price for '+sym+' (used only when daily data has no price for it)',c?c.p:'');
+    if(p===null) return;
+    const pv=+p;
+    if(!isFinite(pv)||pv<=0){alert('Enter a valid price.');return;}
+    m.lastPrice=pv;m.lastDate=todayISO();
+  }
+  saveMine(arr);
+  drawMine();
+}
+
 function resetPerf(){$('pscan').value='';$('pclass').value='';$('pfrom').value='';$('pto').value='';drawPerf();}
 
 function drawPerf(){
@@ -548,73 +773,4 @@ function drawMiss(){
   $('mtable').innerHTML='<tr><th>Move started</th><th>Scan</th><th>Stock</th><th>Close</th><th>Peak close</th><th>Gain %</th><th>Days</th><th>Result</th><th>Listed as</th><th>Reason (approx.)</th></tr>'
    +(rows.length?rows.map(r=>{
      const k=r.Result=='Caught'?'pos':(r.Result=='Missed'?'neg':'amb');
-     return '<tr><td>'+r.Date+'</td><td>'+(r.Scan=='ultra'?'Ultra':'Short')+'</td><td><b>'+r.Symbol+'</b></td><td>'+fmt(r.Close)+'</td><td>'+fmt(r.PeakClose)+'</td><td class="pos">+'+r.GainPct+'%</td><td>'+r.Days+'</td><td class="'+k+'">'+r.Result+'</td><td>'+(r.ListedStatus||'-')+'</td><td>'+(r.Reason||'-')+'</td></tr>';
-   }).join(''):'<tr><td colspan="10">No big movers in this range.</td></tr>');
-  $('meta').textContent='Stocks that rose 15%+ (5 days Ultra / 20 days Short Term) and whether our radar had them | '+rows.length+' shown';
-}
-
-function show(k){
-  cur=k;
-  ['ultra','short','multi','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
-  const scanTab=(k=='ultra'||k=='short');
-  $('perf').style.display=k=='perf'?'block':'none';
-  $('miss').style.display=k=='miss'?'block':'none';
-  $('multi').style.display=k=='multi'?'block':'none';
-  $('bar_scan').style.display=scanTab?'flex':'none';
-  $('chg').style.display=scanTab?'block':'none';
-  $('list').style.display=scanTab?'grid':'none';
-  if(k=='perf'){drawPerf();return;}
-  if(k=='miss'){drawMiss();return;}
-  if(k=='multi'){drawMulti();return;}
-  $('status').innerHTML='<option value="">All status</option>';
-  draw();
-}
-
-// Data status హెచ్చరిక: Ultra/Short csv లలో ఉన్న తాజా Date పాతదైతే పైన బ్యానర్
-function checkStale(){
-  const box=$('stale');
-  const ds=[];
-  ['ultra','short'].forEach(k=>{(DATA[k]||[]).forEach(r=>{if(r.Date) ds.push(r.Date);});});
-  ds.sort();
-  const last=ds.length?ds[ds.length-1]:'';
-  const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(last);
-  if(!m){
-       box.innerHTML='<div class="stale amb">&#9888; Data date is n/a (no rows found in the Ultra / Short files). Check that the daily "Fetch data" run worked.</div>';
-    return;
-  }
-  const d=new Date(+m[1],+m[2]-1,+m[3]);
-  const today=new Date();today.setHours(0,0,0,0);
-  const n=Math.round((today-d)/86400000);
-  if(n>STALE_DAYS){
-    box.innerHTML='<div class="stale">&#9888; Data is old: last update was '+last+' ('+n+' days ago). The daily run may have stopped. Do not trust these signals until the data is updated.</div>';
-  } else {
-    box.innerHTML='';
-  }
-}
-
-const load=k=>fetch(FILES[k]+'?v='+Date.now()).then(r=>{if(!r.ok)throw new Error(FILES[k]+' not found');return r.text();}).then(t=>{DATA[k]=parseCSV(t);});
-Promise.all([load('ultra'),load('short')])
- .then(()=>load('perf').catch(()=>{DATA.perf=[];}))
- .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
- .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
- .then(()=>load('events').catch(()=>{DATA.events=[];}))
- .then(()=>loadHist())
- .then(()=>{buildEv();buildNew();checkStale();show('ultra');})
- .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
-
-// Market Health badge (separate, never blocks the main page)
-fetch('data/market_health.json?v='+Date.now())
- .then(r=>r.ok?r.text():'')
- .then(t=>{
-   t=(t||'').trim();
-   if(t.charAt(0)!=='{') return;
-   const d=JSON.parse(t);
-   const st=['Favorable','Cautious','Weak'].indexOf(d.Status)>=0?d.Status:'Unknown';
-   const sc=isFinite(+d.Score)?(' ('+d.Score+'/100)'):'';
-   $('mh').className='mh '+st;
-   $('mh_txt').textContent='Market Health: '+st+sc;
- })
- .catch(()=>{});
-</script>
-</body>
-</html>
+     return
