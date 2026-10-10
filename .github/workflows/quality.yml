@@ -1,0 +1,34 @@
+name: Quality Compounders
+
+on:
+  workflow_dispatch:
+    inputs:
+      quick:
+        description: "Quick test (yes or no)"
+        default: "yes"
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pandas yfinance requests
+      - name: Scan
+        env:
+          QUICK: ${{ github.event.inputs.quick }}
+        run: python scan_quality.py
+      - name: Save data
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add data
+          git commit -m "Quality data" || echo "nothing to commit"
+          git pull --rebase
+          git push
