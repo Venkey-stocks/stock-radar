@@ -8,9 +8,15 @@ AEQUS,ASM list
 SYNCOMF,ASM list
 GMMPFAUDLR,ASM list
 KOPRAN,ASM list
+STLNETWORK,ASM list
+KRISHNADEF,ASM list
+TATVA,ASM list
+MVGJL,ASM list
+ALLCARGO,ASM list
 ICICIBANK,Fewer than 4 years of annual data
 KOTAKBANK,Fewer than 4 years of annual data
 PAYTM,Sales growth below 12% a year
+MCX,Profit looks one-time (jumped or is over half of sales)
 GROWW,Fewer than 4 years of annual data
 MEESHO,Profit not positive over 3 years
 IDEA,Profit looks one-time (jumped or is over half of sales)
@@ -70,3 +76,11 @@ POONAWALLA,Profit growth below 15% a year
 SAGILITY,ROCE below 15%
 PPLPHARMA,Sales growth below 12% a year
 CUB,Fewer than 4 years of annual data
+TBOTEK,ROCE below 15%
+SUNDRMFAST,Sales growth below 12% a year
+J&KBANK,Fewer than 4 years of annual data
+PARADEEP,Operating cash flow negative
+DEVYANI,Profit not positive over 3 years
+GLAXO,Sales growth below 12% a year
+AGARWALEYE,Profit growth below 15% a year
+ZYDUSWELL,Profit growth below 15% a year
