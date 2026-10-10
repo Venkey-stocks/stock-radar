@@ -558,6 +558,7 @@ function curPrice(m){
   const r=findRow(m.sym);
   if(r&&has(r.Close)) return {p:+r.Close,d:r.Date};
   if(m.lastPrice) return {p:+m.lastPrice,d:(m.lastDate||'entered by you')+' (entered by you)'};
+  if(m.src=='manual'&&m.addPrice) return {p:+m.addPrice,d:m.addDate+' (price you entered)'};
   return null;
 }
 
