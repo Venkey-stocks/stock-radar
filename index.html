@@ -83,6 +83,7 @@ th{color:var(--mut);font-weight:600}
   <button id="t_short" onclick="show('short')">Short Term (1-20 days)</button>
   <button id="t_multi" onclick="show('multi')">Multibagger (1-3 years)</button>
   <button id="t_mine" onclick="show('mine')">My Stocks</button>
+  <button id="t_results" onclick="show('results')">Results Calendar</button>
   <button id="t_perf" onclick="show('perf')">Performance</button>
   <button id="t_miss" onclick="show('miss')">Miss Report</button>
 </div>
@@ -127,6 +128,15 @@ th{color:var(--mut);font-weight:600}
   </div>
   <div class="stats" id="nstats"></div>
   <div class="grid" id="list_mine"></div>
+</div>
+
+<div id="results" style="display:none">
+  <div class="note">Upcoming results (board meeting) dates from NSE, usually about one month ahead. A company that is not listed here has no date announced yet (n/a). Dates can change. Price can gap up or down after results, so plan entries and stop-loss carefully.</div>
+  <div class="bar">
+    <input type="text" id="rsearch" placeholder="Search symbol or name" oninput="drawResults()">
+    <select id="rfilter" onchange="drawResults()"><option value="">All companies</option><option value="mine">Only radar + My Stocks</option></select>
+  </div>
+  <div class="wrap"><table id="rtable"></table></div>
 </div>
 
 <div id="perf" style="display:none">
@@ -179,7 +189,7 @@ Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',events:'data/events.csv'};
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',events:'data/events.csv',results:'data/results_calendar.csv'};
 const STALE_DAYS=3; // data ఇన్ని రోజులకు మించి పాతదైతే ఎరుపు హెచ్చరిక
 let cur='ultra',DATA={},EV={};
 let NEWSET={ultra:new Set(),short:new Set()},NEWOK=false;
@@ -446,6 +456,7 @@ function draw(){
     }
     return '<div class="card"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
     +'<div class="tags">'+tags+'</div>'
+    +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
     +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
@@ -499,6 +510,7 @@ function drawMulti(){
     const de=has(r.DebtEquity)?'<b class="'+(+r.DebtEquity>1?'amb':'')+'">'+r.DebtEquity+'</b>':na;
     return '<div class="card"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
     +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span></div>'
+    +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
     +'<div class="n tgt"><small>Minimum goal (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
@@ -617,6 +629,7 @@ function drawMine2(){
     const lv={Symbol:m.sym,Entry:m.entry==null?'':m.entry,Stop:m.stop==null?'':m.stop,Target:m.target==null?'':m.target};
     return '<div class="card"><div class="top"><span class="sym">'+s+'</span><span class="'+(k||'exp')+'" style="font-weight:700;font-size:16px">'+(pct===null?'n/a':(pct>=0?'+':'')+pct.toFixed(2)+'%')+'</span></div>'
     +'<div class="tags"><span class="tag'+(m.status=='Holding'?' hold':'')+'">'+m.status+'</span><span class="tag">'+(m.src=='manual'?'Added manually':'From radar ('+esc(m.src)+')')+'</span></div>'
+    +resLine(m.sym)
     +'<div class="exp">'+since+'.<br>Latest price: <b>'+(c?fmt(c.p):'n/a')+'</b>'+(c?' ('+esc(c.d)+')':'')+pl+'</div>'
     +'<div class="nums"><div class="n"><small>Entry</small><b>'+nz(m.entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss</small><b>'+nz(m.stop)+'</b></div>'
@@ -727,6 +740,52 @@ function mineAct(btn,act){
   drawMine();
 }
 
+// ===== Results Calendar =====
+let RES={};
+function daysTo(iso){
+  const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||''));
+  if(!m) return null;
+  const d=new Date(+m[1],+m[2]-1,+m[3]);
+  const t=new Date();t.setHours(0,0,0,0);
+  return Math.round((d-t)/86400000);
+}
+function whenTxt(n){return n==0?'today':(n==1?'tomorrow':'in '+n+' days');}
+function buildRes(){
+  RES={};
+  (DATA.results||[]).forEach(r=>{
+    const n=daysTo(r.Date);
+    if(n===null||n<0) return;
+    if(!RES[r.Symbol]||n<RES[r.Symbol].n) RES[r.Symbol]={n:n,date:r.Date};
+  });
+}
+function resLine(sym){
+  const r=RES[sym];
+  if(!r||r.n>30) return '';
+  return '<div class="'+(r.n<=7?'warn':'exp')+'">'+(r.n<=7?'&#9888; ':'')+'Results (board meeting) '+whenTxt(r.n)+', on '+esc(r.date)+'. Price can gap up or down after results.</div>';
+}
+function drawResults(){
+  const q=$('rsearch').value.trim().toUpperCase(), f=$('rfilter').value;
+  const tag={};
+  [['ultra','Ultra'],['short','Short'],['multi','Multibagger']].forEach(a=>{
+    (DATA[a[0]]||[]).forEach(r=>{(tag[r.Symbol]=tag[r.Symbol]||[]).push(a[1]);});
+  });
+  loadMine().forEach(m=>{(tag[m.sym]=tag[m.sym]||[]).push('My Stocks');});
+  const rows=(DATA.results||[]).filter(r=>{
+    const n=daysTo(r.Date);
+    if(n===null||n<0) return false;
+    if(q&&r.Symbol.toUpperCase().indexOf(q)<0&&String(r.Company).toUpperCase().indexOf(q)<0) return false;
+    if(f=='mine'&&!tag[r.Symbol]) return false;
+    return true;
+  });
+  $('rtable').innerHTML='<tr><th>Date</th><th>When</th><th>Stock</th><th>Company</th><th>On my lists</th><th>Purpose</th></tr>'
+   +(rows.length?rows.map(r=>{
+     const n=daysTo(r.Date);
+     const t=tag[r.Symbol];
+     return '<tr><td>'+esc(r.Date)+'</td><td class="'+(n<=7?'amb':'')+'">'+whenTxt(n)+'</td><td><b>'+esc(r.Symbol)+'</b></td><td>'+esc(r.Company)+'</td><td class="'+(t?'pos':'')+'">'+(t?esc(t.join(', ')):'-')+'</td><td>'+esc(r.Purpose)+'</td></tr>';
+   }).join(''):'<tr><td colspan="6">No results dates found.</td></tr>');
+  $('meta').textContent='Upcoming results dates (NSE) | '+rows.length+' shown';
+}
+
 function resetPerf(){$('pscan').value='';$('pclass').value='';$('pfrom').value='';$('pto').value='';drawPerf();}
 
 function drawPerf(){
@@ -781,12 +840,13 @@ function drawMiss(){
 
 function show(k){
   cur=k;
-  ['ultra','short','multi','mine','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  ['ultra','short','multi','mine','results','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
   $('perf').style.display=k=='perf'?'block':'none';
   $('miss').style.display=k=='miss'?'block':'none';
   $('multi').style.display=k=='multi'?'block':'none';
   $('mine').style.display=k=='mine'?'block':'none';
+  $('results').style.display=k=='results'?'block':'none';
   $('bar_scan').style.display=scanTab?'flex':'none';
   $('chg').style.display=scanTab?'block':'none';
   $('list').style.display=scanTab?'grid':'none';
@@ -794,6 +854,7 @@ function show(k){
   if(k=='miss'){drawMiss();return;}
   if(k=='multi'){drawMulti();return;}
   if(k=='mine'){drawMine();return;}
+  if(k=='results'){drawResults();return;}
   $('status').innerHTML='<option value="">All status</option>';
   draw();
 }
@@ -824,25 +885,3 @@ const load=k=>fetch(FILES[k]+'?v='+Date.now()).then(r=>{if(!r.ok)throw new Error
 Promise.all([load('ultra'),load('short')])
  .then(()=>load('perf').catch(()=>{DATA.perf=[];}))
  .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
- .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
- .then(()=>load('events').catch(()=>{DATA.events=[];}))
- .then(()=>loadHist())
- .then(()=>{buildEv();buildNew();checkStale();updTab();show('ultra');})
- .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
-
-// Market Health badge (separate, never blocks the main page)
-fetch('data/market_health.json?v='+Date.now())
- .then(r=>r.ok?r.text():'')
- .then(t=>{
-   t=(t||'').trim();
-   if(t.charAt(0)!=='{') return;
-   const d=JSON.parse(t);
-   const st=['Favorable','Cautious','Weak'].indexOf(d.Status)>=0?d.Status:'Unknown';
-   const sc=isFinite(+d.Score)?(' ('+d.Score+'/100)'):'';
-   $('mh').className='mh '+st;
-   $('mh_txt').textContent='Market Health: '+st+sc;
- })
- .catch(()=>{});
-</script>
-</body>
-</html>
