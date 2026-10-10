@@ -28,6 +28,9 @@ jobs:
       - name: Apply fundamentals
         run: python apply_fundamentals.py
         continue-on-error: true
+      - name: Save history
+        run: python save_history.py
+        continue-on-error: true
       - name: Market health
         run: python market_health.py
         continue-on-error: true
