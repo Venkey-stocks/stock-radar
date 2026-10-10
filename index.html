@@ -82,6 +82,7 @@ th{color:var(--mut);font-weight:600}
   <button id="t_ultra" class="on" onclick="show('ultra')">Ultra Short (1-5 days)</button>
   <button id="t_short" onclick="show('short')">Short Term (1-20 days)</button>
   <button id="t_multi" onclick="show('multi')">Multibagger (1-3 years)</button>
+  <button id="t_quality" onclick="show('quality')">Quality Compounders</button>
   <button id="t_mine" onclick="show('mine')">My Stocks</button>
   <button id="t_results" onclick="show('results')">Results Calendar</button>
   <button id="t_perf" onclick="show('perf')">Performance</button>
@@ -113,6 +114,23 @@ th{color:var(--mut);font-weight:600}
     <select id="msector" onchange="drawMulti()"><option value="">All sectors</option></select>
   </div>
   <div class="grid" id="list_multi"></div>
+</div>
+
+<div id="quality" style="display:none">
+  <div class="note">Large companies (market cap above Rs 15,000 crore) with steady growth: sales and profit rising every year, high ROCE, positive cash flow, price above its 200-day average and ahead of Nifty. Meant for a 1-3 year hold aiming for steady gains (an estimate of 40-100%, not a promise). Stop-loss is wide (15-20%), so the suggested quantity is small. Very high growth rates can come from a low starting base, so check the numbers on screener.in before buying. Not checked: auditor changes and related-party transactions.</div>
+  <div class="bar">
+    <select id="qband" onchange="drawQuality()">
+      <option value="">All bands</option>
+      <option>High Conviction</option><option>Good Setup</option><option>Early Watch</option>
+    </select>
+    <select id="qcap" onchange="drawQuality()">
+      <option value="">Any market cap</option>
+      <option value="mid">Rs 15,000 to 50,000 crore</option>
+      <option value="large">Above Rs 50,000 crore</option>
+    </select>
+    <select id="qsector" onchange="drawQuality()"><option value="">All sectors</option></select>
+  </div>
+  <div class="grid" id="list_quality"></div>
 </div>
 
 <div id="mine" style="display:none">
@@ -189,7 +207,7 @@ Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',events:'data/events.csv',results:'data/results_calendar.csv'};
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',events:'data/events.csv',results:'data/results_calendar.csv'};
 const STALE_DAYS=3; // data ఇన్ని రోజులకు మించి పాతదైతే ఎరుపు హెచ్చరిక
 let cur='ultra',DATA={},EV={};
 let NEWSET={ultra:new Set(),short:new Set()},NEWOK=false;
@@ -341,7 +359,8 @@ function evHtml(sym){
   return '<div class="fund"><div class="ft">Recent events (NSE)</div>'
     +lines.slice(0,5).map(l=>'<div class="evl '+l.cls+'">&#8226; '+l.txt+'</div>').join('')+'</div>';
 }
-  // ===== Chart =====
+
+// ===== Chart =====
 let CH=null;
 
 function chartOnly(r){
@@ -413,7 +432,7 @@ function drawChart(d,lv){
   s+='<div class="chleg">Daily candles, last '+n+' trading days (green = up day, red = down day). Dashed lines: Entry (blue), Stop-loss (red), Target (green). End-of-day data, verify on your own chart.</div>';
   return s;
 }
-  
+
 function fixWarn(w){
   // "; " తో విడిపోయిన "it may block the 15% target" ముక్కను ముందు వాక్యంతో కలుపుతుంది
   const out=[];
@@ -539,16 +558,71 @@ function drawMulti(){
   $('meta').textContent='Multibagger scan (weekly) | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
+function drawQuality(){
+  const rows=DATA.quality||[];
+  const sel=$('qsector');
+  const secs=[...new Set(rows.map(r=>r.Sector).filter(Boolean))].sort();
+  if(sel.options.length-1!=secs.length){
+    const v=sel.value;
+    sel.innerHTML='<option value="">All sectors</option>'+secs.map(s=>'<option>'+s+'</option>').join('');
+    sel.value=secs.includes(v)?v:'';
+  }
+  const b=$('qband').value, mc=$('qcap').value, sc=sel.value;
+  const list=rows.filter(r=>(!b||r.Band==b)&&(!sc||r.Sector==sc)&&(!mc||(mc=='mid'?(+r.MarketCapCr)<=50000:(+r.MarketCapCr)>50000))).sort((a,c)=>c.Score-a.Score);
+  const na='<b class="na">n/a</b>';
+  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
+  $('list_quality').innerHTML=list.length?list.map(r=>{
+    const cls=r.Band.split(' ')[0];
+    const pos=has(r.Positives)?r.Positives.split('; '):[];
+    let warn=has(r.Warning)?r.Warning.split('; '):[];
+    if(has(r.PledgeOfPromoterPct)&&(+r.PledgeOfPromoterPct)>100){
+      warn=warn.filter(x=>x.toLowerCase().indexOf('pledge')<0);
+      warn.push('Promoter pledge shows '+r.PledgeOfPromoterPct+'% (over 100%), which cannot be right. Treat it as a data error and check screener.in');
+    }
+    const pl=pledgeHtml(r.PledgeOfPromoterPct,na);
+    const de=has(r.DebtEquity)?'<b class="'+(+r.DebtEquity>1?'amb':'')+'">'+r.DebtEquity+'</b>':na;
+    const rs=has(r.RS6M)?'<b class="'+(+r.RS6M>=0?'pos':'neg')+'">'+(+r.RS6M>=0?'+':'')+r.RS6M+'%</b>':na;
+    return '<div class="card"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span></div>'
+    +resLine(r.Symbol)
+    +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
+    +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
+    +'<div class="n tgt"><small>Minimum goal (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
+    +'<div class="exp">Large, steadily growing company for a 1-3 year hold. The goal shown is only a minimum level (at least +40% and 1:2 reward-to-risk), not a forecast. Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital; the wide stop makes the position small).</div>'
+    +chartBtn(r)
+    +'<div class="fund"><div class="ft">Quality and growth</div>'
+    +row('ROCE','<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr a year)','<b>'+r.SalesCAGR3+'%</b>')
+    +row('Profit growth (3-yr a year)','<b>'+r.ProfitCAGR3+'%</b>')
+    +row('Latest quarter sales vs last year',has(r.QSalesYoY)?'<b>'+r.QSalesYoY+'%</b>':na)
+    +row('Latest quarter profit vs last year',has(r.QProfitYoY)?'<b>'+r.QProfitYoY+'%</b>':na)
+    +row('Debt / Equity',de)+'</div>'
+    +'<div class="fund"><div class="ft">Ownership, price strength and valuation</div>'
+    +row('Market cap',has(r.MarketCapCr)?'<b>Rs '+fmt(r.MarketCapCr)+' crore</b>':na)
+    +row('Promoter holding',has(r.PromoterPct)?'<b>'+r.PromoterPct+'%</b>':na)
+    +row('Promoter pledge',pl)
+    +row('Institutions hold',has(r.InstPct)?'<b>'+r.InstPct+'%</b>':na)
+    +row('Price vs Nifty, last 6 months',rs)
+    +row('PEG ratio',has(r.PEG)?'<b>'+r.PEG+'</b>':na)
+    +row('Price change, 1 year',has(r.Ret1Y)?'<b>'+r.Ret1Y+'%</b>':na)+'</div>'
+    +evHtml(r.Symbol)
+    +(pos.length?'<div class="goodl">'+pos.map(p=>'&#10003; '+p).join('<br>')+'</div>':'')
+    +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+p).join('<br>')+'</div>':'')
+    +'</div>';
+  }).join(''):'<div class="exp">No stocks match.</div>';
+  const d=rows[0]?rows[0].Date:'-';
+  $('meta').textContent='Quality Compounders (market cap above Rs 15,000 crore) | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
+}
+
 // ===== My Stocks (Watching / Holding) =====
 function loadMine(){try{return JSON.parse(localStorage.getItem('mystocks')||'[]')||[];}catch(e){return [];}}
 function saveMine(a){try{localStorage.setItem('mystocks',JSON.stringify(a));}catch(e){alert('Could not save in this browser (storage blocked?).');}}
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function nz(v){return (v===null||v===undefined||v==='')?'n/a':fmt(v);}
 function updTab(){const n=loadMine().length;$('t_mine').textContent='My Stocks'+(n?' ('+n+')':'');}
-function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='mine')drawMine();else draw();}
+function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='quality')drawQuality();else if(cur=='mine')drawMine();else draw();}
 
 function findRow(sym){
-  const order=['short','ultra','multi'];
+  const order=['short','ultra','multi','quality'];
   for(let i=0;i<order.length;i++){
     const r=(DATA[order[i]]||[]).find(x=>x.Symbol==sym);
     if(r) return r;
@@ -685,7 +759,7 @@ function addManual(){
   if(price===null&&c){price=c.p;date=c.d;}
   if(price===null){alert('This stock is not in the daily data yet. Please enter its price now.');return;}
   const stat=$('nstat').value;
-  const m={sym:sym,status:stat,src:r?cur=='multi'?'multi':'radar':'manual',addDate:date,addPrice:price,entry:en,stop:st,target:tg};
+  const m={sym:sym,status:stat,src:r?(cur=='multi'?'multi':(cur=='quality'?'quality':'radar')):'manual',addDate:date,addPrice:price,entry:en,stop:st,target:tg};
   if(stat=='Holding'){m.buyPrice=price;m.holdDate=todayISO();m.qty=null;}
   arr.push(m);
   saveMine(arr);
@@ -766,7 +840,7 @@ function resLine(sym){
 function drawResults(){
   const q=$('rsearch').value.trim().toUpperCase(), f=$('rfilter').value;
   const tag={};
-  [['ultra','Ultra'],['short','Short'],['multi','Multibagger']].forEach(a=>{
+  [['ultra','Ultra'],['short','Short'],['multi','Multibagger'],['quality','Quality']].forEach(a=>{
     (DATA[a[0]]||[]).forEach(r=>{(tag[r.Symbol]=tag[r.Symbol]||[]).push(a[1]);});
   });
   loadMine().forEach(m=>{(tag[m.sym]=tag[m.sym]||[]).push('My Stocks');});
@@ -840,11 +914,12 @@ function drawMiss(){
 
 function show(k){
   cur=k;
-  ['ultra','short','multi','mine','results','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  ['ultra','short','multi','quality','mine','results','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
   $('perf').style.display=k=='perf'?'block':'none';
   $('miss').style.display=k=='miss'?'block':'none';
   $('multi').style.display=k=='multi'?'block':'none';
+  $('quality').style.display=k=='quality'?'block':'none';
   $('mine').style.display=k=='mine'?'block':'none';
   $('results').style.display=k=='results'?'block':'none';
   $('bar_scan').style.display=scanTab?'flex':'none';
@@ -853,6 +928,7 @@ function show(k){
   if(k=='perf'){drawPerf();return;}
   if(k=='miss'){drawMiss();return;}
   if(k=='multi'){drawMulti();return;}
+  if(k=='quality'){drawQuality();return;}
   if(k=='mine'){drawMine();return;}
   if(k=='results'){drawResults();return;}
   $('status').innerHTML='<option value="">All status</option>';
@@ -886,6 +962,7 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('perf').catch(()=>{DATA.perf=[];}))
  .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
  .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
+ .then(()=>load('quality').catch(()=>{DATA.quality=[];}))
  .then(()=>load('events').catch(()=>{DATA.events=[];}))
  .then(()=>load('results').catch(()=>{DATA.results=[];}))
  .then(()=>loadHist())
