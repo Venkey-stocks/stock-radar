@@ -18,6 +18,9 @@ jobs:
       - name: Events
         run: python fetch_events.py
         continue-on-error: true
+      - name: Results calendar
+        run: python fetch_results_calendar.py
+        continue-on-error: true
       - run: python scan_ultra.py
       - name: Short term scan
         run: python scan_short.py
