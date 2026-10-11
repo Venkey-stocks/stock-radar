@@ -70,6 +70,17 @@ th{color:var(--mut);font-weight:600}
 .chleg{font-size:12px;color:var(--mut);margin-top:6px}
 .stale{background:rgba(248,81,73,.15);border:1px solid var(--r);color:var(--r);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13.5px;font-weight:600}
 .stale.amb{background:rgba(210,153,34,.15);border-color:var(--y);color:var(--y)}
+.lst{display:grid;grid-template-columns:1fr;gap:6px}
+.lhdr,.lhead{display:grid;grid-template-columns:1.2fr .8fr 1.5fr .9fr .9fr .9fr 2fr 24px;gap:8px;align-items:center}
+.lhdr{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:0 12px}
+.lrow{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.lhead{padding:9px 12px;cursor:pointer;font-size:13.5px}
+.lhead:hover,.lhead.open{background:#1c222b}
+.lhead>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lhead .r{color:var(--r)}.lhead .g{color:var(--g)}
+.lbody{border-top:1px solid var(--line);padding:10px}
+.lbody .card{border:none;padding:4px}
+@media(max-width:700px){.lhdr,.lhead{grid-template-columns:1.2fr .8fr .9fr .9fr .9fr 22px;gap:6px}.hm{display:none!important}.lhead{font-size:13px;padding:9px 8px}}
 </style>
 </head>
 <body>
@@ -87,6 +98,11 @@ th{color:var(--mut);font-weight:600}
   <button id="t_results" onclick="show('results')">Results Calendar</button>
   <button id="t_perf" onclick="show('perf')">Performance</button>
   <button id="t_miss" onclick="show('miss')">Miss Report</button>
+</div>
+<div class="bar" id="viewbar">
+  <label>View</label>
+  <button id="v_list" onclick="setView('list')">List</button>
+  <button id="v_cards" onclick="setView('cards')">Cards</button>
 </div>
 
 <div class="bar" id="bar_scan">
@@ -214,6 +230,67 @@ let NEWSET={ultra:new Set(),short:new Set()},NEWOK=false;
 let HIST={ultra:null,short:null};
 let OPEN={};
 const $=id=>document.getElementById(id);
+
+// ===== List / Cards view =====
+let VIEW='list';
+try{VIEW=localStorage.getItem('view')||'list';}catch(e){}
+if(VIEW!='cards') VIEW='list';
+const ROWOPEN={};
+const HDR_SCAN=['Stock','Score','Status','Entry','Stop','Target','Risk / target',''];
+const HDR_Q=['Stock','Score','Sector','Entry','Stop','Target','Quality',''];
+
+function syncView(){
+  $('v_list').className=VIEW=='list'?'on':'';
+  $('v_cards').className=VIEW=='cards'?'on':'';
+}
+function setView(v){
+  VIEW=v;
+  try{localStorage.setItem('view',v);}catch(e){}
+  syncView();
+  redrawCur();
+}
+function togRow(h){
+  const k=h.getAttribute('data-k');
+  const b=h.nextElementSibling;
+  const o=b.style.display=='none';
+  b.style.display=o?'block':'none';
+  h.classList.toggle('open',o);
+  ROWOPEN[k]=o;
+}
+function rowCells(tab,r,ns){
+  const cls=r.Band.split(' ')[0];
+  const rs=RES[r.Symbol];
+  const al=(rs&&rs.n<=7)?'<span class="amb" title="Results in '+rs.n+' days">&#9888;</span>':'<span></span>';
+  let info,extra;
+  if(tab=='ultra'||tab=='short'){
+    info=[(ns&&ns.has(r.Symbol))?'NEW':'',r.Status,r.Class].filter(Boolean).join(' &middot; ');
+    extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%';
+  } else {
+    info=esc(r.Sector||'n/a');
+    extra='ROCE '+r.ROCE+'% &middot; Sales '+r.SalesCAGR3+'% &middot; Profit '+r.ProfitCAGR3+'%';
+  }
+  return '<span><b>'+esc(r.Symbol)+'</b></span>'
+    +'<span><span class="score '+cls+'">'+r.Score+'</span></span>'
+    +'<span class="hm">'+info+'</span>'
+    +'<span>'+fmt(r.Entry)+'</span>'
+    +'<span class="r">'+fmt(r.Stop)+'</span>'
+    +'<span class="g">'+fmt(r.Target)+'</span>'
+    +'<span class="hm">'+extra+'</span>'
+    +al;
+}
+function renderItems(id,tab,items,hdr,emptyMsg){
+  const el=$(id);
+  if(!items.length){el.className='grid';el.innerHTML='<div class="exp">'+emptyMsg+'</div>';return;}
+  if(VIEW!='list'){el.className='grid';el.innerHTML=items.map(i=>i.card).join('');return;}
+  el.className='lst';
+  el.innerHTML='<div class="lhdr">'+hdr.map((h,i)=>'<span class="'+((i==2||i==6)?'hm':'')+'">'+h+'</span>').join('')+'</div>'
+    +items.map(i=>{
+      const k=tab+':'+i.sym;
+      const o=ROWOPEN[k];
+      return '<div class="lrow"><div class="lhead'+(o?' open':'')+'" data-k="'+esc(k)+'" onclick="togRow(this)">'+i.cells+'</div>'
+        +'<div class="lbody" style="display:'+(o?'block':'none')+'">'+i.card+'</div></div>';
+    }).join('');
+}
 
 function parseCSV(t){
   const rows=[];let r=[],f='',q=false;
@@ -463,7 +540,7 @@ function draw(){
   } else {
     ns=NEWSET[cur]||new Set();
   }
-  $('list').innerHTML=list.length?list.map(r=>{
+  const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
     const tagList=[...new Set([ns.has(r.Symbol)?'NEW today':'',r.Status,r.Class,tr(r.Setup),r.Gap=='Yes'?'Gap-up':''].filter(Boolean))];
     const tags=tagList.map(t=>'<span class="tag'+(t=='NEW today'?' new':'')+'">'+t+'</span>').join('');
@@ -487,7 +564,9 @@ function draw(){
     +evHtml(r.Symbol)
     +(wl.length?'<div class="warn">&#9888; '+wl.join('<br>&#9888; ')+'</div>':'')
     +'</div>';
-  }).join(''):'<div class="exp">No stocks match today.</div>';
+  });
+  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells(cur,r,ns),card:cards[i]}));
+  renderItems('list',cur,items,HDR_SCAN,'No stocks match today.');
   const d=rows[0]?rows[0].Date:'-';
   $('meta').textContent='Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
   const nl=rows.filter(r=>ns.has(r.Symbol)).map(r=>r.Symbol);
@@ -517,7 +596,7 @@ function drawMulti(){
   const list=rows.filter(r=>(!b||r.Band==b)&&(!sc||r.Sector==sc)&&(!mc||(+r.MarketCapCr)<=(+mc))).sort((a,c)=>c.Score-a.Score);
   const na='<b class="na">n/a</b>';
   const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
-  $('list_multi').innerHTML=list.length?list.map(r=>{
+  const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
     const pos=has(r.Positives)?r.Positives.split('; '):[];
     let warn=has(r.Warning)?r.Warning.split('; '):[];
@@ -553,7 +632,9 @@ function drawMulti(){
     +(pos.length?'<div class="goodl">'+pos.map(p=>'&#10003; '+p).join('<br>')+'</div>':'')
     +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+p).join('<br>')+'</div>':'')
     +'</div>';
-  }).join(''):'<div class="exp">No stocks match.</div>';
+  });
+  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('multi',r,null),card:cards[i]}));
+  renderItems('list_multi','multi',items,HDR_Q,'No stocks match.');
   const d=rows[0]?rows[0].Date:'-';
   $('meta').textContent='Multibagger scan (weekly) | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
 }
@@ -571,7 +652,7 @@ function drawQuality(){
   const list=rows.filter(r=>(!b||r.Band==b)&&(!sc||r.Sector==sc)&&(!mc||(mc=='mid'?(+r.MarketCapCr)<=50000:(+r.MarketCapCr)>50000))).sort((a,c)=>c.Score-a.Score);
   const na='<b class="na">n/a</b>';
   const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
-  $('list_quality').innerHTML=list.length?list.map(r=>{
+  const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
     const pos=has(r.Positives)?r.Positives.split('; '):[];
     let warn=has(r.Warning)?r.Warning.split('; '):[];
@@ -608,7 +689,9 @@ function drawQuality(){
     +(pos.length?'<div class="goodl">'+pos.map(p=>'&#10003; '+p).join('<br>')+'</div>':'')
     +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+p).join('<br>')+'</div>':'')
     +'</div>';
-  }).join(''):'<div class="exp">No stocks match.</div>';
+  });
+  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('quality',r,null),card:cards[i]}));
+  renderItems('list_quality','quality',items,HDR_Q,'No stocks match.');
   const d=rows[0]?rows[0].Date:'-';
   $('meta').textContent='Quality Compounders (market cap above Rs 15,000 crore) | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
 }
@@ -916,6 +999,8 @@ function show(k){
   cur=k;
   ['ultra','short','multi','quality','mine','results','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
+  $('viewbar').style.display=(scanTab||k=='multi'||k=='quality')?'flex':'none';
+  syncView();
   $('perf').style.display=k=='perf'?'block':'none';
   $('miss').style.display=k=='miss'?'block':'none';
   $('multi').style.display=k=='multi'?'block':'none';
