@@ -15,6 +15,7 @@ MIN_TV = 5e7            # 20 రోజుల సగటు traded value Rs 5 క�
 MCAP_MIN = 15000        # Rs కోట్లు, ఇంతకంటే పైన మాత్రమే
 MAX_1Y_RET = 100.0      # 1 సంవత్సరంలో 100%+ పెరిగినవి వద్దు
 MIN_ROCE = 15.0
+MIN_ROE = 12.0          # banks/NBFC కి (అంచనా)
 MIN_SALES_CAGR = 12.0
 MIN_PROFIT_CAGR = 15.0
 MAX_MINUTES = 150
@@ -292,9 +293,76 @@ def evaluate(sym):
         pass
     m["QSalesYoY"], m["QProfitYoY"] = qs, qn
     return m, ""
-  
 
-# ---------- దశ 2: market cap ----------
+
+def evaluate_fin(sym):
+    """Banks/NBFC/financials కి: ROE + profit growth (ROCE, cash flow, debt వద్దు)"""
+    t = yf.Ticker(sym + ".NS")
+    m = {"IsFin": True}
+    inc = t.income_stmt
+    sales = sr(inc, ["Total Revenue", "Operating Revenue"])
+    ni = sr(inc, ["Net Income", "Net Income Common Stockholders"])
+    if ni is None or len(ni) < 4:
+        return None, "Fewer than 4 years of annual data"
+    if sales is None or len(sales) < 4:
+        return None, "Revenue data not available (financial)"
+    if (today - ni.index[-1]).days > 550:
+        return None, "Annual data is out of date"
+    if (ni.iloc[-4:] <= 0).any():
+        return None, "Profit not positive over 3 years"
+    prev, n_last = float(ni.iloc[-2]), float(ni.iloc[-1])
+    if prev > 0 and n_last / prev > 4:
+        return None, "Profit looks one-time (jumped or is over half of sales)"
+    sc = cagr(sales, 3)
+    pc = cagr(ni, 3)
+    if sc is None or sc < MIN_SALES_CAGR:
+        return None, "Sales growth below 12% a year" if sc is not None else "Sales growth not computable"
+    if pc is None or pc < MIN_PROFIT_CAGR:
+        return None, "Profit growth below 15% a year" if pc is not None else "Profit not positive over 3 years"
+    m["SalesCAGR"], m["ProfitCAGR"] = sc, pc
+
+    bs = t.balance_sheet
+    eq = sr(bs, ["Stockholders Equity", "Common Stock Equity", "Total Equity Gross Minority Interest"])
+    if eq is None:
+        return None, "Balance sheet not available"
+    common = ni.index.intersection(eq.index)
+    if len(common) < 1:
+        return None, "ROE not computable"
+    eq_c = eq[common]
+    ok = eq_c > 0
+    roe_s = (ni[common][ok] / eq_c[ok] * 100)
+    if len(roe_s) < 1:
+        return None, "ROE not computable"
+    m["ROCE"] = float(roe_s.iloc[-1])      # financials కి ఇది ROE
+    m["ROCEavg"] = float(roe_s.iloc[-3:].mean())
+    if m["ROCE"] < MIN_ROE:
+        return None, "ROE below 12%"
+
+    m["OCFConv"] = None
+    m["FCFLast"] = None
+    m["FCF3Sum"] = None
+    m["RecCAGR"] = None
+    m["MarginChange"] = None
+    sh = sr(bs, ["Ordinary Shares Number", "Share Issued"])
+    dil = None
+    if sh is not None and len(sh) >= 4 and float(sh.iloc[-4]) > 0:
+        dil = (float(sh.iloc[-1]) / float(sh.iloc[-4]) - 1) * 100
+    m["Dilution"] = dil
+
+    qs = qn = None
+    try:
+        q = t.quarterly_income_stmt
+        qsr = sr(q, ["Total Revenue", "Operating Revenue"])
+        qnr = sr(q, ["Net Income", "Net Income Common Stockholders"])
+        if qsr is not None and len(qsr) >= 5 and float(qsr.iloc[-5]) > 0:
+            qs = (float(qsr.iloc[-1]) / float(qsr.iloc[-5]) - 1) * 100
+        if qnr is not None and len(qnr) >= 5 and float(qnr.iloc[-5]) > 0:
+            qn = (float(qnr.iloc[-1]) / float(qnr.iloc[-5]) - 1) * 100
+    except Exception:
+        pass
+    m["QSalesYoY"], m["QProfitYoY"] = qs, qn
+    return m, ""
+    # ---------- దశ 2: market cap ----------
 rejected = []
 pool = []
 n_nomcap = 0
@@ -323,13 +391,19 @@ print("దశ 2 తర్వాత (market cap Rs 15,000 కోట్లు ప�
 
 # ---------- దశ 3: financials ----------
 passed = []
+n_fin = 0
 for s1, info, mcr in pool:
     if not time_ok():
         print("సమయ పరిమితి చేరింది, దశ 3 ఆపేశాం")
         break
     sym = s1["Symbol"]
+    fin = (info.get("sector") or "") == "Financial Services"
     try:
-        m, why = evaluate(sym)
+        if fin:
+            n_fin += 1
+            m, why = evaluate_fin(sym)
+        else:
+            m, why = evaluate(sym)
     except Exception as e:
         m, why = None, "Financial data error"
     if m is None:
@@ -337,12 +411,13 @@ for s1, info, mcr in pool:
     else:
         passed.append((s1, info, mcr, m))
     time.sleep(0.3)
-print("దశ 3 తర్వాత (financials నియమాలు):", len(passed))
+print("దశ 3 తర్వాత (financials నియమాలు):", len(passed), "| Financial Services stocks:", n_fin)
 
 # ---------- NSE promoter / pledge, score ----------
 rows = []
 for s1, info, mcr, m in passed:
     sym = s1["Symbol"]
+    isfin = bool(m.get("IsFin"))
     promoter, pledge_of_promoter = None, None
     shd = nse("https://www.nseindia.com/api/corporate-share-holdings-master?index=equities&symbol=" + sym)
     try:
@@ -367,12 +442,18 @@ for s1, info, mcr, m in passed:
     score = 40.0
     score += clip01((m["SalesCAGR"] - 12) / 18.0) * 8
     score += clip01((m["ProfitCAGR"] - 15) / 25.0) * 8
-    score += clip01((m["ROCE"] - 15) / 20.0) * 8
+    if isfin:
+        score += clip01((m["ROCE"] - 12) / 13.0) * 8
+    else:
+        score += clip01((m["ROCE"] - 15) / 20.0) * 8
     pos.append("Sales grew %.0f%% a year and profit %.0f%% a year over 3 years, rising every year" % (m["SalesCAGR"], m["ProfitCAGR"]))
-    pos.append("ROCE %.0f%% (3-year average %.0f%%)" % (m["ROCE"], m["ROCEavg"]))
+    if isfin:
+        pos.append("ROE %.0f%% (3-year average %.0f%%). Bank/NBFC: judged on ROE and profit growth, not ROCE, debt or cash flow" % (m["ROCE"], m["ROCEavg"]))
+    else:
+        pos.append("ROCE %.0f%% (3-year average %.0f%%)" % (m["ROCE"], m["ROCEavg"]))
 
     de = num(info.get("debtToEquity"))
-    de = None if de is None else round(de / 100.0, 2)
+    de = None if (de is None or isfin) else round(de / 100.0, 2)
     if de is not None:
         if de <= 0.2:
             score += 6
@@ -391,7 +472,9 @@ for s1, info, mcr, m in passed:
     elif m["OCFConv"] is not None:
         warn.append("Cash flow is weak compared with profit")
 
-    if m["FCFLast"] is None:
+    if isfin:
+        pass
+    elif m["FCFLast"] is None:
         warn.append("Free cash flow: n/a (not available)")
     elif m["FCF3Sum"] is not None and m["FCF3Sum"] < 0:
         warn.append("Free cash flow negative over the last 3 years (total Rs %.0f crore, last year Rs %.0f crore). Check capex and funding before buying" % (m["FCF3Sum"], m["FCFLast"]))
