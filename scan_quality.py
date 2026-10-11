@@ -489,6 +489,8 @@ for s1, info, mcr, m in passed:
         pos.append("Latest quarter profit up %.0f%% year on year" % m["QProfitYoY"])
     if m["QSalesYoY"] is not None and m["QSalesYoY"] > 100:
         warn.append("Latest quarter sales more than doubled; please verify (one-time item or data issue?)")
+    if m["ProfitCAGR"] > 100 or (m["QProfitYoY"] is not None and m["QProfitYoY"] > 150):
+        warn.append("Base effect: very high profit growth (3-year %.0f%% a year) may come from a low starting base. Check absolute profit on screener.in" % m["ProfitCAGR"])
     if m["MarginChange"] is not None and m["MarginChange"] > 0.5:
         score += 3
         pos.append("Operating margin improved over 2 years")
