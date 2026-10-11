@@ -382,6 +382,7 @@ for s1 in stage1:
     mc = num(info.get("marketCap"))
     if not mc:
         n_nomcap += 1
+        rejected.append({"Symbol": sym, "Reason": "Market cap not available (Yahoo)"})
         continue
     mcr = mc / 1e7
     if mcr >= MCAP_MIN:
