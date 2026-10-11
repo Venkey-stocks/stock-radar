@@ -1,11 +1,13 @@
 name: Quality Compounders
 
 on:
+  schedule:
+    - cron: "30 5 * * 6"
   workflow_dispatch:
     inputs:
       quick:
         description: "Quick test (yes or no)"
-        default: "yes"
+        default: "no"
 
 permissions:
   contents: write
@@ -22,7 +24,7 @@ jobs:
       - run: pip install pandas yfinance requests
       - name: Scan
         env:
-          QUICK: ${{ github.event.inputs.quick }}
+          QUICK: ${{ github.event.inputs.quick || 'no' }}
         run: python scan_quality.py
       - name: Save data
         run: |
