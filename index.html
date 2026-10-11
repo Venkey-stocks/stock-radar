@@ -94,6 +94,7 @@ th{color:var(--mut);font-weight:600}
   <button id="t_short" onclick="show('short')">Short Term (1-20 days)</button>
   <button id="t_multi" onclick="show('multi')">Multibagger (1-3 years)</button>
   <button id="t_quality" onclick="show('quality')">Quality Compounders</button>
+  <button id="t_newl" onclick="show('newl')">New Listings</button>
   <button id="t_mine" onclick="show('mine')">My Stocks</button>
   <button id="t_results" onclick="show('results')">Results Calendar</button>
   <button id="t_perf" onclick="show('perf')">Performance</button>
@@ -147,6 +148,17 @@ th{color:var(--mut);font-weight:600}
     <select id="qsector" onchange="drawQuality()"><option value="">All sectors</option></select>
   </div>
   <div class="grid" id="list_quality"></div>
+</div>
+
+<div id="newl" style="display:none">
+  <div class="note">Recently listed stocks with less than 200 trading days of price history (the other scans skip these). This is a price-only scan: no profit, debt or pledge data is checked yet, and a short history makes the score less reliable, so the top band (High Conviction) is not given. Always verify on screener.in before buying.</div>
+  <div class="bar">
+    <select id="nband" onchange="drawNewl()">
+      <option value="">All bands</option>
+      <option>Good Setup</option><option>Early Watch</option>
+    </select>
+  </div>
+  <div class="grid" id="list_newl"></div>
 </div>
 
 <div id="mine" style="display:none">
@@ -223,7 +235,7 @@ Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',events:'data/events.csv',results:'data/results_calendar.csv'};
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',events:'data/events.csv',results:'data/results_calendar.csv'};
 const STALE_DAYS=3; // data ఇన్ని రోజులకు మించి పాతదైతే ఎరుపు హెచ్చరిక
 let cur='ultra',DATA={},EV={};
 let NEWSET={ultra:new Set(),short:new Set()},NEWOK=false;
@@ -238,6 +250,7 @@ if(VIEW!='cards') VIEW='list';
 const ROWOPEN={};
 const HDR_SCAN=['Stock','Score','Status','Entry','Stop','Target','Risk / target',''];
 const HDR_Q=['Stock','Score','Sector','Entry','Stop','Target','Quality',''];
+const HDR_N=['Stock','Score','Listed','Entry','Stop','Target','Since listing',''];
 
 function syncView(){
   $('v_list').className=VIEW=='list'?'on':'';
@@ -265,6 +278,9 @@ function rowCells(tab,r,ns){
   if(tab=='ultra'||tab=='short'){
     info=[(ns&&ns.has(r.Symbol))?'NEW':'',r.Status,r.Class].filter(Boolean).join(' &middot; ');
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%';
+  } else if(tab=='newl'){
+    info=esc(r.ListedOn||'n/a');
+    extra='Since listing '+r['ChangeSinceListing%']+'% &middot; '+r.DataDays+' days of data';
   } else {
     info=esc(r.Sector||'n/a');
     extra='ROCE '+r.ROCE+'% &middot; Sales '+r.SalesCAGR3+'% &middot; Profit '+r.ProfitCAGR3+'%';
@@ -696,16 +712,48 @@ function drawQuality(){
   $('meta').textContent='Quality Compounders (market cap above Rs 15,000 crore) | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
+function drawNewl(){
+  const rows=DATA.newl||[];
+  const b=$('nband').value;
+  const list=rows.filter(r=>!b||r.Band==b).sort((a,c)=>c.Score-a.Score);
+  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
+  const cards=list.map(r=>{
+    const cls=r.Band.split(' ')[0];
+    const why=has(r.Why)?r.Why.split('; '):[];
+    const warn=has(r.Warning)?r.Warning.split('; '):[];
+    const ch=+r['ChangeSinceListing%'], r20=+r['Return20d%'];
+    return '<div class="card"><div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">Listed '+esc(r.ListedOn)+'</span><span class="tag">'+esc(r.DataDays)+' days of data</span></div>'
+    +resLine(r.Symbol)
+    +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
+    +'<div class="n stop"><small>Stop-loss ('+r.RiskPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
+    +'<div class="n tgt"><small>Target</small><b>'+fmt(r.Target)+'</b></div></div>'
+    +'<div class="exp">Recently listed stock (price-only scan, short history). Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital).</div>'
+    +chartBtn(r)
+    +'<div class="fund"><div class="ft">Price since listing</div>'
+    +row('Change since first day in data','<b class="'+(ch>=0?'pos':'neg')+'">'+(ch>=0?'+':'')+r['ChangeSinceListing%']+'%</b>')
+    +row('Last 20 days','<b class="'+(r20>=0?'pos':'neg')+'">'+(r20>=0?'+':'')+r['Return20d%']+'%</b>')
+    +row('Below its high by','<b>'+r['FromHigh%']+'%</b>')+'</div>'
+    +(why.length?'<div class="why"><div class="ft">Why this setup?</div>'+why.map(x=>'<div>&#8226; '+esc(x)+'</div>').join('')+'</div>':'')
+    +evHtml(r.Symbol)
+    +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+esc(p)).join('<br>')+'</div>':'')
+    +'</div>';
+  });
+  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('newl',r,null),card:cards[i]}));
+  renderItems('list_newl','newl',items,HDR_N,'No new listings match.');
+  $('meta').textContent='New Listings (less than 200 days of history, price-only scan) | Showing '+list.length+' of '+rows.length+' stocks';
+}
+
 // ===== My Stocks (Watching / Holding) =====
 function loadMine(){try{return JSON.parse(localStorage.getItem('mystocks')||'[]')||[];}catch(e){return [];}}
 function saveMine(a){try{localStorage.setItem('mystocks',JSON.stringify(a));}catch(e){alert('Could not save in this browser (storage blocked?).');}}
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function nz(v){return (v===null||v===undefined||v==='')?'n/a':fmt(v);}
 function updTab(){const n=loadMine().length;$('t_mine').textContent='My Stocks'+(n?' ('+n+')':'');}
-function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='quality')drawQuality();else if(cur=='mine')drawMine();else draw();}
+function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='quality')drawQuality();else if(cur=='newl')drawNewl();else if(cur=='mine')drawMine();else draw();}
 
 function findRow(sym){
-  const order=['short','ultra','multi','quality'];
+  const order=['short','ultra','multi','quality','newl'];
   for(let i=0;i<order.length;i++){
     const r=(DATA[order[i]]||[]).find(x=>x.Symbol==sym);
     if(r) return r;
@@ -923,7 +971,7 @@ function resLine(sym){
 function drawResults(){
   const q=$('rsearch').value.trim().toUpperCase(), f=$('rfilter').value;
   const tag={};
-  [['ultra','Ultra'],['short','Short'],['multi','Multibagger'],['quality','Quality']].forEach(a=>{
+  [['ultra','Ultra'],['short','Short'],['multi','Multibagger'],['quality','Quality'],['newl','New Listing']].forEach(a=>{
     (DATA[a[0]]||[]).forEach(r=>{(tag[r.Symbol]=tag[r.Symbol]||[]).push(a[1]);});
   });
   loadMine().forEach(m=>{(tag[m.sym]=tag[m.sym]||[]).push('My Stocks');});
@@ -997,14 +1045,15 @@ function drawMiss(){
 
 function show(k){
   cur=k;
-  ['ultra','short','multi','quality','mine','results','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  ['ultra','short','multi','quality','newl','mine','results','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
-  $('viewbar').style.display=(scanTab||k=='multi'||k=='quality')?'flex':'none';
+  $('viewbar').style.display=(scanTab||k=='multi'||k=='quality'||k=='newl')?'flex':'none';
   syncView();
   $('perf').style.display=k=='perf'?'block':'none';
   $('miss').style.display=k=='miss'?'block':'none';
   $('multi').style.display=k=='multi'?'block':'none';
   $('quality').style.display=k=='quality'?'block':'none';
+  $('newl').style.display=k=='newl'?'block':'none';
   $('mine').style.display=k=='mine'?'block':'none';
   $('results').style.display=k=='results'?'block':'none';
   $('bar_scan').style.display=scanTab?'flex':'none';
@@ -1014,6 +1063,7 @@ function show(k){
   if(k=='miss'){drawMiss();return;}
   if(k=='multi'){drawMulti();return;}
   if(k=='quality'){drawQuality();return;}
+  if(k=='newl'){drawNewl();return;}
   if(k=='mine'){drawMine();return;}
   if(k=='results'){drawResults();return;}
   $('status').innerHTML='<option value="">All status</option>';
@@ -1048,6 +1098,7 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('miss').catch(()=>{DATA.miss=[];}))
  .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
  .then(()=>load('quality').catch(()=>{DATA.quality=[];}))
+ .then(()=>load('newl').catch(()=>{DATA.newl=[];}))
  .then(()=>load('events').catch(()=>{DATA.events=[];}))
  .then(()=>load('results').catch(()=>{DATA.results=[];}))
  .then(()=>loadHist())
