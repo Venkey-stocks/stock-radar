@@ -4,7 +4,7 @@ import pandas as pd
 CAPITAL = 100000          # placeholder, మీరే నిర్ణయించండి
 RISK_PCT = 0.01
 MIN_DAYS = 25             # కనీసం ఇన్ని రోజుల data
-MAX_DAYS = 199            # 200 కంటే తక్కువ మాత్రమే (మిగతా scans లో రానివి)
+MAX_DAYS = 120            # సుమారు 6 నెలల లోపు listings మాత్రమే
 MIN_TURNOVER = 2e7        # రోజుకు సగటున Rs 2 crore (అంచనా)
 MAX_STOP_PCT = 0.075
 
@@ -79,7 +79,7 @@ for sym, g in px.groupby("Symbol"):
         why.append("Above listing-day close")
 
     score = min(score, 79)   # తక్కువ history వల్ల High Conviction ఇవ్వం
-    if score < 40:
+    if score < 50:
         continue
     band = "Good Setup" if score >= 65 else "Early Watch"
 
