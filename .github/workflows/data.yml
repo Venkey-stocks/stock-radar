@@ -43,6 +43,9 @@ jobs:
       - name: Miss report
         run: python miss_report.py
         continue-on-error: true
+      - name: New listings scan
+        run: python scan_newlistings.py
+        continue-on-error: true
       - name: Make charts
         run: python make_charts.py
         continue-on-error: true
