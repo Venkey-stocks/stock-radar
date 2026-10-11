@@ -12,16 +12,20 @@ GMMPFAUDLR,ASM list
 GNA,ASM list
 KOPRAN,ASM list
 STLNETWORK,ASM list
+ARTEMISMED,Market cap not available (Yahoo)
 CENTUM,ASM list
 DPABHUSHAN,ASM list
 JAYKAY,ASM list
 SUNFLAG,ASM list
 JINDWORLD,ASM list
+PRICOLLTD,Market cap not available (Yahoo)
 KRISHNADEF,ASM list
 INDORAMA,ASM list
 ASTEC,ASM list
 HLEGLAS,ASM list
 TATVA,ASM list
+IONEXCHANG,Market cap not available (Yahoo)
+CORONA,Market cap not available (Yahoo)
 PVP,ASM list
 MVGJL,ASM list
 ALLCARGO,ASM list
@@ -90,6 +94,7 @@ GAIL,Sales growth below 12% a year
 WELSPUNLIV,Sales growth below 12% a year
 MPHASIS,Sales growth below 12% a year
 GRANULES,Sales growth below 12% a year
+BOSCHLTD,Sales growth below 12% a year
 NEULANDLAB,Sales or profit did not grow steadily every year
 ACMESOLAR,Profit not positive over 3 years
 IIFL,Profit looks one-time (jumped or is over half of sales)
@@ -143,6 +148,7 @@ KPRMILL,Sales growth below 12% a year
 CRISIL,Sales growth below 12% a year
 POLYMED,ROCE below 15%
 ALIVUS,Sales growth below 12% a year
+CHALET,Profit looks one-time (jumped or is over half of sales)
 FINEORG,Sales growth below 12% a year
 AGARWALEYE,Profit growth below 15% a year
 ASAHIINDIA,Sales growth below 12% a year
