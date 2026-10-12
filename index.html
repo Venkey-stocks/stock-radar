@@ -307,6 +307,8 @@ function profHtml(sym){
   const peers=(p.peers||[]).map(s=>({s:s,q:PROF[s]})).filter(x=>x.q);
   if(peers.length){
     const mc=q=>q.mcap_cr==='n/a'?'n/a':fmt(q.mcap_cr);
+    const nv=(x,u)=>(x===undefined||x===null||x==='n/a')?'n/a':x+(u||'');
+    const cells=q=>'<td>'+mc(q)+'</td><td>'+q.pe+'</td><td>'+nv(q.ret1y,'%')+'</td><td>'+nv(q.roce,'%')+'</td><td>'+nv(q.sales_cagr3,'%')+'</td><td>'+nv(q.profit_cagr3,'%')+'</td>';
     h+='<div class="fund"><div class="ft">Similar companies on our lists (estimate)</div><div class="wrap"><table>'
       +'<tr><th>Stock</th><th>Market cap (Rs cr)</th><th>P/E</th></tr>'
       +'<tr><td><b>'+esc(sym)+'</b></td><td>'+mc(p)+'</td><td>'+p.pe+'</td></tr>'
