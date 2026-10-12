@@ -107,6 +107,8 @@ for r in sig.to_dict("records"):
     scan, sym = r["Scan"], r["Symbol"]
     win = WINDOW[scan]
     ts = pd.Timestamp(r["Date"])
+    if pd.isna(ts):
+        continue                       # తేదీ లేని వరుసలు వదిలేస్తాం
     di = date_idx.get(ts)
     if di is None:
         di = bisect.bisect_right(all_dates, ts)
