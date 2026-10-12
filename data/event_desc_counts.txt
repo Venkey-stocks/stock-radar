@@ -1,5 +1,5 @@
-TOTAL EVENTS: 390
-BY CATEGORY: {'Results date': 260, 'Order win': 42, 'Acquisition/Merger': 35, 'Default/Insolvency (warning)': 20, 'Expansion/Production': 11, 'Bulk BUY': 7, 'Disruption/Suspension (warning)': 5, 'Auditor change (check)': 4, 'Fund raise (Rights/QIP)': 3, 'Buyback': 2, 'Preferential issue': 1}
+TOTAL EVENTS: 433
+BY CATEGORY: {'Results date': 296, 'Order win': 42, 'Acquisition/Merger': 39, 'Default/Insolvency (warning)': 20, 'Expansion/Production': 12, 'Bulk BUY': 7, 'Disruption/Suspension (warning)': 5, 'Auditor change (check)': 4, 'Buyback': 3, 'Fund raise (Rights/QIP)': 3, 'Open offer': 1, 'Preferential issue': 1}
 
 KEPT BUYERS (deals | name)
 1 | PRIJAL TRADEFIN LLP

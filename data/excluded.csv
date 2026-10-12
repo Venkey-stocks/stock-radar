@@ -1,8 +1,6 @@
 Date,Scan,Symbol,Score,Reason
-2026-10-09,ultra,SHREEJISPG,64.1,ASM list
-2026-10-09,ultra,GCSL,59.7,ASM list
-2026-10-09,short,SHREEJISPG,65.5,ASM list
-2026-10-09,short,INDORAMA,61.0,ASM list
-2026-10-09,short,BIRLACABLE,53.9,ASM list
-2026-10-09,short,GCSL,50.6,ASM list
-2026-10-09,short,SAKAR,42.1,ASM list
+2026-10-12,short,SBCL,55.0,ASM list
+2026-10-12,short,RPEL,50.4,ASM list
+2026-10-12,short,KOPRAN,50.0,ASM list
+2026-10-12,short,PAISALO,48.2,ASM list
+2026-10-12,short,AVALON,46.4,ASM list
