@@ -151,7 +151,7 @@ th{color:var(--mut);font-weight:600}
 </div>
 
 <div id="newl" style="display:none">
-  <div class="note">Recently listed stocks with less than 200 trading days of price history (the other scans skip these). This is a price-only scan: no profit, debt or pledge data is checked yet, and a short history makes the score less reliable, so the top band (High Conviction) is not given. Always verify on screener.in before buying.</div>
+  <div class="note">Recently listed stocks with less than 120 trading days of price history (the other scans skip these). This is a price-only scan: no profit, debt or pledge data is checked yet, and a short history makes the score less reliable, so the top band (High Conviction) is not given. Always verify on screener.in before buying.</div>
   <div class="bar">
     <select id="nband" onchange="drawNewl()">
       <option value="">All bands</option>
@@ -769,7 +769,7 @@ function drawNewl(){
   });
   const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('newl',r,null),card:cards[i]}));
   renderItems('list_newl','newl',items,HDR_N,'No new listings match.');
-  $('meta').textContent='New Listings (less than 200 days of history, price-only scan) | Showing '+list.length+' of '+rows.length+' stocks';
+  $('meta').textContent='New Listings (less than 120 days of history, price-only scan) | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
 // ===== My Stocks (Watching / Holding) =====
