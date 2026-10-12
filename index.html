@@ -294,8 +294,34 @@ function rowCells(tab,r,ns){
     +'<span class="hm">'+extra+'</span>'
     +al;
 }
+let PROF={};
+function profHtml(sym){
+  const p=PROF[sym];
+  if(!p) return '';
+  const na='<b class="na">n/a</b>';
+  let h='<div class="fund"><div class="ft">About this company</div>'
+    +'<div class="exp" style="margin:0 0 6px">'+esc(p.summary)+'</div>'
+    +'<div class="row"><span>Sector</span><b>'+esc(p.sector)+'</b></div>'
+    +'<div class="row"><span>Industry</span><b>'+esc(p.industry)+'</b></div>'
+    +'<div class="row"><span>P/E (trailing)</span>'+(p.pe==='n/a'?na:'<b>'+p.pe+'</b>')+'</div></div>';
+  const peers=(p.peers||[]).map(s=>({s:s,q:PROF[s]})).filter(x=>x.q);
+  if(peers.length){
+    const mc=q=>q.mcap_cr==='n/a'?'n/a':fmt(q.mcap_cr);
+    h+='<div class="fund"><div class="ft">Similar companies on our lists (estimate)</div><div class="wrap"><table>'
+      +'<tr><th>Stock</th><th>Market cap (Rs cr)</th><th>P/E</th></tr>'
+      +'<tr><td><b>'+esc(sym)+'</b></td><td>'+mc(p)+'</td><td>'+p.pe+'</td></tr>'
+      +peers.map(x=>'<tr><td>'+esc(x.s)+'</td><td>'+mc(x.q)+'</td><td>'+x.q.pe+'</td></tr>').join('')
+      +'</table></div></div>';
+  }
+  return h;
+}
+function withProf(card,sym){
+  const h=profHtml(sym);
+  return h?card.replace(/<\/div>$/,h+'</div>'):card;
+}
 function renderItems(id,tab,items,hdr,emptyMsg){
   const el=$(id);
+  items.forEach(i=>{i.card=withProf(i.card,i.sym);});
   if(!items.length){el.className='grid';el.innerHTML='<div class="exp">'+emptyMsg+'</div>';return;}
   if(VIEW!='list'){el.className='grid';el.innerHTML=items.map(i=>i.card).join('');return;}
   el.className='lst';
@@ -1116,6 +1142,16 @@ fetch('data/market_health.json?v='+Date.now())
    const sc=isFinite(+d.Score)?(' ('+d.Score+'/100)'):'';
    $('mh').className='mh '+st;
    $('mh_txt').textContent='Market Health: '+st+sc;
+ })
+ .catch(()=>{});
+// Company profiles (separate, never blocks the main page)
+fetch('data/profiles.json?v='+Date.now())
+ .then(r=>r.ok?r.json():null)
+ .then(j=>{
+   if(j&&j.profiles){
+     PROF=j.profiles;
+     if(DATA.ultra&&['ultra','short','multi','quality','newl'].indexOf(cur)>=0) redrawCur();
+   }
  })
  .catch(()=>{});
 </script>
