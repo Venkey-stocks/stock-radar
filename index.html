@@ -193,13 +193,16 @@ th{color:var(--mut);font-weight:600}
     <select id="pclass" onchange="drawPerf()">
       <option value="">All classes</option><option>Standard</option><option>High Potential</option>
     </select>
+    <select id="prad" onchange="drawPerf()">
+      <option value="">On radar: all</option><option value="still">Still on radar</option><option value="removed">Removed (not on radar now)</option>
+    </select>
     <label>From</label><input type="date" id="pfrom" onchange="drawPerf()">
     <label>To</label><input type="date" id="pto" onchange="drawPerf()">
     <button onclick="resetPerf()">Reset</button>
   </div>
   <div class="stats" id="pstats"></div>
   <div class="wrap"><table id="ptable"></table></div>
-  <div class="exp">Dates filter by the day a stock first appeared on the radar. If stop-loss and target are both touched on the same day, it is counted as a stop-loss (conservative). Pending = waiting for price to reach the entry. Expired = time window ended without hitting target or stop (shown at the window's last close). Tracking windows: Ultra 5 trading days, Short Term 20, New Listings 60, Multibagger and Quality 250 (about 1 year). Multibagger, Quality and New Listings tracking started in October 2026; stocks that appeared before that are not included. "Days" = trading days after the signal day. For stocks still Open, P/L % is the change up to the last close. Class applies to Ultra and Short Term only.</div>
+  <div class="exp">Dates filter by the day a stock first appeared on the radar. If stop-loss and target are both touched on the same day, it is counted as a stop-loss (conservative). Pending = waiting for price to reach the entry. Expired = time window ended without hitting target or stop (shown at the window's last close). Tracking windows: Ultra 5 trading days, Short Term 20, New Listings 60, Multibagger and Quality 250 (about 1 year). Multibagger, Quality and New Listings tracking started in October 2026; stocks that appeared before that are not included. "Days" = trading days after the signal day. For stocks still Open, P/L % is the change up to the last close. Class applies to Ultra and Short Term only.<br><br><b>After a stop-loss hit:</b> "After stop max %" = the highest rise from the stop price in the days after the stop. "Whipsaw" = Yes if the price later also touched the target (the stop may have been too tight), No if it did not, "-" if it is still unknown (not enough days observed yet). "Whipsaw %" = Yes out of (Yes + No); stops with unknown result are not counted. With only a few stops this number is not reliable, so wait for a few weeks of data. "On radar" = Yes if the stock is on today's list, Removed if it is not.</div>
 </div>
 
 <div id="miss" style="display:none">
@@ -1022,13 +1025,25 @@ function drawResults(){
   $('meta').textContent='Upcoming results dates (NSE) | '+rows.length+' shown';
 }
 
-function resetPerf(){$('pscan').value='';$('pclass').value='';$('pfrom').value='';$('pto').value='';drawPerf();}
+function resetPerf(){$('pscan').value='';$('pclass').value='';$('prad').value='';$('pfrom').value='';$('pto').value='';drawPerf();}
 
 const SCAN_LBL={ultra:'Ultra',short:'Short',multi:'Multibagger',quality:'Quality',newl:'New Listings'};
 
+// Stop hit తర్వాత Whipsaw లెక్క: Yes / No / తెలియనివి (ఖాళీ)
+function wsStat(rr){
+  const st=rr.filter(r=>r.Result=='Stop hit');
+  const y=st.filter(r=>r.Whipsaw=='Yes').length;
+  const n=st.filter(r=>r.Whipsaw=='No').length;
+  return {y:y,n:n,u:st.length-y-n,pct:(y+n)?Math.round(y*100/(y+n)):null};
+}
+function wsTxt(w){
+  if(w.pct===null) return 'n/a';
+  return w.pct+'% ('+w.y+' of '+(w.y+w.n)+')'+(w.u?' +'+w.u+' unknown':'');
+}
+
 function drawPerf(){
-  const sc=$('pscan').value, cl=$('pclass').value, f=$('pfrom').value, t=$('pto').value;
-  const rows=(DATA.perf||[]).filter(r=>(!sc||r.Scan==sc)&&(!cl||r.Class==cl)&&(!f||r.SignalDate>=f)&&(!t||r.SignalDate<=t))
+  const sc=$('pscan').value, cl=$('pclass').value, f=$('pfrom').value, t=$('pto').value, rd=$('prad').value;
+  const rows=(DATA.perf||[]).filter(r=>(!sc||r.Scan==sc)&&(!cl||r.Class==cl)&&(!f||r.SignalDate>=f)&&(!t||r.SignalDate<=t)&&(!rd||(rd=='removed'?r.NowOnRadar=='No':r.NowOnRadar=='Yes')))
     .sort((a,b)=>b.SignalDate.localeCompare(a.SignalDate)||b.Score-a.Score);
   const cnt=k=>rows.filter(r=>r.Result==k).length;
   const win=cnt('Target hit'), loss=cnt('Stop hit');
@@ -1037,12 +1052,13 @@ function drawPerf(){
   const rate=(win+loss)?Math.round(win*100/(win+loss))+'%':'-';
   const stopRows=rows.filter(r=>r.Result=='Stop hit');
   const avgStop=stopRows.length?(stopRows.reduce((a,r)=>a+(+r.DaysHeld),0)/stopRows.length).toFixed(1)+' days':'-';
+  const wsAll=wsStat(rows);
   const box=(l,v,c)=>'<div class="st"><small>'+l+'</small><b class="'+(c||'')+'">'+v+'</b></div>';
   let sum='';
   if(!sc){
     const keys=['ultra','short','multi','quality','newl'].filter(k=>rows.some(r=>r.Scan==k));
     if(keys.length){
-      sum='<div class="wrap" style="grid-column:1/-1"><table><tr><th>Scan</th><th>Signals</th><th>Target hit</th><th>Stop hit</th><th>Open / Pending</th><th>Hit rate</th><th>Avg days to stop</th><th>Avg P/L %</th></tr>'
+      sum='<div class="wrap" style="grid-column:1/-1"><table><tr><th>Scan</th><th>Signals</th><th>Target hit</th><th>Stop hit</th><th>Open / Pending</th><th>Hit rate</th><th>Avg days to stop</th><th>Avg P/L %</th><th>Whipsaw % (after stop)</th></tr>'
         +keys.map(k=>{
           const rr=rows.filter(r=>r.Scan==k);
           const w=rr.filter(r=>r.Result=='Target hit').length, l=rr.filter(r=>r.Result=='Stop hit');
@@ -1051,19 +1067,27 @@ function drawPerf(){
           const a=pn.length?pn.reduce((s,r)=>s+(+r.PnLPct),0)/pn.length:null;
           const hr=(w+l.length)?Math.round(w*100/(w+l.length))+'%':'-';
           const ad=l.length?(l.reduce((s,r)=>s+(+r.DaysHeld),0)/l.length).toFixed(1):'-';
-          return '<tr><td><b>'+SCAN_LBL[k]+'</b></td><td>'+rr.length+'</td><td class="pos">'+w+'</td><td class="neg">'+l.length+'</td><td>'+op+'</td><td>'+hr+'</td><td>'+ad+'</td><td class="'+(a===null?'':(a>=0?'pos':'neg'))+'">'+(a===null?'-':a.toFixed(2)+'%')+'</td></tr>';
+          const ws=wsStat(rr);
+          return '<tr><td><b>'+SCAN_LBL[k]+'</b></td><td>'+rr.length+'</td><td class="pos">'+w+'</td><td class="neg">'+l.length+'</td><td>'+op+'</td><td>'+hr+'</td><td>'+ad+'</td><td class="'+(a===null?'':(a>=0?'pos':'neg'))+'">'+(a===null?'-':a.toFixed(2)+'%')+'</td><td class="'+(ws.pct!==null&&ws.pct>=30?'amb':'')+'">'+wsTxt(ws)+'</td></tr>';
         }).join('')+'</table></div>';
     }
   }
   $('pstats').innerHTML=box('Signals',rows.length)+box('Target hit',win,'pos')+box('Stop hit',loss,'neg')
     +box('Open / Pending',cnt('Open')+cnt('Pending'))+box('Expired / No entry',cnt('Expired')+cnt('No entry'))
     +box('Hit rate (target vs stop)',rate)+box('Avg return %',avg.toFixed(2)+'%',avg>=0?'pos':'neg')
-    +box('Avg days to stop',avgStop)+sum;
-  $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Type</th><th>Class</th><th>Score</th><th>Entry</th><th>Stop</th><th>Target</th><th>Result</th><th>Days</th><th>Exit/Last</th><th>P/L %</th></tr>'
+    +box('Avg days to stop',avgStop)
+    +box('Whipsaw % (after stop)',wsTxt(wsAll),(wsAll.pct!==null&&wsAll.pct>=30)?'amb':'')
+    +sum;
+  $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Type</th><th>Class</th><th>Score</th><th>Entry</th><th>Stop</th><th>Target</th><th>Result</th><th>Days</th><th>Exit/Last</th><th>P/L %</th><th>After stop max %</th><th>Whipsaw</th><th>Days to target after stop</th><th>On radar</th></tr>'
    +(rows.length?rows.map(r=>{
      const c=r.PnLPct===''?'':(+r.PnLPct>=0?'pos':'neg');
-     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b></td><td>'+r.SignalStatus+'</td><td>'+(r.Class||'-')+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+r.DaysHeld+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td></tr>';
-   }).join(''):'<tr><td colspan="13">No signals in this range yet.</td></tr>');
+     const wsC=r.Whipsaw=='Yes'?'amb':'';
+     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b></td><td>'+r.SignalStatus+'</td><td>'+(r.Class||'-')+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+r.DaysHeld+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td>'
+     +'<td>'+(has(r.AfterStopMaxPct)?r.AfterStopMaxPct+'%':'-')+'</td>'
+     +'<td class="'+wsC+'">'+(has(r.Whipsaw)?r.Whipsaw:'-')+'</td>'
+     +'<td>'+(has(r.DaysToTargetAfterStop)?r.DaysToTargetAfterStop:'-')+'</td>'
+     +'<td>'+(r.NowOnRadar=='Yes'?'Yes':(r.NowOnRadar=='No'?'Removed':'-'))+'</td></tr>';
+   }).join(''):'<tr><td colspan="17">No signals in this range yet.</td></tr>');
   $('meta').textContent='Performance of every stock from the day it first appeared on the radar | '+rows.length+' signals';
 }
 
