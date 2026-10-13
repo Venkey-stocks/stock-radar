@@ -1,1 +1,3 @@
 Date,Scan,Symbol,Score,Reason
+2026-10-13,short,SBCL,60.1,ASM list
+2026-10-13,short,KOPRAN,50.0,ASM list

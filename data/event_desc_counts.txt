@@ -1,5 +1,5 @@
-TOTAL EVENTS: 433
-BY CATEGORY: {'Results date': 301, 'Order win': 41, 'Acquisition/Merger': 36, 'Default/Insolvency (warning)': 18, 'Expansion/Production': 11, 'Bulk BUY': 7, 'Disruption/Suspension (warning)': 5, 'Fund raise (Rights/QIP)': 4, 'Auditor change (check)': 4, 'Buyback': 3, 'Open offer': 1, 'Preferential issue': 1, 'Block BUY': 1}
+TOTAL EVENTS: 468
+BY CATEGORY: {'Results date': 331, 'Order win': 44, 'Acquisition/Merger': 37, 'Default/Insolvency (warning)': 19, 'Expansion/Production': 11, 'Bulk BUY': 7, 'Disruption/Suspension (warning)': 5, 'Fund raise (Rights/QIP)': 4, 'Auditor change (check)': 4, 'Buyback': 3, 'Open offer': 1, 'Preferential issue': 1, 'Block BUY': 1}
 
 KEPT BUYERS (deals | name)
 2 | ABAKKUS FOUR2EIGHT OPPORTUNITIES FUND

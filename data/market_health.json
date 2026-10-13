@@ -9,14 +9,14 @@
  "Checks": [
   {
    "name": "Index vs 50-day average",
-   "text": "NIFTY500 is 4.9% below its 50-day average",
+   "text": "NIFTY500 is 3.9% below its 50-day average",
    "points": 0.0,
    "max": 20,
    "good": false
   },
   {
    "name": "Index vs 200-day average",
-   "text": "NIFTY500 is 4.5% below its 200-day average",
+   "text": "NIFTY500 is 3.5% below its 200-day average",
    "points": 0.0,
    "max": 15,
    "good": false
@@ -30,7 +30,7 @@
   },
   {
    "name": "Index last 5 days",
-   "text": "NIFTY500 moved -1.5% in 5 trading days (today 0.2%)",
+   "text": "NIFTY500 moved -0.5% in 5 trading days (today 1.2%)",
    "points": 0.0,
    "max": 5,
    "good": false
