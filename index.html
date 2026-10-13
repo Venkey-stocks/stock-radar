@@ -134,7 +134,7 @@ th{color:var(--mut);font-weight:600}
 </div>
 
 <div id="quality" style="display:none">
-  <div class="note">Large companies (market cap above Rs 15,000 crore) with steady growth: sales and profit rising every year, high ROCE, positive cash flow, price above its 200-day average and ahead of Nifty. Meant for a 1-3 year hold aiming for steady gains (an estimate of 40-100%, not a promise). Stop-loss is wide (15-20%), so the suggested quantity is small. Very high growth rates can come from a low starting base, so check the numbers on screener.in before buying. Not checked: auditor changes and related-party transactions.</div>
+  <div class="note">Large companies (market cap above Rs 15,000 crore) with steady growth: sales and profit rising every year, high ROCE (ROE for banks and financial companies), positive cash flow, price above its 200-day average and ahead of Nifty. Meant for a 1-3 year hold aiming for steady gains (an estimate of 40-100%, not a promise). Stop-loss is wide (15-20%), so the suggested quantity is small. Very high growth rates can come from a low starting base, so check the numbers on screener.in before buying. Not checked: auditor changes and related-party transactions.</div>
   <div class="bar">
     <select id="qband" onchange="drawQuality()">
       <option value="">All bands</option>
@@ -283,7 +283,7 @@ function rowCells(tab,r,ns){
     extra='Since listing '+r['ChangeSinceListing%']+'% &middot; '+r.DataDays+' days of data';
   } else {
     info=esc(r.Sector||'n/a');
-    extra='ROCE '+r.ROCE+'% &middot; Sales '+r.SalesCAGR3+'% &middot; Profit '+r.ProfitCAGR3+'%';
+    extra=roeLbl(r)+' '+r.ROCE+'% &middot; Sales '+r.SalesCAGR3+'% &middot; Profit '+r.ProfitCAGR3+'%';
   }
   return '<span><b>'+esc(r.Symbol)+'</b></span>'
     +'<span><span class="score '+cls+'">'+r.Score+'</span></span>'
@@ -310,7 +310,7 @@ function profHtml(sym){
     const nv=(x,u)=>(x===undefined||x===null||x==='n/a')?'n/a':x+(u||'');
     const cells=q=>'<td>'+mc(q)+'</td><td>'+q.pe+'</td><td>'+nv(q.ret1y,'%')+'</td><td>'+nv(q.roce,'%')+'</td><td>'+nv(q.sales_cagr3,'%')+'</td><td>'+nv(q.profit_cagr3,'%')+'</td>';
     h+='<div class="fund"><div class="ft">Similar companies on our lists (estimate)</div><div class="wrap"><table>'
-      +'<tr><th>Stock</th><th>Market cap (Rs cr)</th><th>P/E</th><th>1Y return</th><th>ROCE</th><th>Sales CAGR 3Y</th><th>Profit CAGR 3Y</th></tr>'
+      +'<tr><th>Stock</th><th>Market cap (Rs cr)</th><th>P/E</th><th>1Y return</th><th>ROCE (banks: ROE)</th><th>Sales CAGR 3Y</th><th>Profit CAGR 3Y</th></tr>'
       +'<tr><td><b>'+esc(sym)+'</b></td>'+cells(p)+'</tr>'
       +peers.map(x=>'<tr><td>'+esc(x.s)+'</td>'+cells(x.q)+'</tr>').join('')
       +'</table></div></div>';
@@ -373,6 +373,8 @@ function explain(s){
 
 function fmt(x){return (+x).toLocaleString('en-IN',{maximumFractionDigits:2});}
 function has(v){return v!==undefined&&v!==null&&String(v).trim()!=='';}
+// Banks/NBFC (Financial Services) కి ROCE బదులు ROE; ఆ విలువ csv లో ROCE column లోనే ఉంటుంది
+function roeLbl(r){return (r&&r.Sector=='Financial Services')?'ROE':'ROCE';}
 
 function pledgeHtml(v,na){
   if(!has(v)) return na;
@@ -658,7 +660,7 @@ function draw(){
     +'<div class="exp">Quality growth company for a 1-3 year hold. The goal shown is only a minimum 1:2 reward-to-risk level, not a forecast. Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital; the wide stop makes the position small).</div>'
     +chartBtn(r)
     +'<div class="fund"><div class="ft">Quality and growth</div>'
-    +row('ROCE','<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr a year)','<b>'+r.SalesCAGR3+'%</b>')
+    +row(roeLbl(r),'<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr a year)','<b>'+r.SalesCAGR3+'%</b>')
     +row('Profit growth (3-yr a year)','<b>'+r.ProfitCAGR3+'%</b>')
     +row('Latest quarter sales vs last year',has(r.QSalesYoY)?'<b>'+r.QSalesYoY+'%</b>':na)
     +row('Latest quarter profit vs last year',has(r.QProfitYoY)?'<b>'+r.QProfitYoY+'%</b>':na)
@@ -715,7 +717,7 @@ function drawQuality(){
     +'<div class="exp">Large, steadily growing company for a 1-3 year hold. The goal shown is only a minimum level (at least +40% and 1:2 reward-to-risk), not a forecast. Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital; the wide stop makes the position small).</div>'
     +chartBtn(r)
     +'<div class="fund"><div class="ft">Quality and growth</div>'
-    +row('ROCE','<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr a year)','<b>'+r.SalesCAGR3+'%</b>')
+    +row(roeLbl(r),'<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr a year)','<b>'+r.SalesCAGR3+'%</b>')
     +row('Profit growth (3-yr a year)','<b>'+r.ProfitCAGR3+'%</b>')
     +row('Latest quarter sales vs last year',has(r.QSalesYoY)?'<b>'+r.QSalesYoY+'%</b>':na)
     +row('Latest quarter profit vs last year',has(r.QProfitYoY)?'<b>'+r.QProfitYoY+'%</b>':na)
