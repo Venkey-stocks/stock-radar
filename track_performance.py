@@ -9,6 +9,10 @@ WINDOW = {"ultra": 5, "short": 20, "multi": 250, "quality": 250, "newl": 60}
 LONG = {"multi": "data/multibagger.csv", "quality": "data/quality.csv",
         "newl": "data/newlistings.csv"}
 LABEL = {"multi": "Multibagger", "quality": "Quality", "newl": "New listing"}
+# ఇప్పుడు radar లో ఉన్నాయా తెలుసుకోవడానికి తాజా జాబితాలు
+CURRENT = {"ultra": "data/ultra_short.csv", "short": "data/short_term.csv",
+           "multi": "data/multibagger.csv", "quality": "data/quality.csv",
+           "newl": "data/newlistings.csv"}
 SEEN = "data/first_seen.csv"
 SEEN_COLS = ["Scan", "Date", "Symbol", "Status", "Class", "Band", "Score",
              "Entry", "Stop", "Target", "Qty", "Close"]
@@ -28,6 +32,19 @@ bysym = {s: g.sort_values("Date").reset_index(drop=True) for s, g in px.groupby(
 all_dates = sorted(pd.to_datetime(px["Date"].unique()))
 date_idx = {d: i for i, d in enumerate(all_dates)}
 last_px = all_dates[-1].strftime("%Y-%m-%d")
+
+# ---------- ఇప్పుడు radar లో ఉన్న stocks ----------
+now_on = {}
+for scan, f in CURRENT.items():
+    syms = set()
+    if os.path.exists(f):
+        try:
+            cd = pd.read_csv(f)
+            if "Symbol" in cd.columns:
+                syms = set(cd["Symbol"].astype(str).str.strip())
+        except Exception as e:
+            print("చదవలేకపోయాం", f, e)
+    now_on[scan] = syms
 
 # ---------- Ultra / Short: history snapshots ----------
 parts = []
@@ -87,7 +104,8 @@ if len(seen):
     parts.append(seen.copy())
 
 cols = ["Scan", "SignalDate", "Symbol", "SignalStatus", "Class", "Band", "Score", "Entry", "Stop",
-        "Target", "Qty", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct", "PnLRs"]
+        "Target", "Qty", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct", "PnLRs",
+        "AfterStopMaxPct", "AfterStopObsDays", "Whipsaw", "DaysToTargetAfterStop", "NowOnRadar"]
 
 if not parts:
     pd.DataFrame(columns=cols).to_csv("data/performance.csv", index=False)
@@ -163,6 +181,21 @@ for r in sig.to_dict("records"):
         pnl_pct = round((exit_price / entry - 1) * 100, 2)
         pnl_rs = round(qty * (exit_price - entry), 0)
 
+    # ---------- Stop hit తర్వాత ఏం జరిగింది (Whipsaw) ----------
+    # stop తర్వాతి రోజు నుంచి, అదే window రోజుల పాటు చూస్తాం
+    as_max, as_obs, whip, whip_days = "", "", "", ""
+    if result == "Stop hit":
+        post = g[g["Date"] > pd.Timestamp(res_date)].head(win)
+        as_obs = len(post)
+        if as_obs > 0:
+            as_max = round((float(post["High"].max()) / exit_price - 1) * 100, 2)
+            whip = "No"
+            for j, p in enumerate(post.itertuples(), 1):
+                if p.High >= target:
+                    whip = "Yes"
+                    whip_days = j
+                    break
+
     out.append({
         "Scan": scan, "SignalDate": ts.strftime("%Y-%m-%d"), "Symbol": sym,
         "SignalStatus": r["Status"], "Class": r["Class"], "Band": r["Band"], "Score": r["Score"],
@@ -171,6 +204,9 @@ for r in sig.to_dict("records"):
         "ResultDate": pd.Timestamp(res_date).strftime("%Y-%m-%d") if res_date is not None else "",
         "ExitPrice": round(exit_price, 2) if exit_price is not None else "",
         "PnLPct": pnl_pct, "PnLRs": pnl_rs,
+        "AfterStopMaxPct": as_max, "AfterStopObsDays": as_obs,
+        "Whipsaw": whip, "DaysToTargetAfterStop": whip_days,
+        "NowOnRadar": "Yes" if str(sym).strip() in now_on.get(scan, set()) else "No",
     })
 
 res = pd.DataFrame(out, columns=cols)
@@ -178,3 +214,11 @@ res.to_csv("data/performance.csv", index=False)
 print("మొత్తం signals:", len(res))
 if len(res):
     print(res.groupby(["Scan", "Result"]).size().to_string())
+    st = res[res["Result"] == "Stop hit"]
+    if len(st):
+        print("Stop hit తర్వాత Whipsaw (target తాకినవి):")
+        for scan in st["Scan"].unique():
+            s = st[st["Scan"] == scan]
+            print(" ", scan, "stop:", len(s), "| whipsaw Yes:", int((s["Whipsaw"] == "Yes").sum()),
+                  "| No:", int((s["Whipsaw"] == "No").sum()),
+                  "| ఇంకా తెలియదు:", int((s["Whipsaw"] == "").sum()))
