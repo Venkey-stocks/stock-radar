@@ -514,7 +514,7 @@ function openChart(btn){
     .then(j=>{CH=j;go();})
     .catch(()=>{$('chbody').innerHTML='<div class="exp">Chart data file (data/charts.json) not found yet. It is created by the daily run.</div>';});
 }
-  function closeChart(){$('chmodal').style.display='none';}
+function closeChart(){$('chmodal').style.display='none';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeChart();});
 
 function drawChart(d,lv){
@@ -626,8 +626,6 @@ function draw(){
   } else {
     remLine='Removed: n/a (no earlier saved list yet).';
   }
-  $('chg').innerHTML='<div class="note"><b>Changes since yesterday:</b> '+newLine+'<br>'+remLine+'</div>';
-}
   function drawMulti(){
   const rows=DATA.multi||[];
   const sel=$('msector');
@@ -827,13 +825,15 @@ function mineDetails(m){
   const r=findRow(m.sym);
   let h='';
   if(!r){
-    h+='<div class="exp">This stock is not on today\'s radar lists, so company flags (pledge, debt, valuation) are n/a. Check screener.in.</div>';
+    h+='<div class="exp">This stock is not on today\'s radar lists, so company flags (pledge, debt) are n/a. Check screener.in.</div>';
   } else {
     let wl=has(r.Warning)?fixWarn(tr(r.Warning).split('; ')):[];
     h+=(wl.length?'<div class="warn">&#9888; '+wl.join('<br>&#9888; ')+'</div>':'<div class="exp">No warnings in today\'s radar data.</div>');
     h+=fundBox(r);
     if(has(r.PEG)) h+='<div class="fund"><div class="row"><span>PEG ratio (valuation)</span><b>'+r.PEG+'</b></div></div>';
   }
+  if(PROF[m.sym]) h+=profHtml(m.sym);
+  else h+='<div class="exp">Company profile (sector, industry, P/E, peers): n/a. This stock is not in the profile file yet.</div>';
   h+=evHtml(m.sym);
   return h;
 }
@@ -1173,7 +1173,7 @@ fetch('data/profiles.json?v='+Date.now())
  .then(j=>{
    if(j&&j.profiles){
      PROF=j.profiles;
-     if(DATA.ultra&&['ultra','short','multi','quality','newl'].indexOf(cur)>=0) redrawCur();
+     if(DATA.ultra&&['ultra','short','multi','quality','newl','mine'].indexOf(cur)>=0) redrawCur();
    }
  })
  .catch(()=>{});
