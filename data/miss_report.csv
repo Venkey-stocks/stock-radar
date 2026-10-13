@@ -1,53 +1,48 @@
 Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
-2026-10-08,ultra,UTTAMSUGAR,291.55,337.8,15.9,2,Missed,,"Stop-loss too far (6.7%, limit 6.0%)"
-2026-10-06,ultra,PREMIERPOL,97.23,114.91,18.2,4,Missed,,"Stop-loss too far (9.5%, limit 6.0%)"
-2026-10-06,short,PREMIERPOL,97.23,114.91,18.2,4,Missed,,"Stop-loss too far (9.5%, limit 7.5%)"
-2026-10-05,ultra,WSTCSTPAPR,717.75,873.15,21.7,5,Missed,,Too far below resistance (8.3%)
-2026-10-05,ultra,SHRINGARMS,219.36,265.35,21.0,5,Missed,,Too far below resistance (5.3%)
-2026-10-05,ultra,NIACL,158.36,187.02,18.1,5,Missed,,Too far below resistance (53.2%)
-2026-10-05,ultra,GOODLUCK,482.0,566.35,17.5,5,Missed,,Too far below resistance (14.5%)
-2026-10-05,short,GOODLUCK,482.0,566.35,17.5,5,Missed,,Trend filter failed (below 50/200-day avg or 50-day not rising)
-2026-10-05,ultra,SKYGOLD,825.9,968.25,17.2,5,Missed,,"Stop-loss too far (6.1%, limit 6.0%)"
+2026-10-05,ultra,SHRINGARMS,219.36,304.6,38.9,5,Missed,,Too far below resistance (5.3%)
+2026-10-05,ultra,UTTAMSUGAR,294.7,356.6,21.0,5,Missed,,"Stop-loss too far (7.7%, limit 6.0%)"
+2026-10-05,ultra,NIACL,158.36,186.44,17.7,5,Missed,,Too far below resistance (53.2%)
+2026-10-05,ultra,SKYGOLD,825.9,969.0,17.3,5,Missed,,"Stop-loss too far (6.1%, limit 6.0%)"
 2026-10-05,ultra,BALAMINES,1957.8,2287.7,16.9,1,Missed,,Too far below resistance (34.3%)
 2026-10-05,short,BALAMINES,1957.8,2287.7,16.9,1,Missed,,Trend filter failed (below 50/200-day avg or 50-day not rising)
+2026-10-05,ultra,GOODLUCK,482.0,561.2,16.4,5,Missed,,Too far below resistance (14.5%)
+2026-10-05,short,GOODLUCK,482.0,561.2,16.4,5,Missed,,Trend filter failed (below 50/200-day avg or 50-day not rising)
+2026-10-01,short,SHRINGARMS,221.31,304.6,37.6,6,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-10-01,short,INDIAGLYCO,298.8,382.7,28.1,3,Unknown,,"No snapshot that day. Approx: Stop-loss too far (15.4%, limit 7.5%)"
 2026-10-01,ultra,SHANTIGOLD,303.55,380.55,25.4,4,Unknown,,No snapshot that day. Approx: Too far below resistance (9.7%)
-2026-10-01,short,SHRINGARMS,221.31,265.35,19.9,6,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-10-01,ultra,CHENNPETRO,1346.4,1612.3,19.7,3,Unknown,,No snapshot that day. Approx: Too far below resistance (24.6%)
 2026-10-01,ultra,PWL,120.17,143.69,19.6,3,Unknown,,No snapshot that day. Approx: Too far below resistance (16.5%)
 2026-10-01,ultra,CUPID,312.5,366.1,17.2,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (16.4%, limit 6.0%)"
-2026-10-01,short,NIACL,160.21,187.02,16.7,6,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
+2026-10-01,short,NIACL,160.21,186.44,16.4,6,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-10-01,ultra,DELTACORP,73.48,85.43,16.3,1,Unknown,,No snapshot that day. Approx: Too far below resistance (19.6%)
-2026-10-01,short,BBOX,795.85,924.6,16.2,6,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-10-01,ultra,MARSONS,114.26,132.45,15.9,3,Unknown,,No snapshot that day. Approx: Too far below resistance (26.3%)
 2026-10-01,short,MARSONS,114.26,132.45,15.9,3,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-10-01,ultra,JAMNAAUTO,131.66,151.77,15.3,3,Unknown,,No snapshot that day. Approx: Too far below resistance (7.7%)
 2026-10-01,short,JAMNAAUTO,131.66,151.77,15.3,3,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-30,short,PWL,123.48,143.69,16.4,6,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-30,ultra,OPTIEMUS,767.75,889.9,15.9,3,Unknown,,No snapshot that day. Approx: Too far below resistance (10.8%)
-2026-09-29,short,DPABHUSHAN,1665.8,2370.1,42.3,3,Unknown,,"No snapshot that day. Approx: Stop-loss too far (17.9%, limit 7.5%)"
+2026-09-29,short,DPABHUSHAN,1665.8,2363.8,41.9,3,Unknown,,"No snapshot that day. Approx: Stop-loss too far (17.9%, limit 7.5%)"
 2026-09-29,ultra,DPABHUSHAN,1665.8,2262.7,35.8,3,Unknown,,No snapshot that day. Approx: Already rose 10%+ in 2 days (excluded)
 2026-09-29,ultra,INDIAGLYCO,304.5,382.7,25.7,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (17.0%, limit 6.0%)"
 2026-09-29,ultra,CHEMPLASTS,192.35,228.22,18.6,5,Unknown,,No snapshot that day. Approx: Too far below resistance (5.3%)
 2026-09-29,ultra,AVADHSUGAR,793.45,937.55,18.2,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (9.4%, limit 6.0%)"
 2026-09-29,ultra,CELLO,333.35,390.65,17.2,5,Unknown,,No snapshot that day. Approx: Too far below resistance (6.5%)
 2026-09-29,ultra,ARFIN,88.16,103.06,16.9,5,Unknown,,No snapshot that day. Approx: Too far below resistance (12.0%)
+2026-09-29,short,HEXT,482.1,559.9,16.1,8,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-29,ultra,PARAGMILK,268.55,311.8,16.1,5,Unknown,,No snapshot that day. Approx: Too far below resistance (6.6%)
 2026-09-29,ultra,MANALIPETC,80.18,92.36,15.2,4,Unknown,,No snapshot that day. Approx: Too far below resistance (15.3%)
 2026-09-29,short,MANALIPETC,80.18,92.36,15.2,4,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-29,short,SUNTV,553.25,636.5,15.0,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (19.2%, limit 7.5%)"
 2026-09-28,ultra,MOBIKWIK,199.06,242.14,21.6,5,Unknown,,No snapshot that day. Approx: Too far below resistance (10.6%)
-2026-09-28,ultra,MOREPENLAB,120.71,143.96,19.3,5,Unknown,,No snapshot that day. Approx: Too far below resistance (5.0%)
 2026-09-28,ultra,JAYKAY,203.81,240.02,17.8,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (8.6%, limit 6.0%)"
 2026-09-28,ultra,SMCGLOBAL,97.23,114.5,17.8,4,Unknown,,No snapshot that day. Approx: Already rose 10%+ in 2 days (excluded)
-2026-09-28,short,SGFIN,589.75,688.55,16.8,9,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-28,ultra,UNIMECH,1616.2,1873.1,15.9,5,Unknown,,No snapshot that day. Approx: Too far below resistance (15.6%)
 2026-09-28,short,UNIMECH,1616.2,1873.1,15.9,5,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-28,ultra,UNIVCABLES,1427.1,1649.2,15.6,5,Unknown,,No snapshot that day. Approx: Too far below resistance (21.6%)
 2026-09-28,ultra,ROSSTECH,1398.8,1612.1,15.2,5,Unknown,,No snapshot that day. Approx: Too far below resistance (7.6%)
-2026-09-25,short,SBC,53.02,64.18,21.0,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (10.2%, limit 7.5%)"
-2026-09-25,short,SHANTIGOLD,325.68,386.7,18.7,9,Unknown,,"No snapshot that day. Approx: Stop-loss too far (26.1%, limit 7.5%)"
+2026-09-25,short,SBC,53.02,64.49,21.6,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (10.2%, limit 7.5%)"
 2026-09-25,ultra,OMNI,533.95,632.15,18.4,5,Unknown,,No snapshot that day. Approx: Too far below resistance (10.1%)
+2026-09-25,short,SHANTIGOLD,325.68,382.45,17.4,9,Unknown,,"No snapshot that day. Approx: Stop-loss too far (26.1%, limit 7.5%)"
 2026-09-25,ultra,SBC,53.02,62.04,17.0,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (9.7%, limit 6.0%)"
 2026-09-25,ultra,ATLANTAELE,1625.9,1882.9,15.8,5,Unknown,,No snapshot that day. Approx: Too far below resistance (20.4%)
 2026-09-25,short,ATLANTAELE,1625.9,1882.9,15.8,5,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
@@ -57,20 +52,20 @@ Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
 2026-09-24,ultra,CUPID,266.3,312.5,17.3,4,Unknown,,"No snapshot that day. Approx: Stop-loss too far (7.7%, limit 6.0%)"
 2026-09-24,short,TATVA,1728.6,1991.2,15.2,8,Unknown,,"No snapshot that day. Approx: Stop-loss too far (12.2%, limit 7.5%)"
 2026-09-24,ultra,AEQUS,242.79,279.48,15.1,4,Unknown,,"No snapshot that day. Approx: Stop-loss too far (6.6%, limit 6.0%)"
+2026-09-23,short,ONEPOINT,68.41,85.25,24.6,9,Unknown,,"No snapshot that day. Approx: Stop-loss too far (19.1%, limit 7.5%)"
 2026-09-23,short,DELTACORP,68.65,85.43,24.4,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (24.8%, limit 7.5%)"
 2026-09-23,ultra,SUNTV,490.2,605.0,23.4,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (8.9%, limit 6.0%)"
-2026-09-23,short,ONEPOINT,68.41,83.53,22.1,9,Unknown,,"No snapshot that day. Approx: Stop-loss too far (19.1%, limit 7.5%)"
 2026-09-23,ultra,DELTACORP,68.65,80.51,17.3,5,Unknown,,No snapshot that day. Approx: Already rose 10%+ in 2 days (excluded)
 2026-09-22,short,OPTIEMUS,708.9,889.9,25.5,1,Unknown,,"No snapshot that day. Approx: Stop-loss too far (23.9%, limit 7.5%)"
 2026-09-22,ultra,OPTIEMUS,708.9,828.35,16.9,1,Unknown,,No snapshot that day. Approx: Already rose 10%+ in 2 days (excluded)
 2026-09-22,ultra,SEDEMAC,3034.3,3547.8,16.9,4,Unknown,,No snapshot that day. Approx: Too far below resistance (7.9%)
-2026-09-22,short,GODIGIT,241.85,279.4,15.5,13,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
+2026-09-22,short,GODIGIT,241.85,279.85,15.7,13,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
+2026-09-22,short,PTCIL,22130.0,25595.0,15.7,13,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-21,ultra,DCI,272.55,326.65,19.8,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (7.9%, limit 6.0%)"
 2026-09-21,ultra,SMCGLOBAL,81.53,97.23,19.3,5,Unknown,,No snapshot that day. Approx: Too far below resistance (16.5%)
 2026-09-21,ultra,PROTEAN,588.35,691.5,17.5,4,Unknown,,No snapshot that day. Approx: Already rose 10%+ in 2 days (excluded)
 2026-09-21,short,CHENNPETRO,1375.5,1612.3,17.2,11,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-21,ultra,ELECON,413.45,480.75,16.3,5,Unknown,,No snapshot that day. Approx: Too far below resistance (11.1%)
-2026-09-21,short,PTCIL,22300.0,25715.0,15.3,14,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-21,ultra,UTTAMSUGAR,256.05,294.75,15.1,5,Unknown,,No snapshot that day. Approx: Too far below resistance (39.1%)
 2026-09-18,short,JAYKAY,167.18,263.45,57.6,3,Unknown,,"No snapshot that day. Approx: Stop-loss too far (8.9%, limit 7.5%)"
 2026-09-18,ultra,JAYKAY,167.18,212.76,27.3,3,Unknown,,"No snapshot that day. Approx: Stop-loss too far (8.9%, limit 6.0%)"
@@ -78,7 +73,6 @@ Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
 2026-09-18,ultra,LLOYDSENGG,82.43,98.56,19.6,5,Unknown,,No snapshot that day. Approx: Too far below resistance (13.7%)
 2026-09-18,short,FILATEX,93.83,112.0,19.4,3,Unknown,,"No snapshot that day. Approx: Stop-loss too far (21.2%, limit 7.5%)"
 2026-09-18,ultra,PGIL,1146.1,1329.1,16.0,5,Unknown,,No snapshot that day. Approx: Too far below resistance (8.8%)
-2026-09-18,short,KMEW,2885.6,3345.7,15.9,15,Unknown,,"No snapshot that day. Approx: Stop-loss too far (13.8%, limit 7.5%)"
 2026-09-18,ultra,LLOYDSENT,68.84,79.67,15.7,5,Unknown,,No snapshot that day. Approx: Too far below resistance (16.2%)
 2026-09-17,ultra,RAYMOND,978.2,1203.85,23.1,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (17.2%, limit 6.0%)"
 2026-09-17,ultra,INDIAGLYCO,248.7,306.0,23.0,5,Unknown,,No snapshot that day. Approx: Too far below resistance (390.1%)
@@ -87,41 +81,42 @@ Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
 2026-09-17,ultra,MEESHO,207.31,240.19,15.9,3,Unknown,,No snapshot that day. Approx: Too far below resistance (7.6%)
 2026-09-17,ultra,GREAVESCOT,191.72,221.83,15.7,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (6.9%, limit 6.0%)"
 2026-09-17,ultra,GNA,536.55,620.45,15.6,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (6.1%, limit 6.0%)"
-2026-09-16,short,ARFIN,82.57,107.52,30.2,13,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
+2026-09-16,short,ARFIN,82.57,109.4,32.5,13,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-16,ultra,MANINDS,790.3,986.7,24.9,5,Unknown,,No snapshot that day. Approx: Too far below resistance (19.4%)
 2026-09-16,ultra,KROSS,225.86,278.56,23.3,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (7.6%, limit 6.0%)"
 2026-09-16,ultra,RAYMONDREL,565.35,671.45,18.8,5,Unknown,,No snapshot that day. Approx: Too far below resistance (8.8%)
 2026-09-16,short,AZAD,2581.7,3062.6,18.6,13,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
-2026-09-16,short,TDPOWERSYS,696.0,825.65,18.6,12,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-16,ultra,WHIRLPOOL,731.75,865.25,18.2,5,Unknown,,No snapshot that day. Approx: Too far below resistance (16.7%)
 2026-09-16,ultra,SHANTIGOLD,243.95,288.07,18.1,5,Unknown,,No snapshot that day. Approx: Too far below resistance (15.1%)
-2026-09-16,short,AEROFLEX,481.1,567.9,18.0,13,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-16,short,CPPLUS,3547.7,4185.2,18.0,16,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
+2026-09-16,short,TDPOWERSYS,696.0,821.1,18.0,12,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-16,ultra,AGI,717.3,845.7,17.9,4,Unknown,,No snapshot that day. Approx: Too far below resistance (11.4%)
 2026-09-16,short,HEGAM,215.05,252.21,17.3,3,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-16,ultra,PVP,58.51,68.61,17.3,5,Unknown,,No snapshot that day. Approx: Too far below resistance (22.9%)
+2026-09-16,short,AEROFLEX,481.1,563.85,17.2,13,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
+2026-09-16,short,AEROENTER,113.35,132.56,16.9,13,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-16,short,PARAGMILK,268.01,311.8,16.3,13,Unknown,,"No snapshot that day. Approx: Stop-loss too far (9.4%, limit 7.5%)"
 2026-09-16,short,MIDHANI,398.05,462.35,16.2,13,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-16,ultra,AARTIPHARM,813.0,940.1,15.6,5,Unknown,,No snapshot that day. Approx: Too far below resistance (9.8%)
 2026-09-16,ultra,HEGAM,215.05,248.5,15.6,3,Unknown,,No snapshot that day. Approx: Too far below resistance (250.6%)
+2026-09-16,short,GANDHAR,258.95,299.2,15.5,14,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-16,ultra,GNFC,539.75,623.05,15.4,5,Unknown,,No snapshot that day. Approx: Too far below resistance (10.6%)
 2026-09-16,ultra,WELCORP,2424.5,2796.8,15.4,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (7.7%, limit 6.0%)"
 2026-09-16,ultra,AXISCADES,1684.5,1940.2,15.2,5,Unknown,,No snapshot that day. Approx: Too far below resistance (15.1%)
-2026-09-16,short,NAZARA,351.15,404.7,15.2,17,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-16,ultra,WOCKPHARMA,2021.5,2329.7,15.2,5,Unknown,,No snapshot that day. Approx: Too far below resistance (12.4%)
 2026-09-16,short,WOCKPHARMA,2021.5,2329.7,15.2,5,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
+2026-09-16,short,WSTCSTPAPR,711.0,818.65,15.1,17,Unknown,,"No snapshot that day. Approx: Stop-loss too far (9.4%, limit 7.5%)"
 2026-09-15,short,MARINE,376.75,478.85,27.1,10,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-15,short,MANINDS,808.2,1020.35,26.2,6,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-15,ultra,KPIGREEN,276.81,346.45,25.2,4,Unknown,,No snapshot that day. Approx: Too far below resistance (16.8%)
 2026-09-15,short,KROSS,228.87,278.56,21.7,6,Unknown,,"No snapshot that day. Approx: Stop-loss too far (10.4%, limit 7.5%)"
 2026-09-15,ultra,CENTUM,4010.6,4858.7,21.1,4,Unknown,,No snapshot that day. Approx: Too far below resistance (11.0%)
-2026-09-15,short,SHREEJISPG,684.0,823.5,20.4,14,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-15,ultra,CHEMPLASTS,165.12,198.67,20.3,5,Unknown,,No snapshot that day. Approx: Too far below resistance (19.3%)
+2026-09-15,short,SHREEJISPG,684.0,822.55,20.3,14,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-15,short,ARIS,120.63,143.88,19.3,4,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-15,short,PANAMAPET,450.75,537.0,19.1,15,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-15,ultra,SANSERA,3867.8,4586.5,18.6,5,Unknown,,No snapshot that day. Approx: Too far below resistance (7.7%)
 2026-09-15,short,GVPIL,620.05,734.85,18.5,14,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
-2026-09-15,short,GANDHAR,260.45,308.0,18.3,18,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-15,short,JGCHEM,563.63,665.45,18.1,10,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-15,ultra,ROSSTECH,1265.12,1494.1,18.1,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (9.1%, limit 6.0%)"
 2026-09-15,short,ROLEXRINGS,166.47,196.36,18.0,8,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
@@ -141,39 +136,36 @@ Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
 2026-09-15,ultra,SHADOWFAX,241.15,283.05,17.4,5,Unknown,,No snapshot that day. Approx: Too far below resistance (11.4%)
 2026-09-15,ultra,SHILPAMED,911.9,1070.8,17.4,4,Unknown,,No snapshot that day. Approx: Too far below resistance (7.5%)
 2026-09-15,ultra,OPTIEMUS,604.95,708.9,17.2,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (10.8%, limit 6.0%)"
-2026-09-15,short,AEROENTER,116.93,136.68,16.9,18,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-15,short,GNFC,540.6,630.3,16.6,6,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-15,short,UNIVCABLES,1417.3,1649.2,16.4,14,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-15,short,GHCLTEXTIL,119.62,139.12,16.3,8,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-15,ultra,WEL,69.18,80.4,16.2,5,Unknown,,No snapshot that day. Approx: Too far below resistance (159.0%)
 2026-09-15,ultra,JYOTICNC,961.45,1113.85,15.9,4,Unknown,,No snapshot that day. Approx: Too far below resistance (10.1%)
 2026-09-15,ultra,SYRMA,1507.7,1741.8,15.5,5,Unknown,,No snapshot that day. Approx: Too far below resistance (10.1%)
-2026-09-15,ultra,MOREPENLAB,106.04,122.35,15.4,4,Unknown,,No snapshot that day. Approx: Too far below resistance (15.4%)
 2026-09-15,ultra,ENGINERSIN,260.31,300.08,15.3,5,Unknown,,No snapshot that day. Approx: Too far below resistance (10.4%)
 2026-09-15,short,THELEELA,522.45,602.45,15.3,15,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
-2026-09-11,short,MOREPENLAB,115.59,146.97,27.1,13,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-11,ultra,INDORAMA,86.5,106.55,23.2,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (18.3%, limit 6.0%)"
 2026-09-11,short,INDORAMA,86.5,106.55,23.2,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (22.0%, limit 7.5%)"
 2026-09-11,ultra,TEGA,1729.1,2129.0,23.1,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (11.1%, limit 6.0%)"
-2026-09-11,short,WSTCSTPAPR,713.8,873.15,22.3,19,Unknown,,"No snapshot that day. Approx: Stop-loss too far (11.8%, limit 7.5%)"
 2026-09-11,short,RATNAVEER,288.3,345.45,19.8,5,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-11,ultra,PROTEAN,492.35,588.35,19.5,5,Unknown,,No snapshot that day. Approx: Too far below resistance (14.3%)
 2026-09-11,ultra,SAMBHV,131.08,155.13,18.3,5,Unknown,,No snapshot that day. Approx: Setup conditions not fully met (low score)
+2026-09-11,short,GALAXYSURF,2187.3,2553.8,16.8,19,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-11,ultra,PATANJALI,341.0,396.2,16.2,5,Unknown,,No snapshot that day. Approx: Setup conditions not fully met (low score)
-2026-09-11,short,DALMIASUG,417.35,484.5,16.1,19,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
+2026-09-11,short,DALMIASUG,417.35,484.75,16.1,19,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-11,ultra,RATNAVEER,288.3,334.55,16.0,5,Unknown,,No snapshot that day. Approx: Too far below resistance (9.6%)
-2026-09-11,short,GALAXYSURF,2187.3,2532.5,15.8,19,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-11,short,TI,520.6,601.5,15.5,7,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-11,ultra,GMMPFAUDLR,1307.9,1507.2,15.2,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (13.3%, limit 6.0%)"
 2026-09-11,short,SSWL,369.13,424.7,15.1,15,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-10,short,SMCGLOBAL,85.64,115.95,35.4,14,Unknown,,"No snapshot that day. Approx: Stop-loss too far (8.7%, limit 7.5%)"
+2026-09-10,short,UTTAMSUGAR,279.9,356.6,27.4,20,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-10,ultra,HLEGLAS,366.69,445.8,21.6,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (13.0%, limit 6.0%)"
-2026-09-10,short,UTTAMSUGAR,279.9,337.8,20.7,20,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
+2026-09-10,short,DHAMPURSUG,166.33,197.01,18.4,20,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-09-10,ultra,KOPRAN,235.82,277.6,17.7,5,Unknown,,No snapshot that day. Approx: Too far below resistance (7.6%)
 2026-09-10,ultra,VENUSPIPES,1949.1,2282.9,17.1,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (18.2%, limit 6.0%)"
-2026-09-10,short,DHAMPURSUG,166.33,194.6,17.0,20,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
-2026-09-10,short,SKYGOLD,830.3,968.25,16.6,20,Unknown,,"No snapshot that day. Approx: Stop-loss too far (11.8%, limit 7.5%)"
+2026-09-10,short,SKYGOLD,830.3,969.0,16.7,20,Unknown,,"No snapshot that day. Approx: Stop-loss too far (11.8%, limit 7.5%)"
 2026-09-10,ultra,YATHARTH,977.2,1139.5,16.6,5,Unknown,,No snapshot that day. Approx: Setup conditions not fully met (low score)
+2026-09-10,short,FSL,251.35,292.55,16.4,20,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-10,short,ICICIGI,1465.0,1690.2,15.4,19,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-09,short,DCI,270.7,345.2,27.5,12,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-09-09,ultra,FILATEX,75.29,90.35,20.0,2,Unknown,,No snapshot that day. Approx: Too far below resistance (15.5%)
@@ -312,7 +304,6 @@ Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
 2026-08-26,ultra,MASTEK,1630.66,1885.4,15.6,2,Unknown,,No snapshot that day. Approx: Too far below resistance (18.3%)
 2026-08-26,short,MASTEK,1630.66,1885.4,15.6,2,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-08-26,short,PROTEAN,555.54,641.95,15.6,20,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
-2026-08-26,ultra,MOREPENLAB,96.82,111.78,15.5,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (9.0%, limit 6.0%)"
 2026-08-26,ultra,IFCI,85.44,98.32,15.1,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (6.0%, limit 6.0%)"
 2026-08-25,short,SETL,314.75,468.15,48.7,3,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-08-25,short,ROSSTECH,1050.12,1494.1,42.3,10,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
@@ -427,7 +418,6 @@ Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
 2026-08-17,short,KSHINTL,1022.35,1176.75,15.1,16,Unknown,,"No snapshot that day. Approx: Stop-loss too far (13.0%, limit 7.5%)"
 2026-08-14,short,WELCORP,1873.3,2776.9,48.2,5,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-08-14,short,KENNAMET,3513.3,5027.9,43.1,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (12.2%, limit 7.5%)"
-2026-08-14,short,MOREPENLAB,84.05,118.68,41.2,8,Unknown,,"No snapshot that day. Approx: Stop-loss too far (13.9%, limit 7.5%)"
 2026-08-14,short,CYIENTDLM,696.65,976.25,40.1,9,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-08-14,short,RATNAVEER,230.16,310.6,34.9,4,Unknown,,"No snapshot that day. Approx: Stop-loss too far (11.8%, limit 7.5%)"
 2026-08-14,short,ENTERO,1416.6,1898.4,34.0,7,Unknown,,"No snapshot that day. Approx: Stop-loss too far (13.5%, limit 7.5%)"
@@ -502,7 +492,6 @@ Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
 2026-08-11,ultra,HAPPYFORGE,1907.8,2260.6,18.5,4,Unknown,,"No snapshot that day. Approx: Stop-loss too far (10.7%, limit 6.0%)"
 2026-08-11,ultra,BALUFORGE,458.86,542.39,18.2,5,Unknown,,No snapshot that day. Approx: Setup conditions not fully met (low score)
 2026-08-11,ultra,AZAD,2472.1,2899.9,17.3,4,Unknown,,No snapshot that day. Approx: Setup conditions not fully met (low score)
-2026-08-11,ultra,MOREPENLAB,76.76,89.67,16.8,4,Unknown,,No snapshot that day. Approx: Too far below resistance (8.6%)
 2026-08-11,short,EDELWEISS,117.77,137.28,16.6,20,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-08-11,short,WOCKPHARMA,1909.4,2224.0,16.5,19,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-08-11,short,GOODLUCK,442.68,514.69,16.3,20,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
@@ -572,7 +561,6 @@ Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
 2026-08-04,short,THANGAMAYL,4717.5,5514.5,16.9,8,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-08-04,short,CUB,201.47,234.99,16.6,20,Unknown,,No snapshot that day. Approx: Trend filter failed (below 50/200-day avg or 50-day not rising)
 2026-08-04,ultra,CUPID,237.99,276.65,16.2,5,Unknown,,No snapshot that day. Approx: Broke out on weak volume
-2026-08-04,ultra,MOREPENLAB,69.07,80.12,16.0,3,Unknown,,No snapshot that day. Approx: Already rose 10%+ in 2 days (excluded)
 2026-08-03,ultra,COMSYN,208.38,268.59,28.9,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (16.2%, limit 6.0%)"
 2026-08-03,ultra,JGCHEM,507.48,621.08,22.4,5,Unknown,,No snapshot that day. Approx: Setup conditions not fully met (low score)
 2026-08-03,ultra,SUDEEPPHRM,867.6,1053.3,21.4,5,Unknown,,No snapshot that day. Approx: Setup conditions not fully met (low score)
@@ -644,7 +632,6 @@ Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
 2026-07-29,ultra,NAZARA,303.65,349.5,15.1,4,Unknown,,No snapshot that day. Approx: Setup conditions not fully met (low score)
 2026-07-28,short,MANYAVAR,403.62,539.56,33.7,5,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-07-28,ultra,RBA,66.67,84.91,27.4,5,Unknown,,No snapshot that day. Approx: Too far below resistance (19.9%)
-2026-07-28,ultra,MOREPENLAB,55.21,69.07,25.1,5,Unknown,,"No snapshot that day. Approx: Stop-loss too far (7.2%, limit 6.0%)"
 2026-07-28,short,ROSSTECH,911.4,1108.65,21.6,4,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-07-28,ultra,ALIVUS,1100.77,1331.05,20.9,5,Unknown,,No snapshot that day. Approx: Too far below resistance (8.1%)
 2026-07-28,ultra,ATHERENERG,1202.0,1450.4,20.7,5,Unknown,,No snapshot that day. Approx: Too far below resistance (11.9%)
@@ -811,7 +798,6 @@ Date,Scan,Symbol,Close,PeakClose,GainPct,Days,Result,ListedStatus,Reason
 2026-07-17,short,LUMAXTECH,1415.0,2076.3,46.7,12,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-07-17,short,SMLMAH,4085.2,5917.5,44.9,9,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-07-17,short,VINDHYATEL,1800.75,2582.7,43.4,11,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
-2026-07-17,short,MOREPENLAB,58.8,84.05,42.9,12,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-07-17,short,DIVGIITTS,910.9,1297.35,42.4,16,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-07-17,short,ASKAUTOLTD,480.34,678.8,41.3,11,Unknown,,No snapshot that day. Approx: No base or pullback setup (or score below 40)
 2026-07-17,short,TFCILTD,84.59,117.44,38.8,8,Unknown,,"No snapshot that day. Approx: Stop-loss too far (12.5%, limit 7.5%)"
