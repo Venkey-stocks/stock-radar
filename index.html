@@ -117,7 +117,7 @@ th{color:var(--mut);font-weight:600}
 <div class="grid" id="list"></div>
 
 <div id="multi" style="display:none">
-  <div class="note">Weekly scan (updated every Saturday). Quality companies with fast 3-year sales and profit growth, high ROCE, positive cash flow and a price that has not already run up. Meant for 1-3 years. Stop-loss is wide (20-25%), so the suggested quantity is small. Ranked by score; you pick the top few. Always verify ROCE and growth on screener.in before buying. Not checked: auditor changes and related-party transactions.</div>
+  <div class="note">Weekly scan (updated every Saturday). Quality companies with fast 3-year sales and profit growth, high ROCE, positive cash flow and a price that has not already run up. Meant for 1-3 years. Stop-loss and target come from the chart (swing low, ATR, nearest resistance); a very wide stop is shown as a warning, so decide your own position size. Ranked by score; you pick the top few. Always verify ROCE and growth on screener.in before buying. Not checked: auditor changes and related-party transactions.</div>
   <div class="bar" id="bar_multi">
     <select id="mband2" onchange="drawMulti()">
       <option value="">All bands</option>
@@ -134,7 +134,7 @@ th{color:var(--mut);font-weight:600}
 </div>
 
 <div id="quality" style="display:none">
-  <div class="note">Large companies (market cap above Rs 15,000 crore) with steady growth: sales and profit rising every year, high ROCE (ROE for banks and financial companies), positive cash flow, price above its 200-day average and ahead of Nifty. Meant for a 1-3 year hold aiming for steady gains (an estimate of 40-100%, not a promise). Stop-loss is wide (15-20%), so the suggested quantity is small. Very high growth rates can come from a low starting base, so check the numbers on screener.in before buying. Not checked: auditor changes and related-party transactions.</div>
+  <div class="note">Large companies (market cap above Rs 15,000 crore) with steady growth: sales and profit rising every year, high ROCE (ROE for banks and financial companies), positive cash flow, price above its 200-day average and ahead of Nifty. Meant for a 1-3 year hold. Stop-loss and target come from the chart (swing low, ATR, nearest resistance); the target is not a promise, and a very wide stop is shown as a warning. Very high growth rates can come from a low starting base, so check the numbers on screener.in before buying. Not checked: auditor changes and related-party transactions.</div>
   <div class="bar">
     <select id="qband" onchange="drawQuality()">
       <option value="">All bands</option>
@@ -280,7 +280,7 @@ function rowCells(tab,r,ns){
   let info,extra;
   if(tab=='ultra'||tab=='short'){
     info=[(ns&&ns.has(r.Symbol))?'NEW':'',r.Status,r.Class].filter(Boolean).join(' &middot; ');
-    extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%';
+    extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
   } else if(tab=='newl'){
     info=esc(r.ListedOn||'n/a');
     extra='Since listing '+r['ChangeSinceListing%']+'% &middot; '+r.DataDays+' days of data';
@@ -378,6 +378,16 @@ function fmt(x){return (+x).toLocaleString('en-IN',{maximumFractionDigits:2});}
 function has(v){return v!==undefined&&v!==null&&String(v).trim()!=='';}
 // Banks/NBFC (Financial Services) కి ROCE బదులు ROE; ఆ విలువ csv లో ROCE column లోనే ఉంటుంది
 function roeLbl(r){return (r&&r.Sector=='Financial Services')?'ROE':'ROCE';}
+
+// Stop/Target ఎందుకు ఆ స్థాయిలో ఉన్నాయో చూపే బాక్స్ (RR, StopReason, TargetReason columns ఉన్నప్పుడు మాత్రమే)
+function lvlHtml(r){
+  if(!has(r.StopReason)&&!has(r.TargetReason)&&!has(r.RR)) return '';
+  return '<div class="why"><div class="ft">Why these levels?</div>'
+    +(has(r.RR)?'<div>&#8226; Reward:Risk 1:'+esc(r.RR)+'</div>':'')
+    +(has(r.StopReason)?'<div>&#8226; Stop: '+esc(r.StopReason)+'</div>':'')
+    +(has(r.TargetReason)?'<div>&#8226; Target: '+esc(r.TargetReason)+'</div>':'')
+    +'</div>';
+}
 
 function pledgeHtml(v,na){
   if(!has(v)) return na;
@@ -605,9 +615,10 @@ function draw(){
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
     +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
-    +'<div class="exp">'+explain(r)+' Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital). Last close: '+fmt(r.Close)+'.</div>'
+    +'<div class="exp">'+explain(r)+' Last close: '+fmt(r.Close)+'.</div>'
     +chartBtn(r)
     +(r.Boosters?'<div class="exp">Boosters: '+tr(r.Boosters)+'</div>':'')
+    +lvlHtml(r)
     +why
     +fundBox(r)
     +evHtml(r.Symbol)
@@ -659,9 +670,10 @@ function draw(){
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
-    +'<div class="n tgt"><small>Minimum goal (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
-    +'<div class="exp">Quality growth company for a 1-3 year hold. The goal shown is only a minimum 1:2 reward-to-risk level, not a forecast. Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital; the wide stop makes the position small).</div>'
+    +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
+    +'<div class="exp">Quality growth company for a 1-3 year hold. Stop-loss and target come from the chart (see "Why these levels?" below). The target is a chart level, not a forecast.</div>'
     +chartBtn(r)
+    +lvlHtml(r)
     +'<div class="fund"><div class="ft">Quality and growth</div>'
     +row(roeLbl(r),'<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr a year)','<b>'+r.SalesCAGR3+'%</b>')
     +row('Profit growth (3-yr a year)','<b>'+r.ProfitCAGR3+'%</b>')
@@ -716,9 +728,10 @@ function drawQuality(){
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
-    +'<div class="n tgt"><small>Minimum goal (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
-    +'<div class="exp">Large, steadily growing company for a 1-3 year hold. The goal shown is only a minimum level (at least +40% and 1:2 reward-to-risk), not a forecast. Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital; the wide stop makes the position small).</div>'
+    +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
+    +'<div class="exp">Large, steadily growing company for a 1-3 year hold. Stop-loss and target come from the chart (see "Why these levels?" below). The target is a chart level, not a forecast.</div>'
     +chartBtn(r)
+    +lvlHtml(r)
     +'<div class="fund"><div class="ft">Quality and growth</div>'
     +row(roeLbl(r),'<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr a year)','<b>'+r.SalesCAGR3+'%</b>')
     +row('Profit growth (3-yr a year)','<b>'+r.ProfitCAGR3+'%</b>')
@@ -760,8 +773,9 @@ function drawNewl(){
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.RiskPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
     +'<div class="n tgt"><small>Target</small><b>'+fmt(r.Target)+'</b></div></div>'
-    +'<div class="exp">Recently listed stock (price-only scan, short history). Suggested quantity: <b>'+r.Qty+'</b> shares (risk 1% of capital).</div>'
+    +'<div class="exp">Recently listed stock (price-only scan, short history).</div>'
     +chartBtn(r)
+    +lvlHtml(r)
     +'<div class="fund"><div class="ft">Price since listing</div>'
     +row('Change since first day in data','<b class="'+(ch>=0?'pos':'neg')+'">'+(ch>=0?'+':'')+r['ChangeSinceListing%']+'%</b>')
     +row('Last 20 days','<b class="'+(r20>=0?'pos':'neg')+'">'+(r20>=0?'+':'')+r['Return20d%']+'%</b>')
