@@ -2,14 +2,22 @@ import io
 import os
 import time
 import requests
+import numpy as np
 import pandas as pd
 
-CAPITAL = 100000          # placeholder, మీరే నిర్ణయించండి
-RISK_PCT = 0.01
 MIN_DAYS = 25             # కనీసం ఇన్ని రోజుల data
 MAX_DAYS = 120            # సుమారు 6 నెలల లోపు listings మాత్రమే
 MIN_TURNOVER = 2e7        # రోజుకు సగటున Rs 2 crore (అంచనా)
-MAX_STOP_PCT = 0.075
+
+# ---- Stop / Target (టెక్నికల్, అంచనా సంఖ్యలు) ----
+ATR_N = 14                # ATR కాలం
+SWING_LOOKBACK = 30       # swing low కోసం గత రోజులు
+ATR_BUFFER = 0.3          # swing low కింద ATR బఫర్
+ATR_MIN_STOP = 1.5        # stop కనీసం ఇన్ని ATR దూరం (new listings ఎక్కువ ఊగుతాయి)
+NO_RES_ATR = 4.0          # పైన resistance లేకపోతే target = Entry + ఇన్ని ATR
+MAX_TARGET_ATR = 8.0      # target గరిష్టం
+MIN_RR = 2.0              # కనీస Reward:Risk
+WIDE_STOP_PCT = 10.0      # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక (తొలగింపు కాదు)
 
 # ---------- NSE session (fetch_fundamentals.py లో లాగే) ----------
 UA = {
@@ -106,6 +114,7 @@ except Exception as e:
 
 rows = []
 removed = []
+rejected = {"low_rr": 0}
 for sym, g in px.groupby("Symbol"):
     g = g.sort_values("Date").dropna(subset=["Close"])
     n = len(g)
@@ -178,16 +187,67 @@ for sym, g in px.groupby("Symbol"):
         continue
 
     entry = float(c[-1])
-    stop = max(float(l[-10:].min()) * 0.99, entry * (1 - MAX_STOP_PCT))
+
+    # ---------- ATR (14 రోజులు) ----------
+    pc = c[:-1]
+    tr = np.maximum.reduce([h[1:] - l[1:], np.abs(h[1:] - pc), np.abs(l[1:] - pc)])
+    atr = float(tr[-ATR_N:].mean())
+    if atr <= 0:
+        continue
+
+    # ---------- STOP: swing low కింద (ATR బఫర్), కనీసం 1.5 ATR దూరం ----------
+    seg_l = l[-SWING_LOOKBACK:]
+    pivl = pd.Series(seg_l).rolling(5, center=True).min().values
+    swing_lows = seg_l[(seg_l == pivl) & (seg_l < entry * 0.995)]
+    if len(swing_lows) > 0:
+        sw = float(swing_lows.max())          # entry కి దగ్గరగా కింద ఉన్న swing low
+        sw_name = "swing low Rs %.1f" % sw
+    else:
+        sw = float(l[-10:].min())
+        sw_name = "10-day low Rs %.1f" % sw
+    swing_stop = sw - ATR_BUFFER * atr
+    atr_stop = entry - ATR_MIN_STOP * atr
+    if swing_stop <= atr_stop:
+        stop = swing_stop
+        stop_reason = "Below %s with %.1f ATR buffer (ATR Rs %.1f)" % (sw_name, ATR_BUFFER, atr)
+    else:
+        stop = atr_stop
+        stop_reason = "%s is too close; stop set %.1f ATR below entry (ATR Rs %.1f)" % (
+            sw_name, ATR_MIN_STOP, atr)
     risk = entry - stop
     if risk <= 0:
         continue
-    target = max(entry * 1.15, entry + 2 * risk)
-    qty = int(CAPITAL * RISK_PCT / risk)
+    stop_pct = risk / entry * 100
+
+    # ---------- TARGET: పైన దగ్గరి నిజమైన resistance ----------
+    pivh = pd.Series(h).rolling(11, center=True).max().values
+    levels = np.append(h[h == pivh], hi)      # swing highs + listing తర్వాత గరిష్ట high
+    levels = levels[levels > entry * 1.02]
+    cap_price = entry + MAX_TARGET_ATR * atr
+    if len(levels) > 0:
+        lvl = float(levels.min())
+        lvl_name = "post-listing high" if abs(lvl - hi) < 1e-9 else "swing high"
+        if lvl > cap_price:
+            target = cap_price
+            target_reason = "Nearest resistance (%s Rs %.1f) is far; capped at %.0f ATR" % (
+                lvl_name, lvl, MAX_TARGET_ATR)
+        else:
+            target = lvl
+            target_reason = "Nearest resistance: %s Rs %.1f (+%.1f%%)" % (
+                lvl_name, lvl, (lvl / entry - 1) * 100)
+    else:
+        target = entry + NO_RES_ATR * atr
+        target_reason = "At or near the post-listing high, no overhead resistance; %.0f ATR projection (estimate)" % NO_RES_ATR
+    rr = (target - entry) / risk
+    if rr < MIN_RR:
+        rejected["low_rr"] += 1
+        continue
 
     warn = "Low history (%d days)" % n
     if n < 60:
         warn += ", very short history"
+    if stop_pct > WIDE_STOP_PCT:
+        warn += "; Wide stop (%.1f%% away), position size should be small" % stop_pct
     if a_flag == "Unknown" or g_flag == "Unknown":
         warn += "; ASM/GSM list could not be checked today"
 
@@ -203,19 +263,22 @@ for sym, g in px.groupby("Symbol"):
         "Entry": round(entry, 2),
         "Stop": round(stop, 2),
         "Target": round(target, 2),
-        "RiskPct": round(risk / entry * 100, 1),
-        "Qty": qty,
+        "RiskPct": round(stop_pct, 1),
+        "RR": round(rr, 2),
+        "StopReason": stop_reason,
+        "TargetReason": target_reason,
         "Why": "; ".join(why),
         "Warning": warn,
     })
 
 cols = ["Symbol", "Score", "Band", "DataDays", "ListedOn", "ChangeSinceListing%",
-        "Return20d%", "FromHigh%", "Entry", "Stop", "Target", "RiskPct", "Qty",
-        "Why", "Warning"]
+        "Return20d%", "FromHigh%", "Entry", "Stop", "Target", "RiskPct", "RR",
+        "StopReason", "TargetReason", "Why", "Warning"]
 out = pd.DataFrame(rows, columns=cols)
 if len(out) > 0:
     out = out.sort_values("Score", ascending=False)
 os.makedirs("data", exist_ok=True)
 out.to_csv("data/newlistings.csv", index=False)
+print("Reward:Risk %.0f కంటే తక్కువ అని తొలగినవి:" % MIN_RR, rejected["low_rr"])
 print("New listings found:", len(out))
 print("ASM/GSM వల్ల తొలగించినవి:", len(removed), removed)
