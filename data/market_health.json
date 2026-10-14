@@ -1,22 +1,22 @@
 {
  "Date": "2026-10-14",
- "Score": 28.3,
+ "Score": 25.1,
  "Status": "Weak",
  "Advice": "Market is weak. Most breakouts tend to fail in such conditions. Fewer or no new trades, and keep stops tight to your plan.",
  "Index": "NIFTY500",
- "LiquidStocks": 484,
+ "LiquidStocks": 920,
  "ChecksMax": 100,
  "Checks": [
   {
    "name": "Index vs 50-day average",
-   "text": "NIFTY500 is 3.9% below its 50-day average",
+   "text": "NIFTY500 is 4.1% below its 50-day average",
    "points": 0.0,
    "max": 20,
    "good": false
   },
   {
    "name": "Index vs 200-day average",
-   "text": "NIFTY500 is 3.6% below its 200-day average",
+   "text": "NIFTY500 is 3.8% below its 200-day average",
    "points": 0.0,
    "max": 15,
    "good": false
@@ -30,36 +30,36 @@
   },
   {
    "name": "Index last 5 days",
-   "text": "NIFTY500 moved 0.1% in 5 trading days (today -0.1%)",
-   "points": 5.0,
+   "text": "NIFTY500 moved -0.1% in 5 trading days (today -0.3%)",
+   "points": 0.0,
    "max": 5,
-   "good": true
+   "good": false
   },
   {
    "name": "Stocks above 50-day average",
-   "text": "40% of 484 liquid stocks are above their 50-day average",
-   "points": 5.0,
+   "text": "40% of 920 liquid stocks are above their 50-day average",
+   "points": 5.1,
    "max": 20,
    "good": false
   },
   {
    "name": "Stocks above 200-day average",
-   "text": "54% are above their 200-day average",
-   "points": 5.9,
-   "max": 10,
-   "good": true
-  },
-  {
-   "name": "Advancers vs decliners today",
-   "text": "280 stocks rose, 201 fell",
+   "text": "58% are above their 200-day average",
    "points": 7.1,
    "max": 10,
    "good": true
   },
   {
+   "name": "Advancers vs decliners today",
+   "text": "522 stocks rose, 395 fell",
+   "points": 6.7,
+   "max": 10,
+   "good": true
+  },
+  {
    "name": "Near 52-week highs vs lows",
-   "text": "30 stocks are near a 52-week high, 27 near a 52-week low",
-   "points": 5.3,
+   "text": "81 stocks are near a 52-week high, 50 near a 52-week low",
+   "points": 6.2,
    "max": 10,
    "good": true
   }
