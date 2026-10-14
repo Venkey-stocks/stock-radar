@@ -15,7 +15,7 @@ CURRENT = {"ultra": "data/ultra_short.csv", "short": "data/short_term.csv",
            "newl": "data/newlistings.csv"}
 SEEN = "data/first_seen.csv"
 SEEN_COLS = ["Scan", "Date", "Symbol", "Status", "Class", "Band", "Score",
-             "Entry", "Stop", "Target", "Qty", "Close"]
+             "Entry", "Stop", "Target", "Close"]
 
 
 def fnum(x):
@@ -67,6 +67,7 @@ if os.path.exists(SEEN):
         seen = pd.DataFrame(columns=SEEN_COLS)
 else:
     seen = pd.DataFrame(columns=SEEN_COLS)
+seen = seen.reindex(columns=SEEN_COLS)     # పాత Qty column ఉంటే తొలగిపోతుంది
 known = set(zip(seen["Scan"].astype(str), seen["Symbol"].astype(str)))
 
 add = []
@@ -89,11 +90,9 @@ for scan, f in LONG.items():
             continue
         dt = pd.to_datetime(r.get("Date"), errors="coerce")
         date = dt.strftime("%Y-%m-%d") if pd.notna(dt) else last_px
-        qty = fnum(r.get("Qty"))
         add.append({"Scan": scan, "Date": date, "Symbol": sym, "Status": LABEL[scan],
                     "Class": "", "Band": r.get("Band", ""), "Score": fnum(r.get("Score")),
-                    "Entry": entry, "Stop": stop, "Target": target,
-                    "Qty": int(qty) if qty is not None else 0, "Close": entry})
+                    "Entry": entry, "Stop": stop, "Target": target, "Close": entry})
         known.add((scan, sym))
 if add:
     seen = pd.concat([seen, pd.DataFrame(add, columns=SEEN_COLS)], ignore_index=True)
@@ -104,7 +103,7 @@ if len(seen):
     parts.append(seen.copy())
 
 cols = ["Scan", "SignalDate", "Symbol", "SignalStatus", "Class", "Band", "Score", "Entry", "Stop",
-        "Target", "Qty", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct", "PnLRs",
+        "Target", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct",
         "AfterStopMaxPct", "AfterStopObsDays", "Whipsaw", "DaysToTargetAfterStop", "NowOnRadar"]
 
 if not parts:
@@ -141,7 +140,6 @@ for r in sig.to_dict("records"):
         continue
     after = g[g["Date"] > ts].head(win)
     entry, stop, target, close = float(r["Entry"]), float(r["Stop"]), float(r["Target"]), float(r["Close"])
-    qty = int(r["Qty"]) if pd.notna(r["Qty"]) else 0
     pending = entry > close * 1.001      # entry ధర పైన ఉంటే, అక్కడికి చేరాకే trade మొదలు
     active = not pending
     result = "Pending" if pending else "Open"
@@ -176,10 +174,9 @@ for r in sig.to_dict("records"):
         elif active:
             exit_price = float(after["Close"].iloc[-1]) if len(after) else close
 
-    pnl_pct, pnl_rs = "", ""
+    pnl_pct = ""
     if exit_price is not None:
         pnl_pct = round((exit_price / entry - 1) * 100, 2)
-        pnl_rs = round(qty * (exit_price - entry), 0)
 
     # ---------- Stop hit తర్వాత ఏం జరిగింది (Whipsaw) ----------
     # stop తర్వాతి రోజు నుంచి, అదే window రోజుల పాటు చూస్తాం
@@ -199,11 +196,11 @@ for r in sig.to_dict("records"):
     out.append({
         "Scan": scan, "SignalDate": ts.strftime("%Y-%m-%d"), "Symbol": sym,
         "SignalStatus": r["Status"], "Class": r["Class"], "Band": r["Band"], "Score": r["Score"],
-        "Entry": round(entry, 2), "Stop": round(stop, 2), "Target": round(target, 2), "Qty": qty,
+        "Entry": round(entry, 2), "Stop": round(stop, 2), "Target": round(target, 2),
         "Result": result, "DaysHeld": days,
         "ResultDate": pd.Timestamp(res_date).strftime("%Y-%m-%d") if res_date is not None else "",
         "ExitPrice": round(exit_price, 2) if exit_price is not None else "",
-        "PnLPct": pnl_pct, "PnLRs": pnl_rs,
+        "PnLPct": pnl_pct,
         "AfterStopMaxPct": as_max, "AfterStopObsDays": as_obs,
         "Whipsaw": whip, "DaysToTargetAfterStop": whip_days,
         "NowOnRadar": "Yes" if str(sym).strip() in now_on.get(scan, set()) else "No",
