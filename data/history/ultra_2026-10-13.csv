@@ -1,3 +1,1 @@
-Symbol,Status,Score,Band
-MUFIN,Near Miss,52.4,Early Watch
-KISSHT,Setup,44.3,Early Watch
+Date,Symbol,Status,Score,Band,Close,Entry,Stop,Target,StopDistPct,RR,StopReason,TargetReason,VolRatio,TargetPct,Resistance,High52,Gap,Warning,Reasons,Events,EventAdj
