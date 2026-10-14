@@ -28,6 +28,7 @@ EV_PEN_DISRUPT = -5         # Disruption/Suspension
 EV_PEN_AUDITOR = -3         # Auditor change
 
 rejected = {"low_rr": 0}
+rej_rows = []               # RR వల్ల తొలగిన stocks (Excluded tab కోసం)
 
 
 def clip01(x):
@@ -311,6 +312,16 @@ def analyze(sym, g):
     rr = (target - entry) / risk
     if rr < MIN_RR:
         rejected["low_rr"] += 1
+        rej_rows.append({
+            "Date": date_str, "Symbol": sym, "Status": status,
+            "Class": "High Potential" if is_hp else "Standard",
+            "Setup": setup_kind,
+            "Close": round(close, 2), "Entry": round(entry, 2),
+            "Stop": round(stop, 2), "Target": round(target, 2),
+            "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
+            "RR": round(rr, 2), "Reason": "Reward:Risk below 1:2",
+            "StopReason": stop_reason, "TargetReason": target_reason,
+        })
         return None
 
     # ---------- Events (Catalyst boost / penalty) ----------
@@ -456,9 +467,14 @@ columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
+rej_cols = ["Date", "Symbol", "Status", "Class", "Setup", "Close", "Entry", "Stop", "Target",
+            "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason"]
+rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
+
 os.makedirs("data/history", exist_ok=True)
 out.to_csv("data/short_term.csv", index=False)
 out.to_csv("data/history/short_%s.csv" % date_str, index=False)
+rej_out.to_csv("data/short_rejected.csv", index=False)               # RR వల్ల తొలగినవి (Excluded tab కి)
 
 print("data తేదీ:", date_str)
 print("Reward:Risk %.0f కంటే తక్కువ అని తొలగినవి:" % MIN_RR, rejected["low_rr"])
@@ -467,3 +483,6 @@ if len(out) > 0:
     print(out["Status"].value_counts().to_string())
     print(out["Class"].value_counts().to_string())
     print(out.head(10)[["Symbol", "Status", "Class", "Score", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
+if len(rej_out) > 0:
+    print("RR తొలగినవి (టాప్ 5, RR ఎక్కువ నుంచి):")
+    print(rej_out.head(5)[["Symbol", "Status", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
