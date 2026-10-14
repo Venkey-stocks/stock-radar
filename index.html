@@ -99,6 +99,7 @@ th{color:var(--mut);font-weight:600}
   <button id="t_results" onclick="show('results')">Results Calendar</button>
   <button id="t_perf" onclick="show('perf')">Performance</button>
   <button id="t_miss" onclick="show('miss')">Miss Report</button>
+  <button id="t_excl" onclick="show('excl')">Excluded</button>
 </div>
 <div class="bar" id="viewbar">
   <label>View</label>
@@ -223,6 +224,22 @@ th{color:var(--mut);font-weight:600}
   <div class="exp">A "big mover" is a stock (price Rs 50+, average traded value Rs 10 crore+) whose close rose 15%+ within 5 trading days (Ultra) or 20 trading days (Short Term). Caught = it was on our list that day (or in the 2 days before). Missed = we had a snapshot and it was not listed. Unknown = no snapshot exists for that day (older dates), so the reason is only an approximation from price data. Date filter = the day the move started.</div>
 </div>
 
+<div id="excl" style="display:none">
+  <div class="note">Stocks that passed the setup checks but were dropped because the Reward:Risk was below 1:2 (the chart-based target is too close compared with the stop-loss). Shown for the latest scan only; the list is replaced on every run. Ultra Short and Short Term lists are for the last daily run; New Listings only includes stocks with score 50 or more. Stocks removed because of NSE ASM/GSM are not listed here. "Near" = Reward:Risk of 1.5 or more. This is a check on whether our stop/target rules are too strict, not a buy list.</div>
+  <div class="bar">
+    <select id="escan" onchange="drawExcl()">
+      <option value="">All scans</option><option value="ultra">Ultra Short</option><option value="short">Short Term</option><option value="newl">New Listings</option>
+    </select>
+    <select id="enear" onchange="drawExcl()">
+      <option value="">All Reward:Risk</option><option value="near">Near (R:R 1.5 or more)</option>
+    </select>
+    <input type="text" id="esearch" placeholder="Search symbol" oninput="drawExcl()">
+    <button onclick="resetExcl()">Reset</button>
+  </div>
+  <div class="stats" id="estats"></div>
+  <div class="wrap"><table id="etable"></table></div>
+</div>
+
 <div class="foot">
 Data: Yahoo Finance end-of-day prices (via yfinance), scanned automatically after market close.
 Company details come from NSE and Yahoo Finance and can be missing or slightly delayed; "n/a" means unknown, not zero.
@@ -238,7 +255,8 @@ Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',events:'data/events.csv',results:'data/results_calendar.csv'};
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv'};
+const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['newl','exnl','New Listing']];
 const STALE_DAYS=3; // data ఇన్ని రోజులకు మించి పాతదైతే ఎరుపు హెచ్చరిక
 let cur='ultra',DATA={},EV={};
 let NEWSET={ultra:new Set(),short:new Set()},NEWOK=false;
@@ -1132,14 +1150,44 @@ function drawMiss(){
   $('meta').textContent='Stocks that rose 15%+ (5 days Ultra / 20 days Short Term) and whether our radar had them | '+rows.length+' shown';
 }
 
+// ===== Excluded (RR వల్ల తొలగినవి) =====
+function resetExcl(){$('escan').value='';$('enear').value='';$('esearch').value='';drawExcl();}
+
+function drawExcl(){
+  const sc=$('escan').value, nr=$('enear').value, q=$('esearch').value.trim().toUpperCase();
+  let all=[];
+  EX_SRC.forEach(a=>{
+    (DATA[a[1]]||[]).forEach(r=>{all.push(Object.assign({_s:a[0],_l:a[2]},r));});
+  });
+  const base=all.filter(r=>(!sc||r._s==sc)&&(!q||String(r.Symbol).toUpperCase().indexOf(q)>=0));
+  const rows=base.filter(r=>!nr||(+r.RR)>=1.5).sort((a,b)=>(+b.RR)-(+a.RR));
+  const box=(l,v,c)=>'<div class="st"><small>'+l+'</small><b class="'+(c||'')+'">'+v+'</b></div>';
+  const cnt=k=>all.filter(r=>r._s==k).length;
+  const near=base.filter(r=>(+r.RR)>=1.5).length;
+  $('estats').innerHTML=box('Excluded (all scans)',all.length)
+    +box('Ultra Short',cnt('ultra'))+box('Short Term',cnt('short'))+box('New Listings',cnt('newl'))
+    +box('Near (R:R 1.5+) in view',near,'amb');
+  $('etable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Status</th><th>Entry</th><th>Stop</th><th>Target</th><th>R:R</th><th>Risk %</th><th>Target %</th><th>Why stop here</th><th>Why target here</th></tr>'
+   +(rows.length?rows.map(r=>{
+     const rr=+r.RR;
+     const k=rr>=1.5?'amb':'';
+     const st=r.Status||r.Band||'-';
+     return '<tr><td>'+esc(r.Date||'-')+'</td><td>'+esc(r._l)+'</td><td><b>'+esc(r.Symbol)+'</b></td><td>'+esc(st)+'</td><td>'+fmt(r.Entry)+'</td><td class="neg">'+fmt(r.Stop)+'</td><td class="pos">'+fmt(r.Target)+'</td><td class="'+k+'">1:'+esc(r.RR)+'</td><td>'+esc(r.StopDistPct)+'%</td><td>'+esc(r.TargetPct)+'%</td>'
+     +'<td style="white-space:normal;min-width:220px">'+esc(r.StopReason||'-')+'</td>'
+     +'<td style="white-space:normal;min-width:220px">'+esc(r.TargetReason||'-')+'</td></tr>';
+   }).join(''):'<tr><td colspan="12">Nothing excluded for this selection (or the rejected files are not created yet).</td></tr>');
+  $('meta').textContent='Excluded because Reward:Risk was below 1:2 | '+rows.length+' shown';
+}
+
 function show(k){
   cur=k;
-  ['ultra','short','multi','quality','newl','mine','results','perf','miss'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  ['ultra','short','multi','quality','newl','mine','results','perf','miss','excl'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
   $('viewbar').style.display=(scanTab||k=='multi'||k=='quality'||k=='newl')?'flex':'none';
   syncView();
   $('perf').style.display=k=='perf'?'block':'none';
   $('miss').style.display=k=='miss'?'block':'none';
+  $('excl').style.display=k=='excl'?'block':'none';
   $('multi').style.display=k=='multi'?'block':'none';
   $('quality').style.display=k=='quality'?'block':'none';
   $('newl').style.display=k=='newl'?'block':'none';
@@ -1150,6 +1198,7 @@ function show(k){
   $('list').style.display=scanTab?'grid':'none';
   if(k=='perf'){drawPerf();return;}
   if(k=='miss'){drawMiss();return;}
+  if(k=='excl'){drawExcl();return;}
   if(k=='multi'){drawMulti();return;}
   if(k=='quality'){drawQuality();return;}
   if(k=='newl'){drawNewl();return;}
@@ -1190,6 +1239,7 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('newl').catch(()=>{DATA.newl=[];}))
  .then(()=>load('events').catch(()=>{DATA.events=[];}))
  .then(()=>load('results').catch(()=>{DATA.results=[];}))
+ .then(()=>Promise.all(['exul','exsh','exnl'].map(k=>load(k).catch(()=>{DATA[k]=[];}))))
  .then(()=>loadHist())
  .then(()=>{buildEv();buildNew();buildRes();checkStale();updTab();show('ultra');})
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
