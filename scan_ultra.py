@@ -3,18 +3,20 @@ import datetime
 import numpy as np
 import pandas as pd
 
-# ================= మీరు మార్చవలసిన సంఖ్య =================
-CAPITAL = 100000   # <-- మీ నిజమైన capital ఇక్కడ మార్చండి (Step C లో)
-# ==========================================================
-
-RISK_PCT = 0.01            # ప్రతి trade కి capital లో 1% risk
 MIN_PRICE = 50             # కనీస ధర
 MIN_TRADED_VALUE = 10e7    # 20 రోజుల సగటు traded value కనీసం ₹10 కోట్లు
-MIN_STOP_PCT = 2.0         # stop కనీస దూరం %
-MAX_STOP_PCT = 6.0         # stop గరిష్ట దూరం %
-MIN_TARGET_PCT = 15.0      # కనీస target %
 MIN_SCORE = 40             # దీని కంటే తక్కువ score ఉంటే జాబితాలో చూపం
 MIN_ROWS = 70              # కనీసం ఇన్ని రోజుల data ఉండాలి
+
+# ---- Stop / Target (టెక్నికల్, అంచనా సంఖ్యలు) ----
+ATR_N = 14                 # ATR కాలం
+SWING_LOOKBACK = 30        # swing low కోసం గత రోజులు
+ATR_BUFFER = 0.25          # swing low కింద ATR బఫర్
+ATR_MIN_STOP = 1.0         # stop కనీసం ఇన్ని ATR దూరం
+NO_RES_ATR = 3.0           # resistance లేకపోతే target = Entry + ఇన్ని ATR
+MAX_TARGET_ATR = 6.0       # target గరిష్టం (1-5 రోజుల trade కి)
+MIN_RR = 2.0               # కనీస Reward:Risk
+WIDE_STOP_PCT = 8.0        # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక (తొలగింపు కాదు)
 
 # ---- Event score (అంచనా బరువులు) ----
 EV_BOOST_MAIN = 5           # Order win / Acquisition / Buyback
@@ -23,6 +25,8 @@ EV_BOOST_CAP = 8
 EV_PEN_DEFAULT = -10        # Default/Insolvency
 EV_PEN_DISRUPT = -5         # Disruption/Suspension
 EV_PEN_AUDITOR = -3         # Auditor change
+
+rejected = {"low_rr": 0}
 
 
 def clip01(x):
@@ -126,36 +130,71 @@ def analyze(sym, g):
         else:
             return None
 
-    # ---------- Entry / Stop / Target ----------
+    # ---------- Entry ----------
     entry = res * 1.002 if status == "Setup" else close
-    stop = l[-5:].min() * 0.999          # గత 5 రోజుల low
-    risk = entry - stop
-    stop_pct = risk / entry * 100
-    if stop_pct < MIN_STOP_PCT:          # stop మరీ దగ్గరగా ఉంటే 2% కి పెంచుతాం
-        stop = entry * (1 - MIN_STOP_PCT / 100)
-        risk = entry - stop
-        stop_pct = MIN_STOP_PCT
-    if stop_pct > MAX_STOP_PCT:          # stop మరీ దూరం -> తొలగింపు
+
+    # ---------- ATR (14 రోజులు) ----------
+    pc = c[:-1]
+    tr = np.maximum.reduce([h[1:] - l[1:], np.abs(h[1:] - pc), np.abs(l[1:] - pc)])
+    atr = float(tr[-ATR_N:].mean())
+    if atr <= 0:
         return None
 
-    target = max(entry * (1 + MIN_TARGET_PCT / 100), entry + 2 * risk)
-    target_pct = (target / entry - 1) * 100
-    qty = int(max(min(CAPITAL * RISK_PCT / risk, CAPITAL / entry), 0))
+    # ---------- STOP: swing low కింద (ATR బఫర్), కనీసం 1 ATR దూరం ----------
+    seg_l = l[-SWING_LOOKBACK:]
+    pivl = pd.Series(seg_l).rolling(5, center=True).min().values
+    swing_lows = seg_l[(seg_l == pivl) & (seg_l < entry * 0.995)]
+    if len(swing_lows) > 0:
+        sw = float(swing_lows.max())          # entry కి దగ్గరగా కింద ఉన్న swing low
+        sw_name = "swing low Rs %.1f" % sw
+    else:
+        sw = float(l[-10:].min())
+        sw_name = "10-day low Rs %.1f" % sw
+    swing_stop = sw - ATR_BUFFER * atr
+    atr_stop = entry - ATR_MIN_STOP * atr
+    if swing_stop <= atr_stop:
+        stop = swing_stop
+        stop_reason = "Below %s with %.2f ATR buffer (ATR Rs %.1f)" % (sw_name, ATR_BUFFER, atr)
+    else:
+        stop = atr_stop
+        stop_reason = "%s is too close; stop set %.1f ATR below entry (ATR Rs %.1f)" % (
+            sw_name, ATR_MIN_STOP, atr)
+    if stop >= entry:
+        return None
+    risk = entry - stop
+    stop_pct = risk / entry * 100
 
-    # ---------- 15% లోపు resistance హెచ్చరిక ----------
+    # ---------- TARGET: పైన దగ్గరి నిజమైన resistance ----------
     hi250 = h[-251:]
     piv = pd.Series(hi250).rolling(11, center=True).max().values
     levels = hi250[hi250 == piv]         # swing highs
-    if entry * 1.03 < high52 <= entry * 1.15:
-        levels = np.append(levels, high52)
-    levels = levels[(levels > entry * 1.03) & (levels <= entry * 1.15)]
-    warns = []
-    penalty = 0
+    levels = np.append(levels, high52)
+    levels = levels[levels > entry * 1.02]
+    cap_price = entry + MAX_TARGET_ATR * atr
+    next_res = None
     if len(levels) > 0:
-        lvl = levels.min()
-        warns.append("పైన %.1f%% వద్ద పాత high (Rs %.1f), 15%% target కి అడ్డు కావచ్చు" % (
-            (lvl / entry - 1) * 100, lvl))
-        penalty = 10
+        lvl = float(levels.min())
+        next_res = lvl
+        lvl_name = "52-week high" if abs(lvl - high52) < 1e-9 else "swing high"
+        if lvl > cap_price:
+            target = cap_price
+            target_reason = "Nearest resistance (%s Rs %.1f) is far; capped at %.0f ATR for a short trade" % (
+                lvl_name, lvl, MAX_TARGET_ATR)
+        else:
+            target = lvl
+            target_reason = "Nearest resistance: %s Rs %.1f (+%.1f%%)" % (lvl_name, lvl, (lvl / entry - 1) * 100)
+    else:
+        target = entry + NO_RES_ATR * atr
+        target_reason = "No overhead resistance found; %.0f ATR projection (estimate)" % NO_RES_ATR
+    target_pct = (target / entry - 1) * 100
+    rr = (target - entry) / risk
+    if rr < MIN_RR:
+        rejected["low_rr"] += 1
+        return None
+
+    warns = []
+    if stop_pct > WIDE_STOP_PCT:
+        warns.append("Wide stop (%.1f%% away); position size should be small" % stop_pct)
 
     # ---------- Events (Catalyst boost / penalty) ----------
     cats = EV.get(sym.upper().replace(".NS", ""), set())
@@ -210,11 +249,10 @@ def analyze(sym, g):
         rs_.append("Price above 200-day average")
     if sma50 > sma50_prev:
         rs_.append("50-day average is rising")
-    if len(levels) > 0:
-        lv_ = levels.min()
-        rs_.append("Next resistance Rs %.1f (+%.1f%%)" % (lv_, (lv_ / entry - 1) * 100))
+    if next_res is not None:
+        rs_.append("Next resistance Rs %.1f (+%.1f%%)" % (next_res, (next_res / entry - 1) * 100))
     else:
-        rs_.append("No major resistance within 15%")
+        rs_.append("No major resistance overhead")
     if events_txt:
         rs_.append("NSE events (last 7 days): %s, score %+d" % (events_txt, ev_adj))
     reasons = " | ".join(rs_)
@@ -238,7 +276,6 @@ def analyze(sym, g):
         s += 5
     elif d52 <= 10:
         s += 2
-    s -= penalty
     s += ev_adj
     s = round(max(min(s, 100), 0), 1)
 
@@ -247,7 +284,8 @@ def analyze(sym, g):
     return {
         "Date": date_str, "Symbol": sym, "Status": status, "Score": s, "Band": band,
         "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
-        "Target": round(target, 2), "StopDistPct": round(stop_pct, 2), "Qty": qty,
+        "Target": round(target, 2), "StopDistPct": round(stop_pct, 2),
+        "RR": round(rr, 2), "StopReason": stop_reason, "TargetReason": target_reason,
         "VolRatio": round(vol_ratio, 2),
         "TargetPct": round(target_pct, 1), "Resistance": round(res, 2),
         "High52": round(high52, 2), "Gap": "Yes" if gap else "",
@@ -266,8 +304,8 @@ for sym, g in groups.items():
         print("దాటవేసాం", sym, e)
 
 columns = ["Date", "Symbol", "Status", "Score", "Band", "Close", "Entry", "Stop", "Target",
-           "StopDistPct", "Qty", "VolRatio", "TargetPct", "Resistance", "High52", "Gap", "Warning",
-           "Reasons", "Events", "EventAdj"]
+           "StopDistPct", "RR", "StopReason", "TargetReason", "VolRatio", "TargetPct",
+           "Resistance", "High52", "Gap", "Warning", "Reasons", "Events", "EventAdj"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
@@ -276,7 +314,8 @@ out.to_csv("data/ultra_short.csv", index=False)                       # తా�
 out.to_csv("data/history/ultra_%s.csv" % date_str, index=False)       # రోజువారీ snapshot (Miss Report కి)
 
 print("data తేదీ:", date_str)
+print("Reward:Risk %.0f కంటే తక్కువ అని తొలగినవి:" % MIN_RR, rejected["low_rr"])
 print("మొత్తం ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Status"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Status", "Score", "Entry", "Stop", "Target", "Warning"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Status", "Score", "Entry", "Stop", "Target", "RR", "Warning"]].to_string(index=False))
