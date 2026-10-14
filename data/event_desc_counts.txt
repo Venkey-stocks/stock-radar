@@ -1,5 +1,5 @@
-TOTAL EVENTS: 488
-BY CATEGORY: {'Results date': 353, 'Order win': 42, 'Acquisition/Merger': 34, 'Default/Insolvency (warning)': 20, 'Expansion/Production': 12, 'Bulk BUY': 10, 'Auditor change (check)': 5, 'Disruption/Suspension (warning)': 4, 'Fund raise (Rights/QIP)': 3, 'Buyback': 3, 'Open offer': 1, 'Preferential issue': 1}
+TOTAL EVENTS: 517
+BY CATEGORY: {'Results date': 380, 'Order win': 43, 'Acquisition/Merger': 35, 'Default/Insolvency (warning)': 20, 'Expansion/Production': 12, 'Bulk BUY': 10, 'Auditor change (check)': 5, 'Disruption/Suspension (warning)': 4, 'Fund raise (Rights/QIP)': 3, 'Buyback': 3, 'Open offer': 1, 'Preferential issue': 1}
 
 KEPT BUYERS (deals | name)
 1 | BULLPULSE MARKETEDGE PRIVATE LIMITED
