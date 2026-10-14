@@ -104,6 +104,7 @@ def flag(sym, isins, syms):
 # ---------- prices ----------
 px = pd.read_csv("data/prices.csv.gz", parse_dates=["Date"])
 last_date = px["Date"].max()
+date_str = last_date.strftime("%Y-%m-%d")
 
 nifty = None
 try:
@@ -113,6 +114,7 @@ except Exception as e:
     print("Index not available:", e)
 
 rows = []
+rej_rows = []             # RR వల్ల తొలగిన stocks (Excluded tab కోసం)
 removed = []
 rejected = {"low_rr": 0}
 for sym, g in px.groupby("Symbol"):
@@ -241,6 +243,14 @@ for sym, g in px.groupby("Symbol"):
     rr = (target - entry) / risk
     if rr < MIN_RR:
         rejected["low_rr"] += 1
+        rej_rows.append({
+            "Date": date_str, "Symbol": sym, "Score": score, "Band": band,
+            "DataDays": n, "Entry": round(entry, 2), "Stop": round(stop, 2),
+            "Target": round(target, 2), "StopDistPct": round(stop_pct, 2),
+            "TargetPct": round((target / entry - 1) * 100, 1),
+            "RR": round(rr, 2), "Reason": "Reward:Risk below 1:2",
+            "StopReason": stop_reason, "TargetReason": target_reason,
+        })
         continue
 
     warn = "Low history (%d days)" % n
@@ -277,8 +287,19 @@ cols = ["Symbol", "Score", "Band", "DataDays", "ListedOn", "ChangeSinceListing%"
 out = pd.DataFrame(rows, columns=cols)
 if len(out) > 0:
     out = out.sort_values("Score", ascending=False)
+
+rej_cols = ["Date", "Symbol", "Score", "Band", "DataDays", "Entry", "Stop", "Target",
+            "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason"]
+rej_out = pd.DataFrame(rej_rows, columns=rej_cols)
+if len(rej_out) > 0:
+    rej_out = rej_out.sort_values("RR", ascending=False)
+
 os.makedirs("data", exist_ok=True)
 out.to_csv("data/newlistings.csv", index=False)
+rej_out.to_csv("data/newlistings_rejected.csv", index=False)       # RR వల్ల తొలగినవి (Excluded tab కి)
 print("Reward:Risk %.0f కంటే తక్కువ అని తొలగినవి:" % MIN_RR, rejected["low_rr"])
 print("New listings found:", len(out))
 print("ASM/GSM వల్ల తొలగించినవి:", len(removed), removed)
+if len(rej_out) > 0:
+    print("RR తొలగినవి (టాప్ 5, RR ఎక్కువ నుంచి):")
+    print(rej_out.head(5)[["Symbol", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
