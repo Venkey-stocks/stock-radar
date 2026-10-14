@@ -2,15 +2,11 @@ import io
 import os
 import time
 import datetime
+import numpy as np
 import pandas as pd
 import requests
 import yfinance as yf
 
-# ================= మీరు మార్చవలసిన సంఖ్య =================
-CAPITAL = 100000   # <-- మీ నిజమైన capital ఇక్కడ మార్చండి
-# ==========================================================
-
-RISK_PCT = 0.01
 MIN_TV = 5e7            # 20 రోజుల సగటు traded value Rs 5 కోట్లు (అంచనా)
 MCAP_MIN = 15000        # Rs కోట్లు, ఇంతకంటే పైన మాత్రమే
 MAX_1Y_RET = 100.0      # 1 సంవత్సరంలో 100%+ పెరిగినవి వద్దు
@@ -21,6 +17,16 @@ MIN_PROFIT_CAGR = 15.0
 MAX_MINUTES = 150
 QUICK_LIMIT = 120
 MIN_SCORE = 40
+
+# ---- Stop / Target (టెక్నికల్, అంచనా సంఖ్యలు) ----
+ATR_N = 14              # ATR కాలం
+SWING_LOOKBACK = 120    # swing low కోసం గత రోజులు
+ATR_BUFFER = 0.5        # swing low కింద ATR బఫర్
+ATR_MIN_STOP = 2.5      # stop కనీసం ఇన్ని ATR దూరం
+NO_RES_ATR = 12.0       # resistance లేకపోతే target = Entry + ఇన్ని ATR
+MAX_TARGET_ATR = 20.0   # target గరిష్టం
+MIN_RR = 2.0            # కనీస Reward:Risk
+WIDE_STOP_PCT = 20.0    # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక (తొలగింపు కాదు)
 
 START = time.time()
 QUICK = os.environ.get("QUICK", "") == "yes"
@@ -61,13 +67,14 @@ except Exception as e:
     print("Nifty:", e)
 print("Nifty 6 నెలల రాబడి %:", "n/a" if nifty6 is None else round(nifty6, 1))
 
-# ---------- దశ 1: ధర filters ----------
+# ---------- దశ 1: ధర filters + టెక్నికల్ Stop/Target ----------
 stage1 = []
 for sym, g in px.groupby("Symbol"):
     g = g.sort_values("Date")
     if len(g) < 200 or g["Date"].iloc[-1] != last_date:
         continue
     c = g["Close"].values
+    h = g["High"].values
     l = g["Low"].values
     v = g["Volume"].values.astype(float)
     close = c[-1]
@@ -79,9 +86,67 @@ for sym, g in px.groupby("Symbol"):
         continue
     if close <= c[-200:].mean():
         continue
+
+    # ---- ATR (14 రోజులు) ----
+    pc = c[:-1]
+    tr = np.maximum.reduce([h[1:] - l[1:], np.abs(h[1:] - pc), np.abs(l[1:] - pc)])
+    atr = float(tr[-ATR_N:].mean())
+    if atr <= 0:
+        continue
+
+    # ---- STOP: swing low కింద (ATR బఫర్), కనీసం 2.5 ATR దూరం ----
+    seg_l = l[-SWING_LOOKBACK:]
+    pivl = pd.Series(seg_l).rolling(11, center=True).min().values
+    swing_lows = seg_l[(seg_l == pivl) & (seg_l < close * 0.98)]
+    if len(swing_lows) > 0:
+        sw = float(swing_lows.max())          # ధరకు దగ్గరగా కింద ఉన్న swing low
+        sw_name = "swing low Rs %.1f" % sw
+    else:
+        sw = float(l[-60:].min())
+        sw_name = "60-day low Rs %.1f" % sw
+    swing_stop = sw - ATR_BUFFER * atr
+    atr_stop = close - ATR_MIN_STOP * atr
+    if swing_stop <= atr_stop:
+        stop = swing_stop
+        stop_reason = "Below %s with %.1f ATR buffer (ATR Rs %.1f)" % (sw_name, ATR_BUFFER, atr)
+    else:
+        stop = atr_stop
+        stop_reason = "%s is too close; stop set %.1f ATR below entry (ATR Rs %.1f)" % (
+            sw_name, ATR_MIN_STOP, atr)
+    if stop <= 0 or stop >= close:
+        continue
+    risk = close - stop
+    stop_pct = risk / close * 100
+
+    # ---- TARGET: పైన దగ్గరి నిజమైన resistance ----
+    hi250 = h[-250:]
+    high52 = float(hi250.max())
+    piv = pd.Series(hi250).rolling(11, center=True).max().values
+    levels = np.append(hi250[hi250 == piv], high52)    # swing highs + 52 వారాల high
+    levels = levels[levels > close * 1.02]
+    cap_price = close + MAX_TARGET_ATR * atr
+    if len(levels) > 0:
+        lvl = float(levels.min())
+        lvl_name = "52-week high" if abs(lvl - high52) < 1e-9 else "swing high"
+        if lvl > cap_price:
+            target = cap_price
+            target_reason = "Nearest resistance (%s Rs %.1f) is far; capped at %.0f ATR" % (
+                lvl_name, lvl, MAX_TARGET_ATR)
+        else:
+            target = lvl
+            target_reason = "Nearest resistance: %s Rs %.1f (+%.1f%%)" % (
+                lvl_name, lvl, (lvl / close - 1) * 100)
+    else:
+        target = close + NO_RES_ATR * atr
+        target_reason = "At or near the 52-week high, no overhead resistance; %.0f ATR projection (estimate)" % NO_RES_ATR
+    rr = (target - close) / risk
+
     stage1.append({"Symbol": sym, "Close": close, "tv": tv, "Ret1Y": ret1y,
                    "Ret6M": (close / c[-127] - 1) * 100,
-                   "Trend": "Above 200-day average", "Low120": l[-120:].min()})
+                   "Trend": "Above 200-day average",
+                   "Stop": stop, "Target": target, "RR": rr,
+                   "StopReason": stop_reason, "TargetReason": target_reason,
+                   "StopDistPct": stop_pct, "TargetPct": (target / close - 1) * 100})
 stage1.sort(key=lambda x: -x["tv"])
 print("దశ 1 తర్వాత:", len(stage1))
 if QUICK:
@@ -390,7 +455,7 @@ for s1 in stage1:
     time.sleep(0.2)
 print("దశ 2 తర్వాత (market cap Rs 15,000 కోట్లు పైన):", len(pool), "| market cap తెలియనివి:", n_nomcap)
 
-# ---------- దశ 3: financials ----------
+# ---------- దశ 3: Reward:Risk, తర్వాత financials ----------
 passed = []
 n_fin = 0
 for s1, info, mcr in pool:
@@ -398,6 +463,9 @@ for s1, info, mcr in pool:
         print("సమయ పరిమితి చేరింది, దశ 3 ఆపేశాం")
         break
     sym = s1["Symbol"]
+    if s1["RR"] < MIN_RR:
+        rejected.append({"Symbol": sym, "Reason": "Reward:Risk below 1:%.0f" % MIN_RR})
+        continue
     fin = (info.get("sector") or "") == "Financial Services"
     try:
         if fin:
@@ -412,7 +480,7 @@ for s1, info, mcr in pool:
     else:
         passed.append((s1, info, mcr, m))
     time.sleep(0.3)
-print("దశ 3 తర్వాత (financials నియమాలు):", len(passed), "| Financial Services stocks:", n_fin)
+print("దశ 3 తర్వాత (Reward:Risk + financials నియమాలు):", len(passed), "| Financial Services stocks:", n_fin)
 
 # ---------- NSE promoter / pledge, score ----------
 rows = []
@@ -547,6 +615,8 @@ for s1, info, mcr, m in passed:
     if m["RecCAGR"] is not None and m["RecCAGR"] > m["SalesCAGR"] + 10:
         score -= 5
         warn.append("Receivables growing faster than sales")
+    if s1["StopDistPct"] > WIDE_STOP_PCT:
+        warn.append("Wide stop (%.1f%% away); position size should be small" % s1["StopDistPct"])
     if not lists_ok:
         warn.append("ASM/GSM list could not be checked")
     score = round(max(min(score, 100), 0), 1)
@@ -556,16 +626,12 @@ for s1, info, mcr, m in passed:
     band = "High Conviction" if score >= 80 else ("Good Setup" if score >= 65 else "Early Watch")
 
     close = float(s1["Close"])
-    struct = (close - s1["Low120"] * 0.98) / close
-    stop_pct = min(max(struct, 0.15), 0.20)
-    stop = close * (1 - stop_pct)
-    risk = close - stop
-    target = close + max(2 * risk, 0.40 * close)
-    qty = int(max(min(CAPITAL * RISK_PCT / risk, CAPITAL / close), 0))
     rows.append({
         "Date": date_str, "Symbol": sym, "Score": score, "Band": band,
-        "Close": round(close, 2), "Entry": round(close, 2), "Stop": round(stop, 2), "Target": round(target, 2),
-        "StopDistPct": round(stop_pct * 100, 1), "TargetPct": round((target / close - 1) * 100, 1), "Qty": qty,
+        "Close": round(close, 2), "Entry": round(close, 2),
+        "Stop": round(s1["Stop"], 2), "Target": round(s1["Target"], 2),
+        "StopDistPct": round(s1["StopDistPct"], 1), "TargetPct": round(s1["TargetPct"], 1),
+        "RR": round(s1["RR"], 2), "StopReason": s1["StopReason"], "TargetReason": s1["TargetReason"],
         "MarketCapCr": int(mcr), "Sector": info.get("sector") or "",
         "ROCE": round(m["ROCE"], 1), "SalesCAGR3": round(m["SalesCAGR"], 1), "ProfitCAGR3": round(m["ProfitCAGR"], 1),
         "DebtEquity": "" if de is None else de,
@@ -579,7 +645,8 @@ for s1, info, mcr, m in passed:
         "Positives": "; ".join(pos), "Warning": "; ".join(warn),
     })
 
-cols = ["Date", "Symbol", "Score", "Band", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "Qty",
+cols = ["Date", "Symbol", "Score", "Band", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct",
+        "RR", "StopReason", "TargetReason",
         "MarketCapCr", "Sector", "ROCE", "SalesCAGR3", "ProfitCAGR3", "DebtEquity", "QSalesYoY", "QProfitYoY",
         "PromoterPct", "PledgeOfPromoterPct", "InstPct", "Analysts", "PEG", "Ret1Y", "Trend", "RS6M",
         "Positives", "Warning"]
@@ -598,5 +665,5 @@ if len(rj):
     print("తిరస్కరణ కారణాలు:")
     print(rj["Reason"].value_counts().to_string())
 if len(out):
-    print(out.head(10)[["Symbol", "Score", "ROCE", "SalesCAGR3", "ProfitCAGR3", "MarketCapCr"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Score", "ROCE", "SalesCAGR3", "ProfitCAGR3", "MarketCapCr", "RR"]].to_string(index=False))
 print("సమయం: %.1f నిమిషాలు" % ((time.time() - START) / 60.0))
