@@ -58,6 +58,13 @@ th{color:var(--mut);font-weight:600}
 .why .ft{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .why div{padding:1px 0}
 .note{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:12.5px;color:var(--mut)}
+.digest{background:linear-gradient(145deg,#161b22,#1c232d);border:1px solid #30363d;border-radius:12px;padding:12px 16px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.digest-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.digest-head b{font-size:14px;color:var(--tx);display:flex;align-items:center;gap:6px}
+.digest-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.digest-item{font-size:13px}
+.digest-item small{display:block;color:var(--mut);font-size:11px}
+.digest-item b{font-size:14px}
 .mh{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:13px;margin-bottom:12px}
 .mh .dot{width:10px;height:10px;border-radius:50%;background:#444c56;display:inline-block}
 .mh.Favorable .dot{background:var(--g)}.mh.Cautious .dot{background:var(--y)}.mh.Weak .dot{background:var(--r)}
@@ -92,6 +99,20 @@ th{color:var(--mut);font-weight:600}
 <h1>Venkey's Stock Radar</h1>
 <div class="sub" id="meta">Loading...</div>
 <div id="stale"></div>
+
+<div class="digest" id="digest_box">
+  <div class="digest-head">
+    <b>&#9889; Daily Radar Digest (EOD Highlights)</b>
+    <span class="tag smart" id="d_date">-</span>
+  </div>
+  <div class="digest-grid">
+    <div class="digest-item"><small>Fresh Breakouts Today</small><b class="pos" id="d_new">-</b></div>
+    <div class="digest-item"><small>Double Conviction (Smart + Radar)</small><b class="pos" id="d_smart">-</b></div>
+    <div class="digest-item"><small>Top Strong Sector</small><b class="amb" id="d_sector">-</b></div>
+    <div class="digest-item"><small>Market Health Signal</small><b id="d_health">-</b></div>
+  </div>
+</div>
+
 <a class="mh" id="mh" href="/health"><span class="dot"></span><span id="mh_txt">Market Health</span></a>
 <a class="mh" href="/events" style="margin-left:6px">Events</a>
 <div class="tabs">
@@ -586,6 +607,33 @@ function loadHist(){
     })));
 }
 
+function updateDigest(){
+  const ds=[];
+  ['ultra','short','early','smart'].forEach(k=>{(DATA[k]||[]).forEach(r=>{if(r.Date&&r.Date!='Quarterly Filing') ds.push(r.Date);});});
+  ds.sort();
+  const d=ds.length?ds[ds.length-1]:'-';
+  $('d_date').textContent=d;
+
+  let freshCnt=0;
+  (DATA.early||[]).forEach(r=>{if(r.Stage=='Fresh'||r.Stage=='Ready') freshCnt++;});
+  const uNew=NEWSET['ultra']?NEWSET['ultra'].size:0;
+  $('d_new').textContent=(freshCnt+uNew)+' stocks (Early/Ultra)';
+
+  const dConv=(DATA.smart||[]).filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar').length;
+  $('d_smart').textContent=dConv+' stocks on radar';
+
+  const sCounts={};
+  ['ultra','short','early','multi','quality'].forEach(k=>{
+    (DATA[k]||[]).forEach(r=>{
+      const s=r.Sector;
+      if(s&&s!='n/a') sCounts[s]=(sCounts[s]||0)+1;
+    });
+  });
+  let topSec='-',topN=0;
+  Object.keys(sCounts).forEach(s=>{if(sCounts[s]>topN){topN=sCounts[s];topSec=s;}});
+  $('d_sector').textContent=topSec!='-'?(topSec+' ('+topN+' setups)'):'Diverse';
+}
+
 function evHtml(sym){
   const list=EV[sym]||[];
   if(!list.length) return '';
@@ -680,7 +728,7 @@ function drawChart(d,lv){
     if(!has(v)||!isFinite(+v)) return;
     const yy=y(+v);
     s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+a[2]+'" stroke-width="1.5" stroke-dasharray="6 4"/>'
-      +'<text x="'+(L+4)+'" y="'+(yy-4)+'" fill daylight="'+a[2]+'" font-size="12" font-weight="700">'+a[1]+' '+(+v).toFixed(2)+'</text>';
+      +'<text x="'+(L+4)+'" y="'+(yy-4)+'" fill="'+a[2]+'" font-size="12" font-weight="700">'+a[1]+' '+(+v).toFixed(2)+'</text>';
   });
   s+='<text x="'+L+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11">'+d.d[0]+'</text>'
     +'<text x="'+(W-R)+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11" text-anchor="end">'+d.d[n-1]+'</text>';
@@ -1503,7 +1551,7 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('results').catch(()=>{DATA.results=[];}))
  .then(()=>Promise.all(['exul','exsh','exnl','exea'].map(k=>load(k).catch(()=>{DATA[k]=[];}))))
  .then(()=>loadHist())
- .then(()=>{buildEv();buildNew();buildRes();checkStale();updTab();show('ultra');})
+ .then(()=>{buildEv();buildNew();buildRes();checkStale();updateDigest();updTab();show('ultra');})
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
 
 fetch('data/market_health.json?v='+Date.now())
@@ -1516,6 +1564,11 @@ fetch('data/market_health.json?v='+Date.now())
    const sc=isFinite(+d.Score)?(' ('+d.Score+'/100)'):'';
    $('mh').className='mh '+st;
    $('mh_txt').textContent='Market Health: '+st+sc;
+   const dh=$('d_health');
+   if(dh){
+     dh.className=st=='Favorable'?'pos':(st=='Weak'?'neg':'amb');
+     dh.textContent=st+sc;
+   }
  })
  .catch(()=>{});
 
