@@ -25,6 +25,7 @@ label{color:var(--mut);font-size:13px}
 .tag.new{border-color:var(--g);color:var(--g);font-weight:700}
 .tag.hold{border-color:var(--b);color:var(--b);font-weight:700}
 .tag.late{border-color:var(--y);color:var(--y);font-weight:700}
+.tag.smart{border-color:#a371f7;color:#a371f7;font-weight:700}
 .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
 .n{background:#0e1117;border-radius:8px;padding:6px 8px}
 .n small{display:block;color:var(--mut);font-size:11px}
@@ -99,6 +100,7 @@ th{color:var(--mut);font-weight:600}
   <button id="t_multi" onclick="show('multi')">Multibagger (1-3 years)</button>
   <button id="t_quality" onclick="show('quality')">Quality Compounders</button>
   <button id="t_newl" onclick="show('newl')">New Listings</button>
+  <button id="t_smart" onclick="show('smart')">Smart Money</button>
   <button id="t_mine" onclick="show('mine')">My Stocks</button>
   <button id="t_results" onclick="show('results')">Results Calendar</button>
   <button id="t_perf" onclick="show('perf')">Performance</button>
@@ -184,6 +186,32 @@ th{color:var(--mut);font-weight:600}
     </select>
   </div>
   <div class="grid" id="list_newl"></div>
+</div>
+
+<div id="smart" style="display:none">
+  <div class="note">Smart Money: Track institutional holdings and prominent super investors (Ashish Kacholia, Vijay Kedia, Mukul Agrawal, Quant MF, Nippon Small Cap, etc.). Combines quarterly shareholding filings and recent bulk deals with our Radar technical setups. "Double Conviction" highlights stocks that Smart Money holds and also appear on our technical radar.</div>
+  <div class="bar">
+    <select id="sm_type" onchange="drawSmart()">
+      <option value="">All Smart Money</option>
+      <option value="Super Investor">Super Investors</option>
+      <option value="Mutual Fund / DII">Mutual Funds &amp; DII</option>
+      <option value="FII">FII</option>
+    </select>
+    <select id="sm_cap" onchange="drawSmart()">
+      <option value="">Any Market Cap</option>
+      <option value="Micro Cap">Micro Cap (&lt; 1,000 cr)</option>
+      <option value="Small Cap">Small Cap (1,000 - 15,000 cr)</option>
+      <option value="Mid Cap">Mid Cap (15,000 - 50,000 cr)</option>
+      <option value="Large Cap">Large Cap (&gt; 50,000 cr)</option>
+    </select>
+    <select id="sm_rad" onchange="drawSmart()">
+      <option value="">All Stocks</option>
+      <option value="radar">Only on Technical Radar</option>
+    </select>
+    <input type="text" id="sm_search" placeholder="Search investor / stock" oninput="drawSmart()">
+  </div>
+  <div class="stats" id="sm_stats"></div>
+  <div class="grid" id="list_smart"></div>
 </div>
 
 <div id="mine" style="display:none">
@@ -289,9 +317,9 @@ Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv'};
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv'};
 const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['early','exea','Early Movers'],['newl','exnl','New Listing']];
-const STALE_DAYS=3; // data ఇన్ని రోజులకు మించి పాతదైతే ఎరుపు హెచ్చరిక
+const STALE_DAYS=3;
 let cur='ultra',DATA={},EV={};
 let NEWSET={ultra:new Set(),short:new Set()},NEWOK=false;
 let HIST={ultra:null,short:null};
@@ -308,6 +336,7 @@ const HDR_E=['Stock','Score','Stage','Entry','Stop','Target','Risk / target','']
 const HDR_Q=['Stock','Score','Sector','Entry','Stop','Target','Quality',''];
 const HDR_N=['Stock','Score','Listed','Entry','Stop','Target','Since listing',''];
 const HDR_MINE=['Stock','Status','Price','Entry','Stop','Target','Performance',''];
+const HDR_SMART=['Stock','Investor','Type','Action','Holding','Market Cap','Radar Setup',''];
 
 function syncView(){
   $('v_list').className=VIEW=='list'?'on':'';
@@ -332,6 +361,18 @@ function rowCells(tab,r,ns){
   const rs=RES[r.Symbol||r.sym];
   const al=(rs&&rs.n<=7)?'<span class="amb" title="Results in '+rs.n+' days">&#9888;</span>':'<span></span>';
   let info,extra;
+  if(tab=='smart'){
+    const isRadar=r.RadarSetup&&r.RadarSetup!='Not on radar';
+    const radTxt=isRadar?'<b class="pos">&#128293; '+esc(r.RadarSetup)+'</b>':'<span class="na">Not on radar</span>';
+    return '<span><b>'+esc(r.Symbol)+'</b></span>'
+      +'<span><b>'+esc(r.Investor)+'</b></span>'
+      +'<span class="hm"><span class="tag smart">'+esc(r.Type)+'</span></span>'
+      +'<span>'+esc(r.Action)+'</span>'
+      +'<span><b>'+esc(r.HoldingPct)+'</b></span>'
+      +'<span class="hm">'+esc(r.Category)+'</span>'
+      +'<span class="hm">'+radTxt+'</span>'
+      +al;
+  }
   if(tab=='mine'){
     const c=r._cur;
     const pct=r._pct;
@@ -450,10 +491,8 @@ function explain(s){
 
 function fmt(x){return (+x).toLocaleString('en-IN',{maximumFractionDigits:2});}
 function has(v){return v!==undefined&&v!==null&&String(v).trim()!=='';}
-// Banks/NBFC (Financial Services) కి ROCE బదులు ROE; ఆ విలువ csv లో ROCE column లోనే ఉంటుంది
 function roeLbl(r){return (r&&r.Sector=='Financial Services')?'ROE':'ROCE';}
 
-// Stop/Target ఎందుకు ఆ స్థాయిలో ఉన్నాయో చూపే బాక్స్ (RR, StopReason, TargetReason columns ఉన్నప్పుడు మాత్రమే)
 function lvlHtml(r){
   if(!has(r.StopReason)&&!has(r.TargetReason)&&!has(r.RR)) return '';
   return '<div class="why"><div class="ft">Why these levels?</div>'
@@ -508,7 +547,6 @@ function buildEv(){
   });
 }
 
-// పాత పద్ధతి (నిన్నటి saved జాబితా లేనప్పుడు): performance.csv లో SignalDate = data తేదీ అయిన వాటిని "కొత్త" అంటుంది
 function buildNew(){
   NEWSET={ultra:new Set(),short:new Set()};
   NEWOK=(DATA.perf||[]).length>0;
@@ -522,7 +560,6 @@ function buildNew(){
   });
 }
 
-// కొత్త పద్ధతి: data/history లో ఈ data తేదీ కంటే ముందున్న చివరి saved జాబితాను తెస్తుంది
 function loadHist(){
   return fetch('data/history/index.json?v='+Date.now())
     .then(r=>r.ok?r.json():{})
@@ -644,7 +681,6 @@ function drawChart(d,lv){
 }
 
 function fixWarn(w){
-  // "; " తో విడిపోయిన "it may block the 15% target" ముక్కను ముందు వాక్యంతో కలుపుతుంది
   const out=[];
   w.forEach(x=>{
     if(/^it may block/i.test(x.trim())&&out.length) out[out.length-1]+='; '+x.trim();
@@ -912,13 +948,64 @@ function drawEarly(){
   $('meta').textContent='Early Movers | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
+// ===== Smart Money =====
+function drawSmart(){
+  const rows=DATA.smart||[];
+  const t=$('sm_type').value, c=$('sm_cap').value, rad=$('sm_rad').value, q=$('sm_search').value.trim().toUpperCase();
+  const list=rows.filter(r=>{
+    if(t&&r.Type!=t) return false;
+    if(c&&r.Category!=c) return false;
+    if(rad=='radar'&&(r.RadarSetup=='Not on radar'||!r.RadarSetup)) return false;
+    if(q&&r.Symbol.toUpperCase().indexOf(q)<0&&r.Investor.toUpperCase().indexOf(q)<0&&String(r.Sector).toUpperCase().indexOf(q)<0) return false;
+    return true;
+  });
+
+  const cards=list.map(r=>{
+    const isRadar=r.RadarSetup&&r.RadarSetup!='Not on radar';
+    const radBadge=isRadar?'<div class="goodl" style="margin:6px 0">&#128293; <b>On Technical Radar: '+esc(r.RadarSetup)+'</b> (Double Conviction)</div>':'';
+    const px=(r.ClosePrice&&r.ClosePrice!='n/a')?'<b>Rs '+fmt(r.ClosePrice)+'</b>':'n/a';
+    const mc=(r.MarketCapCr&&r.MarketCapCr!='n/a')?'<b>Rs '+fmt(r.MarketCapCr)+' cr</b> ('+esc(r.Category)+')':'n/a';
+    const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
+    const mockR={Symbol:r.Symbol,Entry:r.ClosePrice,Stop:'',Target:''};
+
+    return '<div class="card"><div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="tag smart">'+esc(r.Type)+'</span></div>'
+      +'<div class="tags"><span class="tag">'+esc(r.Category)+'</span><span class="tag">'+esc(r.Sector||'Sector n/a')+'</span><span class="tag hold">'+esc(r.Action)+'</span></div>'
+      +resLine(r.Symbol)
+      +'<div class="exp"><b>'+esc(r.Investor)+'</b> holds <b>'+esc(r.HoldingPct)+'</b> ('+esc(r.Source)+')</div>'
+      +radBadge
+      +'<div class="fund"><div class="ft">Snapshot</div>'
+      +row('Latest Close',px)
+      +row('Market Cap',mc)
+      +row('Sector',esc(r.Sector||'n/a'))
+      +'</div>'
+      +chartBtn(mockR)
+      +profHtml(r.Symbol)
+      +evHtml(r.Symbol)
+      +'</div>';
+  });
+
+  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('smart',r,null),card:cards[i]}));
+  renderItems('list_smart','smart',items,HDR_SMART,'No Smart Money stocks match this filter.');
+
+  const totalInv=new Set(rows.map(r=>r.Investor)).size;
+  const onRad=rows.filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar').length;
+  const smalls=rows.filter(r=>r.Category=='Small Cap'||r.Category=='Micro Cap').length;
+  const box=(l,v,cls)=>'<div class="st"><small>'+l+'</small><b class="'+(cls||'')+'">'+v+'</b></div>';
+  $('sm_stats').innerHTML=box('Total Tracked',rows.length)
+    +box('Super Investors & Funds',totalInv)
+    +box('Small & Micro Cap',smalls,'pos')
+    +box('Double Conviction (On Radar)',onRad,'amb');
+
+  $('meta').textContent='Smart Money tracking (Institutional & Super Investors) | Showing '+list.length+' of '+rows.length+' tracked entries';
+}
+
 // ===== My Stocks (Watching / Holding) =====
 function loadMine(){try{return JSON.parse(localStorage.getItem('mystocks')||'[]')||[];}catch(e){return [];}}
 function saveMine(a){try{localStorage.setItem('mystocks',JSON.stringify(a));}catch(e){alert('Could not save in this browser (storage blocked?).');}}
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function nz(v){return (v===null||v===undefined||v==='')?'n/a':fmt(v);}
 function updTab(){const n=loadMine().length;$('t_mine').textContent='My Stocks'+(n?' ('+n+')':'');}
-function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='quality')drawQuality();else if(cur=='newl')drawNewl();else if(cur=='early')drawEarly();else if(cur=='mine')drawMine();else draw();}
+function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='quality')drawQuality();else if(cur=='newl')drawNewl();else if(cur=='early')drawEarly();else if(cur=='mine')drawMine();else if(cur=='smart')drawSmart();else draw();}
 
 function findRow(sym){
   const order=['short','ultra','early','multi','quality','newl'];
@@ -1172,7 +1259,6 @@ function resetPerf(){$('pscan').value='';$('pclass').value='';$('prad').value=''
 
 const SCAN_LBL={ultra:'Ultra',short:'Short',early:'Early Movers',multi:'Multibagger',quality:'Quality',newl:'New Listings'};
 
-// Stop hit తర్వాత Whipsaw లెక్క: Yes / No / తెలియనివి (ఖాళీ)
 function wsStat(rr){
   const st=rr.filter(r=>r.Result=='Stop hit');
   const y=st.filter(r=>r.Whipsaw=='Yes').length;
@@ -1261,7 +1347,6 @@ function drawMiss(){
   $('meta').textContent='Stocks that rose 15%+ (5 days Ultra / 20 days Short Term) and whether our radar had them | '+rows.length+' shown';
 }
 
-// ===== Excluded (RR వల్ల తొలగినవి) =====
 function resetExcl(){$('escan').value='';$('enear').value='';$('esearch').value='';drawExcl();}
 
 function drawExcl(){
@@ -1290,7 +1375,6 @@ function drawExcl(){
   $('meta').textContent='Excluded because Reward:Risk was below 1:2 | '+rows.length+' shown';
 }
 
-// ===== Sectors heatmap =====
 function drawSect(){
   const b=$('sband').value;
   const src=[['ultra','Ultra Short'],['short','Short Term'],['early','Early Movers'],['multi','Multibagger'],['quality','Quality'],['newl','New Listings']];
@@ -1335,9 +1419,9 @@ function drawSect(){
 
 function show(k){
   cur=k;
-  ['ultra','short','early','multi','quality','newl','mine','results','perf','miss','excl','sect'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  ['ultra','short','early','multi','quality','newl','smart','mine','results','perf','miss','excl','sect'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
-  $('viewbar').style.display=(scanTab||k=='early'||k=='multi'||k=='quality'||k=='newl'||k=='mine')?'flex':'none';
+  $('viewbar').style.display=(scanTab||k=='early'||k=='multi'||k=='quality'||k=='newl'||k=='mine'||k=='smart')?'flex':'none';
   syncView();
   $('perf').style.display=k=='perf'?'block':'none';
   $('miss').style.display=k=='miss'?'block':'none';
@@ -1347,6 +1431,7 @@ function show(k){
   $('multi').style.display=k=='multi'?'block':'none';
   $('quality').style.display=k=='quality'?'block':'none';
   $('newl').style.display=k=='newl'?'block':'none';
+  $('smart').style.display=k=='smart'?'block':'none';
   $('mine').style.display=k=='mine'?'block':'none';
   $('results').style.display=k=='results'?'block':'none';
   $('bar_scan').style.display=scanTab?'flex':'none';
@@ -1360,13 +1445,13 @@ function show(k){
   if(k=='multi'){drawMulti();return;}
   if(k=='quality'){drawQuality();return;}
   if(k=='newl'){drawNewl();return;}
+  if(k=='smart'){drawSmart();return;}
   if(k=='mine'){drawMine();return;}
   if(k=='results'){drawResults();return;}
   $('status').innerHTML='<option value="">All status</option>';
   draw();
 }
 
-// Data status హెచ్చరిక: Ultra/Short csv లలో ఉన్న తాజా Date పాతదైతే పైన బ్యానర్
 function checkStale(){
   const box=$('stale');
   const ds=[];
@@ -1396,6 +1481,7 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('quality').catch(()=>{DATA.quality=[];}))
  .then(()=>load('newl').catch(()=>{DATA.newl=[];}))
  .then(()=>load('early').catch(()=>{DATA.early=[];}))
+ .then(()=>load('smart').catch(()=>{DATA.smart=[];}))
  .then(()=>load('events').catch(()=>{DATA.events=[];}))
  .then(()=>load('results').catch(()=>{DATA.results=[];}))
  .then(()=>Promise.all(['exul','exsh','exnl','exea'].map(k=>load(k).catch(()=>{DATA[k]=[];}))))
@@ -1403,7 +1489,6 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>{buildEv();buildNew();buildRes();checkStale();updTab();show('ultra');})
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
 
-// Market Health badge (separate, never blocks the main page)
 fetch('data/market_health.json?v='+Date.now())
  .then(r=>r.ok?r.text():'')
  .then(t=>{
@@ -1416,14 +1501,14 @@ fetch('data/market_health.json?v='+Date.now())
    $('mh_txt').textContent='Market Health: '+st+sc;
  })
  .catch(()=>{});
-// Company profiles (separate, never blocks the main page)
+
 fetch('data/profiles.json?v='+Date.now())
  .then(r=>r.ok?r.json():null)
  .then(j=>{
    if(j&&j.profiles){
      PROF=j.profiles;
      if(DATA.ultra&&cur=='sect') drawSect();
-     else if(DATA.ultra&&['ultra','short','early','multi','quality','newl','mine'].indexOf(cur)>=0) redrawCur();
+     else if(DATA.ultra&&['ultra','short','early','multi','quality','newl','mine','smart'].indexOf(cur)>=0) redrawCur();
    }
  })
  .catch(()=>{});
