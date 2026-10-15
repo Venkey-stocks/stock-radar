@@ -24,6 +24,7 @@ label{color:var(--mut);font-size:13px}
 .tag{font-size:12px;border:1px solid var(--line);border-radius:20px;padding:1px 8px;color:var(--mut)}
 .tag.new{border-color:var(--g);color:var(--g);font-weight:700}
 .tag.hold{border-color:var(--b);color:var(--b);font-weight:700}
+.tag.late{border-color:var(--y);color:var(--y);font-weight:700}
 .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
 .n{background:#0e1117;border-radius:8px;padding:6px 8px}
 .n small{display:block;color:var(--mut);font-size:11px}
@@ -94,6 +95,7 @@ th{color:var(--mut);font-weight:600}
 <div class="tabs">
   <button id="t_ultra" class="on" onclick="show('ultra')">Ultra Short (1-5 days)</button>
   <button id="t_short" onclick="show('short')">Short Term (1-20 days)</button>
+  <button id="t_early" onclick="show('early')">Early Movers</button>
   <button id="t_multi" onclick="show('multi')">Multibagger (1-3 years)</button>
   <button id="t_quality" onclick="show('quality')">Quality Compounders</button>
   <button id="t_newl" onclick="show('newl')">New Listings</button>
@@ -119,6 +121,25 @@ th{color:var(--mut);font-weight:600}
 </div>
 <div id="chg"></div>
 <div class="grid" id="list"></div>
+
+<div id="early" style="display:none">
+  <div class="note">Early Movers: stocks that are just starting to move (a fresh breakout in the last 10 days) or are ready to break out (just below a 50 or 100-day high, tight range, volume drying up), combined with a fundamentals check where data exists. Nothing is removed for having already risen; instead each stock gets a Stage: Ready (not broken out yet), Fresh (0-3% above the breakout level), Early (3-8%), Extended (8-15%) and Late (above 15%). Fresh and Ready come first. Horizon: Long Term = 100-day breakout with decent fundamentals, otherwise Short Term. Fundamentals come from the Multibagger and Quality scans; stocks not in those scans show n/a (unknown, not zero). Stop-loss and target come from the chart; stocks with Reward:Risk below 1:2 are listed in the Excluded tab. Stages, scores and thresholds are estimates; check the Performance tab over a few weeks before trusting them. Always verify on screener.in.</div>
+  <div class="bar">
+    <select id="yband" onchange="drawEarly()">
+      <option value="">All bands</option>
+      <option>High Conviction</option><option>Good Setup</option><option>Early Watch</option>
+    </select>
+    <select id="ystage" onchange="drawEarly()">
+      <option value="">All stages</option>
+      <option>Ready</option><option>Fresh</option><option>Early</option><option>Extended</option><option>Late</option>
+    </select>
+    <select id="yhor" onchange="drawEarly()">
+      <option value="">Both horizons</option>
+      <option>Short Term</option><option>Long Term</option>
+    </select>
+  </div>
+  <div class="grid" id="list_early"></div>
+</div>
 
 <div id="multi" style="display:none">
   <div class="note">Weekly scan (updated every Saturday). Quality companies with fast 3-year sales and profit growth, high ROCE, positive cash flow and a price that has not already run up. Meant for 1-3 years. Stop-loss and target come from the chart (swing low, ATR, nearest resistance); a very wide stop is shown as a warning, so decide your own position size. Ranked by score; you pick the top few. Always verify ROCE and growth on screener.in before buying. Not checked: auditor changes and related-party transactions.</div>
@@ -228,10 +249,10 @@ th{color:var(--mut);font-weight:600}
 </div>
 
 <div id="excl" style="display:none">
-  <div class="note">Stocks that passed the setup checks but were dropped because the Reward:Risk was below 1:2 (the chart-based target is too close compared with the stop-loss). Shown for the latest scan only; the list is replaced on every run. Ultra Short and Short Term lists are for the last daily run; New Listings only includes stocks with score 50 or more. Stocks removed because of NSE ASM/GSM are not listed here. "Near" = Reward:Risk of 1.5 or more. This is a check on whether our stop/target rules are too strict, not a buy list.</div>
+  <div class="note">Stocks that passed the setup checks but were dropped because the Reward:Risk was below 1:2 (the chart-based target is too close compared with the stop-loss). Shown for the latest scan only; the list is replaced on every run. Ultra Short, Short Term and Early Movers lists are for the last daily run; New Listings only includes stocks with score 50 or more. Stocks removed because of NSE ASM/GSM are not listed here. "Near" = Reward:Risk of 1.5 or more. This is a check on whether our stop/target rules are too strict, not a buy list.</div>
   <div class="bar">
     <select id="escan" onchange="drawExcl()">
-      <option value="">All scans</option><option value="ultra">Ultra Short</option><option value="short">Short Term</option><option value="newl">New Listings</option>
+      <option value="">All scans</option><option value="ultra">Ultra Short</option><option value="short">Short Term</option><option value="early">Early Movers</option><option value="newl">New Listings</option>
     </select>
     <select id="enear" onchange="drawExcl()">
       <option value="">All Reward:Risk</option><option value="near">Near (R:R 1.5 or more)</option>
@@ -268,8 +289,8 @@ Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv'};
-const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['newl','exnl','New Listing']];
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv'};
+const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['early','exea','Early Movers'],['newl','exnl','New Listing']];
 const STALE_DAYS=3; // data ఇన్ని రోజులకు మించి పాతదైతే ఎరుపు హెచ్చరిక
 let cur='ultra',DATA={},EV={};
 let NEWSET={ultra:new Set(),short:new Set()},NEWOK=false;
@@ -283,6 +304,7 @@ try{VIEW=localStorage.getItem('view')||'list';}catch(e){}
 if(VIEW!='cards') VIEW='list';
 const ROWOPEN={};
 const HDR_SCAN=['Stock','Score','Status','Entry','Stop','Target','Risk / target',''];
+const HDR_E=['Stock','Score','Stage','Entry','Stop','Target','Risk / target',''];
 const HDR_Q=['Stock','Score','Sector','Entry','Stop','Target','Quality',''];
 const HDR_N=['Stock','Score','Listed','Entry','Stop','Target','Since listing',''];
 
@@ -311,6 +333,9 @@ function rowCells(tab,r,ns){
   let info,extra;
   if(tab=='ultra'||tab=='short'){
     info=[(ns&&ns.has(r.Symbol))?'NEW':'',r.Status,r.Class].filter(Boolean).join(' &middot; ');
+    extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
+  } else if(tab=='early'){
+    info=[r.Stage,r.Horizon].filter(Boolean).join(' &middot; ');
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
   } else if(tab=='newl'){
     info=esc(r.ListedOn||'n/a');
@@ -821,16 +846,64 @@ function drawNewl(){
   $('meta').textContent='New Listings (less than 120 days of history, price-only scan) | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
+// ===== Early Movers =====
+function drawEarly(){
+  const rows=DATA.early||[];
+  const b=$('yband').value, sg=$('ystage').value, hz=$('yhor').value;
+  const list=rows.filter(r=>(!b||r.Band==b)&&(!sg||r.Stage==sg)&&(!hz||r.Horizon==hz))
+    .sort((a,c)=>((+a.StageOrd)-(+c.StageOrd))||((+c.Score)-(+a.Score)));
+  const na='<b class="na">n/a</b>';
+  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
+  const cards=list.map(r=>{
+    const cls=r.Band.split(' ')[0];
+    const stCls=(r.Stage=='Fresh'||r.Stage=='Ready')?' new':((r.Stage=='Extended'||r.Stage=='Late')?' late':'');
+    const tags='<span class="tag'+stCls+'">'+esc(r.Stage)+'</span>'
+      +'<span class="tag">'+esc(r.Horizon)+'</span>'
+      +'<span class="tag">'+esc(r.Status)+'</span>'
+      +'<span class="tag">'+esc(has(r.Sector)?r.Sector:'Sector n/a')+'</span>';
+    let ex;
+    if(r.Status=='Breakout') ex='Price broke above its recent high '+esc(r.DaysSince)+' day(s) ago on higher volume and is now '+esc(r.GainPct)+'% from the breakout level (Rs '+fmt(r.Level)+').';
+    else ex='Price is just below its recent high (Rs '+fmt(r.Level)+') in a tight range with falling volume. Wait for a close above it with strong volume.';
+    const why=has(r.Reasons)?'<div class="why"><div class="ft">Why is it early?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+esc(x)+'</div>').join('')+'</div>':'';
+    const fs=(has(r.FundScore)&&r.FundScore!=='n/a')?'<b class="'+(+r.FundScore>=60?'pos':(+r.FundScore>=40?'amb':'neg'))+'">'+esc(r.FundScore)+' / 100</b>':na;
+    const fparts=has(r.Fundamentals)?r.Fundamentals.split(' | '):[];
+    const pl=has(r.PledgePct)&&r.PledgePct!=='n/a'?pledgeHtml(r.PledgePct,na):na;
+    const wl=has(r.Warning)?r.Warning.split('; '):[];
+    return '<div class="card"><div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags">'+tags+'</div>'
+    +resLine(r.Symbol)
+    +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
+    +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
+    +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
+    +'<div class="exp">'+ex+' Last close: '+fmt(r.Close)+'.</div>'
+    +chartBtn(r)
+    +lvlHtml(r)
+    +why
+    +'<div class="fund"><div class="ft">Fundamentals check</div>'
+    +row('Fundamental score',fs)
+    +fparts.map(x=>'<div class="exp" style="margin:0">&#8226; '+esc(x)+'</div>').join('')
+    +row('Promoter holding',has(r.PromoterPct)&&r.PromoterPct!=='n/a'?'<b>'+esc(r.PromoterPct)+'%</b>':na)
+    +row('Promoter pledge',pl)+'</div>'
+    +evHtml(r.Symbol)
+    +(wl.length?'<div class="warn">&#9888; '+wl.map(esc).join('<br>&#9888; ')+'</div>':'')
+    +'</div>';
+  });
+  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('early',r,null),card:cards[i]}));
+  renderItems('list_early','early',items,HDR_E,'No Early Movers match (the market may be weak, or the scan has not run yet).');
+  const d=rows[0]?rows[0].Date:'-';
+  $('meta').textContent='Early Movers | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
+}
+
 // ===== My Stocks (Watching / Holding) =====
 function loadMine(){try{return JSON.parse(localStorage.getItem('mystocks')||'[]')||[];}catch(e){return [];}}
 function saveMine(a){try{localStorage.setItem('mystocks',JSON.stringify(a));}catch(e){alert('Could not save in this browser (storage blocked?).');}}
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function nz(v){return (v===null||v===undefined||v==='')?'n/a':fmt(v);}
 function updTab(){const n=loadMine().length;$('t_mine').textContent='My Stocks'+(n?' ('+n+')':'');}
-function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='quality')drawQuality();else if(cur=='newl')drawNewl();else if(cur=='mine')drawMine();else draw();}
+function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='quality')drawQuality();else if(cur=='newl')drawNewl();else if(cur=='early')drawEarly();else if(cur=='mine')drawMine();else draw();}
 
 function findRow(sym){
-  const order=['short','ultra','multi','quality','newl'];
+  const order=['short','ultra','multi','quality','early','newl'];
   for(let i=0;i<order.length;i++){
     const r=(DATA[order[i]]||[]).find(x=>x.Symbol==sym);
     if(r) return r;
@@ -1050,7 +1123,7 @@ function resLine(sym){
 function drawResults(){
   const q=$('rsearch').value.trim().toUpperCase(), f=$('rfilter').value;
   const tag={};
-  [['ultra','Ultra'],['short','Short'],['multi','Multibagger'],['quality','Quality'],['newl','New Listing']].forEach(a=>{
+  [['ultra','Ultra'],['short','Short'],['early','Early Movers'],['multi','Multibagger'],['quality','Quality'],['newl','New Listing']].forEach(a=>{
     (DATA[a[0]]||[]).forEach(r=>{(tag[r.Symbol]=tag[r.Symbol]||[]).push(a[1]);});
   });
   loadMine().forEach(m=>{(tag[m.sym]=tag[m.sym]||[]).push('My Stocks');});
@@ -1178,7 +1251,7 @@ function drawExcl(){
   const cnt=k=>all.filter(r=>r._s==k).length;
   const near=base.filter(r=>(+r.RR)>=1.5).length;
   $('estats').innerHTML=box('Excluded (all scans)',all.length)
-    +box('Ultra Short',cnt('ultra'))+box('Short Term',cnt('short'))+box('New Listings',cnt('newl'))
+    +box('Ultra Short',cnt('ultra'))+box('Short Term',cnt('short'))+box('Early Movers',cnt('early'))+box('New Listings',cnt('newl'))
     +box('Near (R:R 1.5+) in view',near,'amb');
   $('etable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Status</th><th>Entry</th><th>Stop</th><th>Target</th><th>R:R</th><th>Risk %</th><th>Target %</th><th>Why stop here</th><th>Why target here</th></tr>'
    +(rows.length?rows.map(r=>{
@@ -1237,14 +1310,15 @@ function drawSect(){
 
 function show(k){
   cur=k;
-  ['ultra','short','multi','quality','newl','mine','results','perf','miss','excl','sect'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  ['ultra','short','early','multi','quality','newl','mine','results','perf','miss','excl','sect'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
-  $('viewbar').style.display=(scanTab||k=='multi'||k=='quality'||k=='newl')?'flex':'none';
+  $('viewbar').style.display=(scanTab||k=='early'||k=='multi'||k=='quality'||k=='newl')?'flex':'none';
   syncView();
   $('perf').style.display=k=='perf'?'block':'none';
   $('miss').style.display=k=='miss'?'block':'none';
   $('excl').style.display=k=='excl'?'block':'none';
   $('sect').style.display=k=='sect'?'block':'none';
+  $('early').style.display=k=='early'?'block':'none';
   $('multi').style.display=k=='multi'?'block':'none';
   $('quality').style.display=k=='quality'?'block':'none';
   $('newl').style.display=k=='newl'?'block':'none';
@@ -1257,6 +1331,7 @@ function show(k){
   if(k=='miss'){drawMiss();return;}
   if(k=='excl'){drawExcl();return;}
   if(k=='sect'){drawSect();return;}
+  if(k=='early'){drawEarly();return;}
   if(k=='multi'){drawMulti();return;}
   if(k=='quality'){drawQuality();return;}
   if(k=='newl'){drawNewl();return;}
@@ -1295,9 +1370,10 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('multi').catch(()=>{DATA.multi=[];}))
  .then(()=>load('quality').catch(()=>{DATA.quality=[];}))
  .then(()=>load('newl').catch(()=>{DATA.newl=[];}))
+ .then(()=>load('early').catch(()=>{DATA.early=[];}))
  .then(()=>load('events').catch(()=>{DATA.events=[];}))
  .then(()=>load('results').catch(()=>{DATA.results=[];}))
- .then(()=>Promise.all(['exul','exsh','exnl'].map(k=>load(k).catch(()=>{DATA[k]=[];}))))
+ .then(()=>Promise.all(['exul','exsh','exnl','exea'].map(k=>load(k).catch(()=>{DATA[k]=[];}))))
  .then(()=>loadHist())
  .then(()=>{buildEv();buildNew();buildRes();checkStale();updTab();show('ultra');})
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
@@ -1322,7 +1398,7 @@ fetch('data/profiles.json?v='+Date.now())
    if(j&&j.profiles){
      PROF=j.profiles;
      if(DATA.ultra&&cur=='sect') drawSect();
-     else if(DATA.ultra&&['ultra','short','multi','quality','newl','mine'].indexOf(cur)>=0) redrawCur();
+     else if(DATA.ultra&&['ultra','short','early','multi','quality','newl','mine'].indexOf(cur)>=0) redrawCur();
    }
  })
  .catch(()=>{});
