@@ -12,12 +12,11 @@ MIN_RR = 2.0
 BREAKOUT_VOL = 1.3          # breakout రోజు volume కనీసం ఇంత రెట్లు (అంచనా)
 LOOKBACK_DAYS = 10          # గత ఇన్ని రోజుల్లో breakout అయితే "early"
 
-# Short / Long horizon కి stop-target గుణకాలు (అంచనా)
 PARAMS = {
     "Short Term": dict(swing=40, buf=0.3, minatr=1.5, maxatr=10.0, nores=5.0, wide=10.0),
     "Long Term": dict(swing=120, buf=0.5, minatr=2.5, maxatr=25.0, nores=15.0, wide=25.0),
 }
-# Stage: breakout level నుండి పెరుగుదల % (అంచనా) -> (పేరు, score తగ్గింపు, order)
+# Stage: breakout level నుండి పెరుగుదల % (అంచనా) -> (పరిమితి, పేరు, score తగ్గింపు, order)
 STAGES = [(3, "Fresh", 0, 0), (8, "Early", -4, 2), (15, "Extended", -10, 3), (9999, "Late", -15, 4)]
 
 rej_rows = []
@@ -76,68 +75,86 @@ def norm(s):
     return str(s).upper().replace(".NS", "").strip()
 
 
-# ---------- Fundamentals (data/fundamentals.csv, column పేర్లు ఆటోమాటిక్ గా గుర్తిస్తాం) ----------
+def num(x):
+    try:
+        v = float(x)
+        return v if not np.isnan(v) else np.nan
+    except Exception:
+        return np.nan
+
+
+# ---------- Fundamentals: fundamentals.csv + multibagger.csv + quality.csv ----------
 FUND = {}
-if os.path.exists("data/fundamentals.csv"):
-    fd = pd.read_csv("data/fundamentals.csv")
-    cols = {c.lower().replace(" ", "").replace("_", ""): c for c in fd.columns}
 
-    def pick(*keys):
-        for lc, orig in cols.items():
-            if all(k in lc for k in keys):
-                return orig
-        return None
 
-    c_sym = pick("symbol") or fd.columns[0]
-    c_sales = pick("sales", "growth") or pick("revenue", "growth")
-    c_prof = pick("profit", "growth") or pick("pat", "growth") or pick("earnings", "growth")
-    c_roce = pick("roce")
-    c_debt = pick("debt")
-    print("fundamentals columns గుర్తించినవి -> symbol:", c_sym, "| sales:", c_sales,
-          "| profit:", c_prof, "| roce:", c_roce, "| debt:", c_debt)
+def load_csv(path, fields, tag):
+    """fields: {అంతర్గత పేరు: [సాధ్యమైన column పేర్లు]}"""
+    if not os.path.exists(path):
+        print("హెచ్చరిక:", path, "లేదు")
+        return
+    d = pd.read_csv(path)
+    lower = {c.lower(): c for c in d.columns}
+    found = {}
+    for key, names in fields.items():
+        for nm in names:
+            if nm.lower() in lower:
+                found[key] = lower[nm.lower()]
+                break
+    print(path, "-> columns:", found)
+    if "Symbol" not in lower:
+        return
+    sc = lower["symbol"]
+    for _, r in d.iterrows():
+        k = norm(r[sc])
+        e = FUND.setdefault(k, {})
+        for key, col in found.items():
+            val = r[col]
+            if key == "Sector":
+                if isinstance(val, str) and val.strip():
+                    e[key] = val.strip()
+            else:
+                v = num(val)
+                if not np.isnan(v):
+                    e[key] = v
+        if tag == "scan":
+            e["Src"] = "Multibagger/Quality scan"
 
-    def numcol(name):
-        return pd.to_numeric(fd[name], errors="coerce") if name else pd.Series([np.nan] * len(fd))
 
-    sales_s, prof_s, roce_s, debt_s = numcol(c_sales), numcol(c_prof), numcol(c_roce), numcol(c_debt)
-    # growth fraction (0.15) గా ఉంటే % (15) గా మారుస్తాం
-    if sales_s.abs().median() < 2:
-        sales_s = sales_s * 100
-    if prof_s.abs().median() < 2:
-        prof_s = prof_s * 100
-    if debt_s.median() > 5:
-        debt_s = debt_s / 100
-    for i, s_ in enumerate(fd[c_sym].astype(str)):
-        FUND[norm(s_)] = (sales_s.iloc[i], prof_s.iloc[i], roce_s.iloc[i], debt_s.iloc[i])
-else:
-    print("హెచ్చరిక: data/fundamentals.csv లేదు, fundamentals n/a గా ఉంటాయి.")
+load_csv("data/fundamentals.csv", {
+    "Sector": ["Sector"], "Promoter": ["PromoterPct"], "Pledge": ["PledgePct"],
+    "Debt": ["DebtEquity"], "DaysRes": ["DaysToResults"], "MCap": ["MarketCapCr"]}, "base")
+for p in ("data/quality.csv", "data/multibagger.csv"):       # multibagger చివరగా, అదే ప్రాధాన్యత
+    load_csv(p, {
+        "Sector": ["Sector"], "ROCE": ["ROCE"], "SalesCAGR": ["SalesCAGR3"],
+        "ProfitCAGR": ["ProfitCAGR3"], "Debt": ["DebtEquity"], "QSales": ["QSalesYoY"],
+        "QProfit": ["QProfitYoY"], "Promoter": ["PromoterPct"],
+        "Pledge": ["PledgeOfPromoterPct", "PledgePct"]}, "scan")
 
 
 def fund_eval(sym):
-    t = FUND.get(norm(sym))
-    if t is None:
+    e = FUND.get(norm(sym))
+    if not e:
         return None, "Fundamentals: n/a"
-    sg, pg, roce, de = t
-    pts, known = 0, 0
-    if not np.isnan(sg):
-        known += 1
-        pts += sg > 10
-    if not np.isnan(pg):
-        known += 1
-        pts += pg > 15
-    if not np.isnan(roce):
-        known += 1
-        pts += roce > 15
-    if not np.isnan(de):
-        known += 1
-        pts += de < 1
-    f = lambda x, u="": ("%.1f%s" % (x, u)) if not np.isnan(x) else "n/a"
-    txt = "Sales growth %s | Profit growth %s | ROCE %s | Debt/Equity %s" % (
-        f(sg, "%"), f(pg, "%"), f(roce, "%"), f(de))
-    if known < 2:
+    checks = [("ROCE", "ROCE", lambda x: x > 15, "%"),
+              ("SalesCAGR", "Sales growth 3y", lambda x: x > 15, "%"),
+              ("ProfitCAGR", "Profit growth 3y", lambda x: x > 15, "%"),
+              ("QSales", "Qtr sales YoY", lambda x: x > 10, "%"),
+              ("QProfit", "Qtr profit YoY", lambda x: x > 10, "%"),
+              ("Debt", "Debt/Equity", lambda x: x < 1, "")]
+    pts, known, parts = 0, 0, []
+    for key, label, ok, unit in checks:
+        v = e.get(key, np.nan)
+        if np.isnan(v):
+            parts.append("%s n/a" % label)
+        else:
+            known += 1
+            pts += 1 if ok(v) else 0
+            parts.append("%s %.1f%s" % (label, v, unit))
+    txt = " | ".join(parts)
+    if known < 3:                       # 3 కంటే తక్కువ తెలిస్తే నమ్మదగిన score ఇవ్వం
         return None, txt
     return pts / known, txt
-
+    
 
 # ---------- data చదవడం ----------
 df = pd.read_csv("data/prices.csv.gz", parse_dates=["Date"])
@@ -177,9 +194,9 @@ def find_breakout(h, l, c, v):
     """గత 10 రోజుల్లో 100 లేదా 50-రోజుల high పైన మొదటి breakout (volume తో), ఇంకా నిలబడి ఉంటే"""
     n = len(c)
     for N in (100, 50):
-        for d in range(LOOKBACK_DAYS - 1, -1, -1):      # పాతదాని నుంచి కొత్తదాని వైపు
+        for d in range(LOOKBACK_DAYS - 1, -1, -1):
             i = n - 1 - d
-            if i - N < 0:
+            if i - N < 0 or i - 30 < 0:
                 continue
             level = h[i - N:i].max()
             va = v[i - 20:i].mean()
@@ -207,7 +224,6 @@ def find_pre(h, l, c, v, dry):
 def analyze(sym, g):
     if len(g) < MIN_ROWS or g["Date"].iloc[-1] != last_date:
         return None
-    o = g["Open"].values
     h = g["High"].values
     l = g["Low"].values
     c = g["Close"].values
@@ -246,7 +262,8 @@ def analyze(sym, g):
             return None
         status = "Pre-Breakout"
         level, N_used = pre
-        days_ago, bvr, depth = 0, vol_ratio, (h[-30:].max() - l[-30:].min()) / h[-30:].max()
+        days_ago, bvr = 0, vol_ratio
+        depth = (h[-30:].max() - l[-30:].min()) / h[-30:].max()
         gain = (close / level - 1) * 100
         stage, stage_pen, stage_ord = "Ready", 0, 1
         entry = level * 1.002
@@ -254,6 +271,11 @@ def analyze(sym, g):
 
     # ---------- Fundamentals & Horizon ----------
     ffrac, ftxt = fund_eval(sym)
+    fe = FUND.get(norm(sym), {})
+    sector = fe.get("Sector", "n/a")
+    prom = fe.get("Promoter", np.nan)
+    pled = fe.get("Pledge", np.nan)
+    days_res = fe.get("DaysRes", np.nan)
     horizon = "Long Term" if (N_used == 100 and ffrac is not None and ffrac >= 0.5) else "Short Term"
     P = PARAMS[horizon]
 
@@ -325,6 +347,7 @@ def analyze(sym, g):
     rsr = float(rs_rank.get(sym, 0.0))
     d52 = (high52 / close - 1) * 100
 
+    # ---------- Warnings (hard filter కాదు) ----------
     warns = []
     if stage == "Extended":
         warns.append("Extended: %.1f%% above breakout level" % gain)
@@ -338,6 +361,14 @@ def analyze(sym, g):
         warns.append("Nifty is below its 50-day average")
     if ffrac is None:
         warns.append("Fundamentals n/a")
+    pledge_pen = 0
+    if not np.isnan(pled) and pled > 20:
+        warns.append("High promoter pledge: %.1f%% of promoter shares" % pled)
+        pledge_pen = -3
+    if not np.isnan(prom) and prom < 30:
+        warns.append("Promoter holding only %.1f%%" % prom)
+    if not np.isnan(days_res) and 0 <= days_res <= 7:
+        warns.append("Results in %d day(s)" % days_res)
 
     rs_ = [trig]
     if depth <= 0.25:
@@ -383,20 +414,23 @@ def analyze(sym, g):
     if main_ret is not None and r63 > main_ret:
         s += 3
     s += stage_pen
+    s += pledge_pen
     if not market_ok:
         s -= 5
     s = round(max(min(s, 100), 0), 1)
     band = "High Conviction" if s >= 80 else ("Good Setup" if s >= 65 else "Early Watch")
 
     return {
-        "Date": date_str, "Symbol": sym, "Status": status, "Stage": stage, "StageOrd": stage_ord,
-        "Horizon": horizon, "Score": s, "Band": band, "Level": round(level, 2),
+        "Date": date_str, "Symbol": sym, "Sector": sector, "Status": status, "Stage": stage,
+        "StageOrd": stage_ord, "Horizon": horizon, "Score": s, "Band": band, "Level": round(level, 2),
         "DaysSince": days_ago, "GainPct": round(gain, 1), "Close": round(close, 2),
         "Entry": round(entry, 2), "Stop": round(stop, 2), "Target": round(target, 2),
         "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1), "RR": round(rr, 2),
         "StopReason": stop_reason, "TargetReason": target_reason, "VolRatio": round(vol_ratio, 2),
         "RSI": round(rsi, 1), "FundScore": ("n/a" if ffrac is None else round(ffrac * 100)),
-        "Fundamentals": ftxt, "Warning": "; ".join(warns), "Reasons": " | ".join(rs_),
+        "Fundamentals": ftxt, "PromoterPct": ("n/a" if np.isnan(prom) else round(prom, 1)),
+        "PledgePct": ("n/a" if np.isnan(pled) else round(pled, 1)),
+        "Warning": "; ".join(warns), "Reasons": " | ".join(rs_),
     }
 
 
@@ -409,9 +443,10 @@ for sym, g in groups.items():
     except Exception as e:
         print("దాటవేసాం", sym, e)
 
-columns = ["Date", "Symbol", "Status", "Stage", "StageOrd", "Horizon", "Score", "Band", "Level",
+columns = ["Date", "Symbol", "Sector", "Status", "Stage", "StageOrd", "Horizon", "Score", "Band", "Level",
            "DaysSince", "GainPct", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR",
-           "StopReason", "TargetReason", "VolRatio", "RSI", "FundScore", "Fundamentals", "Warning", "Reasons"]
+           "StopReason", "TargetReason", "VolRatio", "RSI", "FundScore", "Fundamentals", "PromoterPct",
+           "PledgePct", "Warning", "Reasons"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values(["StageOrd", "Score"], ascending=[True, False])
 rej_cols = ["Date", "Symbol", "Status", "Stage", "Horizon", "Close", "Entry", "Stop", "Target",
@@ -429,4 +464,4 @@ print("మొత్తం ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Stage"].value_counts().to_string())
     print(out["Horizon"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Stage", "Horizon", "Score", "GainPct", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Stage", "Horizon", "Score", "FundScore", "GainPct", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
