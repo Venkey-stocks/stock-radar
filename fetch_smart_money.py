@@ -31,6 +31,7 @@ CORE_PORTFOLIOS = [
     {"Symbol": "TASTYBITE", "Investor": "Mukul Agrawal", "Type": "Super Investor", "Action": "Holding", "HoldingPct": "1.5%"},
     {"Symbol": "GOKEX", "Investor": "Mukul Agrawal", "Type": "Super Investor", "Action": "Holding", "HoldingPct": "3.5%"},
     {"Symbol": "DVL", "Investor": "Mukul Agrawal", "Type": "Super Investor", "Action": "Holding", "HoldingPct": "2.1%"},
+    {"Symbol": "SHILCTECH", "Investor": "Mukul Agrawal", "Type": "Super Investor", "Action": "Holding", "HoldingPct": "1.6%"},
 
     # Quant Mutual Fund (Aggressive Momentum & Growth)
     {"Symbol": "RELIANCE", "Investor": "Quant Mutual Fund", "Type": "Mutual Fund / DII", "Action": "Accumulating", "HoldingPct": "Top Pick"},
@@ -46,6 +47,7 @@ CORE_PORTFOLIOS = [
     {"Symbol": "KPITTECH", "Investor": "Nippon Small Cap Fund", "Type": "Mutual Fund / DII", "Action": "Holding", "HoldingPct": "Top Holding"},
     {"Symbol": "CREDITACC", "Investor": "Nippon Small Cap Fund", "Type": "Mutual Fund / DII", "Action": "Holding", "HoldingPct": "Top Holding"},
     {"Symbol": "ELGIEQUIP", "Investor": "Nippon Small Cap Fund", "Type": "Mutual Fund / DII", "Action": "Holding", "HoldingPct": "Top Holding"},
+    {"Symbol": "GARUDA", "Investor": "Nippon Small Cap Fund", "Type": "Mutual Fund / DII", "Action": "Holding", "HoldingPct": "3.1%"},
 
     # Top Super Institutional (Radhakishan Damani & Rekha Jhunjhunwala)
     {"Symbol": "DMART", "Investor": "Radhakishan Damani", "Type": "Super Investor", "Action": "Promoter/Core", "HoldingPct": "65.0%"},
@@ -115,7 +117,6 @@ def load_radar_symbols():
 
 def load_fundamentals():
     fund = {}
-    # 1. fundamentals.csv
     if os.path.exists(FUND_PATH):
         try:
             d = pd.read_csv(FUND_PATH)
@@ -128,7 +129,6 @@ def load_fundamentals():
         except Exception:
             pass
 
-    # 2. multibagger & quality scans లో ఉన్న MarketCapCr కూడ జోడింపు
     for p in ("data/multibagger.csv", "data/quality.csv"):
         if os.path.exists(p):
             try:
@@ -145,7 +145,6 @@ def load_fundamentals():
 
 
 def fetch_missing_mcap(symbols, fund_map):
-    """fundamentals లో లేని స్టాక్స్ కి yfinance తో మార్కెట్ క్యాప్ తెస్తుంది"""
     for sym in symbols:
         k = sym.upper().strip()
         fm = fund_map.setdefault(k, {})
@@ -156,7 +155,7 @@ def fetch_missing_mcap(symbols, fund_map):
                 info = t.info or {}
                 raw_mc = info.get("marketCap")
                 if raw_mc and raw_mc > 0:
-                    fm["MarketCapCr"] = round(raw_mc / 1e7, 1)  # Rs Crore
+                    fm["MarketCapCr"] = round(raw_mc / 1e7, 1)
                 if not fm.get("Sector") or fm["Sector"] == "n/a":
                     fm["Sector"] = info.get("sector", "n/a")
             except Exception as e:
@@ -236,7 +235,7 @@ def main():
     all_symbols = set([d["Symbol"] for d in event_deals] + [c["Symbol"] for c in CORE_PORTFOLIOS])
     fetch_missing_mcap(all_symbols, fund_map)
 
-    records = []
+    raw_records = []
     seen_keys = set()
 
     for d in event_deals:
@@ -245,34 +244,7 @@ def main():
         if k in seen_keys:
             continue
         seen_keys.add(k)
-
-        fm = fund_map.get(sym, {})
-        mc = fm.get("MarketCapCr", np.nan)
-        close_px = price_map.get(sym, "n/a")
-        if close_px == "n/a":
-            # ధర లేకపోతే yfinance నుండి ప్రయత్నించడం
-            try:
-                t = yf.Ticker(sym + ".NS")
-                fi = t.fast_info
-                if hasattr(fi, "last_price") and fi.last_price:
-                    close_px = round(fi.last_price, 2)
-            except Exception:
-                pass
-
-        records.append({
-            "Date": d["Date"],
-            "Symbol": sym,
-            "Investor": d["Investor"],
-            "Type": d["Type"],
-            "Action": d["Action"],
-            "HoldingPct": d["HoldingPct"],
-            "MarketCapCr": round(mc, 1) if pd.notna(mc) else "n/a",
-            "Category": get_mcap_category(mc),
-            "Sector": fm.get("Sector", "n/a"),
-            "ClosePrice": close_px,
-            "RadarSetup": radar_map.get(sym, "Not on radar"),
-            "Source": d["Source"]
-        })
+        raw_records.append(d)
 
     for c in CORE_PORTFOLIOS:
         sym = c["Symbol"]
@@ -280,7 +252,19 @@ def main():
         if k in seen_keys:
             continue
         seen_keys.add(k)
+        c["Date"] = "Quarterly Filing"
+        c["Source"] = "Shareholding Filing"
+        raw_records.append(c)
 
+    # Overlap / Clustered Buying గణన (ఒకే స్టాక్‌ను ఎంత మంది ఇన్వెస్టర్లు కొన్నారు)
+    sym_investors = {}
+    for r in raw_records:
+        s = r["Symbol"]
+        sym_investors.setdefault(s, []).append(r["Investor"])
+
+    records = []
+    for r in raw_records:
+        sym = r["Symbol"]
         fm = fund_map.get(sym, {})
         mc = fm.get("MarketCapCr", np.nan)
         close_px = price_map.get(sym, "n/a")
@@ -293,24 +277,32 @@ def main():
             except Exception:
                 pass
 
+        inv_list = sym_investors.get(sym, [])
+        overlap_cnt = len(set(inv_list))
+        other_invs = [inv for inv in set(inv_list) if inv != r["Investor"]]
+        co_holders = ", ".join(other_invs) if other_invs else "None"
+
         records.append({
-            "Date": "Quarterly Filing",
+            "Date": r["Date"],
             "Symbol": sym,
-            "Investor": c["Investor"],
-            "Type": c["Type"],
-            "Action": c["Action"],
-            "HoldingPct": c["HoldingPct"],
+            "Investor": r["Investor"],
+            "Type": r["Type"],
+            "Action": r["Action"],
+            "HoldingPct": r["HoldingPct"],
             "MarketCapCr": round(mc, 1) if pd.notna(mc) else "n/a",
             "Category": get_mcap_category(mc),
             "Sector": fm.get("Sector", "n/a"),
             "ClosePrice": close_px,
             "RadarSetup": radar_map.get(sym, "Not on radar"),
-            "Source": "Shareholding Filing"
+            "OverlapCount": overlap_cnt,
+            "CoInvestors": co_holders,
+            "Source": r["Source"]
         })
 
     out_df = pd.DataFrame(records)
     out_df.to_csv(OUT_CSV, index=False)
     print("Smart Money డేటా సిద్ధమైంది:", len(out_df), "ఎంట్రీలు.")
+    print("Overlap స్టాక్స్ (2+ Investors):", out_df[out_df["OverlapCount"] >= 2]["Symbol"].unique().tolist())
 
 
 if __name__ == "__main__":
