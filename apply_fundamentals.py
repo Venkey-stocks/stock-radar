@@ -76,6 +76,9 @@ def process(path, scan, hist_prefix):
                     warns.append("Debt is on the high side: debt/equity %.2f" % de)
 
             pl, pr = fl(fr["PledgePct"]), fl(fr["PromoterPct"])
+            # Promoter % 0 లేదా అంతకంటే తక్కువ అంటే తెలియనిదిగా భావిస్తాం (n/a, 0 కాదు)
+            if pr is not None and pr <= 0:
+                pr = None
             pp = None
             if pl is not None and pr is not None and pr > 0:
                 pp = round(pl / pr * 100, 1)
