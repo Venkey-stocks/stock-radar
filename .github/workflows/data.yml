@@ -49,6 +49,9 @@ jobs:
       - name: Make charts
         run: python make_charts.py
         continue-on-error: true
+      - name: RS rank
+        run: python compute_rs.py
+        continue-on-error: true
       - name: Save data
         run: |
           git config user.name "bot"
