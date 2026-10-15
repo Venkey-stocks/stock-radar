@@ -1,5 +1,5 @@
-TOTAL EVENTS: 501
-BY CATEGORY: {'Results date': 377, 'Order win': 39, 'Acquisition/Merger': 37, 'Default/Insolvency (warning)': 19, 'Expansion/Production': 9, 'Bulk BUY': 6, 'Auditor change (check)': 5, 'Buyback': 3, 'Fund raise (Rights/QIP)': 2, 'Disruption/Suspension (warning)': 2, 'Open offer': 1, 'Preferential issue': 1}
+TOTAL EVENTS: 536
+BY CATEGORY: {'Results date': 405, 'Order win': 42, 'Acquisition/Merger': 40, 'Default/Insolvency (warning)': 20, 'Expansion/Production': 9, 'Bulk BUY': 6, 'Auditor change (check)': 5, 'Buyback': 3, 'Fund raise (Rights/QIP)': 2, 'Disruption/Suspension (warning)': 2, 'Open offer': 1, 'Preferential issue': 1}
 
 KEPT BUYERS (deals | name)
 1 | CRABEL VINTRADE PRIVATE LIMITED
