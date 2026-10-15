@@ -1,0 +1,23 @@
+name: Early Movers
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "40 12 * * 1-5"
+permissions:
+  contents: write
+jobs:
+  early:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pandas numpy
+      - run: python scan_early.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data/early_movers.csv data/early_rejected.csv data/history
+          git diff --cached --quiet || (git commit -m "Early movers update" && git pull --rebase && git push)
