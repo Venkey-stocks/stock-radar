@@ -26,6 +26,7 @@ label{color:var(--mut);font-size:13px}
 .tag.hold{border-color:var(--b);color:var(--b);font-weight:700}
 .tag.late{border-color:var(--y);color:var(--y);font-weight:700}
 .tag.smart{border-color:#a371f7;color:#a371f7;font-weight:700}
+.tag.overlap{border-color:#f0883e;color:#f0883e;font-weight:700}
 .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
 .n{background:#0e1117;border-radius:8px;padding:6px 8px}
 .n small{display:block;color:var(--mut);font-size:11px}
@@ -189,7 +190,7 @@ th{color:var(--mut);font-weight:600}
 </div>
 
 <div id="smart" style="display:none">
-  <div class="note">Smart Money: Track institutional holdings and prominent super investors (Ashish Kacholia, Vijay Kedia, Mukul Agrawal, Quant MF, Nippon Small Cap, etc.). Combines quarterly shareholding filings and recent bulk deals with our Radar technical setups. "Double Conviction" highlights stocks that Smart Money holds and also appear on our technical radar.</div>
+  <div class="note">Smart Money: Track institutional holdings and prominent super investors (Ashish Kacholia, Vijay Kedia, Mukul Agrawal, Quant MF, Nippon Small Cap, etc.). Combines quarterly shareholding filings and recent bulk deals with our Radar technical setups. "Double Conviction" highlights stocks that Smart Money holds and also appear on our technical radar. "Overlap (2+ Investors)" shows clustered conviction where multiple super investors or funds hold the same stock.</div>
   <div class="bar">
     <select id="sm_type" onchange="drawSmart()">
       <option value="">All Smart Money</option>
@@ -203,6 +204,10 @@ th{color:var(--mut);font-weight:600}
       <option value="Small Cap">Small Cap (1,000 - 15,000 cr)</option>
       <option value="Mid Cap">Mid Cap (15,000 - 50,000 cr)</option>
       <option value="Large Cap">Large Cap (&gt; 50,000 cr)</option>
+    </select>
+    <select id="sm_overlap" onchange="drawSmart()">
+      <option value="">All Holdings</option>
+      <option value="overlap">Overlap Only (2+ Investors)</option>
     </select>
     <select id="sm_rad" onchange="drawSmart()">
       <option value="">All Stocks</option>
@@ -336,7 +341,7 @@ const HDR_E=['Stock','Score','Stage','Entry','Stop','Target','Risk / target','']
 const HDR_Q=['Stock','Score','Sector','Entry','Stop','Target','Quality',''];
 const HDR_N=['Stock','Score','Listed','Entry','Stop','Target','Since listing',''];
 const HDR_MINE=['Stock','Status','Price','Entry','Stop','Target','Performance',''];
-const HDR_SMART=['Stock','Investor','Type','Action','Holding','Market Cap','Radar Setup',''];
+const HDR_SMART=['Stock','Investor','Type','Action','Holding','Market Cap','Conviction / Radar',''];
 
 function syncView(){
   $('v_list').className=VIEW=='list'?'on':'';
@@ -363,14 +368,18 @@ function rowCells(tab,r,ns){
   let info,extra;
   if(tab=='smart'){
     const isRadar=r.RadarSetup&&r.RadarSetup!='Not on radar';
-    const radTxt=isRadar?'<b class="pos">&#128293; '+esc(r.RadarSetup)+'</b>':'<span class="na">Not on radar</span>';
+    const isOverlap=(+r.OverlapCount)>=2;
+    let badge='';
+    if(isOverlap) badge+='<span class="tag overlap">&#128101; '+(+r.OverlapCount)+' Invs</span> ';
+    if(isRadar) badge+='<span class="pos">&#128293; Radar</span>';
+    else if(!isOverlap) badge='<span class="na">Sole pick</span>';
     return '<span><b>'+esc(r.Symbol)+'</b></span>'
       +'<span><b>'+esc(r.Investor)+'</b></span>'
       +'<span class="hm"><span class="tag smart">'+esc(r.Type)+'</span></span>'
       +'<span>'+esc(r.Action)+'</span>'
       +'<span><b>'+esc(r.HoldingPct)+'</b></span>'
       +'<span class="hm">'+esc(r.Category)+'</span>'
-      +'<span class="hm">'+radTxt+'</span>'
+      +'<span class="hm">'+badge+'</span>'
       +al;
   }
   if(tab=='mine'){
@@ -671,7 +680,7 @@ function drawChart(d,lv){
     if(!has(v)||!isFinite(+v)) return;
     const yy=y(+v);
     s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+a[2]+'" stroke-width="1.5" stroke-dasharray="6 4"/>'
-      +'<text x="'+(L+4)+'" y="'+(yy-4)+'" fill="'+a[2]+'" font-size="12" font-weight="700">'+a[1]+' '+(+v).toFixed(2)+'</text>';
+      +'<text x="'+(L+4)+'" y="'+(yy-4)+'" fill daylight="'+a[2]+'" font-size="12" font-weight="700">'+a[1]+' '+(+v).toFixed(2)+'</text>';
   });
   s+='<text x="'+L+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11">'+d.d[0]+'</text>'
     +'<text x="'+(W-R)+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11" text-anchor="end">'+d.d[n-1]+'</text>';
@@ -951,10 +960,11 @@ function drawEarly(){
 // ===== Smart Money =====
 function drawSmart(){
   const rows=DATA.smart||[];
-  const t=$('sm_type').value, c=$('sm_cap').value, rad=$('sm_rad').value, q=$('sm_search').value.trim().toUpperCase();
+  const t=$('sm_type').value, c=$('sm_cap').value, rad=$('sm_rad').value, ov=$('sm_overlap').value, q=$('sm_search').value.trim().toUpperCase();
   const list=rows.filter(r=>{
     if(t&&r.Type!=t) return false;
     if(c&&r.Category!=c) return false;
+    if(ov=='overlap'&&(+r.OverlapCount)<2) return false;
     if(rad=='radar'&&(r.RadarSetup=='Not on radar'||!r.RadarSetup)) return false;
     if(q&&r.Symbol.toUpperCase().indexOf(q)<0&&r.Investor.toUpperCase().indexOf(q)<0&&String(r.Sector).toUpperCase().indexOf(q)<0) return false;
     return true;
@@ -962,21 +972,26 @@ function drawSmart(){
 
   const cards=list.map(r=>{
     const isRadar=r.RadarSetup&&r.RadarSetup!='Not on radar';
+    const isOverlap=(+r.OverlapCount)>=2;
     const radBadge=isRadar?'<div class="goodl" style="margin:6px 0">&#128293; <b>On Technical Radar: '+esc(r.RadarSetup)+'</b> (Double Conviction)</div>':'';
+    const overlapBadge=isOverlap?'<div class="warn" style="margin:6px 0">&#128101; <b>Clustered Conviction: '+(+r.OverlapCount)+' Top Investors</b> (Also held by: '+esc(r.CoInvestors)+')</div>':'';
     const px=(r.ClosePrice&&r.ClosePrice!='n/a')?'<b>Rs '+fmt(r.ClosePrice)+'</b>':'n/a';
     const mc=(r.MarketCapCr&&r.MarketCapCr!='n/a')?'<b>Rs '+fmt(r.MarketCapCr)+' cr</b> ('+esc(r.Category)+')':'n/a';
     const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
     const mockR={Symbol:r.Symbol,Entry:r.ClosePrice,Stop:'',Target:''};
 
     return '<div class="card"><div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="tag smart">'+esc(r.Type)+'</span></div>'
-      +'<div class="tags"><span class="tag">'+esc(r.Category)+'</span><span class="tag">'+esc(r.Sector||'Sector n/a')+'</span><span class="tag hold">'+esc(r.Action)+'</span></div>'
+      +'<div class="tags"><span class="tag">'+esc(r.Category)+'</span><span class="tag">'+esc(r.Sector||'Sector n/a')+'</span><span class="tag hold">'+esc(r.Action)+'</span>'
+      +(isOverlap?'<span class="tag overlap">&#128101; '+(+r.OverlapCount)+' Investors</span>':'')+'</div>'
       +resLine(r.Symbol)
       +'<div class="exp"><b>'+esc(r.Investor)+'</b> holds <b>'+esc(r.HoldingPct)+'</b> ('+esc(r.Source)+')</div>'
       +radBadge
+      +overlapBadge
       +'<div class="fund"><div class="ft">Snapshot</div>'
       +row('Latest Close',px)
       +row('Market Cap',mc)
       +row('Sector',esc(r.Sector||'n/a'))
+      +(isOverlap?row('Co-Holders',esc(r.CoInvestors)):'')
       +'</div>'
       +chartBtn(mockR)
       +profHtml(r.Symbol)
@@ -989,12 +1004,14 @@ function drawSmart(){
 
   const totalInv=new Set(rows.map(r=>r.Investor)).size;
   const onRad=rows.filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar').length;
+  const overlaps=new Set(rows.filter(r=>(+r.OverlapCount)>=2).map(r=>r.Symbol)).size;
   const smalls=rows.filter(r=>r.Category=='Small Cap'||r.Category=='Micro Cap').length;
   const box=(l,v,cls)=>'<div class="st"><small>'+l+'</small><b class="'+(cls||'')+'">'+v+'</b></div>';
   $('sm_stats').innerHTML=box('Total Tracked',rows.length)
     +box('Super Investors & Funds',totalInv)
     +box('Small & Micro Cap',smalls,'pos')
-    +box('Double Conviction (On Radar)',onRad,'amb');
+    +box('Overlap (2+ Investors)',overlaps,'amb')
+    +box('Double Conviction (On Radar)',onRad,'pos');
 
   $('meta').textContent='Smart Money tracking (Institutional & Super Investors) | Showing '+list.length+' of '+rows.length+' tracked entries';
 }
