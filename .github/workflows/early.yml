@@ -1,24 +1,36 @@
 name: Early Movers
+
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "40 12 * * 1-5"
-permissions:
-  contents: write
+    # సోమవారం నుండి శుక్రవారం వరకు ~6:10 PM IST (12:40 UTC)
+    - cron: '40 12 * * 1-5'
+  workflow_dispatch:
+
 jobs:
   early:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - run: pip install pandas numpy
-      - run: python scan_early.py
-      - run: python make_charts.py
-      - name: Commit
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pandas numpy yfinance
+
+      - name: Run scan_early.py
+        run: python scan_early.py
+
+      - name: Run make_charts.py
+        run: python make_charts.py
+
+      - name: Commit and push changes
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git add data/early_movers.csv data/early_rejected.csv data/charts.json data/history
-          git diff --cached --quiet || (git commit -m "Early movers update" && git pull --rebase && git push)
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update Early Movers and charts"
+          git push
