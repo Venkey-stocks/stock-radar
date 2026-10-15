@@ -4,7 +4,8 @@ import bisect
 import pandas as pd
 
 # ట్రేడింగ్ రోజుల్లో గరిష్ట track కాలం
-WINDOW = {"ultra": 5, "short": 20, "multi": 250, "quality": 250, "newl": 60}
+WINDOW = {"ultra": 5, "short": 20, "multi": 250, "quality": 250, "newl": 60, "early": 20}
+EARLY_LONG_WINDOW = 250   # Early Movers లో Long Term horizon కి
 # వారం/కొత్త scans: ఈ csv లలో కనిపించిన మొదటి రోజు నుంచి track
 LONG = {"multi": "data/multibagger.csv", "quality": "data/quality.csv",
         "newl": "data/newlistings.csv"}
@@ -12,7 +13,7 @@ LABEL = {"multi": "Multibagger", "quality": "Quality", "newl": "New listing"}
 # ఇప్పుడు radar లో ఉన్నాయా తెలుసుకోవడానికి తాజా జాబితాలు
 CURRENT = {"ultra": "data/ultra_short.csv", "short": "data/short_term.csv",
            "multi": "data/multibagger.csv", "quality": "data/quality.csv",
-           "newl": "data/newlistings.csv"}
+           "newl": "data/newlistings.csv", "early": "data/early_movers.csv"}
 SEEN = "data/first_seen.csv"
 SEEN_COLS = ["Scan", "Date", "Symbol", "Status", "Class", "Band", "Score",
              "Entry", "Stop", "Target", "Close"]
@@ -26,12 +27,34 @@ def fnum(x):
         return None
 
 
+def band_of(score):
+    v = fnum(score)
+    if v is None:
+        return ""
+    if v >= 80:
+        return "High Conviction"
+    if v >= 65:
+        return "Good Setup"
+    return "Early Watch"
+
+
 px = pd.read_csv("data/prices.csv.gz", parse_dates=["Date"])
 px = px.dropna(subset=["Open", "High", "Low", "Close"])
 bysym = {s: g.sort_values("Date").reset_index(drop=True) for s, g in px.groupby("Symbol")}
 all_dates = sorted(pd.to_datetime(px["Date"].unique()))
 date_idx = {d: i for i, d in enumerate(all_dates)}
 last_px = all_dates[-1].strftime("%Y-%m-%d")
+
+
+def close_on(sym, ts):
+    g = bysym.get(sym)
+    if g is None:
+        return None
+    h = g[g["Date"] <= ts]
+    if h.empty:
+        return None
+    return float(h["Close"].iloc[-1])
+
 
 # ---------- ఇప్పుడు radar లో ఉన్న stocks ----------
 now_on = {}
@@ -46,17 +69,41 @@ for scan, f in CURRENT.items():
             print("చదవలేకపోయాం", f, e)
     now_on[scan] = syms
 
-# ---------- Ultra / Short: history snapshots ----------
+# ---------- Ultra / Short / Early: history snapshots ----------
 parts = []
-for scan in ("ultra", "short"):
+for scan in ("ultra", "short", "early"):
     for f in sorted(glob.glob("data/history/%s_*.csv" % scan)):
         try:
             s = pd.read_csv(f)
         except Exception:
             continue
-        if s.empty:
+        if s.empty or "Symbol" not in s.columns:
             continue
         s["Scan"] = scan
+        if scan == "early":
+            name = os.path.basename(f)
+            fdate = name[len("early_"):-len(".csv")]
+            if "Date" not in s.columns:
+                s["Date"] = fdate
+            if "Status" not in s.columns:
+                s["Status"] = s["Stage"] if "Stage" in s.columns else "Early"
+            s["Class"] = s["Horizon"] if "Horizon" in s.columns else ""
+            if "Band" not in s.columns:
+                s["Band"] = s["Score"].apply(band_of) if "Score" in s.columns else ""
+            if "Close" not in s.columns:
+                closes = []
+                for rr in s.to_dict("records"):
+                    cts = pd.to_datetime(rr.get("Date"), errors="coerce")
+                    c = close_on(str(rr["Symbol"]).strip(), cts) if pd.notna(cts) else None
+                    closes.append(c)
+                s["Close"] = closes
+            for c in ("Entry", "Stop", "Target", "Close"):
+                if c not in s.columns:
+                    s[c] = None
+                s[c] = pd.to_numeric(s[c], errors="coerce")
+            s = s.dropna(subset=["Entry", "Stop", "Target", "Close"])
+            if s.empty:
+                continue
         parts.append(s)
 
 # ---------- Multibagger / Quality / New listings: మొదటిసారి కనిపించిన రోజు నమోదు ----------
@@ -123,6 +170,8 @@ last_idx = {}   # (scan, symbol) -> చివరి signal రోజు index
 for r in sig.to_dict("records"):
     scan, sym = r["Scan"], r["Symbol"]
     win = WINDOW[scan]
+    if scan == "early" and str(r["Class"]) == "Long Term":
+        win = EARLY_LONG_WINDOW
     ts = pd.Timestamp(r["Date"])
     if pd.isna(ts):
         continue                       # తేదీ లేని వరుసలు వదిలేస్తాం
