@@ -11,6 +11,8 @@ ATR_N = 14
 MIN_RR = 2.0
 BREAKOUT_VOL = 1.3          # breakout రోజు volume కనీసం ఇంత రెట్లు (అంచనా)
 LOOKBACK_DAYS = 10          # గత ఇన్ని రోజుల్లో breakout అయితే "early"
+RUNUP_WARN = 100            # 6 నెలల్లో ఇంత % పైగా పెరిగితే "Big run-up" హెచ్చరిక (అంచనా)
+RUNUP_PEN = -6              # దానికి score తగ్గింపు (అంచనా)
 
 PARAMS = {
     "Short Term": dict(swing=40, buf=0.3, minatr=1.5, maxatr=10.0, nores=5.0, wide=10.0),
@@ -101,7 +103,7 @@ def load_csv(path, fields, tag):
                 found[key] = lower[nm.lower()]
                 break
     print(path, "-> columns:", found)
-    if "Symbol" not in lower:
+    if "symbol" not in lower:
         return
     sc = lower["symbol"]
     for _, r in d.iterrows():
@@ -347,8 +349,16 @@ def analyze(sym, g):
     rsr = float(rs_rank.get(sym, 0.0))
     d52 = (high52 / close - 1) * 100
 
+    # ---------- Big run-up (6 నెలల low నుండి పెరుగుదల; hard filter కాదు) ----------
+    low126 = float(l[-126:].min())
+    runup = (close / low126 - 1) * 100 if low126 > 0 else 0.0
+    runup_pen = 0
+
     # ---------- Warnings (hard filter కాదు) ----------
     warns = []
+    if runup > RUNUP_WARN:
+        warns.append("Big run-up: +%.0f%% from the 6-month low, so this may not be early" % runup)
+        runup_pen = RUNUP_PEN
     if stage == "Extended":
         warns.append("Extended: %.1f%% above breakout level" % gain)
     if stage == "Late":
@@ -371,6 +381,7 @@ def analyze(sym, g):
         warns.append("Results in %d day(s)" % days_res)
 
     rs_ = [trig]
+    rs_.append("Up %.0f%% from the 6-month low" % runup)
     if depth <= 0.25:
         rs_.append("Consolidated in a %.0f%% range before the move" % (depth * 100))
     rs_.append("RSI %.0f" % rsi)
@@ -415,6 +426,7 @@ def analyze(sym, g):
         s += 3
     s += stage_pen
     s += pledge_pen
+    s += runup_pen
     if not market_ok:
         s -= 5
     s = round(max(min(s, 100), 0), 1)
@@ -423,7 +435,7 @@ def analyze(sym, g):
     return {
         "Date": date_str, "Symbol": sym, "Sector": sector, "Status": status, "Stage": stage,
         "StageOrd": stage_ord, "Horizon": horizon, "Score": s, "Band": band, "Level": round(level, 2),
-        "DaysSince": days_ago, "GainPct": round(gain, 1), "Close": round(close, 2),
+        "DaysSince": days_ago, "GainPct": round(gain, 1), "RunUpPct": round(runup, 0), "Close": round(close, 2),
         "Entry": round(entry, 2), "Stop": round(stop, 2), "Target": round(target, 2),
         "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1), "RR": round(rr, 2),
         "StopReason": stop_reason, "TargetReason": target_reason, "VolRatio": round(vol_ratio, 2),
@@ -444,7 +456,7 @@ for sym, g in groups.items():
         print("దాటవేసాం", sym, e)
 
 columns = ["Date", "Symbol", "Sector", "Status", "Stage", "StageOrd", "Horizon", "Score", "Band", "Level",
-           "DaysSince", "GainPct", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR",
+           "DaysSince", "GainPct", "RunUpPct", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR",
            "StopReason", "TargetReason", "VolRatio", "RSI", "FundScore", "Fundamentals", "PromoterPct",
            "PledgePct", "Warning", "Reasons"]
 out = pd.DataFrame(rows, columns=columns)
@@ -464,4 +476,4 @@ print("మొత్తం ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Stage"].value_counts().to_string())
     print(out["Horizon"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Stage", "Horizon", "Score", "FundScore", "GainPct", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Stage", "Horizon", "Score", "FundScore", "GainPct", "RunUpPct", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
