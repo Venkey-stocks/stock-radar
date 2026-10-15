@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
+import yfinance as yf
 
 OUT_CSV = "data/smart_money.csv"
 PRICES_PATH = "data/prices.csv.gz"
@@ -59,7 +60,6 @@ CORE_PORTFOLIOS = [
     {"Symbol": "INDIGO", "Investor": "Norges Bank", "Type": "FII", "Action": "Holding", "HoldingPct": "1.5%"}
 ]
 
-# శోధన కోసం పేర్లు
 SUPER_INVESTORS = [
     "ASHISH KACHOLIA", "VIJAY KEDIA", "MUKUL AGRAWAL", "DOLLY KHANNA",
     "PORINJU VELIYATH", "NEMISH SHAH", "SUNIL SINGHANIA", "MADHUSUDAN KELA",
@@ -115,6 +115,7 @@ def load_radar_symbols():
 
 def load_fundamentals():
     fund = {}
+    # 1. fundamentals.csv
     if os.path.exists(FUND_PATH):
         try:
             d = pd.read_csv(FUND_PATH)
@@ -126,7 +127,40 @@ def load_fundamentals():
                 }
         except Exception:
             pass
+
+    # 2. multibagger & quality scans లో ఉన్న MarketCapCr కూడ జోడింపు
+    for p in ("data/multibagger.csv", "data/quality.csv"):
+        if os.path.exists(p):
+            try:
+                d = pd.read_csv(p)
+                for _, r in d.iterrows():
+                    sym = str(r.get("Symbol", "")).upper().strip()
+                    mc = pd.to_numeric(r.get("MarketCapCr"), errors="coerce")
+                    if sym not in fund or np.isnan(fund[sym].get("MarketCapCr", np.nan)):
+                        sec = r.get("Sector", "n/a")
+                        fund[sym] = {"Sector": sec, "MarketCapCr": mc}
+            except Exception:
+                pass
     return fund
+
+
+def fetch_missing_mcap(symbols, fund_map):
+    """fundamentals లో లేని స్టాక్స్ కి yfinance తో మార్కెట్ క్యాప్ తెస్తుంది"""
+    for sym in symbols:
+        k = sym.upper().strip()
+        fm = fund_map.setdefault(k, {})
+        mc = fm.get("MarketCapCr", np.nan)
+        if np.isnan(mc) or mc is None or mc <= 0:
+            try:
+                t = yf.Ticker(k + ".NS")
+                info = t.info or {}
+                raw_mc = info.get("marketCap")
+                if raw_mc and raw_mc > 0:
+                    fm["MarketCapCr"] = round(raw_mc / 1e7, 1)  # Rs Crore
+                if not fm.get("Sector") or fm["Sector"] == "n/a":
+                    fm["Sector"] = info.get("sector", "n/a")
+            except Exception as e:
+                print("yfinance mcap fetch error:", k, e)
 
 
 def scan_events():
@@ -145,17 +179,20 @@ def scan_events():
 
             for si in SUPER_INVESTORS:
                 if si in detail:
-                    inv_type, inv_name = "Super Investor", si
+                    inv_type = "Super Investor"
+                    inv_name = si
                     break
             if not inv_name:
                 for gf in GROWTH_FUNDS:
                     if gf in detail:
-                        inv_type, inv_name = "Mutual Fund / DII", gf
+                        inv_type = "Mutual Fund / DII"
+                        inv_name = gf
                         break
             if not inv_name:
                 for ff in FII_FUNDS:
                     if ff in detail:
-                        inv_type, inv_name = "FII", ff
+                        inv_type = "FII"
+                        inv_name = ff
                         break
 
             if inv_name:
@@ -196,10 +233,12 @@ def main():
     price_map = load_latest_prices()
     event_deals = scan_events()
 
+    all_symbols = set([d["Symbol"] for d in event_deals] + [c["Symbol"] for c in CORE_PORTFOLIOS])
+    fetch_missing_mcap(all_symbols, fund_map)
+
     records = []
     seen_keys = set()
 
-    # 1. తాజా ఈవెంట్స్ డీల్స్ (ప్రాధాన్యత మొదటిది)
     for d in event_deals:
         sym = d["Symbol"]
         k = (sym, d["Investor"])
@@ -209,6 +248,17 @@ def main():
 
         fm = fund_map.get(sym, {})
         mc = fm.get("MarketCapCr", np.nan)
+        close_px = price_map.get(sym, "n/a")
+        if close_px == "n/a":
+            # ధర లేకపోతే yfinance నుండి ప్రయత్నించడం
+            try:
+                t = yf.Ticker(sym + ".NS")
+                fi = t.fast_info
+                if hasattr(fi, "last_price") and fi.last_price:
+                    close_px = round(fi.last_price, 2)
+            except Exception:
+                pass
+
         records.append({
             "Date": d["Date"],
             "Symbol": sym,
@@ -219,12 +269,11 @@ def main():
             "MarketCapCr": round(mc, 1) if pd.notna(mc) else "n/a",
             "Category": get_mcap_category(mc),
             "Sector": fm.get("Sector", "n/a"),
-            "ClosePrice": price_map.get(sym, "n/a"),
+            "ClosePrice": close_px,
             "RadarSetup": radar_map.get(sym, "Not on radar"),
             "Source": d["Source"]
         })
 
-    # 2. ప్రధాన కోర్ పోర్ట్‌ఫోలియో హోల్డింగ్స్
     for c in CORE_PORTFOLIOS:
         sym = c["Symbol"]
         k = (sym, c["Investor"])
@@ -234,6 +283,16 @@ def main():
 
         fm = fund_map.get(sym, {})
         mc = fm.get("MarketCapCr", np.nan)
+        close_px = price_map.get(sym, "n/a")
+        if close_px == "n/a":
+            try:
+                t = yf.Ticker(sym + ".NS")
+                fi = t.fast_info
+                if hasattr(fi, "last_price") and fi.last_price:
+                    close_px = round(fi.last_price, 2)
+            except Exception:
+                pass
+
         records.append({
             "Date": "Quarterly Filing",
             "Symbol": sym,
@@ -244,7 +303,7 @@ def main():
             "MarketCapCr": round(mc, 1) if pd.notna(mc) else "n/a",
             "Category": get_mcap_category(mc),
             "Sector": fm.get("Sector", "n/a"),
-            "ClosePrice": price_map.get(sym, "n/a"),
+            "ClosePrice": close_px,
             "RadarSetup": radar_map.get(sym, "Not on radar"),
             "Source": "Shareholding Filing"
         })
