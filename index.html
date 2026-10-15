@@ -160,7 +160,7 @@ th{color:var(--mut);font-weight:600}
 
 <div id="quality" style="display:none">
   <div class="note">Large companies (market cap above Rs 15,000 crore) with steady growth: sales and profit rising every year, high ROCE (ROE for banks and financial companies), positive cash flow, price above its 200-day average and ahead of Nifty. Meant for a 1-3 year hold. Stop-loss and target come from the chart (swing low, ATR, nearest resistance); the target is not a promise, and a very wide stop is shown as a warning. Very high growth rates can come from a low starting base, so check the numbers on screener.in before buying. Not checked: auditor changes and related-party transactions.</div>
-  <div class="bar" id="bar_quality">
+  <div class="bar">
     <select id="qband" onchange="drawQuality()">
       <option value="">All bands</option>
       <option>High Conviction</option><option>Good Setup</option><option>Early Watch</option>
@@ -239,7 +239,7 @@ th{color:var(--mut);font-weight:600}
       <option value="">All results</option><option>Missed</option><option>Caught</option><option>Unknown</option>
     </select>
     <label>From</label><input type="date" id="mfrom" onchange="drawMiss()">
-    <label>To</label><input type="date" id="mto" onchange="drawMiss()">
+    <label>To</label><input type="date" id="pto" onchange="drawMiss()">
     <button onclick="resetMiss()">Reset</button>
   </div>
   <div class="stats" id="mstats"></div>
@@ -307,6 +307,7 @@ const HDR_SCAN=['Stock','Score','Status','Entry','Stop','Target','Risk / target'
 const HDR_E=['Stock','Score','Stage','Entry','Stop','Target','Risk / target',''];
 const HDR_Q=['Stock','Score','Sector','Entry','Stop','Target','Quality',''];
 const HDR_N=['Stock','Score','Listed','Entry','Stop','Target','Since listing',''];
+const HDR_MINE=['Stock','Status','Price','Entry','Stop','Target','Performance',''];
 
 function syncView(){
   $('v_list').className=VIEW=='list'?'on':'';
@@ -327,10 +328,27 @@ function togRow(h){
   ROWOPEN[k]=o;
 }
 function rowCells(tab,r,ns){
-  const cls=r.Band.split(' ')[0];
-  const rs=RES[r.Symbol];
+  const cls=r.Band?r.Band.split(' ')[0]:'';
+  const rs=RES[r.Symbol||r.sym];
   const al=(rs&&rs.n<=7)?'<span class="amb" title="Results in '+rs.n+' days">&#9888;</span>':'<span></span>';
   let info,extra;
+  if(tab=='mine'){
+    const c=r._cur;
+    const pct=r._pct;
+    const hit=r._hit;
+    const pcls=pct===null?'':(pct>=0?'pos':'neg');
+    const ptxt=pct===null?'n/a':((pct>=0?'+':'')+pct.toFixed(2)+'%');
+    const hitTxt=hit?(hit.c=='neg'?'Stop touched':(hit.c=='pos'?'Target reached':'Open')):'Open';
+    const hitCls=hit?(hit.c=='neg'?'r':(hit.c=='pos'?'g':'')):'';
+    return '<span><b>'+esc(r.sym)+'</b></span>'
+      +'<span><span class="tag'+(r.status=='Holding'?' hold':'')+'">'+esc(r.status)+'</span></span>'
+      +'<span class="hm"><b>'+(c?fmt(c.p):'n/a')+'</b></span>'
+      +'<span>'+nz(r.entry)+'</span>'
+      +'<span class="r">'+nz(r.stop)+'</span>'
+      +'<span class="g">'+nz(r.target)+'</span>'
+      +'<span class="hm"><b class="'+pcls+'">'+ptxt+'</b> &middot; <span class="'+hitCls+'">'+hitTxt+'</span></span>'
+      +al;
+  }
   if(tab=='ultra'||tab=='short'){
     info=[(ns&&ns.has(r.Symbol))?'NEW':'',r.Status,r.Class].filter(Boolean).join(' &middot; ');
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
@@ -969,7 +987,7 @@ function drawMine2(){
   updTab();
   const rows=arr.slice().sort((a,b)=>(a.status==b.status?0:(a.status=='Holding'?-1:1))||String(b.addDate).localeCompare(String(a.addDate)));
   const pcts=[];
-  const html=rows.map(m=>{
+  const items=rows.map(m=>{
     const c=curPrice(m);
     const base=m.status=='Holding'?+m.buyPrice:+m.addPrice;
     const pct=(c&&base>0)?(c.p-base)/base*100:null;
@@ -984,7 +1002,10 @@ function drawMine2(){
     const s=esc(m.sym);
     const btn=(a,l)=>'<button data-s="'+s+'" onclick="mineAct(this,\''+a+'\')">'+l+'</button>';
     const lv={Symbol:m.sym,Entry:m.entry==null?'':m.entry,Stop:m.stop==null?'':m.stop,Target:m.target==null?'':m.target};
-    return '<div class="card"><div class="top"><span class="sym">'+s+'</span><span class="'+(k||'exp')+'" style="font-weight:700;font-size:16px">'+(pct===null?'n/a':(pct>=0?'+':'')+pct.toFixed(2)+'%')+'</span></div>'
+    
+    m._cur=c; m._pct=pct; m._hit=hit;
+
+    const card='<div class="card"><div class="top"><span class="sym">'+s+'</span><span class="'+(k||'exp')+'" style="font-weight:700;font-size:16px">'+(pct===null?'n/a':(pct>=0?'+':'')+pct.toFixed(2)+'%')+'</span></div>'
     +'<div class="tags"><span class="tag'+(m.status=='Holding'?' hold':'')+'">'+m.status+'</span><span class="tag">'+(m.src=='manual'?'Added manually':'From radar ('+esc(m.src)+')')+'</span></div>'
     +resLine(m.sym)
     +'<div class="exp">'+since+'.<br>Latest price: <b>'+(c?fmt(c.p):'n/a')+'</b>'+(c?' ('+esc(c.d)+')':'')+pl+'</div>'
@@ -1000,8 +1021,12 @@ function drawMine2(){
     +(OPEN[m.sym]?mineDetails(m):'')
     +(c&&CH&&CH[m.sym]?chartOnly(lv):'')
     +'</div>';
-  }).join('');
-  $('list_mine').innerHTML=html||'<div class="exp">Nothing here yet. Tap "&#9734; Watch" on a radar card, or add a symbol above.</div>';
+
+    return {sym:m.sym, cells:rowCells('mine',m,null), card:card};
+  });
+
+  renderItems('list_mine','mine',items,HDR_MINE,'Nothing here yet. Tap "&#9734; Watch" on a radar card, or add a symbol above.');
+
   const hold=arr.filter(m=>m.status=='Holding').length, watch=arr.length-hold;
   const avg=pcts.length?pcts.reduce((a,b)=>a+b,0)/pcts.length:null;
   const box=(l,v,c)=>'<div class="st"><small>'+l+'</small><b class="'+(c||'')+'">'+v+'</b></div>';
@@ -1212,7 +1237,7 @@ function drawPerf(){
 function resetMiss(){$('mscan').value='';$('mres').value='';$('mfrom').value='';$('mto').value='';drawMiss();}
 
 function drawMiss(){
-  const sc=$('mscan').value, rs=$('mres').value, f=$('mfrom').value, t=$('mto').value;
+  const sc=$('mscan').value, rs=$('mres').value, f=$('mfrom').value, t=$('pto').value;
   const all=(DATA.miss||[]).filter(r=>(!sc||r.Scan==sc)&&(!f||r.Date>=f)&&(!t||r.Date<=t));
   const rows=all.filter(r=>!rs||r.Result==rs).sort((a,b)=>b.Date.localeCompare(a.Date)||(+b.GainPct)-(+a.GainPct));
   const c=k=>all.filter(r=>r.Result==k).length;
@@ -1312,7 +1337,7 @@ function show(k){
   cur=k;
   ['ultra','short','early','multi','quality','newl','mine','results','perf','miss','excl','sect'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
-  $('viewbar').style.display=(scanTab||k=='early'||k=='multi'||k=='quality'||k=='newl')?'flex':'none';
+  $('viewbar').style.display=(scanTab||k=='early'||k=='multi'||k=='quality'||k=='newl'||k=='mine')?'flex':'none';
   syncView();
   $('perf').style.display=k=='perf'?'block':'none';
   $('miss').style.display=k=='miss'?'block':'none';
