@@ -80,6 +80,8 @@ th{color:var(--mut);font-weight:600}
 .lhead .r{color:var(--r)}.lhead .g{color:var(--g)}
 .lbody{border-top:1px solid var(--line);padding:10px}
 .lbody .card{border:none;padding:4px}
+.hmc{text-align:center;font-weight:600}
+.hmtop{white-space:normal;min-width:200px;color:var(--mut);font-size:12px}
 @media(max-width:700px){.lhdr,.lhead{grid-template-columns:1.2fr .8fr .9fr .9fr .9fr 22px;gap:6px}.hm{display:none!important}.lhead{font-size:13px;padding:9px 8px}}
 </style>
 </head>
@@ -100,6 +102,7 @@ th{color:var(--mut);font-weight:600}
   <button id="t_perf" onclick="show('perf')">Performance</button>
   <button id="t_miss" onclick="show('miss')">Miss Report</button>
   <button id="t_excl" onclick="show('excl')">Excluded</button>
+  <button id="t_sect" onclick="show('sect')">Sectors</button>
 </div>
 <div class="bar" id="viewbar">
   <label>View</label>
@@ -238,6 +241,16 @@ th{color:var(--mut);font-weight:600}
   </div>
   <div class="stats" id="estats"></div>
   <div class="wrap"><table id="etable"></table></div>
+</div>
+
+<div id="sect" style="display:none">
+  <div class="note">Sector heatmap of the stocks on today's radar lists. Each number = how many stocks from that scan are in the sector; darker blue = more stocks. Avg score is the average score of all radar stocks in that sector (greener = higher). This shows where our scans are finding strong setups. It is not the performance of the whole sector. Sector comes from the scan files or the company profile file; stocks without a sector are grouped as n/a.</div>
+  <div class="bar">
+    <select id="sband" onchange="drawSect()">
+      <option value="">All bands</option><option>High Conviction</option><option>Good Setup</option><option>Early Watch</option>
+    </select>
+  </div>
+  <div class="wrap"><table id="stable"></table></div>
 </div>
 
 <div class="foot">
@@ -1179,15 +1192,59 @@ function drawExcl(){
   $('meta').textContent='Excluded because Reward:Risk was below 1:2 | '+rows.length+' shown';
 }
 
+// ===== Sectors heatmap =====
+function drawSect(){
+  const b=$('sband').value;
+  const src=[['ultra','Ultra Short'],['short','Short Term'],['multi','Multibagger'],['quality','Quality'],['newl','New Listings']];
+  const S={};
+  src.forEach(a=>{
+    (DATA[a[0]]||[]).forEach(r=>{
+      if(b&&r.Band!=b) return;
+      let sec='n/a';
+      if(has(r.Sector)) sec=r.Sector;
+      else if(PROF[r.Symbol]&&has(PROF[r.Symbol].sector)&&PROF[r.Symbol].sector!=='n/a') sec=PROF[r.Symbol].sector;
+      const o=S[sec]=S[sec]||{sec:sec,c:{},u:{}};
+      o.c[a[0]]=(o.c[a[0]]||0)+1;
+      const sc=+r.Score;
+      if(!(r.Symbol in o.u)||sc>o.u[r.Symbol]) o.u[r.Symbol]=sc;
+    });
+  });
+  const list=Object.keys(S).map(k=>{
+    const o=S[k];
+    const syms=Object.keys(o.u).sort((x,y)=>o.u[y]-o.u[x]);
+    const avg=syms.reduce((a,s)=>a+o.u[s],0)/syms.length;
+    return {sec:o.sec,c:o.c,total:syms.length,avg:avg,top:syms.slice(0,3).map(s=>s+' '+o.u[s]).join(', ')};
+  }).sort((x,y)=>(y.total-x.total)||(y.avg-x.avg));
+  let mx=1;
+  list.forEach(o=>{src.forEach(a=>{if((o.c[a[0]]||0)>mx) mx=o.c[a[0]];});});
+  const cell=(n)=>{
+    if(!n) return '<td class="hmc" style="color:var(--mut)">-</td>';
+    const al=(0.18+0.62*n/mx).toFixed(2);
+    return '<td class="hmc" style="background:rgba(56,139,253,'+al+')">'+n+'</td>';
+  };
+  const avgCell=(v)=>{
+    const al=Math.max(0.12,Math.min(0.7,(v-40)/60)).toFixed(2);
+    return '<td class="hmc" style="background:rgba(46,160,67,'+al+')">'+v.toFixed(1)+'</td>';
+  };
+  $('stable').innerHTML='<tr><th>Sector</th>'+src.map(a=>'<th class="hmc">'+a[1]+'</th>').join('')+'<th class="hmc">Total stocks</th><th class="hmc">Avg score</th><th>Top stocks (score)</th></tr>'
+    +(list.length?list.map(o=>
+      '<tr><td><b>'+esc(o.sec)+'</b></td>'+src.map(a=>cell(o.c[a[0]]||0)).join('')
+      +'<td class="hmc"><b>'+o.total+'</b></td>'+avgCell(o.avg)+'<td class="hmtop">'+esc(o.top)+'</td></tr>'
+    ).join(''):'<tr><td colspan="9">No stocks on the radar lists for this selection.</td></tr>');
+  const uniq=list.reduce((a,o)=>a+o.total,0);
+  $('meta').textContent='Sector heatmap of radar stocks | '+list.length+' sectors | '+uniq+' sector entries (a stock in two scans of one sector is counted once in Total)';
+}
+
 function show(k){
   cur=k;
-  ['ultra','short','multi','quality','newl','mine','results','perf','miss','excl'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  ['ultra','short','multi','quality','newl','mine','results','perf','miss','excl','sect'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
   $('viewbar').style.display=(scanTab||k=='multi'||k=='quality'||k=='newl')?'flex':'none';
   syncView();
   $('perf').style.display=k=='perf'?'block':'none';
   $('miss').style.display=k=='miss'?'block':'none';
   $('excl').style.display=k=='excl'?'block':'none';
+  $('sect').style.display=k=='sect'?'block':'none';
   $('multi').style.display=k=='multi'?'block':'none';
   $('quality').style.display=k=='quality'?'block':'none';
   $('newl').style.display=k=='newl'?'block':'none';
@@ -1199,6 +1256,7 @@ function show(k){
   if(k=='perf'){drawPerf();return;}
   if(k=='miss'){drawMiss();return;}
   if(k=='excl'){drawExcl();return;}
+  if(k=='sect'){drawSect();return;}
   if(k=='multi'){drawMulti();return;}
   if(k=='quality'){drawQuality();return;}
   if(k=='newl'){drawNewl();return;}
@@ -1263,7 +1321,8 @@ fetch('data/profiles.json?v='+Date.now())
  .then(j=>{
    if(j&&j.profiles){
      PROF=j.profiles;
-     if(DATA.ultra&&['ultra','short','multi','quality','newl','mine'].indexOf(cur)>=0) redrawCur();
+     if(DATA.ultra&&cur=='sect') drawSect();
+     else if(DATA.ultra&&['ultra','short','multi','quality','newl','mine'].indexOf(cur)>=0) redrawCur();
    }
  })
  .catch(()=>{});
