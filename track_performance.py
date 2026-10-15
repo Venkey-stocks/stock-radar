@@ -5,7 +5,7 @@ import pandas as pd
 
 # ట్రేడింగ్ రోజుల్లో గరిష్ట track కాలం
 WINDOW = {"ultra": 5, "short": 20, "multi": 250, "quality": 250, "newl": 60, "early": 20}
-EARLY_LONG_WINDOW = 250   # Early Movers లో Long Term horizon కి
+EARLY_LONG_WINDOW = 250    # Early Movers లో Long Term horizon కి
 # వారం/కొత్త scans: ఈ csv లలో కనిపించిన మొదటి రోజు నుంచి track
 LONG = {"multi": "data/multibagger.csv", "quality": "data/quality.csv",
         "newl": "data/newlistings.csv"}
@@ -71,6 +71,7 @@ for scan, f in CURRENT.items():
 
 # ---------- Ultra / Short / Early: history snapshots ----------
 parts = []
+early_snap_found = False
 for scan in ("ultra", "short", "early"):
     for f in sorted(glob.glob("data/history/%s_*.csv" % scan)):
         try:
@@ -81,6 +82,7 @@ for scan in ("ultra", "short", "early"):
             continue
         s["Scan"] = scan
         if scan == "early":
+            early_snap_found = True
             name = os.path.basename(f)
             fdate = name[len("early_"):-len(".csv")]
             if "Date" not in s.columns:
@@ -105,6 +107,36 @@ for scan in ("ultra", "short", "early"):
             if s.empty:
                 continue
         parts.append(s)
+
+# ---------- Early Movers స్నాప్‌షాట్ లేకపోతే తాజా daily csv నుండి తీసుకోవడం ----------
+if not early_snap_found and os.path.exists("data/early_movers.csv"):
+    try:
+        ed = pd.read_csv("data/early_movers.csv")
+        if not ed.empty and "Symbol" in ed.columns:
+            ed["Scan"] = "early"
+            if "Date" not in ed.columns:
+                ed["Date"] = last_px
+            if "Status" not in ed.columns:
+                ed["Status"] = ed["Stage"] if "Stage" in ed.columns else "Early"
+            ed["Class"] = ed["Horizon"] if "Horizon" in ed.columns else ""
+            if "Band" not in ed.columns:
+                ed["Band"] = ed["Score"].apply(band_of) if "Score" in ed.columns else ""
+            if "Close" not in ed.columns:
+                closes = []
+                for rr in ed.to_dict("records"):
+                    cts = pd.to_datetime(rr.get("Date"), errors="coerce")
+                    c = close_on(str(rr["Symbol"]).strip(), cts) if pd.notna(cts) else None
+                    closes.append(c)
+                ed["Close"] = closes
+            for c in ("Entry", "Stop", "Target", "Close"):
+                if c not in ed.columns:
+                    ed[c] = None
+                ed[c] = pd.to_numeric(ed[c], errors="coerce")
+            ed = ed.dropna(subset=["Entry", "Stop", "Target", "Close"])
+            if not ed.empty:
+                parts.append(ed)
+    except Exception as e:
+        print("early_movers.csv చదవలేకపోయాం:", e)
 
 # ---------- Multibagger / Quality / New listings: మొదటిసారి కనిపించిన రోజు నమోదు ----------
 if os.path.exists(SEEN):
@@ -174,7 +206,7 @@ for r in sig.to_dict("records"):
         win = EARLY_LONG_WINDOW
     ts = pd.Timestamp(r["Date"])
     if pd.isna(ts):
-        continue                       # తేదీ లేని వరుసలు వదిలేస్తాం
+        continue                        # తేదీ లేని వరుసలు వదిలేస్తాం
     di = date_idx.get(ts)
     if di is None:
         di = bisect.bisect_right(all_dates, ts)
