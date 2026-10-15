@@ -5,7 +5,7 @@ import pandas as pd
 DAYS = 120   # chart లో చూపే చివరి రోజుల సంఖ్య
 
 syms = set()
-for path in ("data/ultra_short.csv", "data/short_term.csv", "data/multibagger.csv", "data/quality.csv", "data/newlistings.csv"):
+for path in ("data/ultra_short.csv", "data/short_term.csv", "data/multibagger.csv", "data/quality.csv", "data/newlistings.csv", "data/early_movers.csv"):
     if not os.path.exists(path):
         print("లేదు:", path)
         continue
