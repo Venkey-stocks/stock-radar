@@ -2,6 +2,7 @@ import os
 import datetime
 import numpy as np
 import pandas as pd
+import yfinance as yf
 
 MIN_PRICE = 50
 MIN_TRADED_VALUE = 10e7
@@ -133,6 +134,57 @@ for p in ("data/quality.csv", "data/multibagger.csv"):       # multibagger చ�
         "Pledge": ["PledgeOfPromoterPct", "PledgePct"]}, "scan")
 
 
+def fetch_yf_fund(sym):
+    """radar బయటి stocks కి yfinance తో ఫండమెంటల్స్ తేవడం (విఫలమైతే ఉన్నవి ఉంచుతుంది)"""
+    k = norm(sym)
+    e = FUND.setdefault(k, {})
+    try:
+        t = yf.Ticker(k + ".NS")
+        info = t.info or {}
+        if "Sector" not in e and info.get("sector"):
+            e["Sector"] = info["sector"]
+        if "Promoter" not in e and info.get("heldPercentInsiders") is not None:
+            e["Promoter"] = round(info["heldPercentInsiders"] * 100, 1)
+        if "Debt" not in e and info.get("debtToEquity") is not None:
+            e["Debt"] = round(info["debtToEquity"] / 100, 2)
+        if "QSales" not in e and info.get("revenueGrowth") is not None:
+            e["QSales"] = round(info["revenueGrowth"] * 100, 1)
+        if "QProfit" not in e and info.get("earningsGrowth") is not None:
+            e["QProfit"] = round(info["earningsGrowth"] * 100, 1)
+
+        # Financial statements నుండి ROCE, Sales CAGR, Profit CAGR
+        fin = t.financials
+        bs = t.balance_sheet
+        if fin is not None and not fin.empty and len(fin.columns) >= 3:
+            cols = fin.columns
+            # 3-Year Sales CAGR
+            rev = fin.loc["Total Revenue"] if "Total Revenue" in fin.index else None
+            if rev is not None and len(rev) >= 3 and rev.iloc[0] > 0 and rev.iloc[2] > 0:
+                cagr_s = ((rev.iloc[0] / rev.iloc[2]) ** (1 / 2) - 1) * 100
+                if not np.isnan(cagr_s) and "SalesCAGR" not in e:
+                    e["SalesCAGR"] = round(cagr_s, 1)
+
+            # 3-Year Profit CAGR
+            net = fin.loc["Net Income"] if "Net Income" in fin.index else None
+            if net is not None and len(net) >= 3 and net.iloc[0] > 0 and net.iloc[2] > 0:
+                cagr_p = ((net.iloc[0] / net.iloc[2]) ** (1 / 2) - 1) * 100
+                if not np.isnan(cagr_p) and "ProfitCAGR" not in e:
+                    e["ProfitCAGR"] = round(cagr_p, 1)
+
+            # Latest ROCE = EBIT / Capital Employed
+            ebit = fin.loc["EBIT"] if "EBIT" in fin.index else (fin.loc["Operating Income"] if "Operating Income" in fin.index else None)
+            if ebit is not None and bs is not None and not bs.empty:
+                ta = bs.loc["Total Assets"] if "Total Assets" in bs.index else None
+                cl = bs.loc["Current Liabilities"] if "Current Liabilities" in bs.index else None
+                if ta is not None and cl is not None and len(ta) > 0 and len(cl) > 0:
+                    ce = ta.iloc[0] - cl.iloc[0]
+                    if ce > 0 and "ROCE" not in e:
+                        e["ROCE"] = round((ebit.iloc[0] / ce) * 100, 1)
+        e["Src"] = "yfinance direct"
+    except Exception as ex:
+        print("yfinance ఫెచ్ విఫలం:", k, ex)
+
+
 def fund_eval(sym):
     e = FUND.get(norm(sym))
     if not e:
@@ -153,12 +205,10 @@ def fund_eval(sym):
             pts += 1 if ok(v) else 0
             parts.append("%s %.1f%s" % (label, v, unit))
     txt = " | ".join(parts)
-    if known < 3:                       # 3 కంటే తక్కువ తెలిస్తే నమ్మదగిన score ఇవ్వం
+    if known < 3:                        # 3 కంటే తక్కువ తెలిస్తే నమ్మదగిన score ఇవ్వం
         return None, txt
     return pts / known, txt
-    
-
-# ---------- data చదవడం ----------
+    # ---------- data చదవడం ----------
 df = pd.read_csv("data/prices.csv.gz", parse_dates=["Date"])
 df = df.dropna(subset=["Open", "High", "Low", "Close", "Volume"])
 last_date = df["Date"].max()
@@ -271,9 +321,13 @@ def analyze(sym, g):
         entry = level * 1.002
         trig = "%.1f%% below %d-day high Rs %.1f; tight range, volume drying up (%.1fx)" % (-gain, N_used, level, dry)
 
-    # ---------- Fundamentals & Horizon ----------
+    # ---------- Fundamentals (radar లో లేకపోతే yfinance ద్వారా పొందడం) ----------
+    k = norm(sym)
+    if k not in FUND or "ROCE" not in FUND[k]:
+        fetch_yf_fund(sym)
+
     ffrac, ftxt = fund_eval(sym)
-    fe = FUND.get(norm(sym), {})
+    fe = FUND.get(k, {})
     sector = fe.get("Sector", "n/a")
     prom = fe.get("Promoter", np.nan)
     pled = fe.get("Pledge", np.nan)
