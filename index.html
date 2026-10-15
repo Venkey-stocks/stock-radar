@@ -62,7 +62,8 @@ th{color:var(--mut);font-weight:600}
 .digest-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:6px}
 .digest-head b{font-size:14px;color:var(--tx);display:flex;align-items:center;gap:6px}
 .digest-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.digest-item{font-size:13px}
+.digest-item{font-size:13px;cursor:pointer;padding:6px 8px;border-radius:8px;transition:background .15s}
+.digest-item:hover{background:rgba(56,139,253,.1);border:1px solid rgba(56,139,253,.3)}
 .digest-item small{display:block;color:var(--mut);font-size:11px}
 .digest-item b{font-size:14px}
 .mh{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:13px;margin-bottom:12px}
@@ -74,7 +75,7 @@ th{color:var(--mut);font-weight:600}
 .btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .btns button{padding:4px 12px;font-size:13px}
 .bar input[type=text],.bar input[type=number]{width:118px;padding:6px 8px}
-#chmodal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.72);z-index:50;align-items:center;justify-content:center;padding:12px}
+#chmodal,#popmodal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.72);z-index:50;align-items:center;justify-content:center;padding:12px}
 .chbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%;max-width:820px;max-height:95vh;overflow:auto}
 .chhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .chleg{font-size:12px;color:var(--mut);margin-top:6px}
@@ -102,14 +103,14 @@ th{color:var(--mut);font-weight:600}
 
 <div class="digest" id="digest_box">
   <div class="digest-head">
-    <b>&#9889; Daily Radar Digest (EOD Highlights)</b>
+    <b>&#9889; Daily Radar Digest (Click item to inspect)</b>
     <span class="tag smart" id="d_date">-</span>
   </div>
   <div class="digest-grid">
-    <div class="digest-item"><small>Fresh Breakouts Today</small><b class="pos" id="d_new">-</b></div>
-    <div class="digest-item"><small>Double Conviction (Smart + Radar)</small><b class="pos" id="d_smart">-</b></div>
-    <div class="digest-item"><small>Top Strong Sector</small><b class="amb" id="d_sector">-</b></div>
-    <div class="digest-item"><small>Market Health Signal</small><b id="d_health">-</b></div>
+    <div class="digest-item" onclick="openDigestPop('fresh')"><small>Fresh Breakouts Today &#8599;</small><b class="pos" id="d_new">-</b></div>
+    <div class="digest-item" onclick="openDigestPop('smart')"><small>Double Conviction (Smart + Radar) &#8599;</small><b class="pos" id="d_smart">-</b></div>
+    <div class="digest-item" onclick="openDigestPop('sector')"><small>Top Strong Sector &#8599;</small><b class="amb" id="d_sector">-</b></div>
+    <div class="digest-item" onclick="openDigestPop('health')"><small>Market Health Signal &#8599;</small><b id="d_health">-</b></div>
   </div>
 </div>
 
@@ -339,6 +340,13 @@ Always verify on your own chart. This is a research aid, not investment advice.
   <div class="chbox">
     <div class="chhead"><b id="chtitle" style="font-size:18px"></b><button onclick="closeChart()">Close</button></div>
     <div id="chbody"></div>
+  </div>
+</div>
+
+<div id="popmodal" onclick="if(event.target===this)closeDigestPop()">
+  <div class="chbox" style="max-width:680px">
+    <div class="chhead"><b id="poptitle" style="font-size:17px"></b><button onclick="closeDigestPop()">Close</button></div>
+    <div id="popbody"></div>
   </div>
 </div>
 
@@ -634,6 +642,63 @@ function updateDigest(){
   $('d_sector').textContent=topSec!='-'?(topSec+' ('+topN+' setups)'):'Diverse';
 }
 
+function openDigestPop(type){
+  const t=$('poptitle');
+  const b=$('popbody');
+  if(type=='fresh'){
+    t.textContent='⚡ Fresh Breakouts & Ready Setups Today';
+    const items=[];
+    (DATA.early||[]).forEach(r=>{
+      if(r.Stage=='Fresh'||r.Stage=='Ready') items.push({s:r.Symbol,lbl:r.Stage+' ('+r.Horizon+')',sub:'Score: '+r.Score+' | Close: Rs '+fmt(r.Close),tab:'early'});
+    });
+    const uRows=DATA.ultra||[];
+    const ns=NEWSET['ultra']||new Set();
+    uRows.filter(r=>ns.has(r.Symbol)).forEach(r=>{
+      items.push({s:r.Symbol,lbl:'Ultra Short (NEW)',sub:'Score: '+r.Score+' | Entry: Rs '+fmt(r.Entry),tab:'ultra'});
+    });
+    if(!items.length) b.innerHTML='<div class="exp">No fresh breakouts found for today.</div>';
+    else b.innerHTML='<div class="wrap"><table><tr><th>Stock</th><th>Setup Type</th><th>Details</th><th>Action</th></tr>'
+      +items.map(x=>'<tr><td><b>'+esc(x.s)+'</b></td><td><span class="tag new">'+esc(x.lbl)+'</span></td><td>'+esc(x.sub)+'</td><td><button class="chbtn" onclick="closeDigestPop();show(\''+x.tab+'\');">View</button></td></tr>').join('')
+      +'</table></div>';
+  } else if(type=='smart'){
+    t.textContent='🔥 Double Conviction (Smart Money + Radar)';
+    const rows=(DATA.smart||[]).filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar');
+    if(!rows.length) b.innerHTML='<div class="exp">No Smart Money stocks currently on radar.</div>';
+    else b.innerHTML='<div class="wrap"><table><tr><th>Stock</th><th>Investor</th><th>Holding</th><th>Technical Radar</th><th>Action</th></tr>'
+      +rows.map(r=>'<tr><td><b>'+esc(r.Symbol)+'</b></td><td>'+esc(r.Investor)+'</td><td>'+esc(r.HoldingPct)+'</td><td class="pos"><b>'+esc(r.RadarSetup)+'</b></td><td><button class="chbtn" onclick="closeDigestPop();show(\'smart\');">Inspect</button></td></tr>').join('')
+      +'</table></div>';
+  } else if(type=='sector'){
+    t.textContent='🏢 Top Sector Distribution Across Radar';
+    const sCounts={};
+    const src=[['ultra','Ultra Short'],['short','Short Term'],['early','Early Movers'],['multi','Multibagger'],['quality','Quality']];
+    src.forEach(a=>{
+      (DATA[a[0]]||[]).forEach(r=>{
+        const s=r.Sector||'n/a';
+        if(s!='n/a'){
+          sCounts[s]=sCounts[s]||{name:s,cnt:0,stocks:[]};
+          sCounts[s].cnt++;
+          if(sCounts[s].stocks.indexOf(r.Symbol)<0) sCounts[s].stocks.push(r.Symbol);
+        }
+      });
+    });
+    const list=Object.values(sCounts).sort((x,y)=>y.cnt-x.cnt);
+    if(!list.length) b.innerHTML='<div class="exp">No sector data available.</div>';
+    else b.innerHTML='<div class="wrap"><table><tr><th>Sector</th><th>Total Setups</th><th>Representative Stocks</th><th>Action</th></tr>'
+      +list.slice(0,8).map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td class="amb"><b>'+x.cnt+'</b></td><td class="exp">'+esc(x.stocks.slice(0,4).join(', '))+(x.stocks.length>4?'...':'')+'</td><td><button class="chbtn" onclick="closeDigestPop();show(\'sect\');">Heatmap</button></td></tr>').join('')
+      +'</table></div>';
+  } else if(type=='health'){
+    t.textContent='🩺 Market Health Overview';
+    const hTxt=$('mh_txt').textContent||'Market Health';
+    b.innerHTML='<div class="card" style="border:none">'
+      +'<div class="top"><span class="sym">'+esc(hTxt)+'</span></div>'
+      +'<div class="exp" style="margin:10px 0">Daily market health measures whether Nifty 50 and Nifty 500 are trading comfortably above their 50-day and 200-day moving averages, and tracks breadth across broader indices.</div>'
+      +'<div class="btns"><a href="/health" style="text-decoration:none"><button>Open Full Market Health Page</button></a></div>'
+      +'</div>';
+  }
+  $('popmodal').style.display='flex';
+}
+function closeDigestPop(){$('popmodal').style.display='none';}
+
 function evHtml(sym){
   const list=EV[sym]||[];
   if(!list.length) return '';
@@ -696,7 +761,7 @@ function openChart(btn){
     .catch(()=>{$('chbody').innerHTML='<div class="exp">Chart data file (data/charts.json) not found yet. It is created by the daily run.</div>';});
 }
 function closeChart(){$('chmodal').style.display='none';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeChart();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeChart();closeDigestPop();}});
 
 function drawChart(d,lv){
   const n=d.c.length;
