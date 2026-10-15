@@ -1,0 +1,33 @@
+name: Fetch Smart Money
+
+on:
+  schedule:
+    # ప్రతి శనివారం మధ్యాహ్నం ~1:00 PM IST (07:30 UTC)
+    - cron: '30 7 * * 6'
+  workflow_dispatch:
+
+jobs:
+  smart_money:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pandas numpy yfinance
+
+      - name: Run fetch_smart_money.py
+        run: python fetch_smart_money.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update Smart Money data"
+          git push
