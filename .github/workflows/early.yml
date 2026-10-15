@@ -15,9 +15,10 @@ jobs:
           python-version: "3.11"
       - run: pip install pandas numpy
       - run: python scan_early.py
+      - run: python make_charts.py
       - name: Commit
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add data/early_movers.csv data/early_rejected.csv data/history
+          git add data/early_movers.csv data/early_rejected.csv data/charts.json data/history
           git diff --cached --quiet || (git commit -m "Early movers update" && git pull --rebase && git push)
