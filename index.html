@@ -120,7 +120,6 @@ th{color:var(--mut);font-weight:600}
 .hmc{text-align:center;font-weight:600}
 .hmtop{white-space:normal;min-width:200px;color:var(--mut);font-size:12px}
 @media(max-width:700px){.lhdr,.lhead{grid-template-columns:1.2fr .8fr .9fr .9fr .9fr 22px;gap:6px}.hm{display:none!important}.lhead{font-size:13px;padding:9px 8px}}
-/* Position Sizer Box */
 .calc-box{background:#0e1117;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:14px}
 .calc-box .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .calc-box input{width:110px;padding:5px 8px;font-size:13px;text-align:right}
@@ -215,7 +214,7 @@ th{color:var(--mut);font-weight:600}
 
 <div id="quality" style="display:none">
   <div class="note">Large companies (market cap above Rs 15,000 crore) with steady growth: sales and profit rising every year, high ROCE, positive cash flow, price above its 200-day average. Meant for a 1-3 year hold.</div>
-  <div class="bar">
+  <div class="bar" id="qband" onchange="drawQuality()">
     <select id="qband" onchange="drawQuality()">
       <option value="">All bands</option>
       <option>High Conviction</option><option>Good Setup</option><option>Early Watch</option>
@@ -295,10 +294,17 @@ th{color:var(--mut);font-weight:600}
   <div class="wrap"><table id="rtable"></table></div>
 </div>
 
+<!-- Performance Tab with Decision Band Filter -->
 <div id="perf" style="display:none">
   <div class="bar">
     <select id="pscan" onchange="drawPerf()">
       <option value="">All scans</option><option value="ultra">Ultra Short</option><option value="short">Short Term</option><option value="early">Early Movers</option><option value="multi">Multibagger</option><option value="quality">Quality</option><option value="newl">New Listings</option>
+    </select>
+    <select id="pband" onchange="drawPerf()">
+      <option value="">All Decision Bands</option>
+      <option value="high">High Conviction Only (Score 80+)</option>
+      <option value="good">Good Setup (Score 65-79)</option>
+      <option value="early">Early Watch (Score 40-64)</option>
     </select>
     <select id="pclass" onchange="drawPerf()">
       <option value="">All classes</option><option>Standard</option><option>High Potential</option>
@@ -492,7 +498,7 @@ function calcPositionSize(){
   $('dr_calc_profit').textContent = '+Rs ' + totalProfit.toLocaleString('en-IN', {maximumFractionDigits: 0});
 }
 
-// ===== Universal Drawer Logic (Early, Ultra, Short) =====
+// ===== Universal Drawer Logic =====
 let EARLY_MAP={};
 
 function getStageMeta(r){
@@ -585,10 +591,8 @@ function openRationale(sym, tabType){
     ctn.appendChild(el);
   });
   
-  $('dr_price').textContent='Rs '+fmt(r.Close||r.Entry);
-  $('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)';
-  $('dr_target').textContent='Rs '+fmt(r.Target||r.Level)+' (+'+(r.TargetPct||'')+')';
-  $('dr_stage').textContent=meta.code;
+  $('dr_price').textContent='Rs '+fmt(r.Close\vert{}\vert{}r.Entry);$('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)';
+  $('dr_target').textContent='Rs '+fmt(r.Target\vert{}\vert{}r.Level)+' (+'+(r.TargetPct\vert{}\vert{}'')+')';$('dr_stage').textContent=meta.code;
   $('dr_chart_link').href='https://in.tradingview.com/chart/?symbol=NSE:'+encodeURIComponent(r.Symbol);
   
   calcPositionSize();
@@ -994,7 +998,7 @@ function drawChart(d,lv){
     const x=L+step*i+step/2;
     const up=d.c[i]>=d.o[i];
     const col=up?'#2ea043':'#f85149';
-    s+='<line x1="'+x+'" x2="'+x+'" y1="'+y(d.h[i])+'" y2="'+y(d.l[i])+'" stroke="'+col+'" stroke-width="1"/>';
+    s+='<line x1="'+x+'" x2="'+x+'" y1="'+y(d.h[i])+'" y2="'+y(d.l[i])+'" stroke destruction="'+col+'" stroke-width="1"/>';
     const yt=y(Math.max(d.o[i],d.c[i])), yb=y(Math.min(d.o[i],d.c[i]));
     s+='<rect x="'+(x-bw/2)+'" y="'+yt+'" width="'+bw+'" height="'+Math.max(1,yb-yt)+'" fill="'+col+'"/>';
   }
@@ -1012,8 +1016,7 @@ function drawChart(d,lv){
   s+='<div class="chleg">Daily candles, last '+n+' trading days. Dashed lines: Entry (blue), Stop-loss (red), Target (green).</div>';
   return s;
 }
-
-function fixWarn(w){
+  function fixWarn(w){
   const out=[];
   w.forEach(x=>{
     if(/^it may block/i.test(x.trim())&&out.length) out[out.length-1]+='; '+x.trim();
@@ -1212,7 +1215,8 @@ function drawNewl(){
   renderItems('list_newl','newl',items,HDR_N,'No new listings match.');
   $('meta').textContent='New Listings | Showing '+list.length+' of '+rows.length+' stocks';
 }
-  // ===== Early Movers (Interactive Decision Scrutiny) =====
+
+// ===== Early Movers =====
 function drawEarly(){
   const rows=DATA.early||[];
   EARLY_MAP={};
@@ -1329,8 +1333,7 @@ function drawSmart(){
 
   $('meta').textContent='Smart Money tracking | Showing '+list.length+' of '+rows.length+' tracked entries';
 }
-
-// ===== My Stocks (Watching / Holding) =====
+  // ===== My Stocks (Watching / Holding) =====
 function loadMine(){try{return JSON.parse(localStorage.getItem('mystocks')||'[]')||[];}catch(e){return [];}}
 function saveMine(a){try{localStorage.setItem('mystocks',JSON.stringify(a));}catch(e){alert('Could not save in this browser.');}}
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -1581,7 +1584,16 @@ function drawResults(){
   $('meta').textContent='Upcoming results dates | '+rows.length+' shown';
 }
 
-function resetPerf(){$('pscan').value='';$('pclass').value='';$('prad').value='';$('pfrom').value='';$('pto').value='';drawPerf();}
+// ===== Performance Tracking (With Band Filter) =====
+function resetPerf(){
+  $('pscan').value='';
+  $('pband').value='';
+  $('pclass').value='';
+  $('prad').value='';
+  $('pfrom').value='';
+  $('pto').value='';
+  drawPerf();
+}
 
 const SCAN_LBL={ultra:'Ultra',short:'Short',early:'Early Movers',multi:'Multibagger',quality:'Quality',newl:'New Listings'};
 
@@ -1597,24 +1609,46 @@ function wsTxt(w){
 }
 
 function drawPerf(){
-  const sc=$('pscan').value, cl=$('pclass').value, f=$('pfrom').value, t=$('pto').value, rd=$('prad').value;
-  const rows=(DATA.perf||[]).filter(r=>(!sc||r.Scan==sc)&&(!cl||r.Class==cl)&&(!f||r.SignalDate>=f)&&(!t||r.SignalDate<=t)&&(!rd||(rd=='removed'?r.NowOnRadar=='No':r.NowOnRadar=='Yes')))
-    .sort((a,b)=>b.SignalDate.localeCompare(a.SignalDate)||b.Score-a.Score);
+  const sc=$('pscan').value, bd=$('pband').value, cl=$('pclass').value, f=$('pfrom').value, t=$('pto').value, rd=$('prad').value;
+  
+  const rows=(DATA.perf||[]).filter(r=>{
+    if(sc && r.Scan!=sc) return false;
+    if(cl && r.Class!=cl) return false;
+    if(f && r.SignalDate<f) return false;
+    if(t && r.SignalDate>t) return false;
+    if(rd && (rd=='removed'?r.NowOnRadar=='No':r.NowOnRadar=='Yes')) return false;
+    
+    // Decision Band filtering based on Score
+    const score = parseFloat(r.Score) || 0;
+    if(bd == 'high' && score < 80) return false;
+    if(bd == 'good' && (score < 65 || score >= 80)) return false;
+    if(bd == 'early' && score >= 65) return false;
+    
+    return true;
+  }).sort((a,b)=>b.SignalDate.localeCompare(a.SignalDate)||b.Score-a.Score);
+
   const cnt=k=>rows.filter(r=>r.Result==k).length;
   const win=cnt('Target hit'), loss=cnt('Stop hit');
   const withPnl=rows.filter(r=>r.PnLPct!=='');
   const avg=withPnl.length?withPnl.reduce((a,r)=>a+(+r.PnLPct),0)/withPnl.length:0;
   const rate=(win+loss)?Math.round(win*100/(win+loss))+'%':'-';
+  
   const box=(l,v,c)=>'<div class="st"><small>'+l+'</small><b class="'+(c||'')+'">'+v+'</b></div>';
-  $('pstats').innerHTML=box('Signals',rows.length)+box('Target hit',win,'pos')+box('Stop hit',loss,'neg')
+  $('pstats').innerHTML=box('Signals',rows.length)
+    +box('Target hit',win,'pos')
+    +box('Stop hit',loss,'neg')
     +box('Open / Pending',cnt('Open')+cnt('Pending'))
-    +box('Hit rate',rate)+box('Avg return %',avg.toFixed(2)+'%',avg>=0?'pos':'neg');
+    +box('Hit rate',rate)
+    +box('Avg return %',avg.toFixed(2)+'%',avg>=0?'pos':'neg');
+    
   $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Type</th><th>Score</th><th>Entry</th><th>Stop</th><th>Target</th><th>Result</th><th>Exit/Last</th><th>P/L %</th></tr>'
    +(rows.length?rows.map(r=>{
      const c=r.PnLPct===''?'':(+r.PnLPct>=0?'pos':'neg');
      return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b></td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td></tr>';
    }).join(''):'<tr><td colspan="11">No signals in this range yet.</td></tr>');
-  $('meta').textContent='Performance tracking | '+rows.length+' signals';
+   
+  const bandTxt = bd == 'high' ? ' [High Conviction 80+]' : (bd == 'good' ? ' [Good Setup 65-79]' : (bd == 'early' ? ' [Early Watch <65]' : ''));
+  $('meta').textContent='Performance tracking'+bandTxt+' | '+rows.length+' signals';
 }
 
 function resetMiss(){$('mscan').value='';$('mres').value='';$('mfrom').value='';$('mto').value='';drawMiss();}
