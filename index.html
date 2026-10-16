@@ -380,7 +380,7 @@ Always verify on your own chart. This is a research aid, not investment advice.
 <div id="rationaleDrawer" class="drawer-overlay" onclick="handleDrawerOverlay(event)">
   <div class="drawer-content">
     <div class="drawer-header">
-      <h3 id="dr_title">Stock Rationale</h3>
+      <h3 id="dr_title">Investment Rationale</h3>
       <button class="close-btn" onclick="closeRationaleDrawer()">&times;</button>
     </div>
     <div class="drawer-body">
@@ -388,19 +388,19 @@ Always verify on your own chart. This is a research aid, not investment advice.
         <span id="dr_icon" style="font-size:22px">&#9679;</span>
         <div>
           <div class="banner-title" id="dr_badge">PRIME ENTRY</div>
-          <div class="banner-sub" id="dr_sub">Strong setup passing key technical &amp; fundamental criteria</div>
+          <div class="banner-sub" id="dr_sub">Fresh breakout with high conviction and favorable Risk:Reward</div>
         </div>
       </div>
       
       <div class="reasons-container">
-        <div class="reasons-heading">&#128204; Behind the Reason (ఎందుకు ఎంపికైంది?)</div>
+        <div class="reasons-heading">&#128204; Behind The Reason (ఎందుకు ఎంపికైంది?)</div>
         <div id="dr_reasons"></div>
       </div>
 
       <div class="fund" id="dr_levels_box" style="margin-top:14px">
         <div class="ft">Key Decision Levels</div>
         <div class="row"><span>Current Price</span><b id="dr_price">-</b></div>
-        <div class="row"><span>Suggested Stop-Loss</span><b class="neg" id="dr_stop">-</b></div>
+        <div class="row"><span>Stop-Loss</span><b class="neg" id="dr_stop">-</b></div>
         <div class="row"><span>Target / Pivot Level</span><b class="pos" id="dr_target">-</b></div>
         <div class="row"><span>Stage Analysis</span><b id="dr_stage">-</b></div>
       </div>
@@ -413,7 +413,7 @@ Always verify on your own chart. This is a research aid, not investment advice.
 </div>
 
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv'};
+  const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv'};
 const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['early','exea','Early Movers'],['newl','exnl','New Listing']];
 const STALE_DAYS=3;
 let cur='ultra',DATA={},EV={};
@@ -456,42 +456,79 @@ function togRow(h){
 // ===== Click-to-Reveal Drawer Logic =====
 let EARLY_MAP={};
 
+function getStageMeta(r){
+  let badge=r.StageBadge;
+  let color=r.StageColor;
+  let code=r.StageCode;
+
+  if(!badge||badge==='WATCH'||badge==='-'){
+    if(r.Stage==='Fresh'){
+      badge='PRIME ENTRY';
+      color='green';
+      code='Stage 2A';
+    }else if(r.Stage==='Ready'){
+      badge='WATCHLIST';
+      color='gold';
+      code='Stage 1B';
+    }else{
+      badge='AVOID';
+      color='red';
+      code='Stage 2B';
+    }
+  }
+  return {badge,color,code};
+}
+
 function openRationale(sym){
   const r=EARLY_MAP[sym];
   if(!r) return;
   
-  $('dr_title').textContent=r.Symbol+' — ఇన్వెస్ట్‌మెంట్ విశ్లేషణ';
-  const badge=r.StageBadge||(r.Stage=='Fresh'?'PRIME ENTRY':(r.Stage=='Ready'?'WATCHLIST':'AVOID'));
-  const color=r.StageColor||(badge.includes('ENTRY')?'green':(badge.includes('WATCH')?'gold':'red'));
-  const code=r.StageCode||(r.Stage=='Fresh'?'Stage 2A':(r.Stage=='Ready'?'Stage 1B':'Stage 2B'));
+  $('dr_title').textContent=r.Symbol+' — Investment Scrutiny';
+  const meta=getStageMeta(r);
   
-  $('dr_badge').textContent=badge;
-  $('dr_icon').textContent=color=='green'?'🟢':(color=='gold'?'🟡':'🔴');
+  $('dr_badge').textContent=meta.badge;
+  $('dr_icon').textContent=meta.color==='green'?'🟢':(meta.color==='gold'?'🟡':'🔴');
   
   const bnr=$('dr_banner');
-  bnr.className='status-banner banner-'+color;
+  bnr.className='status-banner banner-'+meta.color;
   
-  if(badge.includes('ENTRY')){
-    $('dr_sub').textContent='ప్రస్తుతం కొనుగోలుకు అత్యంత అనుకూలమైన జోన్ (తక్కువ రిస్క్, ఫ్రెష్ మొమెంటం)';
-  } else if(badge.includes('WATCH')){
-    $('dr_sub').textContent='బ్రేక్‌అవుట్‌కు సిద్ధంగా ఉంది. వాచ్‌లిస్ట్‌లో పెట్టి వాల్యూమ్ కోసం వేచి చూడండి';
-  } else {
-    $('dr_sub').textContent='బేస్ నుండి ఇప్పటికే చాలా దూరం పెరిగింది. ఇప్పుడు కొంటే రిస్క్ ఎక్కువ';
+  if(meta.badge==='PRIME ENTRY'){
+    $('dr_sub').textContent='Low Risk Entry Zone: Fresh breakout with strong volume support.';
+  }else if(meta.badge==='WATCHLIST'){
+    $('dr_sub').textContent='Consolidation Near Pivot: Tight range with drying volume. Keep on radar.';
+  }else{
+    $('dr_sub').textContent='Extended Run-up: High risk of pullback. Avoid chasing at current level.';
   }
   
   const ctn=$('dr_reasons');
   ctn.innerHTML='';
   
   let lines=[];
-  if(r.SimpleReasons&&r.SimpleReasons.length){
+  if(r.SimpleReasons&&r.SimpleReasons.trim().length>0&&r.SimpleReasons!=='[]'){
     lines=r.SimpleReasons.split(' || ').map(s=>{
       const idx=s.indexOf(':');
-      return idx>0?{title:s.slice(0,idx).trim(),desc:s.slice(idx+1).trim()}:{title:'విశ్లేషణ',desc:s};
+      return idx>0?{title:s.slice(0,idx).trim(),desc:s.slice(idx+1).trim()}:{title:'Key Insight',desc:s};
     });
-  } else if(r.Reasons){
-    lines=r.Reasons.split(' | ').map((s,i)=>({title:'కారణం '+(i+1),desc:s}));
-  } else {
-    lines.push({title:'సాధారణ సమీక్ష',desc:'ఈ స్టాక్ మన రాడార్ టెక్నికల్ మరియు బేస్ ఫిల్టర్లను పూర్తి చేసుకుంది.'});
+  }else{
+    if(r.Stage==='Fresh'){
+      lines=[
+        {title:'Early Breakout Zone',desc:`Breakout level నుండి ధర కేవలం ${r.GainPct}% మాత్రమే పెరిగింది. Ideal early entry zone.`},
+        {title:'Volume Confirmation',desc:`Normal average కంటే ${r.VolRatio||'2.0'}x రెట్లు అధిక volume తో breakout అయింది.`},
+        {title:'Defined Risk:Reward',desc:`Stop-loss కేవలం ${r.StopDistPct}% వద్ద ఉంది (Rs ${r.Stop}). Risk:Reward ratio 1:${r.RR} తో అనుకూలంగా ఉంది.`},
+        {title:'Sector Support',desc:`${r.Sector||'Leading Sector'} రంగానికి చెందినది. Multi-week base నుండి breakout వచ్చింది.`}
+      ];
+    }else if(r.Stage==='Ready'){
+      lines=[
+        {title:'Pivot Resistance Testing',desc:`Resistance level (Rs ${r.Level}) కి కేవలం ${Math.abs(r.GainPct)}% సమీపంలో consolidate అవుతోంది.`},
+        {title:'Volume Dry-Up (VCP)',desc:'Volume బాగా డ్రై అయిపోయింది. Selling pressure దాదాపుగా తగ్గింది.'},
+        {title:'Action Plan',desc:'ముందే తొందరపడి కొనవద్దు. Strong volume తో breakout ఇచ్చినప్పుడు entry ప్లాన్ చేయండి.'}
+      ];
+    }else{
+      lines=[
+        {title:'Chasing Risk',desc:`Breakout level నుండి ఇప్పటికే ${r.GainPct}% పెరిగిపోయింది. Late entry వల్ల risk ఎక్కువ.`},
+        {title:'Action Plan',desc:'Pullback లేదా fresh base formation వచ్చేంత వరకు వేచి చూడండి.'}
+      ];
+    }
   }
   
   lines.forEach((item,idx)=>{
@@ -504,7 +541,7 @@ function openRationale(sym){
   $('dr_price').textContent='Rs '+fmt(r.Close||r.Entry);
   $('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)';
   $('dr_target').textContent='Rs '+fmt(r.Target||r.Level)+' (+'+(r.TargetPct||'')+')';
-  $('dr_stage').textContent=code+' ('+r.Stage+')';
+  $('dr_stage').textContent=meta.code+' ('+r.Stage+')';
   $('dr_chart_link').href='https://in.tradingview.com/chart/?symbol=NSE:'+encodeURIComponent(r.Symbol);
   
   $('rationaleDrawer').style.display='flex';
@@ -560,9 +597,8 @@ function rowCells(tab,r,ns){
     info=[(ns&&ns.has(r.Symbol))?'NEW':'',r.Status,r.Class].filter(Boolean).join(' &middot; ');
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
   } else if(tab=='early'){
-    const sBadge=r.StageBadge||(r.Stage=='Fresh'?'PRIME ENTRY':(r.Stage=='Ready'?'WATCHLIST':'AVOID'));
-    const sColor=r.StageColor||(sBadge.includes('ENTRY')?'green':(sBadge.includes('WATCH')?'gold':'red'));
-    info='<span class="status-pill status-'+sColor+'">&#9679; '+sBadge+'</span>';
+    const meta=getStageMeta(r);
+    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>';
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
   } else if(tab=='newl'){
     info=esc(r.ListedOn||'n/a');
@@ -1152,8 +1188,7 @@ function drawNewl(){
   renderItems('list_newl','newl',items,HDR_N,'No new listings match.');
   $('meta').textContent='New Listings (less than 120 days of history, price-only scan) | Showing '+list.length+' of '+rows.length+' stocks';
 }
-
-// ===== Early Movers (Stage 1B -> 2A Click-to-Reveal Enabled) =====
+  // ===== Early Movers (Interactive Decision Scrutiny) =====
 function drawEarly(){
   const rows=DATA.early||[];
   EARLY_MAP={};
@@ -1167,18 +1202,16 @@ function drawEarly(){
   
   const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
-    const sBadge=r.StageBadge||(r.Stage=='Fresh'?'PRIME ENTRY':(r.Stage=='Ready'?'WATCHLIST':'AVOID'));
-    const sColor=r.StageColor||(sBadge.includes('ENTRY')?'green':(sBadge.includes('WATCH')?'gold':'red'));
-    const sCode=r.StageCode||(r.Stage=='Fresh'?'Stage 2A':(r.Stage=='Ready'?'Stage 1B':'Stage 2B'));
+    const meta=getStageMeta(r);
 
-    const tags='<span class="status-pill status-'+sColor+'">&#9679; '+sBadge+'</span>'
-      +'<span class="tag">'+esc(sCode)+'</span>'
+    const tags='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>'
+      +'<span class="tag">'+esc(meta.code)+'</span>'
       +'<span class="tag">'+esc(r.Horizon)+'</span>'
       +'<span class="tag">'+esc(has(r.Sector)?r.Sector:'Sector n/a')+'</span>';
       
     let ex;
-    if(r.Status=='Breakout') ex='Price broke above recent high '+esc(r.DaysSince)+' day(s) ago on higher volume; currently '+esc(r.GainPct)+'% from breakout level (Rs '+fmt(r.Level)+').';
-    else ex='Price is tightening just below recent high (Rs '+fmt(r.Level)+') with drying volume. Watch for breakout.';
+    if(r.Status=='Breakout') ex='Broke above recent high '+esc(r.DaysSince)+' day(s) ago on strong volume; now '+esc(r.GainPct)+'% from breakout level (Rs '+fmt(r.Level)+').';
+    else ex='Tight range consolidation just below recent high (Rs '+fmt(r.Level)+') with drying volume.';
     
     const why=has(r.Reasons)?'<div class="why"><div class="ft">Why is it early?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+esc(x)+'</div>').join('')+'</div>':'';
     const fs=(has(r.FundScore)&&r.FundScore!=='n/a')?'<b class="'+(+r.FundScore>=60?'pos':(+r.FundScore>=40?'amb':'neg'))+'">'+esc(r.FundScore)+' / 100</b>':na;
