@@ -15,18 +15,44 @@ button,select,input{background:var(--card);color:var(--tx);border:1px solid var(
 button.on{background:var(--b);border-color:var(--b)}
 label{color:var(--mut);font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;transition:border-color .2s}
+.card.clickable{cursor:pointer}
+.card.clickable:hover{border-color:var(--b)}
 .top{display:flex;justify-content:space-between;align-items:center}
 .sym{font-size:18px;font-weight:700}
 .score{font-weight:700;border-radius:6px;padding:2px 8px;font-size:13px}
 .High{background:var(--g)}.Good{background:var(--b)}.Early{background:#444c56}
-.tags{margin:6px 0;display:flex;gap:6px;flex-wrap:wrap}
+.tags{margin:6px 0;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .tag{font-size:12px;border:1px solid var(--line);border-radius:20px;padding:1px 8px;color:var(--mut)}
 .tag.new{border-color:var(--g);color:var(--g);font-weight:700}
 .tag.hold{border-color:var(--b);color:var(--b);font-weight:700}
 .tag.late{border-color:var(--y);color:var(--y);font-weight:700}
 .tag.smart{border-color:#a371f7;color:#a371f7;font-weight:700}
 .tag.overlap{border-color:#f0883e;color:#f0883e;font-weight:700}
+.status-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.4px;display:inline-flex;align-items:center;gap:4px}
+.status-green{background:rgba(46,160,67,.2);color:#3fb950;border:1px solid rgba(46,160,67,.4)}
+.status-gold{background:rgba(210,153,34,.2);color:#d29922;border:1px solid rgba(210,153,34,.4)}
+.status-red{background:rgba(248,81,73,.2);color:#f85149;border:1px solid rgba(248,81,73,.4)}
+.drawer-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:9999;display:none;justify-content:flex-end}
+.drawer-content{width:100%;max-width:440px;background:#161b22;border-left:1px solid var(--line);height:100%;padding:22px;box-sizing:border-box;display:flex;flex-direction:column;overflow-y:auto}
+.drawer-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.drawer-header h3{margin:0;font-size:17px;color:var(--tx)}
+.close-btn{background:transparent;border:none;color:var(--mut);font-size:20px;cursor:pointer}
+.close-btn:hover{color:var(--tx)}
+.drawer-body{flex:1;padding-top:16px}
+.status-banner{padding:14px;border-radius:8px;display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.banner-green{background:#0d2818;border:1px solid var(--g);color:#3fb950}
+.banner-gold{background:#2a2008;border:1px solid var(--y);color:#e3b341}
+.banner-red{background:#2b1113;border:1px solid var(--r);color:#ff7b72}
+.banner-title{font-size:15px;font-weight:700}
+.banner-sub{font-size:12px;opacity:.9;margin-top:2px}
+.reasons-heading{font-size:13px;color:var(--mut);margin:0 0 10px;text-transform:uppercase;letter-spacing:.5px}
+.reason-item{background:#0e1117;border:1px solid var(--line);border-left:3px solid var(--b);border-radius:6px;padding:10px 12px;margin-bottom:10px}
+.reason-title{font-weight:600;font-size:13px;color:var(--tx);margin-bottom:3px}
+.reason-desc{font-size:12.5px;color:var(--mut);line-height:1.4}
+.drawer-actions{margin-top:20px;display:flex;flex-direction:column;gap:8px}
+.chart-link-btn{display:block;text-align:center;background:var(--b);color:#fff;text-decoration:none;padding:9px;border-radius:8px;font-size:13px;font-weight:600}
+.chart-link-btn:hover{opacity:.9}
 .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
 .n{background:#0e1117;border-radius:8px;padding:6px 8px}
 .n small{display:block;color:var(--mut);font-size:11px}
@@ -350,6 +376,42 @@ Always verify on your own chart. This is a research aid, not investment advice.
   </div>
 </div>
 
+<!-- ================= Click-to-Reveal Rationale Drawer ================= -->
+<div id="rationaleDrawer" class="drawer-overlay" onclick="handleDrawerOverlay(event)">
+  <div class="drawer-content">
+    <div class="drawer-header">
+      <h3 id="dr_title">Stock Rationale</h3>
+      <button class="close-btn" onclick="closeRationaleDrawer()">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <div id="dr_banner" class="status-banner banner-green">
+        <span id="dr_icon" style="font-size:22px">&#9679;</span>
+        <div>
+          <div class="banner-title" id="dr_badge">PRIME ENTRY</div>
+          <div class="banner-sub" id="dr_sub">Strong setup passing key technical &amp; fundamental criteria</div>
+        </div>
+      </div>
+      
+      <div class="reasons-container">
+        <div class="reasons-heading">&#128204; Behind the Reason (ఎందుకు ఎంపికైంది?)</div>
+        <div id="dr_reasons"></div>
+      </div>
+
+      <div class="fund" id="dr_levels_box" style="margin-top:14px">
+        <div class="ft">Key Decision Levels</div>
+        <div class="row"><span>Current Price</span><b id="dr_price">-</b></div>
+        <div class="row"><span>Suggested Stop-Loss</span><b class="neg" id="dr_stop">-</b></div>
+        <div class="row"><span>Target / Pivot Level</span><b class="pos" id="dr_target">-</b></div>
+        <div class="row"><span>Stage Analysis</span><b id="dr_stage">-</b></div>
+      </div>
+
+      <div class="drawer-actions">
+        <a id="dr_chart_link" href="#" target="_blank" rel="noopener" class="chart-link-btn">&#128200; Open in TradingView</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv'};
 const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['early','exea','Early Movers'],['newl','exnl','New Listing']];
@@ -366,7 +428,7 @@ try{VIEW=localStorage.getItem('view')||'list';}catch(e){}
 if(VIEW!='cards') VIEW='list';
 const ROWOPEN={};
 const HDR_SCAN=['Stock','Score','Status','Entry','Stop','Target','Risk / target',''];
-const HDR_E=['Stock','Score','Stage','Entry','Stop','Target','Risk / target',''];
+const HDR_E=['Stock','Score','Decision Status','Entry','Stop','Target','Risk / target',''];
 const HDR_Q=['Stock','Score','Sector','Entry','Stop','Target','Quality',''];
 const HDR_N=['Stock','Score','Listed','Entry','Stop','Target','Since listing',''];
 const HDR_MINE=['Stock','Status','Price','Entry','Stop','Target','Performance',''];
@@ -390,6 +452,72 @@ function togRow(h){
   h.classList.toggle('open',o);
   ROWOPEN[k]=o;
 }
+
+// ===== Click-to-Reveal Drawer Logic =====
+let EARLY_MAP={};
+
+function openRationale(sym){
+  const r=EARLY_MAP[sym];
+  if(!r) return;
+  
+  $('dr_title').textContent=r.Symbol+' — ఇన్వెస్ట్‌మెంట్ విశ్లేషణ';
+  const badge=r.StageBadge||(r.Stage=='Fresh'?'PRIME ENTRY':(r.Stage=='Ready'?'WATCHLIST':'AVOID'));
+  const color=r.StageColor||(badge.includes('ENTRY')?'green':(badge.includes('WATCH')?'gold':'red'));
+  const code=r.StageCode||(r.Stage=='Fresh'?'Stage 2A':(r.Stage=='Ready'?'Stage 1B':'Stage 2B'));
+  
+  $('dr_badge').textContent=badge;
+  $('dr_icon').textContent=color=='green'?'🟢':(color=='gold'?'🟡':'🔴');
+  
+  const bnr=$('dr_banner');
+  bnr.className='status-banner banner-'+color;
+  
+  if(badge.includes('ENTRY')){
+    $('dr_sub').textContent='ప్రస్తుతం కొనుగోలుకు అత్యంత అనుకూలమైన జోన్ (తక్కువ రిస్క్, ఫ్రెష్ మొమెంటం)';
+  } else if(badge.includes('WATCH')){
+    $('dr_sub').textContent='బ్రేక్‌అవుట్‌కు సిద్ధంగా ఉంది. వాచ్‌లిస్ట్‌లో పెట్టి వాల్యూమ్ కోసం వేచి చూడండి';
+  } else {
+    $('dr_sub').textContent='బేస్ నుండి ఇప్పటికే చాలా దూరం పెరిగింది. ఇప్పుడు కొంటే రిస్క్ ఎక్కువ';
+  }
+  
+  const ctn=$('dr_reasons');
+  ctn.innerHTML='';
+  
+  let lines=[];
+  if(r.SimpleReasons&&r.SimpleReasons.length){
+    lines=r.SimpleReasons.split(' || ').map(s=>{
+      const idx=s.indexOf(':');
+      return idx>0?{title:s.slice(0,idx).trim(),desc:s.slice(idx+1).trim()}:{title:'విశ్లేషణ',desc:s};
+    });
+  } else if(r.Reasons){
+    lines=r.Reasons.split(' | ').map((s,i)=>({title:'కారణం '+(i+1),desc:s}));
+  } else {
+    lines.push({title:'సాధారణ సమీక్ష',desc:'ఈ స్టాక్ మన రాడార్ టెక్నికల్ మరియు బేస్ ఫిల్టర్లను పూర్తి చేసుకుంది.'});
+  }
+  
+  lines.forEach((item,idx)=>{
+    const el=document.createElement('div');
+    el.className='reason-item';
+    el.innerHTML='<div class="reason-title">'+(idx+1)+'. '+esc(item.title)+'</div><div class="reason-desc">'+esc(item.desc)+'</div>';
+    ctn.appendChild(el);
+  });
+  
+  $('dr_price').textContent='Rs '+fmt(r.Close||r.Entry);
+  $('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)';
+  $('dr_target').textContent='Rs '+fmt(r.Target||r.Level)+' (+'+(r.TargetPct||'')+')';
+  $('dr_stage').textContent=code+' ('+r.Stage+')';
+  $('dr_chart_link').href='https://in.tradingview.com/chart/?symbol=NSE:'+encodeURIComponent(r.Symbol);
+  
+  $('rationaleDrawer').style.display='flex';
+}
+
+function closeRationaleDrawer(){
+  $('rationaleDrawer').style.display='none';
+}
+
+function handleDrawerOverlay(e){
+  if(e.target.id==='rationaleDrawer') closeRationaleDrawer();
+}
+
 function rowCells(tab,r,ns){
   const cls=r.Band?r.Band.split(' ')[0]:'';
   const rs=RES[r.Symbol||r.sym];
@@ -432,7 +560,9 @@ function rowCells(tab,r,ns){
     info=[(ns&&ns.has(r.Symbol))?'NEW':'',r.Status,r.Class].filter(Boolean).join(' &middot; ');
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
   } else if(tab=='early'){
-    info=[r.Stage,r.Horizon].filter(Boolean).join(' &middot; ');
+    const sBadge=r.StageBadge||(r.Stage=='Fresh'?'PRIME ENTRY':(r.Stage=='Ready'?'WATCHLIST':'AVOID'));
+    const sColor=r.StageColor||(sBadge.includes('ENTRY')?'green':(sBadge.includes('WATCH')?'gold':'red'));
+    info='<span class="status-pill status-'+sColor+'">&#9679; '+sBadge+'</span>';
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
   } else if(tab=='newl'){
     info=esc(r.ListedOn||'n/a');
@@ -733,12 +863,12 @@ function evHtml(sym){
 let CH=null;
 
 function chartOnly(r){
-  return '<button class="chbtn" data-s="'+esc(r.Symbol)+'" data-e="'+esc(r.Entry)+'" data-st="'+esc(r.Stop)+'" data-t="'+esc(r.Target)+'" onclick="openChart(this)">Chart</button>';
+  return '<button class="chbtn" data-s="'+esc(r.Symbol)+'" data-e="'+esc(r.Entry)+'" data-st="'+esc(r.Stop)+'" data-t="'+esc(r.Target)+'" onclick="event.stopPropagation();openChart(this)">Chart</button>';
 }
 
 function watchBtn(r){
   if(loadMine().some(x=>x.sym==r.Symbol)) return '<button class="chbtn" style="margin-left:6px" disabled>&#9733; In My Stocks</button>';
-  return '<button class="chbtn" style="margin-left:6px" data-s="'+esc(r.Symbol)+'" onclick="addFromCard(this)">&#9734; Watch</button>';
+  return '<button class="chbtn" style="margin-left:6px" data-s="'+esc(r.Symbol)+'" onclick="event.stopPropagation();addFromCard(this)">&#9734; Watch</button>';
 }
 
 function chartBtn(r){return chartOnly(r)+watchBtn(r);}
@@ -761,7 +891,7 @@ function openChart(btn){
     .catch(()=>{$('chbody').innerHTML='<div class="exp">Chart data file (data/charts.json) not found yet. It is created by the daily run.</div>';});
 }
 function closeChart(){$('chmodal').style.display='none';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeChart();closeDigestPop();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeChart();closeDigestPop();closeRationaleDrawer();}});
 
 function drawChart(d,lv){
   const n=d.c.length;
@@ -874,7 +1004,8 @@ function draw(){
   }
   $('chg').innerHTML='<div class="note"><b>Changes since yesterday:</b> '+newLine+'<br>'+remLine+'</div>';
 }
-  function drawMulti(){
+
+function drawMulti(){
   const rows=DATA.multi||[];
   const sel=$('msector');
   const secs=[...new Set(rows.map(r=>r.Sector).filter(Boolean))].sort();
@@ -1022,30 +1153,41 @@ function drawNewl(){
   $('meta').textContent='New Listings (less than 120 days of history, price-only scan) | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
-// ===== Early Movers =====
+// ===== Early Movers (Stage 1B -> 2A Click-to-Reveal Enabled) =====
 function drawEarly(){
   const rows=DATA.early||[];
+  EARLY_MAP={};
+  rows.forEach(r=>{EARLY_MAP[r.Symbol]=r;});
+
   const b=$('yband').value, sg=$('ystage').value, hz=$('yhor').value;
   const list=rows.filter(r=>(!b||r.Band==b)&&(!sg||r.Stage==sg)&&(!hz||r.Horizon==hz))
     .sort((a,c)=>((+a.StageOrd)-(+c.StageOrd))||((+c.Score)-(+a.Score)));
   const na='<b class="na">n/a</b>';
   const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
+  
   const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
-    const stCls=(r.Stage=='Fresh'||r.Stage=='Ready')?' new':((r.Stage=='Extended'||r.Stage=='Late')?' late':'');
-    const tags='<span class="tag'+stCls+'">'+esc(r.Stage)+'</span>'
+    const sBadge=r.StageBadge||(r.Stage=='Fresh'?'PRIME ENTRY':(r.Stage=='Ready'?'WATCHLIST':'AVOID'));
+    const sColor=r.StageColor||(sBadge.includes('ENTRY')?'green':(sBadge.includes('WATCH')?'gold':'red'));
+    const sCode=r.StageCode||(r.Stage=='Fresh'?'Stage 2A':(r.Stage=='Ready'?'Stage 1B':'Stage 2B'));
+
+    const tags='<span class="status-pill status-'+sColor+'">&#9679; '+sBadge+'</span>'
+      +'<span class="tag">'+esc(sCode)+'</span>'
       +'<span class="tag">'+esc(r.Horizon)+'</span>'
-      +'<span class="tag">'+esc(r.Status)+'</span>'
       +'<span class="tag">'+esc(has(r.Sector)?r.Sector:'Sector n/a')+'</span>';
+      
     let ex;
-    if(r.Status=='Breakout') ex='Price broke above its recent high '+esc(r.DaysSince)+' day(s) ago on higher volume and is now '+esc(r.GainPct)+'% from the breakout level (Rs '+fmt(r.Level)+').';
-    else ex='Price is just below its recent high (Rs '+fmt(r.Level)+') in a tight range with falling volume. Wait for a close above it with strong volume.';
+    if(r.Status=='Breakout') ex='Price broke above recent high '+esc(r.DaysSince)+' day(s) ago on higher volume; currently '+esc(r.GainPct)+'% from breakout level (Rs '+fmt(r.Level)+').';
+    else ex='Price is tightening just below recent high (Rs '+fmt(r.Level)+') with drying volume. Watch for breakout.';
+    
     const why=has(r.Reasons)?'<div class="why"><div class="ft">Why is it early?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+esc(x)+'</div>').join('')+'</div>':'';
     const fs=(has(r.FundScore)&&r.FundScore!=='n/a')?'<b class="'+(+r.FundScore>=60?'pos':(+r.FundScore>=40?'amb':'neg'))+'">'+esc(r.FundScore)+' / 100</b>':na;
     const fparts=has(r.Fundamentals)?r.Fundamentals.split(' | '):[];
     const pl=has(r.PledgePct)&&r.PledgePct!=='n/a'?pledgeHtml(r.PledgePct,na):na;
     const wl=has(r.Warning)?r.Warning.split('; '):[];
-    return '<div class="card"><div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\')">'
+    +'<div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
     +'<div class="tags">'+tags+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
@@ -1053,6 +1195,7 @@ function drawEarly(){
     +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
     +'<div class="exp">'+ex+' Last close: '+fmt(r.Close)+'.</div>'
     +chartBtn(r)
+    +'<div style="font-size:11.5px;color:var(--b);margin-top:8px">&#9432; Tap card to inspect deep rationale &amp; stage details</div>'
     +lvlHtml(r)
     +why
     +'<div class="fund"><div class="ft">Fundamentals check</div>'
@@ -1064,10 +1207,11 @@ function drawEarly(){
     +(wl.length?'<div class="warn">&#9888; '+wl.map(esc).join('<br>&#9888; ')+'</div>':'')
     +'</div>';
   });
+  
   const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('early',r,null),card:cards[i]}));
   renderItems('list_early','early',items,HDR_E,'No Early Movers match (the market may be weak, or the scan has not run yet).');
   const d=rows[0]?rows[0].Date:'-';
-  $('meta').textContent='Early Movers | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
+  $('meta').textContent='Early Movers (Stage 1B & 2A Scrutiny Active) | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
 // ===== Smart Money =====
