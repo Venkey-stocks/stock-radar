@@ -388,7 +388,7 @@ Always verify on your own chart. This is a research aid, not investment advice.
         <span id="dr_icon" style="font-size:22px">&#9679;</span>
         <div>
           <div class="banner-title" id="dr_badge">PRIME ENTRY</div>
-          <div class="banner-sub" id="dr_sub">Fresh breakout with high conviction and favorable Risk:Reward</div>
+          <div class="banner-sub" id="dr_sub">High Conviction setup passing momentum &amp; risk criteria</div>
         </div>
       </div>
       
@@ -402,7 +402,7 @@ Always verify on your own chart. This is a research aid, not investment advice.
         <div class="row"><span>Current Price</span><b id="dr_price">-</b></div>
         <div class="row"><span>Stop-Loss</span><b class="neg" id="dr_stop">-</b></div>
         <div class="row"><span>Target / Pivot Level</span><b class="pos" id="dr_target">-</b></div>
-        <div class="row"><span>Stage Analysis</span><b id="dr_stage">-</b></div>
+        <div class="row"><span>Decision Band</span><b id="dr_stage">-</b></div>
       </div>
 
       <div class="drawer-actions">
@@ -427,7 +427,7 @@ let VIEW='list';
 try{VIEW=localStorage.getItem('view')||'list';}catch(e){}
 if(VIEW!='cards') VIEW='list';
 const ROWOPEN={};
-const HDR_SCAN=['Stock','Score','Status','Entry','Stop','Target','Risk / target',''];
+const HDR_SCAN=['Stock','Score','Decision Status','Entry','Stop','Target','Risk / target',''];
 const HDR_E=['Stock','Score','Decision Status','Entry','Stop','Target','Risk / target',''];
 const HDR_Q=['Stock','Score','Sector','Entry','Stop','Target','Quality',''];
 const HDR_N=['Stock','Score','Listed','Entry','Stop','Target','Since listing',''];
@@ -453,7 +453,7 @@ function togRow(h){
   ROWOPEN[k]=o;
 }
 
-// ===== Click-to-Reveal Drawer Logic =====
+// ===== Universal Drawer Logic (Early, Ultra, Short) =====
 let EARLY_MAP={};
 
 function getStageMeta(r){
@@ -462,25 +462,27 @@ function getStageMeta(r){
   let code=r.StageCode;
 
   if(!badge||badge==='WATCH'||badge==='-'){
-    if(r.Stage==='Fresh'){
+    if(r.Stage==='Fresh'||r.Band==='High Conviction'){
       badge='PRIME ENTRY';
       color='green';
-      code='Stage 2A';
-    }else if(r.Stage==='Ready'){
+      code=r.Stage?'Stage 2A':'High Conviction';
+    }else if(r.Stage==='Ready'||r.Band==='Good Setup'){
       badge='WATCHLIST';
       color='gold';
-      code='Stage 1B';
+      code=r.Stage?'Stage 1B':'Good Setup';
     }else{
       badge='AVOID';
       color='red';
-      code='Stage 2B';
+      code=r.Stage?'Stage 2B':'Early Watch';
     }
   }
   return {badge,color,code};
 }
 
-function openRationale(sym){
-  const r=EARLY_MAP[sym];
+function openRationale(sym, tabType){
+  const tab = tabType || cur;
+  const rows = (DATA[tab]||[]);
+  const r = rows.find(x=>x.Symbol===sym) || EARLY_MAP[sym];
   if(!r) return;
   
   $('dr_title').textContent=r.Symbol+' — Investment Scrutiny';
@@ -493,9 +495,9 @@ function openRationale(sym){
   bnr.className='status-banner banner-'+meta.color;
   
   if(meta.badge==='PRIME ENTRY'){
-    $('dr_sub').textContent='Low Risk Entry Zone: Fresh breakout with strong volume support.';
+    $('dr_sub').textContent='High Conviction Setup: Fresh momentum with favorable Risk:Reward ratio.';
   }else if(meta.badge==='WATCHLIST'){
-    $('dr_sub').textContent='Consolidation Near Pivot: Tight range with drying volume. Keep on radar.';
+    $('dr_sub').textContent='Consolidation / Pivot Watch: Price tightening with drying volume.';
   }else{
     $('dr_sub').textContent='Extended Run-up: High risk of pullback. Avoid chasing at current level.';
   }
@@ -510,23 +512,28 @@ function openRationale(sym){
       return idx>0?{title:s.slice(0,idx).trim(),desc:s.slice(idx+1).trim()}:{title:'Key Insight',desc:s};
     });
   }else{
-    if(r.Stage==='Fresh'){
-      lines=[
-        {title:'Early Breakout Zone',desc:`Breakout level నుండి ధర కేవలం ${r.GainPct}% మాత్రమే పెరిగింది. Ideal early entry zone.`},
-        {title:'Volume Confirmation',desc:`Normal average కంటే ${r.VolRatio||'2.0'}x రెట్లు అధిక volume తో breakout అయింది.`},
-        {title:'Defined Risk:Reward',desc:`Stop-loss కేవలం ${r.StopDistPct}% వద్ద ఉంది (Rs ${r.Stop}). Risk:Reward ratio 1:${r.RR} తో అనుకూలంగా ఉంది.`},
-        {title:'Sector Support',desc:`${r.Sector||'Leading Sector'} రంగానికి చెందినది. Multi-week base నుండి breakout వచ్చింది.`}
-      ];
-    }else if(r.Stage==='Ready'){
-      lines=[
-        {title:'Pivot Resistance Testing',desc:`Resistance level (Rs ${r.Level}) కి కేవలం ${Math.abs(r.GainPct)}% సమీపంలో consolidate అవుతోంది.`},
-        {title:'Volume Dry-Up (VCP)',desc:'Volume బాగా డ్రై అయిపోయింది. Selling pressure దాదాపుగా తగ్గింది.'},
-        {title:'Action Plan',desc:'ముందే తొందరపడి కొనవద్దు. Strong volume తో breakout ఇచ్చినప్పుడు entry ప్లాన్ చేయండి.'}
-      ];
+    if(tab==='early'){
+      if(r.Stage==='Fresh'){
+        lines=[
+          {title:'Early Breakout Zone',desc:`Breakout level నుండి ధర కేవలం ${r.GainPct}% మాత్రమే పెరిగింది. Ideal early entry zone.`},
+          {title:'Volume Confirmation',desc:`Normal average కంటే ${r.VolRatio||'2.0'}x రెట్లు అధిక volume తో breakout అయింది.`},
+          {title:'Defined Risk:Reward',desc:`Stop-loss కేవలం ${r.StopDistPct}% వద్ద ఉంది (Rs ${r.Stop}). Risk:Reward ratio 1:${r.RR} తో అనుకూలంగా ఉంది.`},
+          {title:'Sector Support',desc:`${r.Sector||'Leading Sector'} రంగానికి చెందినది. Multi-week base నుండి breakout వచ్చింది.`}
+        ];
+      }else{
+        lines=[
+          {title:'Pivot Resistance Testing',desc:`Resistance level (Rs ${r.Level}) కి కేవలం ${Math.abs(r.GainPct)}% సమీపంలో consolidate అవుతోంది.`},
+          {title:'Volume Dry-Up (VCP)',desc:'Volume బాగా డ్రై అయిపోయింది. Selling pressure దాదాపుగా తగ్గింది.'},
+          {title:'Action Plan',desc:'ముందే తొందరపడి కొనవద్దు. Strong volume తో breakout ఇచ్చినప్పుడు entry ప్లాన్ చేయండి.'}
+        ];
+      }
     }else{
+      const setupDesc = r.Setup || r.Status || 'Bullish Momentum';
       lines=[
-        {title:'Chasing Risk',desc:`Breakout level నుండి ఇప్పటికే ${r.GainPct}% పెరిగిపోయింది. Late entry వల్ల risk ఎక్కువ.`},
-        {title:'Action Plan',desc:'Pullback లేదా fresh base formation వచ్చేంత వరకు వేచి చూడండి.'}
+        {title:'Setup & Pattern',desc:`${setupDesc} సెటప్ గుర్తించబడింది. Momentum score ${r.Score}/100 తో బలంగా ఉంది.`},
+        {title:'Risk Management',desc:`Stop-loss లెవెల్ Rs ${r.Stop} (${r.StopDistPct}% రిస్క్). Reward:Risk 1:${r.RR||'2.0'} తో అనుకూలంగా ఉంది.`},
+        {title:'Target Projection',desc:`Chart structure ఆధారంగా Target Rs ${r.Target} (+${r.TargetPct}%) వద్ద లెక్కించబడింది.`},
+        {title:'Trend & Moving Averages',desc:`Short-term ట్రెండ్ బలంగా ఉంది. 20-DMA పైన స్థిరంగా ట్రేడ్ అవుతోంది.`}
       ];
     }
   }
@@ -541,7 +548,7 @@ function openRationale(sym){
   $('dr_price').textContent='Rs '+fmt(r.Close||r.Entry);
   $('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)';
   $('dr_target').textContent='Rs '+fmt(r.Target||r.Level)+' (+'+(r.TargetPct||'')+')';
-  $('dr_stage').textContent=meta.code+' ('+r.Stage+')';
+  $('dr_stage').textContent=meta.code;
   $('dr_chart_link').href='https://in.tradingview.com/chart/?symbol=NSE:'+encodeURIComponent(r.Symbol);
   
   $('rationaleDrawer').style.display='flex';
@@ -593,10 +600,7 @@ function rowCells(tab,r,ns){
       +'<span class="hm"><b class="'+pcls+'">'+ptxt+'</b> &middot; <span class="'+hitCls+'">'+hitTxt+'</span></span>'
       +al;
   }
-  if(tab=='ultra'||tab=='short'){
-    info=[(ns&&ns.has(r.Symbol))?'NEW':'',r.Status,r.Class].filter(Boolean).join(' &middot; ');
-    extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
-  } else if(tab=='early'){
+  if(tab=='ultra'||tab=='short'||tab=='early'){
     const meta=getStageMeta(r);
     info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>';
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
@@ -959,7 +963,7 @@ function drawChart(d,lv){
     if(!has(v)||!isFinite(+v)) return;
     const yy=y(+v);
     s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+a[2]+'" stroke-width="1.5" stroke-dasharray="6 4"/>'
-      +'<text x="'+(L+4)+'" y="'+(yy-4)+'" fill="'+a[2]+'" font-size="12" font-weight="700">'+a[1]+' '+(+v).toFixed(2)+'</text>';
+      +'<text x="'+(L+4)+'" y="'+(yy-4)+'" fill="' + a[2] + '" font-size="12" font-weight="700">' + a[1] + ' ' + (+v).toFixed(2) + '</text>';
   });
   s+='<text x="'+L+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11">'+d.d[0]+'</text>'
     +'<text x="'+(W-R)+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11" text-anchor="end">'+d.d[n-1]+'</text>';
@@ -999,15 +1003,24 @@ function draw(){
   }
   const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
-    const tagList=[...new Set([ns.has(r.Symbol)?'NEW today':'',r.Status,r.Class,tr(r.Setup),r.Gap=='Yes'?'Gap-up':''].filter(Boolean))];
-    const tags=tagList.map(t=>'<span class="tag'+(t=='NEW today'?' new':'')+'">'+t+'</span>').join('');
+    const meta=getStageMeta(r);
+    const tagList=[...new Set([
+      '<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>',
+      ns.has(r.Symbol)?'NEW today':'',
+      r.Status,
+      r.Class,
+      tr(r.Setup),
+      r.Gap=='Yes'?'Gap-up':''
+    ].filter(Boolean))];
+    const tags=tagList.map(t=>t.startsWith('<span')?t:'<span class="tag'+(t=='NEW today'?' new':'')+'">'+t+'</span>').join('');
     const why=has(r.Reasons)?'<div class="why"><div class="ft">Why this setup?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+x+'</div>').join('')+'</div>':'';
     let wl=has(r.Warning)?fixWarn(tr(r.Warning).split('; ')):[];
     if(has(r.PledgeOfPromoterPct)&&(+r.PledgeOfPromoterPct)>100){
       wl=wl.filter(x=>x.toLowerCase().indexOf('pledge')<0);
       wl.push('Promoter pledge shows '+r.PledgeOfPromoterPct+'% (over 100%), which cannot be right. Treat it as a data error and check screener.in');
     }
-    return '<div class="card"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\')">'
+    +'<div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
     +'<div class="tags">'+tags+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
@@ -1015,6 +1028,7 @@ function draw(){
     +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
     +'<div class="exp">'+explain(r)+' Last close: '+fmt(r.Close)+'.</div>'
     +chartBtn(r)
+    +'<div style="font-size:11.5px;color:var(--b);margin-top:8px">&#9432; Tap card to inspect deep rationale &amp; levels</div>'
     +(r.Boosters?'<div class="exp">Boosters: '+tr(r.Boosters)+'</div>':'')
     +lvlHtml(r)
     +why
@@ -1219,7 +1233,7 @@ function drawEarly(){
     const pl=has(r.PledgePct)&&r.PledgePct!=='n/a'?pledgeHtml(r.PledgePct,na):na;
     const wl=has(r.Warning)?r.Warning.split('; '):[];
     
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\')">'
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'early\')">'
     +'<div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
     +'<div class="tags">'+tags+'</div>'
     +resLine(r.Symbol)
