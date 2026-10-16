@@ -167,7 +167,7 @@ def load_csv(path, fields, tag):
 load_csv("data/fundamentals.csv", {
     "Sector": ["Sector"], "Promoter": ["PromoterPct"], "Pledge": ["PledgePct"],
     "Debt": ["DebtEquity"], "DaysRes": ["DaysToResults"], "MCap": ["MarketCapCr"]}, "base")
-for p in ("data/quality.csv", "data/multibagger.csv"):       # multibagger చివరగా, అదే ప్రాధాన్యత
+for p in ("data/quality.csv", "data/multibagger.csv"):
     load_csv(p, {
         "Sector": ["Sector"], "ROCE": ["ROCE"], "SalesCAGR": ["SalesCAGR3"],
         "ProfitCAGR": ["ProfitCAGR3"], "Debt": ["DebtEquity"], "QSales": ["QSalesYoY"],
@@ -176,7 +176,7 @@ for p in ("data/quality.csv", "data/multibagger.csv"):       # multibagger చ�
 
 
 def fetch_yf_fund(sym):
-    """radar బయటి stocks కి yfinance తో ఫండమెంటల్స్ తేవడం (విఫలమైతే ఉన్నవి ఉంచుతుంది)"""
+    """radar బయటి stocks కి yfinance తో ఫండమెంటల్స్ తేవడం"""
     k = norm(sym)
     e = FUND.setdefault(k, {})
     try:
@@ -193,25 +193,21 @@ def fetch_yf_fund(sym):
         if "QProfit" not in e and info.get("earningsGrowth") is not None:
             e["QProfit"] = round(info["earningsGrowth"] * 100, 1)
 
-        # Financial statements నుండి ROCE, Sales CAGR, Profit CAGR
         fin = t.financials
         bs = t.balance_sheet
         if fin is not None and not fin.empty and len(fin.columns) >= 3:
-            # 3-Year Sales CAGR
             rev = fin.loc["Total Revenue"] if "Total Revenue" in fin.index else None
             if rev is not None and len(rev) >= 3 and rev.iloc[0] > 0 and rev.iloc[2] > 0:
                 cagr_s = ((rev.iloc[0] / rev.iloc[2]) ** (1 / 2) - 1) * 100
                 if not np.isnan(cagr_s) and "SalesCAGR" not in e:
                     e["SalesCAGR"] = round(cagr_s, 1)
 
-            # 3-Year Profit CAGR
             net = fin.loc["Net Income"] if "Net Income" in fin.index else None
             if net is not None and len(net) >= 3 and net.iloc[0] > 0 and net.iloc[2] > 0:
                 cagr_p = ((net.iloc[0] / net.iloc[2]) ** (1 / 2) - 1) * 100
                 if not np.isnan(cagr_p) and "ProfitCAGR" not in e:
                     e["ProfitCAGR"] = round(cagr_p, 1)
 
-            # Latest ROCE = EBIT / Capital Employed
             ebit = fin.loc["EBIT"] if "EBIT" in fin.index else (fin.loc["Operating Income"] if "Operating Income" in fin.index else None)
             if ebit is not None and bs is not None and not bs.empty:
                 ta = bs.loc["Total Assets"] if "Total Assets" in bs.index else None
@@ -245,7 +241,7 @@ def fund_eval(sym):
             pts += 1 if ok(v) else 0
             parts.append("%s %.1f%s" % (label, v, unit))
     txt = " | ".join(parts)
-    if known < 3:                        # 3 కంటే తక్కువ తెలిస్తే నమ్మదగిన score ఇవ్వం
+    if known < 3:
         return None, txt
     return pts / known, txt
 
@@ -283,9 +279,20 @@ for sym, g in groups.items():
         ret63[sym] = cc[-1] / cc[-64] - 1
 rs_rank = pd.Series(ret63).rank(pct=True)
 
+# ---------- Sector Relative Strength (RS) Ranking ----------
+sec_returns = {}
+for sym, r_val in ret63.items():
+    fe = FUND.get(norm(sym), {})
+    s_name = fe.get("Sector", "n/a")
+    if s_name and s_name != "n/a":
+        sec_returns.setdefault(s_name, []).append(r_val)
+
+sec_median = {s: float(np.median(vals)) for s, vals in sec_returns.items() if len(vals) >= 2}
+sec_rs_rank = pd.Series(sec_median).rank(pct=True) if sec_median else pd.Series(dtype=float)
+
 
 def find_breakout(h, l, c, v):
-    """గత 10 రోజుల్లో 100 లేదా 50-రోజుల high పైన మొదటి breakout (volume తో), ఇంకా నిలబడి ఉంటే"""
+    """గత 10 రోజుల్లో 100 లేదా 50-రోజుల high పైన మొదటి breakout (volume తో)"""
     n = len(c)
     for N in (100, 50):
         for d in range(LOOKBACK_DAYS - 1, -1, -1):
@@ -366,7 +373,7 @@ def analyze(sym, g):
         entry = level * 1.002
         trig = "%.1f%% below %d-day high Rs %.1f; tight range, volume drying up (%.1fx)" % (-gain, N_used, level, dry)
 
-    # ---------- Fundamentals (radar లో లేకపోతే yfinance ద్వారా పొందడం) ----------
+    # ---------- Fundamentals ----------
     k = norm(sym)
     if k not in FUND or "ROCE" not in FUND[k]:
         fetch_yf_fund(sym)
@@ -379,6 +386,19 @@ def analyze(sym, g):
     days_res = fe.get("DaysRes", np.nan)
     horizon = "Long Term" if (N_used == 100 and ffrac is not None and ffrac >= 0.5) else "Short Term"
     P = PARAMS[horizon]
+
+    # ---------- Sector Momentum & RS Rank ----------
+    sec_pct = float(sec_rs_rank.get(sector, 0.50)) if sector != "n/a" else 0.50
+    sec_score = int(round(sec_pct * 100))
+    if sec_score >= 75:
+        sec_status = "Leading Sector"
+        sec_label = f"🚀 Leading Sector ({sec_score}/100)"
+    elif sec_score >= 45:
+        sec_status = "Neutral Sector"
+        sec_label = f"⚖️ Neutral Sector ({sec_score}/100)"
+    else:
+        sec_status = "Lagging Sector"
+        sec_label = f"⚠️ Lagging Sector ({sec_score}/100)"
 
     # ---------- ATR, STOP ----------
     pc = c[:-1]
@@ -448,12 +468,10 @@ def analyze(sym, g):
     rsr = float(rs_rank.get(sym, 0.0))
     d52 = (high52 / close - 1) * 100
 
-    # ---------- Big run-up (6 నెలల low నుండి పెరుగుదల; hard filter కాదు) ----------
     low126 = float(l[-126:].min())
     runup = (close / low126 - 1) * 100 if low126 > 0 else 0.0
     runup_pen = 0
 
-    # ---------- Warnings (hard filter కాదు) ----------
     warns = []
     if runup > RUNUP_WARN:
         warns.append("Big run-up: +%.0f%% from the 6-month low, so this may not be early" % runup)
@@ -506,7 +524,7 @@ def analyze(sym, g):
     else:
         s += clip01((1 - dry) / 0.4) * 10
     s += rsr * 15
-    s += (ffrac * 20) if ffrac is not None else 8        # n/a అయితే తటస్థం
+    s += (ffrac * 20) if ffrac is not None else 8
     if 50 <= rsi <= 70:
         s += 6
     if mh > 0:
@@ -527,6 +545,11 @@ def analyze(sym, g):
         s += 5
     if is_dryup:
         s += 3
+    if sec_score >= 75:
+        s += 4
+    elif sec_score < 40:
+        s -= 4
+
     s += stage_pen
     s += pledge_pen
     s += runup_pen
@@ -536,7 +559,7 @@ def analyze(sym, g):
     band = "High Conviction" if s >= 80 else ("Good Setup" if s >= 65 else "Early Watch")
 
     # =========================================================================
-    # --- Stage 1B -> 2A విశ్లేషణ మరియు తెలుగు రీజనింగ్ + VCP వివరాలు ---
+    # --- Stage 1B -> 2A విశ్లేషణ మరియు తెలుగు రీజనింగ్ + VCP + సెక్టార్ RS ---
     # =========================================================================
     st_badge = "WATCH"
     st_color = "gold"
@@ -576,11 +599,21 @@ def analyze(sym, g):
             st_badge, st_color, st_code = "EXTENDED", "red", "Stage 2B"
             st_reasons_list.append(f"Extended Move: Breakout level నుండి ఇప్పటికే {gain:.1f}% పెరిగిపోయింది.")
 
-    # VCP / Volume Dry-Up పాయింట్లను రీజనింగ్ జాబితాకు ముందుగా జోడించడం
+    # VCP / Volume Dry-Up పాయింట్లు
     if is_vcp:
         st_reasons_list.insert(0, f"💎 VCP Contraction: {vcp_desc} తో ప్రైస్ రేంజ్ పూర్తిగా టైట్ అయింది.")
     if is_dryup:
         st_reasons_list.insert(1 if is_vcp else 0, f"💧 Volume Dry-Up: అమ్మకాల వాల్యూమ్ {dryup_pct}% తగ్గింది (సప్లై డ్రై అయింది).")
+
+    # Sector Relative Strength Confirmation పాయింట్
+    if sector != "n/a":
+        if sec_score >= 75:
+            sec_txt = f"Sector Momentum: {sector} రంగం Nifty 500 కంటే బలంగా దూసుకుపోతోంది (RS ర్యాంక్: {sec_score}/100, లీడింగ్ సెక్టార్)."
+        elif sec_score >= 45:
+            sec_txt = f"Sector Momentum: {sector} రంగం మార్కెట్‌తో సమానంగా స్థిరంగా ఉంది (RS ర్యాంక్: {sec_score}/100)."
+        else:
+            sec_txt = f"Sector Momentum: {sector} రంగం Nifty కంటే వెనుకబడి ఉంది (RS ర్యాంక్: {sec_score}/100, జాగ్రత్త అవసరం)."
+        st_reasons_list.append(sec_txt)
 
     st_reasons = " || ".join(st_reasons_list)
 
@@ -596,7 +629,8 @@ def analyze(sym, g):
         "PledgePct": ("n/a" if np.isnan(pled) else round(pled, 1)),
         "Warning": "; ".join(warns), "Reasons": " | ".join(rs_),
         "StageBadge": st_badge, "StageColor": st_color, "StageCode": st_code, "SimpleReasons": st_reasons,
-        "IsVCP": "Yes" if is_vcp else "No", "IsDryUp": "Yes" if is_dryup else "No", "VCPDesc": vcp_desc
+        "IsVCP": "Yes" if is_vcp else "No", "IsDryUp": "Yes" if is_dryup else "No", "VCPDesc": vcp_desc,
+        "SectorRS": sec_score, "SectorStatus": sec_status
     }
 
 
@@ -613,7 +647,7 @@ columns = ["Date", "Symbol", "Sector", "Status", "Stage", "StageOrd", "Horizon",
            "DaysSince", "GainPct", "RunUpPct", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR",
            "StopReason", "TargetReason", "VolRatio", "RSI", "FundScore", "Fundamentals", "PromoterPct",
            "PledgePct", "Warning", "Reasons", "StageBadge", "StageColor", "StageCode", "SimpleReasons",
-           "IsVCP", "IsDryUp", "VCPDesc"]
+           "IsVCP", "IsDryUp", "VCPDesc", "SectorRS", "SectorStatus"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values(["StageOrd", "Score"], ascending=[True, False])
 rej_cols = ["Date", "Symbol", "Status", "Stage", "Horizon", "Close", "Entry", "Stop", "Target",
@@ -631,4 +665,4 @@ print("మొత్తం ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Stage"].value_counts().to_string())
     print(out["Horizon"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Stage", "StageBadge", "Score", "FundScore", "GainPct", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Stage", "StageBadge", "Score", "Sector", "SectorRS", "SectorStatus"]].to_string(index=False))
