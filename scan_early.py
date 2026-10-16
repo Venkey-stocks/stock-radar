@@ -35,6 +35,41 @@ def clip01(x):
     return float(min(max(x, 0.0), 1.0))
 
 
+def detect_vcp(h, l, c, v):
+    """
+    Detects Volatility Contraction Pattern (VCP) and Volume Dry-Up.
+    Returns: (is_vcp, is_dryup, vcp_desc, dryup_pct)
+    """
+    if len(c) < 40:
+        return False, False, "", 0.0
+
+    vol_20_avg = np.mean(v[-21:-1]) if len(v) >= 21 else np.mean(v)
+    vol_recent_avg = np.mean(v[-4:])
+
+    is_dryup = False
+    dryup_pct = 0.0
+    if vol_20_avg > 0:
+        dryup_ratio = vol_recent_avg / vol_20_avg
+        if dryup_ratio < 0.65:
+            is_dryup = True
+            dryup_pct = round((1.0 - dryup_ratio) * 100, 1)
+
+    is_vcp = False
+    vcp_desc = ""
+    r1 = (np.max(h[-40:-20]) - np.min(l[-40:-20])) / np.mean(c[-40:-20]) * 100
+    r2 = (np.max(h[-20:-8]) - np.min(l[-20:-8])) / np.mean(c[-20:-8]) * 100
+    r3 = (np.max(h[-8:]) - np.min(l[-8:])) / np.mean(c[-8:]) * 100
+
+    if r1 > r2 and r2 > r3 and r3 <= 7.0:
+        is_vcp = True
+        vcp_desc = f"3-Stage Contraction ({r1:.1f}% -> {r2:.1f}% -> {r3:.1f}%)"
+    elif r2 > r3 and r3 <= 5.5:
+        is_vcp = True
+        vcp_desc = f"Tight Contraction ({r2:.1f}% -> {r3:.1f}%)"
+
+    return is_vcp, is_dryup, vcp_desc, dryup_pct
+
+
 def rsi14(c):
     s = pd.Series(c)
     d = s.diff()
@@ -301,6 +336,9 @@ def analyze(sym, g):
     vol_ratio = v[-1] / vol_avg20
     dry = v[-6:-1].mean() / vol_avg20
 
+    # ---------- VCP & Volume Dry-Up Check ----------
+    is_vcp, is_dryup, vcp_desc, dryup_pct = detect_vcp(h, l, c, v)
+
     # ---------- Trigger ----------
     bo = find_breakout(h, l, c, v)
     if bo is not None:
@@ -485,6 +523,10 @@ def analyze(sym, g):
         s += 5
     if main_ret is not None and r63 > main_ret:
         s += 3
+    if is_vcp:
+        s += 5
+    if is_dryup:
+        s += 3
     s += stage_pen
     s += pledge_pen
     s += runup_pen
@@ -494,16 +536,15 @@ def analyze(sym, g):
     band = "High Conviction" if s >= 80 else ("Good Setup" if s >= 65 else "Early Watch")
 
     # =========================================================================
-    # --- క్రొత్తగా జోడించిన Stage 1B -> 2A విశ్లేషణ మరియు తెలుగు రీజనింగ్ ---
+    # --- Stage 1B -> 2A విశ్లేషణ మరియు తెలుగు రీజనింగ్ + VCP వివరాలు ---
     # =========================================================================
     st_badge = "WATCH"
     st_color = "gold"
     st_code = "Stage 1"
-    st_reasons = []
+    st_reasons_list = []
 
     if evaluate_stage_and_rationale is not None:
         try:
-            # వీక్లీ డేటాను రీ-శాంపిల్ చేయడం
             w_df = g.set_index("Date").resample("W").agg({
                 "Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"
             }).dropna()
@@ -518,18 +559,30 @@ def analyze(sym, g):
                 st_badge = st_info["badge"]
                 st_color = st_info["badge_color"]
                 st_code = st_info["stage_code"]
-                # కారణాలను ఒక క్లీన్ పైప్ (|) సపరేటెడ్ స్ట్రింగ్ గా మార్చడం
-                st_reasons = " || ".join(["%s: %s" % (r['title'], r['desc']) for r in st_info.get("reasons", [])])
-            else:
-                # డీఫాల్ట్ ఫాల్ బ్యాక్
-                if stage == "Fresh":
-                    st_badge, st_color, st_code = "PRIME ENTRY", "green", "Stage 2A"
-                elif stage == "Ready":
-                    st_badge, st_color, st_code = "WATCHLIST", "gold", "Stage 1B"
-                else:
-                    st_badge, st_color, st_code = "EXTENDED", "red", "Stage 2B"
+                for item in st_info.get("reasons", []):
+                    st_reasons_list.append("%s: %s" % (item['title'], item['desc']))
         except Exception:
             pass
+
+    if not st_reasons_list:
+        if stage == "Fresh":
+            st_badge, st_color, st_code = "PRIME ENTRY", "green", "Stage 2A"
+            st_reasons_list.append(f"Early Breakout Zone: Breakout level నుండి ధర కేవలం {gain:.1f}% మాత్రమే పెరిగింది.")
+            st_reasons_list.append(f"Volume Confirmation: Normal average కంటే {vol_ratio:.1f}x రెట్లు అధిక volume తో breakout అయింది.")
+        elif stage == "Ready":
+            st_badge, st_color, st_code = "WATCHLIST", "gold", "Stage 1B"
+            st_reasons_list.append(f"Pivot Testing: Resistance level (Rs {level:.1f}) కి కేవలం {abs(gain):.1f}% సమీపంలో consolidate అవుతోంది.")
+        else:
+            st_badge, st_color, st_code = "EXTENDED", "red", "Stage 2B"
+            st_reasons_list.append(f"Extended Move: Breakout level నుండి ఇప్పటికే {gain:.1f}% పెరిగిపోయింది.")
+
+    # VCP / Volume Dry-Up పాయింట్లను రీజనింగ్ జాబితాకు ముందుగా జోడించడం
+    if is_vcp:
+        st_reasons_list.insert(0, f"💎 VCP Contraction: {vcp_desc} తో ప్రైస్ రేంజ్ పూర్తిగా టైట్ అయింది.")
+    if is_dryup:
+        st_reasons_list.insert(1 if is_vcp else 0, f"💧 Volume Dry-Up: అమ్మకాల వాల్యూమ్ {dryup_pct}% తగ్గింది (సప్లై డ్రై అయింది).")
+
+    st_reasons = " || ".join(st_reasons_list)
 
     return {
         "Date": date_str, "Symbol": sym, "Sector": sector, "Status": status, "Stage": stage,
@@ -542,7 +595,8 @@ def analyze(sym, g):
         "Fundamentals": ftxt, "PromoterPct": ("n/a" if np.isnan(prom) else round(prom, 1)),
         "PledgePct": ("n/a" if np.isnan(pled) else round(pled, 1)),
         "Warning": "; ".join(warns), "Reasons": " | ".join(rs_),
-        "StageBadge": st_badge, "StageColor": st_color, "StageCode": st_code, "SimpleReasons": st_reasons
+        "StageBadge": st_badge, "StageColor": st_color, "StageCode": st_code, "SimpleReasons": st_reasons,
+        "IsVCP": "Yes" if is_vcp else "No", "IsDryUp": "Yes" if is_dryup else "No", "VCPDesc": vcp_desc
     }
 
 
@@ -558,7 +612,8 @@ for sym, g in groups.items():
 columns = ["Date", "Symbol", "Sector", "Status", "Stage", "StageOrd", "Horizon", "Score", "Band", "Level",
            "DaysSince", "GainPct", "RunUpPct", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR",
            "StopReason", "TargetReason", "VolRatio", "RSI", "FundScore", "Fundamentals", "PromoterPct",
-           "PledgePct", "Warning", "Reasons", "StageBadge", "StageColor", "StageCode", "SimpleReasons"]
+           "PledgePct", "Warning", "Reasons", "StageBadge", "StageColor", "StageCode", "SimpleReasons",
+           "IsVCP", "IsDryUp", "VCPDesc"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values(["StageOrd", "Score"], ascending=[True, False])
 rej_cols = ["Date", "Symbol", "Status", "Stage", "Horizon", "Close", "Entry", "Stop", "Target",
