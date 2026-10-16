@@ -998,7 +998,7 @@ function drawChart(d,lv){
     const x=L+step*i+step/2;
     const up=d.c[i]>=d.o[i];
     const col=up?'#2ea043':'#f85149';
-    s+='<line x1="'+x+'" x2="'+x+'" y1="'+y(d.h[i])+'" y2="'+y(d.l[i])+'" stroke destruction="'+col+'" stroke-width="1"/>';
+    s+='<line x1="'+x+'" x2="'+x+'" y1="'+y(d.h[i])+'" y2="'+y(d.l[i])+'" stroke="'+col+'" stroke-width="1"/>';
     const yt=y(Math.max(d.o[i],d.c[i])), yb=y(Math.min(d.o[i],d.c[i]));
     s+='<rect x="'+(x-bw/2)+'" y="'+yt+'" width="'+bw+'" height="'+Math.max(1,yb-yt)+'" fill="'+col+'"/>';
   }
