@@ -4,6 +4,12 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 
+# మనం స్టెప్ 1 లో క్రియేట్ చేసిన Stage 1B -> 2A ఇంజిన్ ఇంపోర్ట్
+try:
+    from stage_engine import evaluate_stage_and_rationale
+except ImportError:
+    evaluate_stage_and_rationale = None
+
 MIN_PRICE = 50
 MIN_TRADED_VALUE = 10e7
 MIN_SCORE = 40
@@ -156,7 +162,6 @@ def fetch_yf_fund(sym):
         fin = t.financials
         bs = t.balance_sheet
         if fin is not None and not fin.empty and len(fin.columns) >= 3:
-            cols = fin.columns
             # 3-Year Sales CAGR
             rev = fin.loc["Total Revenue"] if "Total Revenue" in fin.index else None
             if rev is not None and len(rev) >= 3 and rev.iloc[0] > 0 and rev.iloc[2] > 0:
@@ -208,7 +213,9 @@ def fund_eval(sym):
     if known < 3:                        # 3 కంటే తక్కువ తెలిస్తే నమ్మదగిన score ఇవ్వం
         return None, txt
     return pts / known, txt
-    # ---------- data చదవడం ----------
+
+
+# ---------- data చదవడం ----------
 df = pd.read_csv("data/prices.csv.gz", parse_dates=["Date"])
 df = df.dropna(subset=["Open", "High", "Low", "Close", "Volume"])
 last_date = df["Date"].max()
@@ -486,6 +493,44 @@ def analyze(sym, g):
     s = round(max(min(s, 100), 0), 1)
     band = "High Conviction" if s >= 80 else ("Good Setup" if s >= 65 else "Early Watch")
 
+    # =========================================================================
+    # --- క్రొత్తగా జోడించిన Stage 1B -> 2A విశ్లేషణ మరియు తెలుగు రీజనింగ్ ---
+    # =========================================================================
+    st_badge = "WATCH"
+    st_color = "gold"
+    st_code = "Stage 1"
+    st_reasons = []
+
+    if evaluate_stage_and_rationale is not None:
+        try:
+            # వీక్లీ డేటాను రీ-శాంపిల్ చేయడం
+            w_df = g.set_index("Date").resample("W").agg({
+                "Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"
+            }).dropna()
+            
+            st_info = evaluate_stage_and_rationale(
+                daily_df=g,
+                weekly_df=w_df,
+                sector_name=sector,
+                industry_name=""
+            )
+            if st_info:
+                st_badge = st_info["badge"]
+                st_color = st_info["badge_color"]
+                st_code = st_info["stage_code"]
+                # కారణాలను ఒక క్లీన్ పైప్ (|) సపరేటెడ్ స్ట్రింగ్ గా మార్చడం
+                st_reasons = " || ".join(["%s: %s" % (r['title'], r['desc']) for r in st_info.get("reasons", [])])
+            else:
+                # డీఫాల్ట్ ఫాల్ బ్యాక్
+                if stage == "Fresh":
+                    st_badge, st_color, st_code = "PRIME ENTRY", "green", "Stage 2A"
+                elif stage == "Ready":
+                    st_badge, st_color, st_code = "WATCHLIST", "gold", "Stage 1B"
+                else:
+                    st_badge, st_color, st_code = "EXTENDED", "red", "Stage 2B"
+        except Exception:
+            pass
+
     return {
         "Date": date_str, "Symbol": sym, "Sector": sector, "Status": status, "Stage": stage,
         "StageOrd": stage_ord, "Horizon": horizon, "Score": s, "Band": band, "Level": round(level, 2),
@@ -497,6 +542,7 @@ def analyze(sym, g):
         "Fundamentals": ftxt, "PromoterPct": ("n/a" if np.isnan(prom) else round(prom, 1)),
         "PledgePct": ("n/a" if np.isnan(pled) else round(pled, 1)),
         "Warning": "; ".join(warns), "Reasons": " | ".join(rs_),
+        "StageBadge": st_badge, "StageColor": st_color, "StageCode": st_code, "SimpleReasons": st_reasons
     }
 
 
@@ -512,7 +558,7 @@ for sym, g in groups.items():
 columns = ["Date", "Symbol", "Sector", "Status", "Stage", "StageOrd", "Horizon", "Score", "Band", "Level",
            "DaysSince", "GainPct", "RunUpPct", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR",
            "StopReason", "TargetReason", "VolRatio", "RSI", "FundScore", "Fundamentals", "PromoterPct",
-           "PledgePct", "Warning", "Reasons"]
+           "PledgePct", "Warning", "Reasons", "StageBadge", "StageColor", "StageCode", "SimpleReasons"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values(["StageOrd", "Score"], ascending=[True, False])
 rej_cols = ["Date", "Symbol", "Status", "Stage", "Horizon", "Close", "Entry", "Stop", "Target",
@@ -530,4 +576,4 @@ print("మొత్తం ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Stage"].value_counts().to_string())
     print(out["Horizon"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Stage", "Horizon", "Score", "FundScore", "GainPct", "RunUpPct", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Stage", "StageBadge", "Score", "FundScore", "GainPct", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
