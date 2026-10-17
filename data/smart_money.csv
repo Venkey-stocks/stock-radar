@@ -1,38 +1,38 @@
 Date,Symbol,Investor,Type,Action,HoldingPct,MarketCapCr,Category,Sector,ClosePrice,RadarSetup,OverlapCount,CoInvestors,Source
-Quarterly Filing,SHILCTECH,Ashish Kacholia,Super Investor,Holding,2.4%,4490,Small Cap,Industrials,3850.0,Multibagger (Score: 77.0),2,Mukul Agrawal,Shareholding Filing
-Quarterly Filing,GARUDA,Ashish Kacholia,Super Investor,Holding,1.8%,1522,Small Cap,Industrials,164.8000030517578,Multibagger (Score: 78.5),2,Nippon Small Cap Fund,Shareholding Filing
-Quarterly Filing,ADFFOODS,Ashish Kacholia,Super Investor,Holding,2.1%,3027.8,Small Cap,Consumer Defensive,275.6000061035156,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,BALAMINES,Ashish Kacholia,Super Investor,Holding,1.2%,6620.8,Small Cap,Basic Materials,2043.4000244140625,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,GRAVITA,Ashish Kacholia,Super Investor,Holding,2.2%,10784.2,Small Cap,Industrials,1480.5999755859375,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,SAFARI,Ashish Kacholia,Super Investor,Holding,2.3%,6430.1,Small Cap,Consumer Cyclical,1312.300048828125,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,PATELENG,Vijay Kedia,Super Investor,Holding,1.6%,2349.4,Small Cap,Industrials,24.600000381469727,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,ELECON,Vijay Kedia,Super Investor,Holding,1.8%,11064.0,Small Cap,Industrials,493.0499877929688,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,TALBROAUTO,Vijay Kedia,Super Investor,Holding,1.2%,2272.8,Small Cap,Consumer Cyclical,368.2000122070313,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,ATULAUTO,Vijay Kedia,Super Investor,Holding,1.4%,1170.1,Small Cap,Consumer Cyclical,421.6499938964844,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,VAIBHAVGBL,Vijay Kedia,Super Investor,Holding,2.0%,3402.2,Small Cap,Consumer Cyclical,202.8699951171875,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,RAYMOND,Mukul Agrawal,Super Investor,Holding,1.9%,7600.8,Small Cap,Industrials,1142.0999755859375,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,NEULANDLAB,Mukul Agrawal,Super Investor,Holding,1.3%,25602.0,Mid Cap,Healthcare,19955.0,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,TASTYBITE,Mukul Agrawal,Super Investor,Holding,1.5%,2397.7,Small Cap,Consumer Defensive,9344.0,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,GOKEX,Mukul Agrawal,Super Investor,Holding,3.5%,5072.0,Small Cap,Consumer Cyclical,692.2000122070312,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,DVL,Mukul Agrawal,Super Investor,Holding,2.1%,1014.7,Small Cap,Financial Services,289.70001220703125,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,SHILCTECH,Mukul Agrawal,Super Investor,Holding,1.6%,4490,Small Cap,Industrials,3850.0,Multibagger (Score: 77.0),2,Ashish Kacholia,Shareholding Filing
-Quarterly Filing,RELIANCE,Quant Mutual Fund,Mutual Fund / DII,Accumulating,Top Pick,1644195.4,Large Cap,Energy,1215.0,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,JIOFIN,Quant Mutual Fund,Mutual Fund / DII,Accumulating,Top Pick,144615.4,Large Cap,Financial Services,219.00999450683597,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,ADANIPOWER,Quant Mutual Fund,Mutual Fund / DII,Accumulating,Top Pick,378944.3,Large Cap,Utilities,196.5,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,SAIL,Quant Mutual Fund,Mutual Fund / DII,Accumulating,Top Pick,70338.7,Large Cap,Basic Materials,170.2899932861328,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,HINDCOPPER,Quant Mutual Fund,Mutual Fund / DII,Holding,High Weight,43811.0,Mid Cap,Basic Materials,453.0499877929688,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,BIOCON,Quant Mutual Fund,Mutual Fund / DII,Holding,High Weight,57648.9,Large Cap,Healthcare,352.0,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,SHILCTECH,Ashish Kacholia,Super Investor,Holding,2.4%,4312.7,Small Cap,Industrials,3769.800048828125,Not on radar,2,Mukul Agrawal,Shareholding Filing
+Quarterly Filing,GARUDA,Ashish Kacholia,Super Investor,Holding,1.8%,1542.1,Small Cap,Industrials,165.74000549316406,Not on radar,2,Nippon Small Cap Fund,Shareholding Filing
+Quarterly Filing,ADFFOODS,Ashish Kacholia,Super Investor,Holding,2.1%,2980.0,Small Cap,Consumer Defensive,271.25,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,BALAMINES,Ashish Kacholia,Super Investor,Holding,1.2%,6697.3,Small Cap,Basic Materials,2067.0,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,GRAVITA,Ashish Kacholia,Super Investor,Holding,2.2%,10774.8,Small Cap,Industrials,1479.300048828125,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,SAFARI,Ashish Kacholia,Super Investor,Holding,2.3%,6443.8,Small Cap,Consumer Cyclical,1315.0999755859375,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,PATELENG,Vijay Kedia,Super Investor,Holding,1.6%,2347.5,Small Cap,Industrials,24.57999992370605,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,ELECON,Vijay Kedia,Super Investor,Holding,1.8%,10779.1,Small Cap,Industrials,480.3500061035156,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,TALBROAUTO,Vijay Kedia,Super Investor,Holding,1.2%,2275.9,Small Cap,Consumer Cyclical,368.7000122070313,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,ATULAUTO,Vijay Kedia,Super Investor,Holding,1.4%,1174.0,Small Cap,Consumer Cyclical,423.0499877929688,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,VAIBHAVGBL,Vijay Kedia,Super Investor,Holding,2.0%,3536.5,Small Cap,Consumer Cyclical,210.8800048828125,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,RAYMOND,Mukul Agrawal,Super Investor,Holding,1.9%,7546.3,Small Cap,Industrials,1133.9000244140625,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,NEULANDLAB,Mukul Agrawal,Super Investor,Holding,1.3%,25242.8,Mid Cap,Healthcare,19675.0,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,TASTYBITE,Mukul Agrawal,Super Investor,Holding,1.5%,2393.8,Small Cap,Consumer Defensive,9329.0,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,GOKEX,Mukul Agrawal,Super Investor,Holding,3.5%,5248.1,Small Cap,Consumer Cyclical,716.2000122070312,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,DVL,Mukul Agrawal,Super Investor,Holding,2.1%,1010.1,Small Cap,Financial Services,288.3999938964844,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,SHILCTECH,Mukul Agrawal,Super Investor,Holding,1.6%,4312.7,Small Cap,Industrials,3769.800048828125,Not on radar,2,Ashish Kacholia,Shareholding Filing
+Quarterly Filing,RELIANCE,Quant Mutual Fund,Mutual Fund / DII,Accumulating,Top Pick,n/a,Unknown,Energy,1211.199951171875,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,JIOFIN,Quant Mutual Fund,Mutual Fund / DII,Accumulating,Top Pick,142792.9,Large Cap,Financial Services,216.25,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,ADANIPOWER,Quant Mutual Fund,Mutual Fund / DII,Accumulating,Top Pick,377690.8,Large Cap,Utilities,195.8500061035156,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,SAIL,Quant Mutual Fund,Mutual Fund / DII,Accumulating,Top Pick,70611.3,Large Cap,Basic Materials,170.9499969482422,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,HINDCOPPER,Quant Mutual Fund,Mutual Fund / DII,Holding,High Weight,44333.2,Mid Cap,Basic Materials,458.4500122070313,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,BIOCON,Quant Mutual Fund,Mutual Fund / DII,Holding,High Weight,57190.4,Large Cap,Healthcare,349.20001220703125,Not on radar,1,None,Shareholding Filing
 Quarterly Filing,TUBEINVEST,Nippon Small Cap Fund,Mutual Fund / DII,Holding,Top Holding,n/a,Unknown,n/a,n/a,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,APARINDS,Nippon Small Cap Fund,Mutual Fund / DII,Holding,Top Holding,70822.9,Large Cap,Industrials,16914.0,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,KPITTECH,Nippon Small Cap Fund,Mutual Fund / DII,Holding,Top Holding,14319.2,Small Cap,Technology,526.0,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,CREDITACC,Nippon Small Cap Fund,Mutual Fund / DII,Holding,Top Holding,20233.6,Mid Cap,Financial Services,1262.4000244140625,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,ELGIEQUIP,Nippon Small Cap Fund,Mutual Fund / DII,Holding,Top Holding,18019.2,Mid Cap,Industrials,571.5999755859375,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,GARUDA,Nippon Small Cap Fund,Mutual Fund / DII,Holding,3.1%,1522,Small Cap,Industrials,164.8000030517578,Multibagger (Score: 78.5),2,Ashish Kacholia,Shareholding Filing
-Quarterly Filing,DMART,Radhakishan Damani,Super Investor,Promoter/Core,65.0%,220376.2,Large Cap,Consumer Defensive,3378.39990234375,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,VSTIND,Radhakishan Damani,Super Investor,Holding,32.0%,3422.6,Small Cap,Consumer Defensive,201.8699951171875,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,APARINDS,Nippon Small Cap Fund,Mutual Fund / DII,Holding,Top Holding,67133.9,Large Cap,Industrials,16033.0,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,KPITTECH,Nippon Small Cap Fund,Mutual Fund / DII,Holding,Top Holding,15108.6,Mid Cap,Technology,555.0,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,CREDITACC,Nippon Small Cap Fund,Mutual Fund / DII,Holding,Top Holding,19765.6,Mid Cap,Financial Services,1233.199951171875,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,ELGIEQUIP,Nippon Small Cap Fund,Mutual Fund / DII,Holding,Top Holding,18038.1,Mid Cap,Industrials,572.2000122070312,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,GARUDA,Nippon Small Cap Fund,Mutual Fund / DII,Holding,3.1%,1542.1,Small Cap,Industrials,165.74000549316406,Not on radar,2,Ashish Kacholia,Shareholding Filing
+Quarterly Filing,DMART,Radhakishan Damani,Super Investor,Promoter/Core,65.0%,218001.8,Large Cap,Consumer Defensive,3342.0,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,VSTIND,Radhakishan Damani,Super Investor,Holding,32.0%,3422.4,Small Cap,Consumer Defensive,201.8600006103516,Not on radar,1,None,Shareholding Filing
 Quarterly Filing,INDIASTATS,Radhakishan Damani,Super Investor,Holding,1.6%,n/a,Unknown,n/a,n/a,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,TITAN,Rekha Jhunjhunwala,Super Investor,Holding,5.1%,391304,Large Cap,Consumer Cyclical,4455.7998046875,Quality (Score: 68.0),1,None,Shareholding Filing
-Quarterly Filing,TATACOMM,Rekha Jhunjhunwala,Super Investor,Holding,1.8%,50280.6,Large Cap,Communication Services,1763.699951171875,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,CANBK,Rekha Jhunjhunwala,Super Investor,Holding,1.5%,106235.5,Large Cap,Financial Services,117.12000274658205,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,TITAN,Rekha Jhunjhunwala,Super Investor,Holding,5.1%,394392.6,Large Cap,Consumer Cyclical,4444.7998046875,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,TATACOMM,Rekha Jhunjhunwala,Super Investor,Holding,1.8%,49684.7,Mid Cap,Communication Services,1742.800048828125,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,CANBK,Rekha Jhunjhunwala,Super Investor,Holding,1.5%,107296.7,Large Cap,Financial Services,118.29000091552734,Not on radar,1,None,Shareholding Filing
 Quarterly Filing,ZOMATO,Government of Singapore,FII,Holding,2.3%,n/a,Unknown,n/a,n/a,Not on radar,1,None,Shareholding Filing
-Quarterly Filing,INDIGO,Norges Bank,FII,Holding,1.5%,184760.9,Large Cap,Industrials,4778.2998046875,Not on radar,1,None,Shareholding Filing
+Quarterly Filing,INDIGO,Norges Bank,FII,Holding,1.5%,181226.8,Large Cap,Industrials,4686.89990234375,Not on radar,1,None,Shareholding Filing
