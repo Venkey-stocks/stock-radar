@@ -1057,13 +1057,13 @@ function drawChart(d,lv){
     const yt=y(Math.max(d.o[i],d.c[i])), yb=y(Math.min(d.o[i],d.c[i]));
     s+='<rect x="'+(x-bw/2)+'" y="'+yt+'" width="'+bw+'" height="'+Math.max(1,yb-yt)+'" fill="' + col + '"/>';
   }
-  const lines=[['e','Entry','#388bfd'],['s','Stop','#f85149'],['t','Target','#2ea043']];
+ const lines=[['e','Entry','#388bfd'],['s','Stop','#f85149'],['t','Target','#2ea043']];
   lines.forEach(a=>{
     const v=lv[a[0]];
     if(!has(v)||!isFinite(+v)) return;
     const yy=y(+v);
-    s += `<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="${a[2]}" stroke-width="1.5" stroke-dasharray="6 4"/>`;
-    s += `<text x="${L+4}" y="${yy-4}" fill="${a[2]}" font-size="12" font-weight="700">${a[1]} ${(+v).toFixed(2)}</text>`;
+    s += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+a[2]+'" stroke-width="1.5" stroke-dasharray="6 4"/>';
+    s += '<text x="'+(L+4)+'" y="'+(yy-4)+'" fill="'+a[2]+'" font-size="12" font-weight="700">'+a[1]+' '+Number(v).toFixed(2)+'</text>';
   });
   s+='<text x="'+L+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11">'+d.d[0]+'</text>'
     +'<text x="'+(W-R)+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11" text-anchor="end">'+d.d[n-1]+'</text>';
