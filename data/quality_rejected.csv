@@ -1,159 +1,216 @@
 Symbol,Reason
 PCJEWELLER,ASM list
+RAYMOND,ASM list
 MOBIKWIK,ASM list
 DELTACORP,ASM list
-OPTIEMUS,ASM list
+SHRINGARMS,ASM list
 SMCGLOBAL,ASM list
+OPTIEMUS,ASM list
 AVALON,ASM list
 BLUESTONE,ASM list
-AEQUS,ASM list
-SYNCOMF,ASM list
-GMMPFAUDLR,ASM list
+ANTELOPUS,ASM list
+WSTCSTPAPR,ASM list
+IBULLSLTD,ASM list
 GNA,ASM list
-KOPRAN,ASM list
-STLNETWORK,ASM list
-ARTEMISMED,Market cap not available (Yahoo)
-CENTUM,ASM list
 DPABHUSHAN,ASM list
+CENTUM,ASM list
+STLNETWORK,ASM list
+FILATEX,ASM list
 JAYKAY,ASM list
+ARTEMISMED,Market cap not available (Yahoo)
+ONEPOINT,ASM list
 SUNFLAG,ASM list
-JINDWORLD,ASM list
 PRICOLLTD,Market cap not available (Yahoo)
-KRISHNADEF,ASM list
+UTTAMSUGAR,ASM list
+ADVANCE,ASM list
+JINDWORLD,ASM list
 INDORAMA,ASM list
 ASTEC,ASM list
-HLEGLAS,ASM list
 TATVA,ASM list
-IONEXCHANG,Market cap not available (Yahoo)
-CORONA,Market cap not available (Yahoo)
-PVP,ASM list
+CHALET,Market cap not available (Yahoo)
 MVGJL,ASM list
+DHANBANK,ASM list
+PVP,ASM list
+BETA,ASM list
+SEJALLTD,ASM list
 ALLCARGO,ASM list
-VALIANTORG,ASM list
+OCCLLTD,ASM list
+CORONA,Market cap not available (Yahoo)
+BSE,Reward:Risk below 1:2
+BHARTIARTL,Reward:Risk below 1:2
+ICICIBANK,Reward:Risk below 1:2
+TCS,Reward:Risk below 1:2
 KOTAKBANK,Profit growth below 15% a year
-PAYTM,Sales growth below 12% a year
-ETERNAL,Profit not positive over 3 years
-GROWW,Fewer than 4 years of annual data
-MEESHO,Profit not positive over 3 years
-IDEA,Profit looks one-time (jumped or is over half of sales)
-IFCI,Profit not positive over 3 years
-LENSKART,Fewer than 4 years of annual data
-SOLARINDS,Sales or profit did not grow steadily every year
-DIVISLAB,Sales growth below 12% a year
-ADANIENT,Sales growth below 12% a year
-CHENNPETRO,Profit looks one-time (jumped or is over half of sales)
-ADANIPORTS,ROCE below 15%
-ADANIPOWER,Profit growth below 15% a year
-BHEL,ROCE below 15%
-INDIGO,Profit not positive over 3 years
-HAL,Sales growth below 12% a year
+AXISBANK,Reward:Risk below 1:2
+BAJFINANCE,Reward:Risk below 1:2
+PAYTM,Reward:Risk below 1:2
+ETERNAL,Reward:Risk below 1:2
+MEESHO,Reward:Risk below 1:2
+MCX,Reward:Risk below 1:2
+HCLTECH,Reward:Risk below 1:2
 TECHM,Sales growth below 12% a year
-AZAD,ROCE below 15%
-SAIL,Sales growth below 12% a year
-ADANIGREEN,ROCE below 15%
-GVT&D,Profit not positive over 3 years
-OFSS,Sales growth below 12% a year
-DLF,Profit looks one-time (jumped or is over half of sales)
-LICHSGFIN,Sales growth below 12% a year
-REDINGTON,Profit growth below 15% a year
-WOCKPHARMA,Sales growth below 12% a year
-FEDERALBNK,Profit growth below 15% a year
-ENGINERSIN,Sales growth below 12% a year
-MRPL,Profit looks one-time (jumped or is over half of sales)
-SUNTV,Sales growth below 12% a year
-SONACOMS,ROCE below 15%
-CGPOWER,Profit growth below 15% a year
-MOTHERSON,ROCE below 15%
-IDFCFIRSTB,Profit growth below 15% a year
-GRAPHITE,Sales growth below 12% a year
-NAUKRI,Sales growth below 12% a year
-JSWINFRA,ROCE below 15%
-TORNTPHARM,ROCE below 15%
-PWL,Profit not positive over 3 years
-PNB,Sales growth below 12% a year
-ENRIN,Fewer than 4 years of annual data
-MANKIND,Profit growth below 15% a year
-UNITDSPR,Sales growth below 12% a year
-RBLBANK,Profit growth below 15% a year
-GLENMARK,Sales or profit did not grow steadily every year
-UNIONBANK,Sales growth below 12% a year
-MANAPPURAM,Sales growth below 12% a year
-GESHIP,Profit looks one-time (jumped or is over half of sales)
-HONASA,Profit not positive over 3 years
-AEGISLOG,Sales growth below 12% a year
-FINCABLES,Sales growth below 12% a year
-AUROPHARMA,Sales growth below 12% a year
-HSCL,Sales growth below 12% a year
-ANGELONE,Profit growth below 15% a year
-GLAND,Profit growth below 15% a year
-JYOTICNC,Profit not positive over 3 years
-ABCAPITAL,Profit growth below 15% a year
-LGEINDIA,Fewer than 4 years of annual data
-PNBHOUSING,ROE below 12%
-GAIL,Sales growth below 12% a year
-WELSPUNLIV,Sales growth below 12% a year
-MPHASIS,Sales growth below 12% a year
-GRANULES,Sales growth below 12% a year
-BOSCHLTD,Sales growth below 12% a year
-NEULANDLAB,Sales or profit did not grow steadily every year
-ACMESOLAR,Profit not positive over 3 years
-IIFL,Profit looks one-time (jumped or is over half of sales)
-FSL,Profit growth below 15% a year
-BBOX,Sales growth below 12% a year
-URBANCO,Profit not positive over 3 years
-ANANTRAJ,ROCE below 15%
-SIEMENS,Sales growth below 12% a year
-NAVINFLUOR,Sales or profit did not grow steadily every year
-PAGEIND,Sales growth below 12% a year
-ABDL,Sales growth below 12% a year
-PIRAMALFIN,Profit not positive over 3 years
-EXIDEIND,Sales growth below 12% a year
-OBEROIRLTY,Profit growth below 15% a year
-CARBORUNIV,Sales growth below 12% a year
-LLOYDSME,Profit not positive over 3 years
-CASTROLIND,Sales growth below 12% a year
-BELRISE,ROCE below 15%
-LALPATHLAB,Sales growth below 12% a year
-TATATECH,Sales growth below 12% a year
-STARHEALTH,Profit growth below 15% a year
-POONAWALLA,Profit not positive over 3 years
-SHYAMMETL,Profit growth below 15% a year
-PTCIL,ROCE below 15%
-KAJARIACER,Sales growth below 12% a year
-PETRONET,Sales growth below 12% a year
-SAGILITY,ROCE below 15%
-PPLPHARMA,Sales growth below 12% a year
-BEML,Sales growth below 12% a year
-CRAFTSMAN,ROCE below 15%
-AEGISVOPAK,Profit not positive over 3 years
-CUB,Sales growth below 12% a year
-USHAMART,Sales growth below 12% a year
-COHANCE,Profit growth below 15% a year
-FLUOROCHEM,Sales growth below 12% a year
-TBOTEK,ROCE below 15%
-JINDALSAW,Sales growth below 12% a year
-DEEPAKFERT,Sales growth below 12% a year
-SUNDRMFAST,Sales growth below 12% a year
-J&KBANK,Sales growth below 12% a year
-ECLERX,Profit growth below 15% a year
-PARADEEP,Operating cash flow negative
-AARTIIND,Sales growth below 12% a year
-AIIL,Profit growth below 15% a year
-DEVYANI,Profit not positive over 3 years
-GLAXO,Sales growth below 12% a year
-THELEELA,Profit looks one-time (jumped or is over half of sales)
-APLLTD,Sales growth below 12% a year
-ELGIEQUIP,Sales growth below 12% a year
-KPRMILL,Sales growth below 12% a year
-CRISIL,Sales growth below 12% a year
-POLYMED,ROCE below 15%
-ALIVUS,Sales growth below 12% a year
-CHALET,Profit looks one-time (jumped or is over half of sales)
-FINEORG,Sales growth below 12% a year
-AGARWALEYE,Profit growth below 15% a year
-ASAHIINDIA,Sales growth below 12% a year
-RATNAMANI,Sales growth below 12% a year
-ZYDUSWELL,Profit growth below 15% a year
-HATSUN,Sales growth below 12% a year
-GRINDWELL,Sales growth below 12% a year
-LMW,Sales growth below 12% a year
+GROWW,Reward:Risk below 1:2
+NETWEB,Reward:Risk below 1:2
+LENSKART,Reward:Risk below 1:2
+ADANIPORTS,Reward:Risk below 1:2
+BHEL,Reward:Risk below 1:2
+DIVISLAB,Reward:Risk below 1:2
+IDEA,Reward:Risk below 1:2
+ADANIENT,Reward:Risk below 1:2
+ADANIPOWER,Reward:Risk below 1:2
+TITAN,Reward:Risk below 1:2
+COFORGE,Reward:Risk below 1:2
+POWERINDIA,Reward:Risk below 1:2
+SOLARINDS,Reward:Risk below 1:2
+KALYANKJIL,Reward:Risk below 1:2
+DIXON,Reward:Risk below 1:2
+PERSISTENT,Reward:Risk below 1:2
+HAL,Reward:Risk below 1:2
+TRENT,Reward:Risk below 1:2
+BAJAJ-AUTO,Reward:Risk below 1:2
+AZAD,Reward:Risk below 1:2
+APOLLO,Reward:Risk below 1:2
+SAIL,Reward:Risk below 1:2
+ADANIGREEN,Reward:Risk below 1:2
+TVSMOTOR,Reward:Risk below 1:2
+HBLENGINE,Reward:Risk below 1:2
+ADANIENSOL,Reward:Risk below 1:2
+FEDERALBNK,Reward:Risk below 1:2
+OFSS,Reward:Risk below 1:2
+RBLBANK,Reward:Risk below 1:2
+MRPL,Reward:Risk below 1:2
+DLF,Reward:Risk below 1:2
+APARINDS,Reward:Risk below 1:2
+CGPOWER,Reward:Risk below 1:2
+ENGINERSIN,Reward:Risk below 1:2
+SUNTV,Reward:Risk below 1:2
+WOCKPHARMA,Reward:Risk below 1:2
+SONACOMS,Reward:Risk below 1:2
+LODHA,Reward:Risk below 1:2
+ZYDUSLIFE,Reward:Risk below 1:2
+NAUKRI,Reward:Risk below 1:2
+MOTHERSON,Reward:Risk below 1:2
+IDFCFIRSTB,Reward:Risk below 1:2
+ANGELONE,Reward:Risk below 1:2
+JSWINFRA,Reward:Risk below 1:2
+REDINGTON,Reward:Risk below 1:2
+PNB,Reward:Risk below 1:2
+PFOCUS,Reward:Risk below 1:2
+TORNTPHARM,Reward:Risk below 1:2
+AEGISLOG,Reward:Risk below 1:2
+AEQUS,Reward:Risk below 1:2
+NIACL,Reward:Risk below 1:2
+UNITDSPR,Reward:Risk below 1:2
+GLENMARK,Reward:Risk below 1:2
+AUROPHARMA,Reward:Risk below 1:2
+ABB,Reward:Risk below 1:2
+PWL,Reward:Risk below 1:2
+POONAWALLA,Reward:Risk below 1:2
+RADICO,Reward:Risk below 1:2
+GESHIP,Reward:Risk below 1:2
+GAIL,Reward:Risk below 1:2
+MPHASIS,Reward:Risk below 1:2
+MANAPPURAM,Reward:Risk below 1:2
+DATAPATTNS,Reward:Risk below 1:2
+ABCAPITAL,Reward:Risk below 1:2
+JYOTICNC,Reward:Risk below 1:2
+APLAPOLLO,Reward:Risk below 1:2
+IIFL,Reward:Risk below 1:2
+LGEINDIA,Reward:Risk below 1:2
+KARURVYSYA,Reward:Risk below 1:2
+ANANDRATHI,Reward:Risk below 1:2
+WELSPUNLIV,Reward:Risk below 1:2
+INDIANB,Reward:Risk below 1:2
+MAHABANK,Reward:Risk below 1:2
+BBOX,Reward:Risk below 1:2
+GLAND,Reward:Risk below 1:2
+PIDILITIND,Reward:Risk below 1:2
+GRAPHITE,Reward:Risk below 1:2
+PNBHOUSING,Reward:Risk below 1:2
+NEULANDLAB,Reward:Risk below 1:2
+BOSCHLTD,Reward:Risk below 1:2
+HSCL,Reward:Risk below 1:2
+HEXT,Reward:Risk below 1:2
+MOTILALOFS,Reward:Risk below 1:2
+NUVAMA,Reward:Risk below 1:2
+GABRIEL,Reward:Risk below 1:2
+BALRAMCHIN,Reward:Risk below 1:2
+PHOENIXLTD,Reward:Risk below 1:2
+RRKABEL,Reward:Risk below 1:2
+TATATECH,Reward:Risk below 1:2
+EMMVEE,Reward:Risk below 1:2
+ACMESOLAR,Reward:Risk below 1:2
+ABDL,Reward:Risk below 1:2
+URBANCO,Reward:Risk below 1:2
+NAVINFLUOR,Reward:Risk below 1:2
+TATACOMM,Reward:Risk below 1:2
+SIEMENS,Reward:Risk below 1:2
+FSL,Reward:Risk below 1:2
+PRESTIGE,Reward:Risk below 1:2
+FINCABLES,Reward:Risk below 1:2
+NAM-INDIA,Reward:Risk below 1:2
+LLOYDSME,Reward:Risk below 1:2
+CARBORUNIV,Reward:Risk below 1:2
+OBEROIRLTY,Reward:Risk below 1:2
+PIRAMALFIN,Reward:Risk below 1:2
+NAZARA,ROCE below 15%
+SAILIFE,Reward:Risk below 1:2
+CASTROLIND,Reward:Risk below 1:2
+SHYAMMETL,Reward:Risk below 1:2
+BELRISE,Reward:Risk below 1:2
+KAJARIACER,Reward:Risk below 1:2
+SUPREMEIND,Reward:Risk below 1:2
+PETRONET,Reward:Risk below 1:2
+PTCIL,Reward:Risk below 1:2
+ANTHEM,Reward:Risk below 1:2
+CGCL,Reward:Risk below 1:2
+STARHEALTH,Reward:Risk below 1:2
+GRANULES,Reward:Risk below 1:2
+LALPATHLAB,Reward:Risk below 1:2
+CRAFTSMAN,Reward:Risk below 1:2
+SAGILITY,Reward:Risk below 1:2
+COHANCE,Reward:Risk below 1:2
+CUB,Reward:Risk below 1:2
+PPLPHARMA,Reward:Risk below 1:2
+CAPLIPOINT,Reward:Risk below 1:2
+BEML,Reward:Risk below 1:2
+INOXINDIA,Reward:Risk below 1:2
+CEMPRO,Reward:Risk below 1:2
+BAJAJHLDNG,Reward:Risk below 1:2
+IPCALAB,Reward:Risk below 1:2
+TBOTEK,Reward:Risk below 1:2
+FLUOROCHEM,Reward:Risk below 1:2
+ASTRAMICRO,Reward:Risk below 1:2
+JINDALSAW,Reward:Risk below 1:2
+IKS,Reward:Risk below 1:2
+SHRIPISTON,Reward:Risk below 1:2
+AEGISVOPAK,Reward:Risk below 1:2
+DEEPAKFERT,Reward:Risk below 1:2
+THELEELA,Reward:Risk below 1:2
+BHARTIHEXA,Reward:Risk below 1:2
+AJANTPHARM,Reward:Risk below 1:2
+EMCURE,Reward:Risk below 1:2
+ECLERX,Reward:Risk below 1:2
+SCHNEIDER,Reward:Risk below 1:2
+AARTIIND,Reward:Risk below 1:2
+PARADEEP,Reward:Risk below 1:2
+LTTS,Reward:Risk below 1:2
+KPIL,Reward:Risk below 1:2
+GLAXO,Reward:Risk below 1:2
+HAPPYFORGE,Reward:Risk below 1:2
+APLLTD,Reward:Risk below 1:2
+BRIGADE,Reward:Risk below 1:2
+SUNDRMFAST,Reward:Risk below 1:2
+KPRMILL,Reward:Risk below 1:2
+CRISIL,Reward:Risk below 1:2
+ALIVUS,Reward:Risk below 1:2
+POLYMED,Reward:Risk below 1:2
+ELGIEQUIP,Reward:Risk below 1:2
+FINEORG,Reward:Risk below 1:2
+MINDACORP,Reward:Risk below 1:2
+AIIL,Reward:Risk below 1:2
+ASAHIINDIA,Reward:Risk below 1:2
+GRINDWELL,Reward:Risk below 1:2
+RATNAMANI,Reward:Risk below 1:2
+ZYDUSWELL,Reward:Risk below 1:2
+LMW,Reward:Risk below 1:2
