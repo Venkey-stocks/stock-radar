@@ -650,8 +650,8 @@ function openRationale(sym, tabType){
     ctn.appendChild(el);
   });
   
-  $('dr_price').textContent='Rs '+fmt(r.Close \vert{}\vert{} r.Entry);$('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)';
-  $('dr_target').textContent='Rs '+fmt(r.Target \vert{}\vert{} r.Level)+' (+'+(r.TargetPct \vert{}\vert{} '')+')';$('dr_stage').textContent=meta.code;
+  $('dr_price').textContent='Rs '+fmt(r.Close || r.Entry);$('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)';
+$('dr_target').textContent='Rs '+fmt(r.Target || r.Level)+' (+'+(r.TargetPct || '')+')';$('dr_stage').textContent=meta.code;
   $('dr_chart_link').href='https://in.tradingview.com/chart/?symbol=NSE:'+encodeURIComponent(r.Symbol);
   
   calcPositionSize();
