@@ -1457,6 +1457,39 @@ function hitInfo(m){
     if(st) return {t:'Stop-loss level touched on '+d.d[i],c:'neg'};
     if(tg) return {t:'Target level touched on '+d.d[i],c:'pos'};
   }
+
+  // ===== Dynamic Trailing Stop-Loss Engine =====
+function getTrailingAdvice(m, curP){
+  if(m.status !== 'Holding' || !m.buyPrice || !curP) return null;
+  const buy = +m.buyPrice;
+  const gainPct = ((curP - buy) / buy) * 100;
+
+  if(gainPct >= 15){
+    const trailPrice = Math.round(curP * 0.93 * 100) / 100;
+    return {
+      level: 'Trend Lock (7% Trail)',
+      trailStop: trailPrice,
+      msg: 'అద్భుతమైన ర్యాలీ! +'+gainPct.toFixed(1)+'% లాభంలో ఉంది. లాభాలు పోకుండా స్టాప్-లాస్‌ను Rs '+trailPrice+' కు ట్రైల్ చేయండి.',
+      cls: 'pos'
+    };
+  } else if(gainPct >= 10){
+    const lockPrice = Math.round(buy * 1.05 * 100) / 100;
+    return {
+      level: 'Lock +5% Profit',
+      trailStop: lockPrice,
+      msg: '+'+gainPct.toFixed(1)+'% పెరిగింది. కనీసం 5% లాభం లాక్ చేయడానికి స్టాప్-లాస్‌ను Rs '+lockPrice+' కు పెంచండి.',
+      cls: 'pos'
+    };
+  } else if(gainPct >= 5){
+    return {
+      level: 'Breakeven Guard (Zero Risk)',
+      trailStop: buy,
+      msg: '+'+gainPct.toFixed(1)+'% లాభం వచ్చింది. రిస్క్ లేకుండా ఉండటానికి స్టాప్-లాస్‌ను కొన్న ధరకు (Rs '+buy+') మార్చండి.',
+      cls: 'amb'
+    };
+  }
+  return null;
+}
   return {t:'Stop-loss and target not touched since '+from,c:'na'};
 }
 
