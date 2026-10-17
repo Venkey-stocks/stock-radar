@@ -689,7 +689,16 @@ function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationa
     const ptxt=pct===null?'n/a':((pct>=0?'+':'')+pct.toFixed(2)+'%');
     const hitTxt=hit?(hit.c=='neg'?'Stop touched':(hit.c=='pos'?'Target reached':'Open')):'Open';
     const hitCls=hit?(hit.c=='neg'?'r':(hit.c=='pos'?'g':'')):'';
-    return '<span><b>'+esc(r.sym)+'</b></span>'
+    
+    // List view lo alert badge kanipinche logic
+    const curP = c ? c.p : (r.lastPrice || null);
+    const tr = getTrailingAdvice(r, curP);
+    let trailBadge = '';
+    if(tr){
+      trailBadge = ' <span class="tag '+(tr.cls==='pos'?'new':'late')+'" style="margin-left:4px">&#128640; '+tr.level+'</span>';
+    }
+
+    return '<span><b>'+esc(r.sym)+'</b>'+trailBadge+'</span>'
       +'<span><span class="tag'+(r.status=='Holding'?' hold':'')+'">'+esc(r.status)+'</span></span>'
       +'<span class="hm"><b>'+(c?fmt(c.p):'n/a')+'</b></span>'
       +'<span>'+nz(r.entry)+'</span>'
@@ -1609,8 +1618,9 @@ function addManual(){
   if(price===null&&c){price=c.p;date=c.d;}
   if(price===null){alert('Please enter current price.');return;}
   const stat=$('nstat').value;
-  const m={sym:sym,status:stat,src:'manual',addDate:date,addPrice:price,entry:en,stop:st,target:tg};
-  if(stat=='Holding'){m.buyPrice=price;m.holdDate=todayISO();m.qty=null;}
+  const effectiveBuy = (en !== null && en > 0) ? en : price;
+  const m={sym:sym,status:stat,src:'manual',addDate:date,addPrice:effectiveBuy,entry:en,stop:st,target:tg};
+  if(stat=='Holding'){m.buyPrice=effectiveBuy;m.holdDate=todayISO();m.qty=null;}
   arr.push(m);
   saveMine(arr);
   ['nsym','nprice','nentry','nstop','ntarget'].forEach(i=>{$(i).value='';});
