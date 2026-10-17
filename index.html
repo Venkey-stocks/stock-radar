@@ -895,6 +895,28 @@ function loadHist(){
     })));
 }
 
+  function syncMinePrices(){
+  const arr = loadMine();
+  if(!arr || !arr.length) return;
+  let updated = false;
+  
+  arr.forEach(item => {
+    const cur = curPrice({sym: item.sym});
+    if(cur && cur.p && item.lastPrice !== cur.p){
+      item.lastPrice = cur.p;
+      item.lastPriceDate = cur.d || todayISO();
+      updated = true;
+    }
+  });
+  
+  if(updated){
+    saveMine(arr);
+    if(typeof curTab !== 'undefined' && curTab === 'mine'){
+      drawMine();
+    }
+  }
+}
+
 function updateDigest(){
   const ds=[];
   ['ultra','short','early','smart'].forEach(k=>{(DATA[k]||[]).forEach(r=>{if(r.Date&&r.Date!='Quarterly Filing') ds.push(r.Date);});});
@@ -1533,7 +1555,7 @@ function mineDetails(m){
   return h;
 }
 
-function drawMine(){ensureCH().then(drawMine2);}
+function function drawMine(){if(typeof syncMinePrices==='function')syncMinePrices();ensureCH().then(drawMine2);}
 
 function drawMine2(){
   if(cur!='mine') return;
