@@ -1,199 +1,581 @@
 Symbol,Reason
 PCJEWELLER,ASM list
+RAYMOND,ASM list
 MOBIKWIK,ASM list
 DELTACORP,ASM list
+SHRINGARMS,ASM list
 SMCGLOBAL,ASM list
+OPTIEMUS,ASM list
 AVALON,ASM list
-AEQUS,ASM list
-SYNCOMF,ASM list
-GMMPFAUDLR,ASM list
-KOPRAN,ASM list
+BLUESTONE,ASM list
+ANTELOPUS,ASM list
+WSTCSTPAPR,ASM list
+IBULLSLTD,ASM list
+GNA,ASM list
+DPABHUSHAN,ASM list
+CENTUM,ASM list
 STLNETWORK,ASM list
-KRISHNADEF,ASM list
+FILATEX,ASM list
+JAYKAY,ASM list
+ONEPOINT,ASM list
+SUNFLAG,ASM list
+UTTAMSUGAR,ASM list
+ADVANCE,ASM list
+JINDWORLD,ASM list
+INDORAMA,ASM list
+ASTEC,ASM list
 TATVA,ASM list
 MVGJL,ASM list
+DHANBANK,ASM list
+PVP,ASM list
+BETA,ASM list
+SEJALLTD,ASM list
 ALLCARGO,ASM list
+OCCLLTD,ASM list
 MPSLTD,ASM list
-GOACARBON,ASM list
-APOLLO,ROCE below 15%
-RSYSTEMS,Sales growth below 20% a year
-TFCILTD,Sales growth below 20% a year
-RAYMONDREL,Fewer than 4 years of annual data
-SHANTIGOLD,Operating cash flow negative
-LLOYDSENGG,ROCE below 15%
-TARIL,Operating cash flow negative
-WABAG,Sales growth below 20% a year
-MOTISONS,Sales growth below 20% a year
-SENCO,Operating cash flow negative
-ELECON,Sales growth below 20% a year
-EMIL,Sales growth below 20% a year
-EDELWEISS,Fewer than 4 years of annual data
-YATHARTH,ROCE below 15%
-BALRAMCHIN,Sales growth below 20% a year
-UJJIVANSFB,Fewer than 4 years of annual data
-CYIENT,Sales growth below 20% a year
-AARTIPHARM,Sales growth below 20% a year
-CARTRADE,ROCE below 15%
-GNFC,Sales growth below 20% a year
-RAIN,Sales growth below 20% a year
-MARKSANS,Sales growth below 20% a year
-QUADFUTURE,Sales growth below 20% a year
-SOUTHBANK,Fewer than 4 years of annual data
-BALAMINES,Sales growth below 20% a year
-AXISCADES,Sales growth below 20% a year
-JASH,Profit growth below 20% a year
-SMSPHARMA,Sales growth below 20% a year
-VIYASH,Profit looks one-time (jumped or is over half of sales)
-KTKBANK,Fewer than 4 years of annual data
-NAZARA,Sales growth below 20% a year
-EBGNG,Operating cash flow negative
-BLACKBUCK,Profit not positive over 3 years
-JAMNAAUTO,Sales growth below 20% a year
-WELENT,Sales growth below 20% a year
-UNIMECH,ROCE below 15%
-NEOGEN,Sales growth below 20% a year
-PACEDIGITK,Operating cash flow negative
-NEPHROPLUS,Profit not positive over 3 years
-GENUSPOWER,Operating cash flow negative
-TEXRAIL,ROCE below 15%
-KROSS,Sales growth below 20% a year
-INDOCO,Sales growth below 20% a year
-TIMETECHNO,Sales growth below 20% a year
-LEMONTREE,Sales growth below 20% a year
-DYNAMATECH,Sales growth below 20% a year
-PCBL,Sales growth below 20% a year
-NOCIL,Sales growth below 20% a year
-SMLMAH,Sales growth below 20% a year
-KSB,Sales growth below 20% a year
-BAJAJHIND,Sales growth below 20% a year
-KRN,Operating cash flow negative
-ARVIND,Sales growth below 20% a year
-ELECTCAST,Sales growth below 20% a year
-MANALIPETC,Profit looks one-time (jumped or is over half of sales)
-SOLARA,Sales growth below 20% a year
-IGARASHI,Sales growth below 20% a year
-SUBEXLTD,Sales growth below 20% a year
-HOMEFIRST,ROCE below 15%
-JGCHEM,Sales growth below 20% a year
-INDGN,Sales growth below 20% a year
-AVANTEL,Sales growth below 20% a year
-INDNIPPON,Sales growth below 20% a year
-SOTL,Sales growth below 20% a year
-SUDEEPPHRM,Sales growth below 20% a year
-JTLIND,Sales growth below 20% a year
-ARIS,Profit looks one-time (jumped or is over half of sales)
-JMFINANCIL,Fewer than 4 years of annual data
-CONFIPET,Profit growth below 20% a year
-LXCHEM,Sales growth below 20% a year
-MOSCHIP,ROCE below 15%
-ICIL,Sales growth below 20% a year
-JUBLPHARMA,Sales growth below 20% a year
-GOODLUCK,Sales growth below 20% a year
-JAYNECOIND,Profit looks one-time (jumped or is over half of sales)
-CAPILLARY,Profit not positive over 3 years
-FOSECOIND,Sales growth below 20% a year
-CONCORDBIO,Sales growth below 20% a year
-NELCO,Sales growth below 20% a year
-PTC,Sales growth below 20% a year
-CCAVENUE,ROCE below 15%
-WALCHANNAG,Sales growth below 20% a year
-JUBLINGREA,Sales growth below 20% a year
-RAMRAT,Operating cash flow negative
-RELIGARE,Profit growth below 20% a year
-EIEL,Operating cash flow negative
-NSLNISP,Sales growth not computable
-TNPETRO,Sales growth below 20% a year
-MASTEK,Sales growth below 20% a year
-MANYAVAR,Sales growth below 20% a year
-IDEAFORGE,Sales growth below 20% a year
-TANLA,Sales growth below 20% a year
-GMRP&UI,Sales growth below 20% a year
+BMWVENTLTD,ASM list
+AAREYDRUGS,ASM list
+WHIRLPOOL,Reward:Risk below 1:2
+TARIL,Reward:Risk below 1:2
+RSYSTEMS,Reward:Risk below 1:2
+RAYMONDREL,Reward:Risk below 1:2
+ELECON,Reward:Risk below 1:2
+GALLANTT,Reward:Risk below 1:2
+LLOYDSENGG,Reward:Risk below 1:2
+TEGA,Reward:Risk below 1:2
+HONASA,Reward:Risk below 1:2
+TRANSRAILL,Reward:Risk below 1:2
+PROTEAN,Reward:Risk below 1:2
+SENCO,Reward:Risk below 1:2
+MARINE,Reward:Risk below 1:2
+UJJIVANSFB,Reward:Risk below 1:2
+RITES,Reward:Risk below 1:2
+PVRINOX,Profit not positive over 3 years
+EMIL,Reward:Risk below 1:2
+CARTRADE,Reward:Risk below 1:2
+SOUTHBANK,Reward:Risk below 1:2
+MOTISONS,Reward:Risk below 1:2
+CYIENT,Reward:Risk below 1:2
+RAIN,Reward:Risk below 1:2
+SCI,Reward:Risk below 1:2
+EDELWEISS,Reward:Risk below 1:2
+AARTIPHARM,Reward:Risk below 1:2
+WABAG,Reward:Risk below 1:2
+SYNCOMF,Reward:Risk below 1:2
+YATHARTH,Reward:Risk below 1:2
+BSOFT,Reward:Risk below 1:2
+CELLO,Reward:Risk below 1:2
+PARAS,Reward:Risk below 1:2
+GOODLUCK,Reward:Risk below 1:2
+ANURAS,Reward:Risk below 1:2
+ZENSARTECH,Reward:Risk below 1:2
+BALAMINES,Reward:Risk below 1:2
+MARKSANS,Reward:Risk below 1:2
+JASH,Reward:Risk below 1:2
+AXISCADES,Reward:Risk below 1:2
+PARAGMILK,Reward:Risk below 1:2
+PGEL,Reward:Risk below 1:2
+KTKBANK,Reward:Risk below 1:2
+GREAVESCOT,Reward:Risk below 1:2
+TEJASNET,Reward:Risk below 1:2
+SHAREINDIA,Reward:Risk below 1:2
+VENUSPIPES,Reward:Risk below 1:2
+STYLEBAAZA,Reward:Risk below 1:2
+LANDMARK,Reward:Risk below 1:2
+SSWL,Reward:Risk below 1:2
+ORIENTELEC,Reward:Risk below 1:2
+TI,Reward:Risk below 1:2
+NEOGEN,Reward:Risk below 1:2
+SHOPERSTOP,Reward:Risk below 1:2
+NRBBEARING,Reward:Risk below 1:2
+GNFC,Reward:Risk below 1:2
+PACEDIGITK,Reward:Risk below 1:2
+MBEL,Reward:Risk below 1:2
+JAMNAAUTO,Reward:Risk below 1:2
+KROSS,Reward:Risk below 1:2
+VIYASH,Reward:Risk below 1:2
+USHAMART,Reward:Risk below 1:2
+LEMONTREE,Reward:Risk below 1:2
+NEPHROPLUS,Reward:Risk below 1:2
+QPOWER,Reward:Risk below 1:2
+63MOONS,Reward:Risk below 1:2
+TEXRAIL,Reward:Risk below 1:2
+UNIMECH,Reward:Risk below 1:2
+TIMETECHNO,Reward:Risk below 1:2
+GMMPFAUDLR,Reward:Risk below 1:2
+SGFIN,Reward:Risk below 1:2
 TIPSMUSIC,Profit looks one-time (jumped or is over half of sales)
-HIKAL,Sales growth below 20% a year
-GUJTHEM,Sales growth below 20% a year
-CEATLTD,Sales growth below 20% a year
-PARKHOSPS,Sales growth below 20% a year
-EKC,Sales growth below 20% a year
-SUVEN,Sales growth below 20% a year
-EMBDL,Profit not positive over 3 years
-AGI,Sales growth below 20% a year
-VIDYAWIRES,Operating cash flow negative
-GODREJAGRO,Sales growth below 20% a year
-STYLAMIND,Sales growth below 20% a year
-WENDT,Sales growth below 20% a year
-SANGHVIMOV,Profit growth below 20% a year
-GSFC,Profit growth below 20% a year
-POWERMECH,Sales growth below 20% a year
-UTKARSHBNK,Fewer than 4 years of annual data
-EQUITASBNK,Fewer than 4 years of annual data
-GALAXYSURF,Sales growth below 20% a year
-FEDFINA,ROCE below 15%
-SBFC,ROCE below 15%
-MUKANDLTD,Profit looks one-time (jumped or is over half of sales)
-BOROLTD,Sales growth below 20% a year
-PENIND,Sales growth below 20% a year
-VADILALIND,Sales growth below 20% a year
-GMBREW,Sales growth below 20% a year
-INDOAMIN,Sales growth below 20% a year
-UNIPARTS,Sales growth below 20% a year
-VENKEYS,Sales growth below 20% a year
-TVSSCS,Sales growth below 20% a year
-RICOAUTO,Sales growth below 20% a year
-GOCLCORP,Profit looks one-time (jumped or is over half of sales)
-HCG,Sales growth below 20% a year
-DMCC,Sales growth below 20% a year
-KOLTEPATIL,Annual data is out of date
-IZMO,ROCE below 15%
-AEROENTER,Sales growth below 20% a year
-WINDLAS,Profit growth below 20% a year
-TEMBO,Operating cash flow negative
-NIBE,ROCE below 15%
-MAYURUNIQ,Sales growth below 20% a year
-MUNJALAU,Sales growth below 20% a year
-UFLEX,Sales growth below 20% a year
-IKIO,Sales growth below 20% a year
-PARACABLES,Profit growth below 20% a year
-SHARDAMOTR,Sales growth below 20% a year
-INGERRAND,Sales growth below 20% a year
-DCW,Sales growth below 20% a year
-SOMANYCERA,Sales growth below 20% a year
-JNKINDIA,Profit growth below 20% a year
-GIPCL,Sales growth below 20% a year
-GHCLTEXTIL,Sales growth not computable
-BLUSPRING,Fewer than 4 years of annual data
-CARRARO,Sales growth below 20% a year
-JAYBARMARU,Profit looks one-time (jumped or is over half of sales)
-BASF,Sales growth below 20% a year
-BCG,Sales growth below 20% a year
-STYRENIX,Sales growth below 20% a year
-MAWANASUG,Sales growth below 20% a year
-GPTINFRA,Sales growth below 20% a year
-STYL,Sales growth below 20% a year
-RAJRATAN,Sales growth below 20% a year
-FINPIPE,Sales growth below 20% a year
-INFOBEAN,Sales growth below 20% a year
-5PAISA,Sales growth below 20% a year
-SPORTKING,Sales growth below 20% a year
-IGPL,Sales growth below 20% a year
-PURVA,Profit growth below 20% a year
-SUPRAJIT,Sales growth below 20% a year
-NILKAMAL,Sales growth below 20% a year
-TCPLPACK,Sales growth below 20% a year
-JUNIPER,Sales growth below 20% a year
-EPIGRAL,Sales growth below 20% a year
-PNBGILTS,Profit growth below 20% a year
-SUNDROP,Profit growth below 20% a year
-SURYODAY,Fewer than 4 years of annual data
-PRINCEPIPE,Sales growth below 20% a year
-COFFEEDAY,Sales growth below 20% a year
-DOLLAR,Sales growth below 20% a year
-ESTER,Sales growth below 20% a year
-ROTO,Sales growth below 20% a year
-MAGADSUGAR,Sales growth below 20% a year
-DENTA,Sales growth below 20% a year
-BALMLAWRIE,Sales growth below 20% a year
-TTKHLTCARE,Sales growth below 20% a year
-BAJEL,Profit not positive over 3 years
-SUNCLAY,Sales growth below 20% a year
-DLINKINDIA,Sales growth below 20% a year
-KILITCH,Sales growth below 20% a year
+BAJAJCON,Reward:Risk below 1:2
+ROLEXRINGS,Reward:Risk below 1:2
+SHAILY,Reward:Risk below 1:2
+SJS,Reward:Risk below 1:2
+GENUSPOWER,Reward:Risk below 1:2
+KRN,Reward:Risk below 1:2
+RHIM,Reward:Risk below 1:2
+ELLEN,Reward:Risk below 1:2
+JSFB,Reward:Risk below 1:2
+NEWGEN,Reward:Risk below 1:2
+PRIVISCL,Reward:Risk below 1:2
+ZENTEC,Reward:Risk below 1:2
+EMUDHRA,Reward:Risk below 1:2
+GRAVITA,Reward:Risk below 1:2
+DYNAMATECH,Reward:Risk below 1:2
+ALKYLAMINE,Reward:Risk below 1:2
+ACE,Reward:Risk below 1:2
+SOLARA,Reward:Risk below 1:2
+MIDHANI,Reward:Risk below 1:2
+RKFORGE,Reward:Risk below 1:2
+JAYNECOIND,Reward:Risk below 1:2
+EPL,Reward:Risk below 1:2
+BLACKBUCK,Reward:Risk below 1:2
+BAJAJHIND,Reward:Risk below 1:2
+KSB,Reward:Risk below 1:2
+SWARAJENG,Reward:Risk below 1:2
+ATLANTAELE,Reward:Risk below 1:2
+LLOYDSENT,Reward:Risk below 1:2
+INDOCO,Reward:Risk below 1:2
+QUADFUTURE,Reward:Risk below 1:2
+ELECTCAST,Reward:Risk below 1:2
+JUBLPHARMA,Reward:Risk below 1:2
+ITDC,Reward:Risk below 1:2
+WELENT,Reward:Risk below 1:2
+PIXTRANS,Reward:Risk below 1:2
+SKFINDUS,Reward:Risk below 1:2
+JGCHEM,Reward:Risk below 1:2
+PNGJL,Reward:Risk below 1:2
+FIVESTAR,Reward:Risk below 1:2
+SENORES,Reward:Risk below 1:2
+TCI,Reward:Risk below 1:2
+MANALIPETC,Reward:Risk below 1:2
+PCBL,Reward:Risk below 1:2
+KIRIINDUS,Reward:Risk below 1:2
+MANORAMA,Reward:Risk below 1:2
+JTLIND,Reward:Risk below 1:2
+SKIPPER,Reward:Risk below 1:2
+SMSPHARMA,Reward:Risk below 1:2
+JINDRILL,Reward:Risk below 1:2
+LUMAXTECH,Reward:Risk below 1:2
+DCBBANK,Reward:Risk below 1:2
+INDGN,Reward:Risk below 1:2
+TITAGARH,Reward:Risk below 1:2
+AVANTEL,Reward:Risk below 1:2
+HCC,Reward:Risk below 1:2
+KRISHNADEF,Reward:Risk below 1:2
+SUPRIYA,Reward:Risk below 1:2
+J&KBANK,Reward:Risk below 1:2
+PGIL,Reward:Risk below 1:2
+HOMEFIRST,Reward:Risk below 1:2
+SOTL,Reward:Risk below 1:2
+ARIS,Reward:Risk below 1:2
+NOCIL,Reward:Risk below 1:2
+ARVIND,Reward:Risk below 1:2
+RELIGARE,Reward:Risk below 1:2
+TANLA,Reward:Risk below 1:2
+LXCHEM,Reward:Risk below 1:2
+RBA,Reward:Risk below 1:2
+SUDARSCHEM,Reward:Risk below 1:2
+STAR,Reward:Risk below 1:2
+ARVSMART,Reward:Risk below 1:2
+BALUFORGE,Reward:Risk below 1:2
+PARKHOSPS,Reward:Risk below 1:2
+CEATLTD,Reward:Risk below 1:2
+RENUKA,Reward:Risk below 1:2
+MAHSEAMLES,Reward:Risk below 1:2
+KERNEX,Reward:Risk below 1:2
+RAINBOW,Reward:Risk below 1:2
+SUDEEPPHRM,Reward:Risk below 1:2
+JMFINANCIL,Reward:Risk below 1:2
+DHAMPURSUG,Reward:Risk below 1:2
+SUBEXLTD,Reward:Risk below 1:2
+ENTERO,Reward:Risk below 1:2
+GPPL,Reward:Risk below 1:2
+NORTHARC,Reward:Risk below 1:2
+CAPILLARY,Reward:Risk below 1:2
+VINCOFE,Reward:Risk below 1:2
+CONFIPET,Reward:Risk below 1:2
+IIFLCAPS,Reward:Risk below 1:2
+DALMIASUG,Reward:Risk below 1:2
+EPACKPEB,Reward:Risk below 1:2
+SDBL,Reward:Risk below 1:2
+ICIL,Reward:Risk below 1:2
+COMSYN,Reward:Risk below 1:2
+NSLNISP,Reward:Risk below 1:2
+CCL,Reward:Risk below 1:2
+RATEGAIN,Reward:Risk below 1:2
+DEEPINDS,Reward:Risk below 1:2
+PAUSHAKLTD,Reward:Risk below 1:2
+WALCHANNAG,Reward:Risk below 1:2
+DAMCAPITAL,Reward:Risk below 1:2
+GOKEX,Reward:Risk below 1:2
+NELCO,Reward:Risk below 1:2
+SPARC,Reward:Risk below 1:2
+SPLPETRO,Reward:Risk below 1:2
+AURUM,Reward:Risk below 1:2
+GMRP&UI,Reward:Risk below 1:2
+IDEAFORGE,Reward:Risk below 1:2
+CONCORDBIO,Reward:Risk below 1:2
+SUVEN,Reward:Risk below 1:2
+CLEAN,Reward:Risk below 1:2
+VIJAYA,Reward:Risk below 1:2
+MANINFRA,Reward:Risk below 1:2
+PTC,Reward:Risk below 1:2
+ZOTA,Reward:Risk below 1:2
+JUBLINGREA,Reward:Risk below 1:2
+KOPRAN,Reward:Risk below 1:2
+AKUMS,Reward:Risk below 1:2
+RAMRAT,Reward:Risk below 1:2
+FEDFINA,Reward:Risk below 1:2
+IGIL,Reward:Risk below 1:2
+BLUEJET,Reward:Risk below 1:2
+NIBE,Reward:Risk below 1:2
+KRISHANA,Reward:Risk below 1:2
+VARROC,Reward:Risk below 1:2
+REFEX,Reward:Risk below 1:2
+MOSCHIP,Reward:Risk below 1:2
+TCIEXP,Reward:Risk below 1:2
+ASKAUTOLTD,Reward:Risk below 1:2
+VOLTAMP,Reward:Risk below 1:2
+SAPPHIRE,Reward:Risk below 1:2
+NIVABUPA,Reward:Risk below 1:2
+ARSSBL,Reward:Risk below 1:2
+UNICHEMLAB,Reward:Risk below 1:2
+RIIL,Reward:Risk below 1:2
+MASTEK,Reward:Risk below 1:2
+JKPAPER,Reward:Risk below 1:2
+SAREGAMA,Reward:Risk below 1:2
+EKC,Reward:Risk below 1:2
+BECTORFOOD,Reward:Risk below 1:2
+VIDYAWIRES,Reward:Risk below 1:2
+MGL,Reward:Risk below 1:2
+THYROCARE,Reward:Risk below 1:2
+PANAMAPET,Reward:Risk below 1:2
+INNOVACAP,Reward:Risk below 1:2
+GALAXYSURF,Reward:Risk below 1:2
+MANYAVAR,Reward:Risk below 1:2
+PREMEXPLN,Operating cash flow negative
+LTFOODS,Reward:Risk below 1:2
+HERITGFOOD,Reward:Risk below 1:2
+EIEL,Reward:Risk below 1:2
+GAEL,Reward:Risk below 1:2
+KDDL,Reward:Risk below 1:2
+JAGSNPHARM,Reward:Risk below 1:2
+QUESS,Reward:Risk below 1:2
+TARSONS,Reward:Risk below 1:2
+OAL,Sales growth below 20% a year
+TNPETRO,Reward:Risk below 1:2
+RISHABH,Reward:Risk below 1:2
+KRBL,Reward:Risk below 1:2
+MUFIN,Reward:Risk below 1:2
+STYLAMIND,Reward:Risk below 1:2
+ETHOSLTD,Reward:Risk below 1:2
+SBFC,Reward:Risk below 1:2
+ORCHPHARMA,Reward:Risk below 1:2
+DYCL,Reward:Risk below 1:2
+NPST,Reward:Risk below 1:2
+POWERMECH,Reward:Risk below 1:2
+AGI,Reward:Risk below 1:2
+MSTCLTD,Reward:Risk below 1:2
+EIMCOELECO,Reward:Risk below 1:2
+BEPL,Reward:Risk below 1:2
+AGARWALEYE,Reward:Risk below 1:2
+TALBROAUTO,Reward:Risk below 1:2
+TRUALT,Reward:Risk below 1:2
+AVTNPL,Reward:Risk below 1:2
+PFS,Reward:Risk below 1:2
+SAMHI,Reward:Risk below 1:2
+DIVGIITTS,Reward:Risk below 1:2
+METROPOLIS,Reward:Risk below 1:2
+MUKANDLTD,Reward:Risk below 1:2
+ARIHANTCAP,Reward:Risk below 1:2
+KIRLOSBROS,Reward:Risk below 1:2
+MBAPL,Reward:Risk below 1:2
+BLSE,Reward:Risk below 1:2
+SATIN,Reward:Risk below 1:2
+PARACABLES,Reward:Risk below 1:2
+HIKAL,Reward:Risk below 1:2
+GUJTHEM,Reward:Risk below 1:2
+GODREJAGRO,Reward:Risk below 1:2
+CEIGALL,Reward:Risk below 1:2
+RGL,Reward:Risk below 1:2
+EQUITASBNK,Reward:Risk below 1:2
+DWARKESH,Reward:Risk below 1:2
+GOLDIAM,Reward:Risk below 1:2
+ALICON,Reward:Risk below 1:2
+RPGLIFE,Reward:Risk below 1:2
+KSL,Reward:Risk below 1:2
+ASIANENE,Reward:Risk below 1:2
+ORIENTHOT,Sales growth below 20% a year
+INDOAMIN,Reward:Risk below 1:2
+DMCC,Reward:Risk below 1:2
+WAAREERTL,Reward:Risk below 1:2
+GSFC,Reward:Risk below 1:2
+HLEGLAS,Reward:Risk below 1:2
+BOROLTD,Reward:Risk below 1:2
+BOSCH-HCIL,Reward:Risk below 1:2
+GMBREW,Reward:Risk below 1:2
+BATAINDIA,Reward:Risk below 1:2
+PENIND,Reward:Risk below 1:2
+JSWDULUX,Reward:Risk below 1:2
+EXICOM,Reward:Risk below 1:2
+VGUARD,Reward:Risk below 1:2
+ISGEC,Reward:Risk below 1:2
+PNBGILTS,Reward:Risk below 1:2
+SURYAROSNI,Reward:Risk below 1:2
+NUVOCO,Reward:Risk below 1:2
+WESTLIFE,Reward:Risk below 1:2
+TEMBO,Reward:Risk below 1:2
+PRUDENT,Reward:Risk below 1:2
+CRAMC,Reward:Risk below 1:2
+STEELXIND,Reward:Risk below 1:2
+SANATHAN,Sales growth below 20% a year
+CARYSIL,Reward:Risk below 1:2
+MAHLOG,Reward:Risk below 1:2
+HCG,Reward:Risk below 1:2
+UTLSOLAR,Reward:Risk below 1:2
+SIS,Reward:Risk below 1:2
+SIGACHI,Reward:Risk below 1:2
+PITTIENG,Reward:Risk below 1:2
+AEROENTER,Reward:Risk below 1:2
+MAXESTATES,Reward:Risk below 1:2
+NELCAST,Reward:Risk below 1:2
+AJAXENGG,Reward:Risk below 1:2
+STEELCAS,Reward:Risk below 1:2
+SKFINDIA,Reward:Risk below 1:2
+TVSELECT,Reward:Risk below 1:2
+DATAMATICS,Reward:Risk below 1:2
+RICOAUTO,Reward:Risk below 1:2
+FOSECOIND,Reward:Risk below 1:2
+WINDLAS,Reward:Risk below 1:2
+DBL,Reward:Risk below 1:2
+UNIPARTS,Reward:Risk below 1:2
+KOLTEPATIL,Reward:Risk below 1:2
+JUSTDIAL,Reward:Risk below 1:2
+TIIL,Reward:Risk below 1:2
+APOLLOPIPE,Reward:Risk below 1:2
+REGAAL,Reward:Risk below 1:2
+MUNJALAU,Reward:Risk below 1:2
+VENKEYS,Reward:Risk below 1:2
+ONWARDTEC,Reward:Risk below 1:2
+SFL,Reward:Risk below 1:2
+STOVEKRAFT,Reward:Risk below 1:2
+MAYURUNIQ,Reward:Risk below 1:2
+KINGFA,Reward:Risk below 1:2
+BBL,Reward:Risk below 1:2
+CARERATING,Reward:Risk below 1:2
+WEWORK,Reward:Risk below 1:2
+GREENPLY,Reward:Risk below 1:2
+VALIANTORG,Reward:Risk below 1:2
+HARSHA,Reward:Risk below 1:2
+EXCELSOFT,Reward:Risk below 1:2
+VIMTALABS,Reward:Risk below 1:2
+AARTIDRUGS,Reward:Risk below 1:2
+PRAKASH,Reward:Risk below 1:2
+PICCADIL,Reward:Risk below 1:2
+IZMO,Reward:Risk below 1:2
+TVSSCS,Reward:Risk below 1:2
+SIRCA,Reward:Risk below 1:2
+KIRLPNU,Reward:Risk below 1:2
+DCW,Reward:Risk below 1:2
+UFLEX,Reward:Risk below 1:2
+MAHSCOOTER,Reward:Risk below 1:2
+TRIDENT,Reward:Risk below 1:2
+VADILALIND,Reward:Risk below 1:2
+GOKULAGRO,Reward:Risk below 1:2
+PGHL,Reward:Risk below 1:2
+JAIBALAJI,Reward:Risk below 1:2
+SEAMECLTD,Reward:Risk below 1:2
+INDOTECH,Reward:Risk below 1:2
+SHILCTECH,Reward:Risk below 1:2
+GANECOS,Reward:Risk below 1:2
+VIVIANA,Reward:Risk below 1:2
+AVL,Reward:Risk below 1:2
+ALEMBICLTD,Reward:Risk below 1:2
+HINDOILEXP,Reward:Risk below 1:2
+FMGOETZE,Reward:Risk below 1:2
+VAIBHAVGBL,Reward:Risk below 1:2
+GOCLCORP,Reward:Risk below 1:2
+OMAXE,Reward:Risk below 1:2
+GLOBUSSPR,Reward:Risk below 1:2
+SOMANYCERA,Reward:Risk below 1:2
+WENDT,Reward:Risk below 1:2
+UTIAMC,Reward:Risk below 1:2
+VMART,Reward:Risk below 1:2
+JAYBARMARU,Reward:Risk below 1:2
+NITINSPIN,Reward:Risk below 1:2
+JLHL,Reward:Risk below 1:2
+LUXIND,Reward:Risk below 1:2
+DIFFNKG,Reward:Risk below 1:2
+RML,Reward:Risk below 1:2
+HATHWAY,Reward:Risk below 1:2
+FINPIPE,Reward:Risk below 1:2
+JNKINDIA,Reward:Risk below 1:2
+INGERRAND,Reward:Risk below 1:2
+KANSAINER,Reward:Risk below 1:2
+INDNIPPON,Reward:Risk below 1:2
+5PAISA,Reward:Risk below 1:2
+GULFOILLUB,Reward:Risk below 1:2
+MANGLMCEM,Reward:Risk below 1:2
+SASKEN,Reward:Risk below 1:2
+GPTINFRA,Reward:Risk below 1:2
+SHARDAMOTR,Reward:Risk below 1:2
+HMAAGRO,Reward:Risk below 1:2
+BLKASHYAP,Reward:Risk below 1:2
+RACLGEAR,Reward:Risk below 1:2
+GALAPREC,Reward:Risk below 1:2
+BASF,Reward:Risk below 1:2
+SANDHAR,Reward:Risk below 1:2
+SIMPLEXINF,Reward:Risk below 1:2
+TCPLPACK,Reward:Risk below 1:2
+DCI,Reward:Risk below 1:2
+VISHNU,Reward:Risk below 1:2
+STYRENIX,Reward:Risk below 1:2
+GHCLTEXTIL,Reward:Risk below 1:2
+GIPCL,Reward:Risk below 1:2
+WAKEFIT,Reward:Risk below 1:2
+TEXINFRA,Profit looks one-time (jumped or is over half of sales)
+GARUDA,Reward:Risk below 1:2
+LUMAXIND,Reward:Risk below 1:2
+BCG,Reward:Risk below 1:2
+SAKSOFT,Reward:Risk below 1:2
+DBOL,Reward:Risk below 1:2
+CARRARO,Reward:Risk below 1:2
+PRINCEPIPE,Reward:Risk below 1:2
+BAJAJHCARE,Reward:Risk below 1:2
+BHARATSE,Reward:Risk below 1:2
+PASUPTAC,Reward:Risk below 1:2
+PDMJEPAPER,Reward:Risk below 1:2
+MAHLIFE,Reward:Risk below 1:2
+THOMASCOOK,Reward:Risk below 1:2
+ANDHRAPAP,Reward:Risk below 1:2
+MMP,Reward:Risk below 1:2
+PROSTARM,Reward:Risk below 1:2
+IRISDOREME,Reward:Risk below 1:2
+NESCO,Reward:Risk below 1:2
+IGPL,Reward:Risk below 1:2
+STYL,Reward:Risk below 1:2
+INDIGOPNTS,Reward:Risk below 1:2
+PSPPROJECT,Reward:Risk below 1:2
+RAJRATAN,Reward:Risk below 1:2
+DOMS,Reward:Risk below 1:2
+EMSLIMITED,Reward:Risk below 1:2
+SMARTWORKS,Reward:Risk below 1:2
+TARC,Reward:Risk below 1:2
+SAATVIKGL,Reward:Risk below 1:2
+MOL,Reward:Risk below 1:2
+ADOR,Reward:Risk below 1:2
+NRAIL,Reward:Risk below 1:2
+REDTAPE,Reward:Risk below 1:2
+MEIL,Reward:Risk below 1:2
+DSSL,Reward:Risk below 1:2
+MCLOUD,Reward:Risk below 1:2
+CERA,Reward:Risk below 1:2
+HIRECT,Reward:Risk below 1:2
+IVALUE,Reward:Risk below 1:2
+RELTD,Reward:Risk below 1:2
+ORKLAINDIA,Reward:Risk below 1:2
+LGBBROSLTD,Reward:Risk below 1:2
+VRLLOG,Reward:Risk below 1:2
+POLYPLEX,Reward:Risk below 1:2
+SUNDROP,Reward:Risk below 1:2
+VSSL,Reward:Risk below 1:2
+FDC,Reward:Risk below 1:2
+AJMERA,Reward:Risk below 1:2
+TSFINV,Reward:Risk below 1:2
+APCOTEXIND,Reward:Risk below 1:2
+SHK,Reward:Risk below 1:2
+KAMDHENU,Reward:Risk below 1:2
+GUJALKALI,Reward:Risk below 1:2
+ATULAUTO,Reward:Risk below 1:2
+SHANTIGEAR,Reward:Risk below 1:2
+EPIGRAL,Reward:Risk below 1:2
+MANAKCOAT,Reward:Risk below 1:2
+RAJOOENG,Reward:Risk below 1:2
+RAMCOSYS,Reward:Risk below 1:2
+BANCOINDIA,Reward:Risk below 1:2
+MMFL,Reward:Risk below 1:2
+ARROWGREEN,Reward:Risk below 1:2
+HNDFDS,Reward:Risk below 1:2
+YUKEN,Reward:Risk below 1:2
+MOLDTKPAC,Reward:Risk below 1:2
+JINDALPOLY,Reward:Risk below 1:2
+DOLPHIN,Reward:Risk below 1:2
+PURVA,Reward:Risk below 1:2
+SUPRAJIT,Reward:Risk below 1:2
+UDS,Reward:Risk below 1:2
+UNITEDPOLY,Reward:Risk below 1:2
+CANTABIL,Reward:Risk below 1:2
+NILKAMAL,Reward:Risk below 1:2
+KRSNAA,Reward:Risk below 1:2
+MAMATA,Reward:Risk below 1:2
+GATEWAY,Reward:Risk below 1:2
+PDSL,Reward:Risk below 1:2
+MAGADSUGAR,Reward:Risk below 1:2
+ASHIANA,Reward:Risk below 1:2
+COSMOFIRST,Reward:Risk below 1:2
+MASTERTR,Reward:Risk below 1:2
+SURYODAY,Reward:Risk below 1:2
+GUFICBIO,Reward:Risk below 1:2
+IFBIND,Reward:Risk below 1:2
+COFFEEDAY,Reward:Risk below 1:2
+SANGAMIND,Reward:Risk below 1:2
+SHIVALIK,Reward:Risk below 1:2
+MWL,Reward:Risk below 1:2
+FAIRCHEMOR,Reward:Risk below 1:2
+ADFFOODS,Reward:Risk below 1:2
+TTKPRESTIG,Reward:Risk below 1:2
+STANLEY,Reward:Risk below 1:2
+SHIVAUM,Reward:Risk below 1:2
+SRHHYPOLTD,Reward:Risk below 1:2
+TINNARUBR,Reward:Risk below 1:2
+IKIO,Reward:Risk below 1:2
+MUTHOOTMF,Reward:Risk below 1:2
+ROSSARI,Reward:Risk below 1:2
+ANDHRSUGAR,Reward:Risk below 1:2
+BAJEL,Reward:Risk below 1:2
+HARIOMPIPE,Reward:Risk below 1:2
+PRABHA,Reward:Risk below 1:2
+IMAGICAA,Reward:Risk below 1:2
+MANBA,Reward:Risk below 1:2
+TNPL,Reward:Risk below 1:2
+RPSGVENT,Reward:Risk below 1:2
+ACCELYA,Reward:Risk below 1:2
+TVSSRICHAK,Reward:Risk below 1:2
+ESTER,Reward:Risk below 1:2
+DOLLAR,Reward:Risk below 1:2
+HUHTAMAKI,Reward:Risk below 1:2
+SURAKSHA,Reward:Risk below 1:2
+RUPA,Reward:Risk below 1:2
+RAMCOIND,Reward:Risk below 1:2
+DODLA,Reward:Risk below 1:2
+SHREEPUSHK,Reward:Risk below 1:2
+SPAL,Reward:Risk below 1:2
+ALLTIME,Reward:Risk below 1:2
+MODIS,Reward:Risk below 1:2
+NGLFINE,Reward:Risk below 1:2
+SESHAPAPER,Reward:Risk below 1:2
+WONDERLA,Reward:Risk below 1:2
+GANDHITUBE,Reward:Risk below 1:2
+EVEREADY,Reward:Risk below 1:2
+ROTO,Reward:Risk below 1:2
+PROZONER,Reward:Risk below 1:2
+DLINKINDIA,Reward:Risk below 1:2
+MAZDA,Reward:Risk below 1:2
+KILITCH,Reward:Risk below 1:2
+INDIANHUME,Reward:Risk below 1:2
+KAMATHOTEL,Reward:Risk below 1:2
+20MICRONS,Reward:Risk below 1:2
+MONARCH,Reward:Risk below 1:2
+WINDMACHIN,Reward:Risk below 1:2
+MONTECARLO,Reward:Risk below 1:2
+GANESHHOU,Reward:Risk below 1:2
+JUNIPER,Reward:Risk below 1:2
+DIAMONDYD,Reward:Risk below 1:2
+IGARASHI,Reward:Risk below 1:2
+GARFIBRES,Reward:Risk below 1:2
+PATELRMART,Reward:Risk below 1:2
+WCIL,Reward:Risk below 1:2
+KIRLOSIND,Reward:Risk below 1:2
+BUTTERFLY,Reward:Risk below 1:2
+ZUARIIND,Reward:Risk below 1:2
+DDEVPLSTIK,Reward:Risk below 1:2
+TASTYBITE,Reward:Risk below 1:2
