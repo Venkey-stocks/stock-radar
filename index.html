@@ -164,6 +164,7 @@ th{color:var(--mut);font-weight:600}
   <label>View</label>
   <button id="v_list" onclick="setView('list')">List</button>
   <button id="v_cards" onclick="setView('cards')">Cards</button>
+  <button onclick="exportToExcel()" style="margin-left:auto;background:#238636;border-color:#2ea043;font-weight:600">&#128229; Export to Excel</button>
 </div>
 
 <div class="bar" id="bar_scan">
@@ -473,6 +474,74 @@ function togRow(h){
   ROWOPEN[k]=o;
 }
 
+  // ===== Export Visible Tab Data to Excel / CSV =====
+function exportToExcel(){
+  const tab = cur;
+  const rows = DATA[tab] || [];
+  if(!rows.length){
+    alert('డౌన్‌లోడ్ చేయడానికి ఈ ట్యాబ్‌లో ఎలాంటి డేటా లేదు!');
+    return;
+  }
+
+  let exportRows = [];
+  if(tab == 'early'){
+    const b = $('yband').value, sg = $('ystage').value, hz =$('yhor').value;
+    exportRows = rows.filter(r => (!b || r.Band == b) && (!sg || r.Stage == sg) && (!hz || r.Horizon == hz));
+  } else if(tab == 'multi'){
+    const b = $('mband2').value, mc = $('mcap').value, sc =$('msector').value;
+    exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc) && (!mc || (+r.MarketCapCr) <= (+mc)));
+  } else if(tab == 'quality'){
+    const b = $('qband').value, mc = $('qcap').value, sc =$('qsector').value;
+    exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc) && (!mc || (mc == 'mid' ? (+r.MarketCapCr) <= 50000 : (+r.MarketCapCr) > 50000)));
+  } else if(tab == 'newl'){
+    const b = $('nband').value;
+    exportRows = rows.filter(r => !b || r.Band == b);
+  } else if(tab == 'smart'){
+    const t = $('sm_type').value, c = $('sm_cap').value, rad =$('sm_rad').value, ov = $('sm_overlap').value, q =$('sm_search').value.trim().toUpperCase();
+    exportRows = rows.filter(r => {
+      if(t && r.Type != t) return false;
+      if(c && r.Category != c) return false;
+      if(ov == 'overlap' && (+r.OverlapCount) < 2) return false;
+      if(rad == 'radar' && (r.RadarSetup == 'Not on radar' || !r.RadarSetup)) return false;
+      if(q && r.Symbol.toUpperCase().indexOf(q) < 0 && r.Investor.toUpperCase().indexOf(q) < 0 && String(r.Sector).toUpperCase().indexOf(q) < 0) return false;
+      return true;
+    });
+  } else if(tab == 'ultra' || tab == 'short'){
+    const b = $('band').value, st =$('status').value;
+    exportRows = rows.filter(r => (!b || r.Band == b) && (!st || r.Status == st));
+  } else {
+    exportRows = rows;
+  }
+
+  if(!exportRows.length){
+    alert('మీరు ఎంచుకున్న ఫిల్టర్‌కు సరిపోయే డేటా ఏదీ లేదు!');
+    return;
+  }
+
+  const headers = Object.keys(exportRows[0]);
+  
+  const csvContent = [
+    headers.join(','),
+    ...exportRows.map(row => headers.map(fieldName => {
+      let val = row[fieldName] === null || row[fieldName] === undefined ? '' : String(row[fieldName]);
+      val = val.replace(/"/g, '""');
+      if (val.search(/("|,|\n)/g) >= 0) {
+        val = `"${val}"`;
+      }
+      return val;
+    }).join(','))
+  ].join('\r\n');
+
+  const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const today = new Date().toISOString().split('T')[0];
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Radar_${tab.toUpperCase()}_${today}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 // ===== Smart Risk & Position Sizing Calculator =====
 function calcPositionSize(){
   if(!ACTIVE_ROW) return;
