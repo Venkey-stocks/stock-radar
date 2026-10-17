@@ -29,6 +29,8 @@ label{color:var(--mut);font-size:13px}
 .tag.late{border-color:var(--y);color:var(--y);font-weight:700}
 .tag.smart{border-color:#a371f7;color:#a371f7;font-weight:700}
 .tag.overlap{border-color:#f0883e;color:#f0883e;font-weight:700}
+.tag.vcp{border-color:#388bfd;color:#58a6ff;background:rgba(56,139,253,0.15);font-weight:700}
+.tag.dryup{border-color:#a371f7;color:#d2a8ff;background:rgba(163,113,247,0.15);font-weight:700}
 .status-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.4px;display:inline-flex;align-items:center;gap:4px}
 .status-green{background:rgba(46,160,67,.2);color:#3fb950;border:1px solid rgba(46,160,67,.4)}
 .status-gold{background:rgba(210,153,34,.2);color:#d29922;border:1px solid rgba(210,153,34,.4)}
@@ -295,7 +297,6 @@ th{color:var(--mut);font-weight:600}
   <div class="wrap"><table id="rtable"></table></div>
 </div>
 
-<!-- Performance Tab with Decision Band Filter -->
 <div id="perf" style="display:none">
   <div class="bar">
     <select id="pscan" onchange="drawPerf()">
@@ -382,7 +383,6 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
   </div>
 </div>
 
-<!-- ================= Click-to-Reveal Rationale & Position Sizing Drawer ================= -->
 <div id="rationaleDrawer" class="drawer-overlay" onclick="handleDrawerOverlay(event)">
   <div class="drawer-content">
     <div class="drawer-header">
@@ -411,7 +411,6 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
         <div class="row"><span>Decision Band</span><b id="dr_stage">-</b></div>
       </div>
 
-      <!-- Smart Risk & Position Sizer Section -->
       <div class="calc-box">
         <div class="ft" style="color:var(--tx);font-weight:700;margin-bottom:8px">&#129518; Smart Position Sizing (రిస్క్ కాలిక్యులేటర్)</div>
         <div class="row">
@@ -431,9 +430,8 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
     </div>
   </div>
 </div>
-
 <script>
-  const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv'};
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv'};
 const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['early','exea','Early Movers'],['newl','exnl','New Listing']];
 const STALE_DAYS=3;
 let cur='ultra',DATA={},EV={};
@@ -443,7 +441,6 @@ let OPEN={};
 let ACTIVE_ROW=null;
 const $=id=>document.getElementById(id);
 
-// ===== List / Cards view =====
 let VIEW='list';
 try{VIEW=localStorage.getItem('view')||'list';}catch(e){}
 if(VIEW!='cards') VIEW='list';
@@ -474,7 +471,6 @@ function togRow(h){
   ROWOPEN[k]=o;
 }
 
-  // ===== Export Visible Tab Data to Excel / CSV =====
 function exportToExcel(){
   const tab = cur;
   const rows = DATA[tab] || [];
@@ -485,19 +481,19 @@ function exportToExcel(){
 
   let exportRows = [];
   if(tab == 'early'){
-    const b = $('yband').value, sg = $('ystage').value, hz =$('yhor').value;
+    const b = $('yband').value, sg = $('ystage').value, hz = $('yhor').value;
     exportRows = rows.filter(r => (!b || r.Band == b) && (!sg || r.Stage == sg) && (!hz || r.Horizon == hz));
   } else if(tab == 'multi'){
-    const b = $('mband2').value, mc = $('mcap').value, sc =$('msector').value;
+    const b = $('mband2').value, mc = $('mcap').value, sc = $('msector').value;
     exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc) && (!mc || (+r.MarketCapCr) <= (+mc)));
   } else if(tab == 'quality'){
-    const b = $('qband').value, mc = $('qcap').value, sc =$('qsector').value;
+    const b = $('qband').value, mc = $('qcap').value, sc = $('qsector').value;
     exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc) && (!mc || (mc == 'mid' ? (+r.MarketCapCr) <= 50000 : (+r.MarketCapCr) > 50000)));
   } else if(tab == 'newl'){
     const b = $('nband').value;
     exportRows = rows.filter(r => !b || r.Band == b);
   } else if(tab == 'smart'){
-    const t = $('sm_type').value, c = $('sm_cap').value, rad =$('sm_rad').value, ov = $('sm_overlap').value, q =$('sm_search').value.trim().toUpperCase();
+    const t = $('sm_type').value, c = $('sm_cap').value, rad = $('sm_rad').value, ov = $('sm_overlap').value, q = $('sm_search').value.trim().toUpperCase();
     exportRows = rows.filter(r => {
       if(t && r.Type != t) return false;
       if(c && r.Category != c) return false;
@@ -507,7 +503,7 @@ function exportToExcel(){
       return true;
     });
   } else if(tab == 'ultra' || tab == 'short'){
-    const b = $('band').value, st =$('status').value;
+    const b = $('band').value, st = $('status').value;
     exportRows = rows.filter(r => (!b || r.Band == b) && (!st || r.Status == st));
   } else {
     exportRows = rows;
@@ -519,15 +515,12 @@ function exportToExcel(){
   }
 
   const headers = Object.keys(exportRows[0]);
-  
   const csvContent = [
     headers.join(','),
     ...exportRows.map(row => headers.map(fieldName => {
       let val = row[fieldName] === null || row[fieldName] === undefined ? '' : String(row[fieldName]);
       val = val.replace(/"/g, '""');
-      if (val.search(/("|,|\n)/g) >= 0) {
-        val = `"${val}"`;
-      }
+      if (val.search(/("|,|\n)/g) >= 0) val = `"${val}"`;
       return val;
     }).join(','))
   ].join('\r\n');
@@ -542,7 +535,7 @@ function exportToExcel(){
   link.click();
   document.body.removeChild(link);
 }
-// ===== Smart Risk & Position Sizing Calculator =====
+
 function calcPositionSize(){
   if(!ACTIVE_ROW) return;
   const r = ACTIVE_ROW;
@@ -567,7 +560,6 @@ function calcPositionSize(){
   $('dr_calc_profit').textContent = '+Rs ' + totalProfit.toLocaleString('en-IN', {maximumFractionDigits: 0});
 }
 
-// ===== Universal Drawer Logic =====
 let EARLY_MAP={};
 
 function getStageMeta(r){
@@ -660,21 +652,16 @@ function openRationale(sym, tabType){
     ctn.appendChild(el);
   });
   
-  $('dr_price').textContent='Rs '+fmt(r.Close || r.Entry);$('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)';
-  $('dr_target').textContent='Rs '+fmt(r.Target || r.Level)+' (+'+(r.TargetPct || '')+')';$('dr_stage').textContent=meta.code;
+  $('dr_price').textContent='Rs '+fmt(r.Close \vert{}\vert{} r.Entry);$('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)';
+  $('dr_target').textContent='Rs '+fmt(r.Target \vert{}\vert{} r.Level)+' (+'+(r.TargetPct \vert{}\vert{} '')+')';$('dr_stage').textContent=meta.code;
   $('dr_chart_link').href='https://in.tradingview.com/chart/?symbol=NSE:'+encodeURIComponent(r.Symbol);
   
   calcPositionSize();
   $('rationaleDrawer').style.display='flex';
 }
 
-function closeRationaleDrawer(){
-  $('rationaleDrawer').style.display='none';
-}
-
-function handleDrawerOverlay(e){
-  if(e.target.id==='rationaleDrawer') closeRationaleDrawer();
-}
+function closeRationaleDrawer(){$('rationaleDrawer').style.display='none';}
+function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationaleDrawer();}
 
 function rowCells(tab,r,ns){
   const cls=r.Band?r.Band.split(' ')[0]:'';
@@ -1013,7 +1000,6 @@ function evHtml(sym){
     +lines.slice(0,5).map(l=>'<div class="evl '+l.cls+'">&#8226; '+l.txt+'</div>').join('')+'</div>';
 }
 
-// ===== Chart =====
 let CH=null;
 
 function chartOnly(r){
@@ -1067,9 +1053,9 @@ function drawChart(d,lv){
     const x=L+step*i+step/2;
     const up=d.c[i]>=d.o[i];
     const col=up?'#2ea043':'#f85149';
-    s+='<line x1="'+x+'" x2="'+x+'" y1="'+y(d.h[i])+'" y2="'+y(d.l[i])+'" stroke="'+col+'" stroke-width="1"/>';
+    s+='<line x1="'+x+'" x2="'+x+'" y1="'+y(d.h[i])+'" y2="'+y(d.l[i])+'" stroke="' + col + '" stroke-width="1"/>';
     const yt=y(Math.max(d.o[i],d.c[i])), yb=y(Math.min(d.o[i],d.c[i]));
-    s+='<rect x="'+(x-bw/2)+'" y="'+yt+'" width="'+bw+'" height="'+Math.max(1,yb-yt)+'" fill="'+col+'"/>';
+    s+='<rect x="'+(x-bw/2)+'" y="'+yt+'" width="'+bw+'" height="'+Math.max(1,yb-yt)+'" fill="' + col + '"/>';
   }
   const lines=[['e','Entry','#388bfd'],['s','Stop','#f85149'],['t','Target','#2ea043']];
   lines.forEach(a=>{
@@ -1085,7 +1071,8 @@ function drawChart(d,lv){
   s+='<div class="chleg">Daily candles, last '+n+' trading days. Dashed lines: Entry (blue), Stop-loss (red), Target (green).</div>';
   return s;
 }
-  function fixWarn(w){
+
+function fixWarn(w){
   const out=[];
   w.forEach(x=>{
     if(/^it may block/i.test(x.trim())&&out.length) out[out.length-1]+='; '+x.trim();
@@ -1093,6 +1080,67 @@ function drawChart(d,lv){
   });
   return out;
 }
+  // ===== Dynamic Trailing Stop-Loss Engine =====
+function getTrailingAdvice(m, curP){
+  if(m.status !== 'Holding' || !m.buyPrice || !curP) return null;
+  const buy = +m.buyPrice;
+  const gainPct = ((curP - buy) / buy) * 100;
+
+  if(gainPct >= 15){
+    const trailPrice = Math.round(curP * 0.93 * 100) / 100;
+    return {
+      level: 'Trend Lock (7% Trail)',
+      trailStop: trailPrice,
+      msg: 'అద్భుతమైన ర్యాలీ! +'+gainPct.toFixed(1)+'% లాభంలో ఉంది. లాభాలు పోకుండా స్టాప్-లాస్‌ను Rs '+trailPrice+' కు ట్రైల్ చేయండి.',
+      cls: 'pos'
+    };
+  } else if(gainPct >= 10){
+    const lockPrice = Math.round(buy * 1.05 * 100) / 100;
+    return {
+      level: 'Lock +5% Profit',
+      trailStop: lockPrice,
+      msg: '+'+gainPct.toFixed(1)+'% పెరిగింది. కనీసం 5% లాభం లాక్ చేయడానికి స్టాప్-లాస్‌ను Rs '+lockPrice+' కు పెంచండి.',
+      cls: 'pos'
+    };
+  } else if(gainPct >= 5){
+    return {
+      level: 'Breakeven Guard (Zero Risk)',
+      trailStop: buy,
+      msg: '+'+gainPct.toFixed(1)+'% లాభం వచ్చింది. రిస్క్ లేకుండా ఉండటానికి స్టాప్-లాస్‌ను కొన్న ధరకు (Rs '+buy+') మార్చండి.',
+      cls: 'amb'
+    };
+  }
+  return null;
+}
+
+// ===== Smart Auto-Injector for Trailing Stop Alerts =====
+function updateTrailingStopAlerts(){
+  const mineRows = loadMine();
+  if(!mineRows.length) return;
+
+  mineRows.forEach(m => {
+    if(m.status === 'Holding' && m.buyPrice){
+      const c = curPrice(m);
+      const p = c ? c.p : (m.lastPrice || null);
+      if(p){
+        const tr = getTrailingAdvice(m, p);
+        if(tr){
+          const cards = document.querySelectorAll('#list_mine .card');
+          cards.forEach(el => {
+            if(el.textContent.includes(m.sym) && !el.querySelector('.trail-alert-box')){
+              const box = document.createElement('div');
+              box.className = 'trail-alert-box';
+              box.style.cssText = 'margin-top:8px;padding:8px 12px;border-radius:6px;border-left:4px solid #2ea043;background:rgba(46,160,67,0.12);color:#7ee787;font-size:12px;line-height:1.4;';
+              box.innerHTML = '<b>&#128640; Trailing Stop Alert: '+esc(tr.level)+'</b><br>'+esc(tr.msg);
+              el.appendChild(box);
+            }
+          });
+        }
+      }
+    }
+  });
+}
+setInterval(updateTrailingStopAlerts, 1500);
 
 function draw(){
   const rows=(DATA[cur]||[]);
@@ -1277,7 +1325,7 @@ function drawNewl(){
     +row('Change since listing','<b class="'+(ch>=0?'pos':'neg')+'">'+(ch>=0?'+':'')+r['ChangeSinceListing%']+'%</b>')
     +row('Last 20 days','<b class="'+(r20>=0?'pos':'neg')+'">'+(r20>=0?'+':'')+r['Return20d%']+'%</b>')+'</div>'
     +evHtml(r.Symbol)
-    +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+esc(p)).join('<br>')+'</div>':'')
+    +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+esc(p)).join('<br>&#9888; ')+'</div>':'')
     +'</div>';
   });
   const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('newl',r,null),card:cards[i]}));
@@ -1285,7 +1333,6 @@ function drawNewl(){
   $('meta').textContent='New Listings | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
-// ===== Early Movers =====
 function drawEarly(){
   const rows=DATA.early||[];
   EARLY_MAP={};
@@ -1303,9 +1350,9 @@ function drawEarly(){
 
     let vcpTag = '';
     if(r.IsVCP === 'Yes'){
-      vcpTag = '<span class="tag" style="border-color:#388bfd;color:#58a6ff;background:rgba(56,139,253,0.15);font-weight:700">&#9889; VCP '+esc(r.VCPDesc ? '('+r.VCPDesc+')' : 'Tight')+'</span>';
+      vcpTag = '<span class="tag vcp">&#9889; VCP '+esc(r.VCPDesc ? '('+r.VCPDesc+')' : 'Tight')+'</span>';
     } else if(r.IsDryUp === 'Yes'){
-      vcpTag = '<span class="tag" style="border-color:#a371f7;color:#d2a8ff;background:rgba(163,113,247,0.15);font-weight:700">&#128167; Vol Dry-up</span>';
+      vcpTag = '<span class="tag dryup">&#128167; Vol Dry-up</span>';
     }
 
     const tags='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>'
@@ -1352,7 +1399,6 @@ function drawEarly(){
   $('meta').textContent='Early Movers | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
 }
 
-// ===== Smart Money =====
 function drawSmart(){
   const rows=DATA.smart||[];
   const t=$('sm_type').value, c=$('sm_cap').value, rad=$('sm_rad').value, ov=$('sm_overlap').value, q=$('sm_search').value.trim().toUpperCase();
@@ -1410,7 +1456,7 @@ function drawSmart(){
 
   $('meta').textContent='Smart Money tracking | Showing '+list.length+' of '+rows.length+' tracked entries';
 }
-  // ===== My Stocks (Watching / Holding) =====
+
 function loadMine(){try{return JSON.parse(localStorage.getItem('mystocks')||'[]')||[];}catch(e){return [];}}
 function saveMine(a){try{localStorage.setItem('mystocks',JSON.stringify(a));}catch(e){alert('Could not save in this browser.');}}
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -1430,7 +1476,7 @@ function findRow(sym){
 function ensureCH(){
   if(CH) return Promise.resolve();
   return fetch('data/charts.json?v='+Date.now())
-    .then(r=>{if(!r.ok)throw new Error('nf');return r.json();})
+    .then(r=>r.ok?r.json():{})
     .then(j=>{CH=j;})
     .catch(()=>{});
 }
@@ -1457,73 +1503,6 @@ function hitInfo(m){
     if(st) return {t:'Stop-loss level touched on '+d.d[i],c:'neg'};
     if(tg) return {t:'Target level touched on '+d.d[i],c:'pos'};
   }
-
-  // ===== Dynamic Trailing Stop-Loss Engine =====
-function getTrailingAdvice(m, curP){
-  if(m.status !== 'Holding' || !m.buyPrice || !curP) return null;
-  const buy = +m.buyPrice;
-  const gainPct = ((curP - buy) / buy) * 100;
-
-  if(gainPct >= 15){
-    const trailPrice = Math.round(curP * 0.93 * 100) / 100;
-    return {
-      level: 'Trend Lock (7% Trail)',
-      trailStop: trailPrice,
-      msg: 'అద్భుతమైన ర్యాలీ! +'+gainPct.toFixed(1)+'% లాభంలో ఉంది. లాభాలు పోకుండా స్టాప్-లాస్‌ను Rs '+trailPrice+' కు ట్రైల్ చేయండి.',
-      cls: 'pos'
-    };
-  } else if(gainPct >= 10){
-    const lockPrice = Math.round(buy * 1.05 * 100) / 100;
-    return {
-      level: 'Lock +5% Profit',
-      trailStop: lockPrice,
-      msg: '+'+gainPct.toFixed(1)+'% పెరిగింది. కనీసం 5% లాభం లాక్ చేయడానికి స్టాప్-లాస్‌ను Rs '+lockPrice+' కు పెంచండి.',
-      cls: 'pos'
-    };
-  } else if(gainPct >= 5){
-    return {
-      level: 'Breakeven Guard (Zero Risk)',
-      trailStop: buy,
-      msg: '+'+gainPct.toFixed(1)+'% లాభం వచ్చింది. రిస్క్ లేకుండా ఉండటానికి స్టాప్-లాస్‌ను కొన్న ధరకు (Rs '+buy+') మార్చండి.',
-      cls: 'amb'
-    };
-  }
-  return null;
-}
-  // ===== Smart Auto-Injector for Trailing Stop Alerts =====
-function updateTrailingStopAlerts(){
-  const mineRows = DATA['mine'] || [];
-  if(!mineRows.length) return;
-
-  mineRows.forEach(m => {
-    if(m.status === 'Holding' && m.buyPrice){
-      // లేటెస్ట్ మార్కెట్ ప్రైస్ పొందడం
-      const sym = m.symbol || m.Symbol;
-      const c = (typeof curPrice === 'function') ? curPrice(sym) : null;
-      const p = c ? c.p : (m.currentPrice || m.close || null);
-
-      if(p){
-        const tr = getTrailingAdvice(m, p);
-        if(tr){
-          // స్క్రీన్ పై ఆ స్టాక్ కార్డ్ ఉందో లేదో వెతకడం
-          const cards = document.querySelectorAll('.card, .stock-card, [data-sym]');
-          cards.forEach(el => {
-            if(el.textContent.includes(sym) && !el.querySelector('.trail-alert-box')){
-              const box = document.createElement('div');
-              box.className = 'trail-alert-box';
-              box.style.cssText = 'margin-top:8px;padding:8px 12px;border-radius:6px;border-left:4px solid #2ea043;background:rgba(46,160,67,0.12);color:#7ee787;font-size:12px;line-height:1.4;';
-              box.innerHTML = '<b>&#128640; Trailing Stop Alert: '+esc(tr.level)+'</b><br>'+esc(tr.msg);
-              el.appendChild(box);
-            }
-          });
-        }
-      }
-    }
-  });
-}
-
-// 'My Stocks' ట్యాబ్ క్లిక్ చేసినప్పుడు లేదా పేజీ మారినప్పుడు ఆటోమేటిక్‌గా రన్ అవ్వడం
-setInterval(updateTrailingStopAlerts, 1500);
   return {t:'Stop-loss and target not touched since '+from,c:'na'};
 }
 
@@ -1682,7 +1661,6 @@ function mineAct(btn,act){
   drawMine();
 }
 
-// ===== Results Calendar =====
 let RES={};
 function daysTo(iso){
   const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||''));
@@ -1728,7 +1706,6 @@ function drawResults(){
   $('meta').textContent='Upcoming results dates | '+rows.length+' shown';
 }
 
-// ===== Performance Tracking (With Band Filter) =====
 function resetPerf(){
   $('pscan').value='';
   $('pband').value='';
@@ -1762,7 +1739,6 @@ function drawPerf(){
     if(t && r.SignalDate>t) return false;
     if(rd && (rd=='removed'?r.NowOnRadar=='No':r.NowOnRadar=='Yes')) return false;
     
-    // Decision Band filtering based on Score
     const score = parseFloat(r.Score) || 0;
     if(bd == 'high' && score < 80) return false;
     if(bd == 'good' && (score < 65 || score >= 80)) return false;
