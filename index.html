@@ -1301,7 +1301,15 @@ function drawEarly(){
     const cls=r.Band.split(' ')[0];
     const meta=getStageMeta(r);
 
+    let vcpTag = '';
+    if(r.IsVCP === 'Yes'){
+      vcpTag = '<span class="tag" style="border-color:#388bfd;color:#58a6ff;background:rgba(56,139,253,0.15);font-weight:700">&#9889; VCP '+esc(r.VCPDesc ? '('+r.VCPDesc+')' : 'Tight')+'</span>';
+    } else if(r.IsDryUp === 'Yes'){
+      vcpTag = '<span class="tag" style="border-color:#a371f7;color:#d2a8ff;background:rgba(163,113,247,0.15);font-weight:700">&#128167; Vol Dry-up</span>';
+    }
+
     const tags='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>'
+      +vcpTag
       +'<span class="tag">'+esc(meta.code)+'</span>'
       +'<span class="tag">'+esc(r.Horizon)+'</span>'
       +'<span class="tag">'+esc(has(r.Sector)?r.Sector:'Sector n/a')+'</span>';
