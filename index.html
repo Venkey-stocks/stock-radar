@@ -453,8 +453,7 @@ const HDR_MINE=['Stock','Status','Price','Entry','Stop','Target','Performance','
 const HDR_SMART=['Stock','Investor','Type','Action','Holding','Market Cap','Conviction / Radar',''];
 
 function syncView(){
-  $('v_list').className=VIEW=='list'?'on':'';
-  $('v_cards').className=VIEW=='cards'?'on':'';
+  $('v_list').className=VIEW=='list'?'on':'';$('v_cards').className=VIEW=='cards'?'on':'';
 }
 function setView(v){
   VIEW=v;
@@ -475,25 +474,25 @@ function exportToExcel(){
   const tab = cur;
   const rows = DATA[tab] || [];
   if(!rows.length){
-    alert('డౌన్‌లోడ్ చేయడానికి ఈ ట్యాబ్‌లో ఎలాంటి డేటా లేదు!');
+    alert('Download cheyadaniki ee tab lo data ledu!');
     return;
   }
 
   let exportRows = [];
   if(tab == 'early'){
-    const b = $('yband').value, sg = $('ystage').value, hz = $('yhor').value;
+    const b = $('yband').value, sg = $('ystage').value, hz =$('yhor').value;
     exportRows = rows.filter(r => (!b || r.Band == b) && (!sg || r.Stage == sg) && (!hz || r.Horizon == hz));
   } else if(tab == 'multi'){
-    const b = $('mband2').value, mc = $('mcap').value, sc = $('msector').value;
+    const b = $('mband2').value, mc = $('mcap').value, sc =$('msector').value;
     exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc) && (!mc || (+r.MarketCapCr) <= (+mc)));
   } else if(tab == 'quality'){
-    const b = $('qband').value, mc = $('qcap').value, sc = $('qsector').value;
+    const b = $('qband').value, mc = $('qcap').value, sc =$('qsector').value;
     exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc) && (!mc || (mc == 'mid' ? (+r.MarketCapCr) <= 50000 : (+r.MarketCapCr) > 50000)));
   } else if(tab == 'newl'){
     const b = $('nband').value;
     exportRows = rows.filter(r => !b || r.Band == b);
   } else if(tab == 'smart'){
-    const t = $('sm_type').value, c = $('sm_cap').value, rad = $('sm_rad').value, ov = $('sm_overlap').value, q = $('sm_search').value.trim().toUpperCase();
+    const t = $('sm_type').value, c = $('sm_cap').value, rad =$('sm_rad').value, ov = $('sm_overlap').value, q =$('sm_search').value.trim().toUpperCase();
     exportRows = rows.filter(r => {
       if(t && r.Type != t) return false;
       if(c && r.Category != c) return false;
@@ -503,14 +502,14 @@ function exportToExcel(){
       return true;
     });
   } else if(tab == 'ultra' || tab == 'short'){
-    const b = $('band').value, st = $('status').value;
+    const b = $('band').value, st =$('status').value;
     exportRows = rows.filter(r => (!b || r.Band == b) && (!st || r.Status == st));
   } else {
     exportRows = rows;
   }
 
   if(!exportRows.length){
-    alert('మీరు ఎంచుకున్న ఫిల్టర్‌కు సరిపోయే డేటా ఏదీ లేదు!');
+    alert('Filter ki tagga data ledu!');
     return;
   }
 
@@ -555,9 +554,8 @@ function calcPositionSize(){
   const totalCap = qty * entry;
   const totalProfit = qty * rewardPerShare;
   
-  $('dr_calc_qty').textContent = qty.toLocaleString('en-IN') + ' షేర్లు';
-  $('dr_calc_cap').textContent = 'Rs ' + totalCap.toLocaleString('en-IN', {maximumFractionDigits: 0});
-  $('dr_calc_profit').textContent = '+Rs ' + totalProfit.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  $('dr_calc_qty').textContent = qty.toLocaleString('en-IN') + ' shares';
+  $('dr_calc_cap').textContent = 'Rs ' + totalCap.toLocaleString('en-IN', {maximumFractionDigits: 0});$('dr_calc_profit').textContent = '+Rs ' + totalProfit.toLocaleString('en-IN', {maximumFractionDigits: 0});
 }
 
 let EARLY_MAP={};
@@ -622,25 +620,25 @@ function openRationale(sym, tabType){
     if(tab==='early'){
       if(r.Stage==='Fresh'){
         lines=[
-          {title:'Early Breakout Zone',desc:`Breakout level నుండి ధర కేవలం ${r.GainPct}% మాత్రమే పెరిగింది.`},
-          {title:'Volume Confirmation',desc:`Normal average కంటే ${r.VolRatio||'2.0'}x రెట్లు అధిక volume తో breakout అయింది.`},
-          {title:'Defined Risk:Reward',desc:`Stop-loss కేవలం ${r.StopDistPct}% వద్ద ఉంది (Rs ${r.Stop}). Risk:Reward ratio 1:${r.RR} తో అనుకూలంగా ఉంది.`},
-          {title:'Sector Support',desc:`${r.Sector||'Leading Sector'} రంగానికి చెందినది. Multi-week base నుండి breakout వచ్చింది.`}
+          {title:'Early Breakout Zone',desc:`Breakout level nundi price kevalam ${r.GainPct}% matrame perigindi.`},
+          {title:'Volume Confirmation',desc:`Normal average kante ${r.VolRatio||'2.0'}x retlu adhika volume tho breakout ayindi.`},
+          {title:'Defined Risk:Reward',desc:`Stop-loss kevalam ${r.StopDistPct}% daggara undi (Rs ${r.Stop}). Risk:Reward ratio 1:${r.RR} tho anukulam ga undi.`},
+          {title:'Sector Support',desc:`${r.Sector||'Leading Sector'} ranganiki chendindi. Multi-week base nundi breakout vachindi.`}
         ];
       }else{
         lines=[
-          {title:'Pivot Resistance Testing',desc:`Resistance level (Rs ${r.Level}) కి కేవలం ${Math.abs(r.GainPct)}% సమీపంలో consolidate అవుతోంది.`},
-          {title:'Volume Dry-Up (VCP)',desc:'Volume బాగా డ్రై అయిపోయింది. Selling pressure దాదాపుగా తగ్గింది.'},
-          {title:'Action Plan',desc:'ముందే తొందరపడి కొనవద్దు. Strong volume తో breakout ఇచ్చినప్పుడు entry ప్లాన్ చేయండి.'}
+          {title:'Pivot Resistance Testing',desc:`Resistance level (Rs ${r.Level}) ki kevalam ${Math.abs(r.GainPct)}% samipamlo consolidate avtundi.`},
+          {title:'Volume Dry-Up (VCP)',desc:'Volume baga dry aipoindi. Selling pressure taggindi.'},
+          {title:'Action Plan',desc:'Thondarapadi konakandi. Strong volume tho breakout vachinappudu entry teesukondi.'}
         ];
       }
     }else{
       const setupDesc = r.Setup || r.Status || 'Bullish Momentum';
       lines=[
-        {title:'Setup & Pattern',desc:`${setupDesc} సెటప్ గుర్తించబడింది. Momentum score ${r.Score}/100 తో బలంగా ఉంది.`},
-        {title:'Risk Management',desc:`Stop-loss లెవెల్ Rs ${r.Stop} (${r.StopDistPct}% రిస్క్). Reward:Risk 1:${r.RR||'2.0'} తో అనుకూలంగా ఉంది.`},
-        {title:'Target Projection',desc:`Chart structure ఆధారంగా Target Rs ${r.Target} (+${r.TargetPct}%) వద్ద లెక్కించబడింది.`},
-        {title:'Trend & Moving Averages',desc:`Short-term ట్రెండ్ బలంగా ఉంది. 20-DMA పైన స్థిరంగా ట్రేడ్ అవుతోంది.`}
+        {title:'Setup & Pattern',desc:`${setupDesc} setup gurthimpabadindi. Momentum score ${r.Score}/100 tho balanga undi.`},
+        {title:'Risk Management',desc:`Stop-loss level Rs ${r.Stop} (${r.StopDistPct}% risk). Reward:Risk 1:${r.RR||'2.0'} tho anukulam ga undi.`},
+        {title:'Target Projection',desc:`Chart structure aadharamga Target Rs ${r.Target} (+${r.TargetPct}%) daggara lekkimpabadindi.`},
+        {title:'Trend & Moving Averages',desc:`Short-term trend balanga undi. 20-DMA paina sthiramga trade avtundi.`}
       ];
     }
   }
@@ -662,8 +660,7 @@ function openRationale(sym, tabType){
 
 function closeRationaleDrawer(){$('rationaleDrawer').style.display='none';}
 function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationaleDrawer();}
-
-function rowCells(tab,r,ns){
+  function rowCells(tab,r,ns){
   const cls=r.Band?r.Band.split(' ')[0]:'';
   const rs=RES[r.Symbol||r.sym];
   const al=(rs&&rs.n<=7)?'<span class="amb" title="Results in '+rs.n+' days">&#9888;</span>':'<span></span>';
@@ -721,6 +718,7 @@ function rowCells(tab,r,ns){
     +'<span class="hm">'+extra+'</span>'
     +al;
 }
+
 let PROF={};
 function profHtml(sym){
   const p=PROF[sym];
@@ -744,10 +742,12 @@ function profHtml(sym){
   }
   return h;
 }
+
 function withProf(card,sym){
   const h=profHtml(sym);
   return h?card.replace(/<\/div>$/,h+'</div>'):card;
 }
+
 function renderItems(id,tab,items,hdr,emptyMsg){
   const el=$(id);
   items.forEach(i=>{i.card=withProf(i.card,i.sym);});
@@ -1033,6 +1033,7 @@ function openChart(btn){
 function closeChart(){$('chmodal').style.display='none';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeChart();closeDigestPop();closeRationaleDrawer();}});
 
+// ===== Completely Cleaned drawChart Function (No Syntax Mismatch) =====
 function drawChart(d,lv){
   const n=d.c.length;
   const W=720,H=360,L=8,R=64,T=14,B=24;
@@ -1073,6 +1074,7 @@ function drawChart(d,lv){
   s+='<div class="chleg">Daily candles, last '+n+' trading days. Dashed lines: Entry (blue), Stop-loss (red), Target (green).</div>';
   return s;
 }
+
 function fixWarn(w){
   const out=[];
   w.forEach(x=>{
