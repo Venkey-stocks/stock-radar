@@ -658,6 +658,7 @@ os.makedirs("data/history", exist_ok=True)
 out.to_csv("data/early_movers.csv", index=False)
 out.to_csv("data/history/early_%s.csv" % date_str, index=False)
 rej_out.to_csv("data/early_rejected.csv", index=False)
+rej_out.to_csv("data/excluded_early.csv", index=False)                # Excluded Performance tracking కోసం
 
 print("data తేదీ:", date_str)
 print("R:R తొలగినవి:", len(rej_out))
