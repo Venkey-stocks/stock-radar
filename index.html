@@ -1865,8 +1865,10 @@ function drawMiss(){
   const c=k=>all.filter(r=>r.Result==k).length;
   const caught=c('Caught'), missed=c('Missed');
   const rate=(caught+missed)?Math.round(caught*100/(caught+missed))+'%':'-';
-  const box=(l,v,k)=>'<div class="st"><small>'+l+'</small><b class="'+(k||'')+'">'+v+'</b></div>';
-  $('mstats').innerHTML=box('Big movers (15%+)',all.length)+box('Caught',caught,'pos')+box('Missed',missed,'neg')+box('Catch rate',rate);
+ const box=(l,v,k)=>'<div class="st"><small>'+l+'</small><b class="'+(k||'')+'">'+v+'</b></div>';
+  const btnExport='<button onclick="exportMissToCSV()" style="margin-left:auto;align-self:center;padding:7px 14px;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;">📥 Export to Excel</button>';
+  $('mstats').innerHTML=box('Big movers (15%+)',all.length)+box('Caught',caught,'pos')+box('Missed',missed,'neg')+box('Catch rate',rate)+btnExport;
+  window._lastMissFiltered = rows;
   $('mtable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Close</th><th>Peak close</th><th>Gain %</th><th>Days</th><th>Result</th><th>Reason</th></tr>'
    +(rows.length?rows.map(r=>{
      const k=r.Result=='Caught'?'pos':(r.Result=='Missed'?'neg':'amb');
@@ -2031,9 +2033,42 @@ fetch('data/profiles.json?v='+Date.now())
      PROF=j.profiles;
      if(DATA.ultra&&cur=='sect') drawSect();
      else if(DATA.ultra&&['ultra','short','early','multi','quality','newl','mine','smart'].indexOf(cur)>=0) redrawCur();
-   }
+  }
  })
  .catch(()=>{});
+
+// ====== MISS REPORT EXCEL EXPORT FUNCTION ======
+function exportMissToCSV() {
+  const data = window._lastMissFiltered || [];
+  if (!data.length) {
+    alert("ఎగుమతి చేయడానికి డేటా లేదు!");
+    return;
+  }
+  const headers = ["Date", "Scan", "Stock", "Close", "Peak Close", "Gain %", "Days", "Result", "Reason"];
+  const csvRows = [headers.join(",")];
+  data.forEach(r => {
+    const row = [
+      r.Date || "",
+      r.Scan == 'ultra' ? 'Ultra' : 'Short',
+      r.Symbol || "",
+      r.Close || "",
+      r.PeakClose || "",
+      (r.GainPct || "") + "%",
+      r.Days || "",
+      r.Result || "",
+      '"' + (r.Reason || "").replace(/"/g, '""') + '"'
+    ];
+    csvRows.push(row.join(","));
+  });
+  const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Miss_Report_" + (data[0].Date || "export") + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
 </script>
 </body>
 </html>
