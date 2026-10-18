@@ -2096,7 +2096,7 @@ fetch('data/profiles.json?v='+Date.now())
 function exportMissToCSV() {
   const data = window._lastMissFiltered || [];
   if (!data.length) {
-    alert("ఎగుమతి చేయడానికి డేటా లేదు!");
+    alert("ఎగుమతి చేయడానికి Miss Report డేటా లేదు!");
     return;
   }
   const headers = ["Date", "Scan", "Stock", "Close", "Peak Close", "Gain %", "Days", "Result", "Reason"];
@@ -2126,18 +2126,10 @@ function exportMissToCSV() {
 }
 
 // ====== EXCLUDED TAB EXCEL EXPORT FUNCTION ======
-// ====== EXCLUDED TAB EXCEL EXPORT FUNCTION ======
 function exportExcludedToCSV() {
   const data = window._lastExclFiltered || [];
   if (!data.length) {
     alert("ఎగుమతి చేయడానికి Excluded ట్యాబ్‌లో డేటా లేదు!");
-    return;
-  }
-  // ====== EXCLUDED TAB EXCEL EXPORT FUNCTION ======
-function exportExcludedToCSV() {
-  const data = window._lastExclFiltered || [];
-  if (!data.length) {
-    alert("Export cheyadaniki Excluded tab lo data ledu!");
     return;
   }
   const headers = ["Scan", "Symbol", "Status", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR", "Reason"];
