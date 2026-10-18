@@ -2205,9 +2205,20 @@ function exportExcludedToCSV() {
     alert("ఎక్స్‌పోర్ట్ చేయడానికి పెర్ఫార్మెన్స్ ట్యాబ్‌లో డేటా లేదు!");
     return;
   }
-  const headers = ["Signal Date", "Scan", "Stock", "Type", "Score", "Entry", "Stop", "Target", "Result", "Exit/Last", "P/L %"];
+  const headers = [
+    "Signal Date", "Scan", "Stock", "Type", "Score", 
+    "Entry", "Stop", "Target", "Result", "Exit/Last", 
+    "P/L %", "Whipsaw (Fake SL)", "After Stop Max %", "Days to Target After Stop"
+  ];
   const csvRows = [headers.join(",")];
   data.forEach(r => {
+    const isWs = r.Whipsaw === "Yes" || (r.DaysToTargetAfterStop && r.DaysToTargetAfterStop !== "");
+    const wsText = isWs ? "Yes (Fake SL)" : (r.Result === "Stop hit" ? "No" : "-");
+    const afterMax = (r.AfterStopMaxPct !== undefined && r.AfterStopMaxPct !== "" && r.AfterStopMaxPct !== null)
+      ? (parseFloat(r.AfterStopMaxPct) >= 0 ? "+" : "") + parseFloat(r.AfterStopMaxPct).toFixed(1) + "%"
+      : "-";
+    const daysToTgt = (r.DaysToTargetAfterStop && r.DaysToTargetAfterStop !== "") ? r.DaysToTargetAfterStop : "-";
+
     const row = [
       r.SignalDate || "",
       SCAN_LBL[r.Scan] || r.Scan || "",
@@ -2219,7 +2230,10 @@ function exportExcludedToCSV() {
       r.Target || "",
       r.Result || "",
       r.ExitPrice === "" ? "-" : r.ExitPrice,
-      (r.PnLPct === "" ? "-" : r.PnLPct + "%")
+      (r.PnLPct === "" ? "-" : r.PnLPct + "%"),
+      wsText,
+      afterMax,
+      daysToTgt
     ];
     csvRows.push(row.join(","));
   });
