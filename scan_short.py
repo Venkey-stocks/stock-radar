@@ -478,7 +478,8 @@ rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=F
 os.makedirs("data/history", exist_ok=True)
 out.to_csv("data/short_term.csv", index=False)
 out.to_csv("data/history/short_%s.csv" % date_str, index=False)
-rej_out.to_csv("data/short_rejected.csv", index=False)               # RR వల్ల తొలగినవి (Excluded tab కి)
+rej_out.to_csv("data/short_rejected.csv", index=False)
+rej_out.to_csv("data/excluded_short.csv", index=False)               # Excluded tab & Performance tracking కోసం
 
 print("data తేదీ:", date_str)
 print("Reward:Risk %.0f కంటే తక్కువ అని తొలగినవి:" % MIN_RR, rejected["low_rr"])
