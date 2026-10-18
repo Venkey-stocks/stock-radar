@@ -334,6 +334,7 @@ th{color:var(--mut);font-weight:600}
     <label>From</label><input type="date" id="pfrom" onchange="drawPerf()">
     <label>To</label><input type="date" id="pto" onchange="drawPerf()">
     <button onclick="resetPerf()">Reset</button>
+    <button onclick="exportPerfToCSV()" style="margin-left:auto;background:#238636;border-color:#2ea043;font-weight:600">&#128229; Export to Excel</button>
   </div>
   <div class="stats" id="pstats"></div>
   <div class="wrap"><table id="ptable"></table></div>
