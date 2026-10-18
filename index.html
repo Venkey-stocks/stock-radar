@@ -1883,17 +1883,23 @@ function drawPerf(){
   const avg=withPnl.length?withPnl.reduce((a,r)=>a+(+r.PnLPct),0)/withPnl.length:0;
   const rate=(win+loss)?Math.round(win*100/(win+loss))+'%':'-';
   
+  // Whipsaw count calculation (Stop hit ayi malli target reach ayinavi)
+  const wsRows = baseRows.filter(r => r.Result == 'Stop hit' && (r.Whipsaw == 'Yes' || (r.DaysToTargetAfterStop && r.DaysToTargetAfterStop !== '')));
+  const wsCount = wsRows.length;
+  const wsPct = loss > 0 ? Math.round((wsCount / loss) * 100) + '%' : '0%';
+
   const cardBox=(label, val, cls, filterKey)=>{
     const isAct = (PERF_RESULT_FILTER === filterKey);
     const actCls = isAct ? ' active-filter' : '';
     const clickAttr = filterKey !== null ? ` onclick="filterPerfByResult('${filterKey}')"` : '';
     const cursorCls = filterKey !== null ? ' clickable' : '';
-    return `<div class="st${cursorCls}${actCls}"${clickAttr} title="క్లిక్ చేసి ${label} స్టాక్స్ మాత్రమే చూడండి"><small>${label}</small><b class="${cls||''}">${val}</b></div>`;
+    return `<div class="st${cursorCls}${actCls}"${clickAttr} title="Click to filter by ${label}"><small>${label}</small><b class="${cls||''}">${val}</b></div>`;
   };
 
   $('pstats').innerHTML = cardBox('Signals', baseRows.length, '', '')
     + cardBox('Target hit', win, 'pos', 'Target hit')
     + cardBox('Stop hit', loss, 'neg', 'Stop hit')
+    + cardBox('Whipsaw (Fake Stop)', `${wsCount} (${wsPct})`, 'amb', 'Whipsaw')
     + cardBox('Open / Pending', openPendingCnt, '', 'OpenPending')
     + cardBox('Hit rate', rate, '', null)
     + cardBox('Avg return %', avg.toFixed(2)+'%', avg>=0?'pos':'neg', null);
@@ -1901,19 +1907,25 @@ function drawPerf(){
   const displayRows = baseRows.filter(r=>{
     if(!PERF_RESULT_FILTER) return true;
     if(PERF_RESULT_FILTER === 'OpenPending') return (r.Result === 'Open' || r.Result === 'Pending');
+    if(PERF_RESULT_FILTER === 'Whipsaw') return r.Result === 'Stop hit' && (r.Whipsaw === 'Yes' || (r.DaysToTargetAfterStop && r.DaysToTargetAfterStop !== ''));
     return r.Result === PERF_RESULT_FILTER;
   });
+
   window._lastPerfFiltered = displayRows;
     
-  $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Type</th><th>Score</th><th>Entry</th><th>Stop</th><th>Target</th><th>Result</th><th>Exit/Last</th><th>P/L %</th></tr>'
+  $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Type</th><th>Score</th><th>Entry</th><th>Stop</th><th>Target</th><th>Result</th><th>Exit/Last</th><th>P/L %</th><th>Whipsaw?</th><th>After Stop Max %</th></tr>'
    +(displayRows.length?displayRows.map(r=>{
      const c=r.PnLPct===''?'':(+r.PnLPct>=0?'pos':'neg');
-     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b></td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td></tr>';
-   }).join(''):'<tr><td colspan="11">ఈ ఫిల్టర్‌కు సరిపోలే సిగ్నల్స్ లేవు.</td></tr>');
+     const isWs = r.Whipsaw === 'Yes' || (r.DaysToTargetAfterStop && r.DaysToTargetAfterStop !== '');
+     const wsBadge = isWs ? '<span class="amb" style="font-weight:700">Yes (Fake SL)</span>' : (r.Result === 'Stop hit' ? '<span style="color:var(--mut)">No</span>' : '-');
+     const afterMax = r.AfterStopMaxPct !== undefined && r.AfterStopMaxPct !== '' && r.AfterStopMaxPct !== null ? (parseFloat(r.AfterStopMaxPct) >= 0 ? '+' : '') + parseFloat(r.AfterStopMaxPct).toFixed(1) + '%' : '-';
+     const afterMaxCls = afterMax.startsWith('+') ? 'pos' : '';
+     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b></td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td><td>'+wsBadge+'</td><td class="'+afterMaxCls+'">'+afterMax+'</td></tr>';
+   }).join(''):'<tr><td colspan="13">Ee filter ki saripoye signals levu.</td></tr>');
    
-  const filterLabel = PERF_RESULT_FILTER ? ` [ఫిల్టర్: ${PERF_RESULT_FILTER}]` : '';
+  const filterLabel = PERF_RESULT_FILTER ? ` [Filter: ${PERF_RESULT_FILTER}]` : '';
   const bandTxt = bd == 'high' ? ' [High Conviction 80+]' : (bd == 'good' ? ' [Good Setup 65-79]' : (bd == 'early' ? ' [Early Watch <65]' : ''));
-  $('meta').textContent='Performance tracking'+bandTxt+filterLabel+' | '+baseRows.length+' సిగ్నల్స్‌లో '+displayRows.length+' చూపిస్తున్నాం';
+  $('meta').textContent='Performance tracking'+bandTxt+filterLabel+' | Showing '+displayRows.length+' of '+baseRows.length+' signals';
 }
 function resetMiss(){$('mscan').value='';$('mres').value='';$('mfrom').value='';$('mto').value='';drawMiss();}
 
