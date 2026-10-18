@@ -296,7 +296,8 @@ if len(rej_out) > 0:
 
 os.makedirs("data", exist_ok=True)
 out.to_csv("data/newlistings.csv", index=False)
-rej_out.to_csv("data/newlistings_rejected.csv", index=False)       # RR వల్ల తొలగినవి (Excluded tab కి)
+rej_out.to_csv("data/newlistings_rejected.csv", index=False)
+rej_out.to_csv("data/excluded_newlistings.csv", index=False)       # Excluded Performance tracking కోసం
 print("Reward:Risk %.0f కంటే తక్కువ అని తొలగినవి:" % MIN_RR, rejected["low_rr"])
 print("New listings found:", len(out))
 print("ASM/GSM వల్ల తొలగించినవి:", len(removed), removed)
