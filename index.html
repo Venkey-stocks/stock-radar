@@ -1821,7 +1821,18 @@ function resetPerf(){
   drawPerf();
 }
 
-const SCAN_LBL={ultra:'Ultra',short:'Short',early:'Early Movers',multi:'Multibagger',quality:'Quality',newl:'New Listings'};
+const SCAN_LBL = {
+  ultra: 'Ultra Short',
+  short: 'Short Term',
+  early: 'Early Movers',
+  multi: 'Multibagger',
+  quality: 'Quality',
+  newl: 'New Listings',
+  exul: 'Excl: Ultra',
+  exsh: 'Excl: Short',
+  exea: 'Excl: Early',
+  exnl: 'Excl: New Listings'
+};
 
 function wsStat(rr){
   const st=rr.filter(r=>r.Result=='Stop hit');
