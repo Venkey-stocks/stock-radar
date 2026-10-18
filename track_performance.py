@@ -199,11 +199,16 @@ EXCL_FILES = {
 }
 
 for escan, ef in EXCL_FILES.items():
-    alt_file = "data/short_rejected.csv" if escan == "exsh" and not os.path.exists(ef) else ef
-    if not os.path.exists(alt_file):
+    # ఒకవేళ excluded ఫైల్ లేకపోతే rejected ఫైల్ నుంచి నేరుగా తీసుకునే ఏర్పాటు
+    alt_map = {
+        "exsh": "data/short_rejected.csv",
+        "exul": "data/ultra_rejected.csv"
+    }
+    target_file = ef if os.path.exists(ef) else alt_map.get(escan, ef)
+    if not os.path.exists(target_file):
         continue
     try:
-        ex_df = pd.read_csv(alt_file)
+        ex_df = pd.read_csv(target_file)
         if ex_df.empty or "Symbol" not in ex_df.columns:
             continue
         
@@ -230,13 +235,13 @@ for escan, ef in EXCL_FILES.items():
             
         ex_df["Close"] = ex_df["Close"].fillna(ex_df["Entry"])
         
-        # డమ్మీ లెక్కలు లేకుండా, అసలైన ఒరిజినల్ Entry, Stop, Target ఉన్న రికార్డులను మాత్రమే తీసుకోవడం
+        # ఒరిజినల్ Entry, Stop, Target ఉన్న రికార్డులను ట్రాకింగ్‌లోకి తీసుకోవడం
         ex_df = ex_df.dropna(subset=["Entry", "Stop", "Target"])
         
         if not ex_df.empty:
             parts.append(ex_df)
     except Exception as e:
-        print(f"{alt_file} చదవలేకపోయాం:", e)
+        print(f"{target_file} చదవలేకపోయాం:", e)
 cols = ["Scan", "SignalDate", "Symbol", "SignalStatus", "Class", "Band", "Score", "Entry", "Stop",
         "Target", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct",
         "AfterStopMaxPct", "AfterStopObsDays", "Whipsaw", "DaysToTargetAfterStop", "NowOnRadar"]
