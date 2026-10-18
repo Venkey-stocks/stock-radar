@@ -202,7 +202,8 @@ for escan, ef in EXCL_FILES.items():
     # ఒకవేళ excluded ఫైల్ లేకపోతే rejected ఫైల్ నుంచి నేరుగా తీసుకునే ఏర్పాటు
     alt_map = {
         "exsh": "data/short_rejected.csv",
-        "exul": "data/ultra_rejected.csv"
+        "exul": "data/ultra_rejected.csv",
+        "exea": "data/early_rejected.csv"
     }
     target_file = ef if os.path.exists(ef) else alt_map.get(escan, ef)
     if not os.path.exists(target_file):
