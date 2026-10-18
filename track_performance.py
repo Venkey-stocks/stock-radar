@@ -206,31 +206,54 @@ for escan, ef in EXCL_FILES.items():
         if ex_df.empty or "Symbol" not in ex_df.columns:
             continue
         ex_df["Scan"] = escan
-        if "Date" not in ex_df.columns:
+        
+        # కాలమ్ పేర్లు సరిచేయడం
+        if "Date" not in ex_df.columns and "SignalDate" in ex_df.columns:
+            ex_df["Date"] = ex_df["SignalDate"]
+        elif "Date" not in ex_df.columns:
             ex_df["Date"] = last_px
+            
         if "Status" not in ex_df.columns:
             ex_df["Status"] = "Excluded"
+            
         if "Class" not in ex_df.columns:
             ex_df["Class"] = ex_df["Horizon"] if "Horizon" in ex_df.columns else ""
+            
         if "Band" not in ex_df.columns:
             ex_df["Band"] = ex_df["Score"].apply(band_of) if "Score" in ex_df.columns else ""
+            
+        # ప్రైస్ మరియు ఎంట్రీ ఫీల్డ్స్ సరిచూడడం
+        if "Entry" not in ex_df.columns and "Price" in ex_df.columns:
+            ex_df["Entry"] = ex_df["Price"]
+            
         if "Close" not in ex_df.columns:
-            closes = []
-            for rr in ex_df.to_dict("records"):
-                cts = pd.to_datetime(rr.get("Date"), errors="coerce")
-                c = close_on(str(rr["Symbol"]).strip(), cts) if pd.notna(cts) else None
-                closes.append(c)
-            ex_df["Close"] = closes
+            if "Price" in ex_df.columns:
+                ex_df["Close"] = ex_df["Price"]
+            elif "Entry" in ex_df.columns:
+                ex_df["Close"] = ex_df["Entry"]
+            else:
+                closes = []
+                for rr in ex_df.to_dict("records"):
+                    cts = pd.to_datetime(rr.get("Date"), errors="coerce")
+                    c = close_on(str(rr["Symbol"]).strip(), cts) if pd.notna(cts) else None
+                    closes.append(c)
+                ex_df["Close"] = closes
+                
+        # ఒకవేళ టార్గెట్ లేదా స్టాప్ లేకపోతే డమ్మీగా కాలిక్యులేట్ చేయడం (డ్రాప్ అవ్వకుండా కాపాడటానికి)
         for c in ("Entry", "Stop", "Target", "Close"):
             if c not in ex_df.columns:
                 ex_df[c] = None
             ex_df[c] = pd.to_numeric(ex_df[c], errors="coerce")
-        ex_df = ex_df.dropna(subset=["Entry", "Stop", "Target", "Close"])
+            
+        # Entry, Stop మాత్రమే తప్పనిసరి, Target లేకపోతే 1:2 గా ఆటో లెక్క
+        ex_df = ex_df.dropna(subset=["Entry", "Stop"])
+        ex_df["Close"] = ex_df["Close"].fillna(ex_df["Entry"])
+        ex_df["Target"] = ex_df["Target"].fillna(ex_df["Entry"] + 2 * (ex_df["Entry"] - ex_df["Stop"]))
+        
         if not ex_df.empty:
             parts.append(ex_df)
     except Exception as e:
         print(f"{ef} చదవలేకపోయాం:", e)
-
 cols = ["Scan", "SignalDate", "Symbol", "SignalStatus", "Class", "Band", "Score", "Entry", "Stop",
         "Target", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct",
         "AfterStopMaxPct", "AfterStopObsDays", "Whipsaw", "DaysToTargetAfterStop", "NowOnRadar"]
