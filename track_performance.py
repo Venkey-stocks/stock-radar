@@ -3,17 +3,26 @@ import glob
 import bisect
 import pandas as pd
 
-# ట్రేడింగ్ రోజుల్లో గరిష్ట track కాలం
-WINDOW = {"ultra": 5, "short": 20, "multi": 250, "quality": 250, "newl": 60, "early": 20}
+# ట్రేడింగ్ రోజుల్లో గరిష్ట track కాలం (Excluded scans కూడా చేర్చబడ్డాయి)
+WINDOW = {
+    "ultra": 5, "short": 20, "multi": 250, "quality": 250, "newl": 60, "early": 20,
+    "exul": 5, "exsh": 20, "exea": 20, "exnl": 60
+}
 EARLY_LONG_WINDOW = 250    # Early Movers లో Long Term horizon కి
+
 # వారం/కొత్త scans: ఈ csv లలో కనిపించిన మొదటి రోజు నుంచి track
 LONG = {"multi": "data/multibagger.csv", "quality": "data/quality.csv",
         "newl": "data/newlistings.csv"}
 LABEL = {"multi": "Multibagger", "quality": "Quality", "newl": "New listing"}
+
 # ఇప్పుడు radar లో ఉన్నాయా తెలుసుకోవడానికి తాజా జాబితాలు
-CURRENT = {"ultra": "data/ultra_short.csv", "short": "data/short_term.csv",
-           "multi": "data/multibagger.csv", "quality": "data/quality.csv",
-           "newl": "data/newlistings.csv", "early": "data/early_movers.csv"}
+CURRENT = {
+    "ultra": "data/ultra_short.csv", "short": "data/short_term.csv",
+    "multi": "data/multibagger.csv", "quality": "data/quality.csv",
+    "newl": "data/newlistings.csv", "early": "data/early_movers.csv",
+    "exul": "data/excluded_ultra.csv", "exsh": "data/excluded_short.csv",
+    "exea": "data/excluded_early.csv", "exnl": "data/excluded_newlistings.csv"
+}
 SEEN = "data/first_seen.csv"
 SEEN_COLS = ["Scan", "Date", "Symbol", "Status", "Class", "Band", "Score",
              "Entry", "Stop", "Target", "Close"]
@@ -181,10 +190,50 @@ seen.to_csv(SEEN, index=False)
 if len(seen):
     parts.append(seen.copy())
 
+# ---------- Excluded Scans (Ultra, Short, Early, New Listings) ట్రాకింగ్ ----------
+EXCL_FILES = {
+    "exul": "data/excluded_ultra.csv",
+    "exsh": "data/excluded_short.csv",
+    "exea": "data/excluded_early.csv",
+    "exnl": "data/excluded_newlistings.csv"
+}
+
+for escan, ef in EXCL_FILES.items():
+    if not os.path.exists(ef):
+        continue
+    try:
+        ex_df = pd.read_csv(ef)
+        if ex_df.empty or "Symbol" not in ex_df.columns:
+            continue
+        ex_df["Scan"] = escan
+        if "Date" not in ex_df.columns:
+            ex_df["Date"] = last_px
+        if "Status" not in ex_df.columns:
+            ex_df["Status"] = "Excluded"
+        if "Class" not in ex_df.columns:
+            ex_df["Class"] = ex_df["Horizon"] if "Horizon" in ex_df.columns else ""
+        if "Band" not in ex_df.columns:
+            ex_df["Band"] = ex_df["Score"].apply(band_of) if "Score" in ex_df.columns else ""
+        if "Close" not in ex_df.columns:
+            closes = []
+            for rr in ex_df.to_dict("records"):
+                cts = pd.to_datetime(rr.get("Date"), errors="coerce")
+                c = close_on(str(rr["Symbol"]).strip(), cts) if pd.notna(cts) else None
+                closes.append(c)
+            ex_df["Close"] = closes
+        for c in ("Entry", "Stop", "Target", "Close"):
+            if c not in ex_df.columns:
+                ex_df[c] = None
+            ex_df[c] = pd.to_numeric(ex_df[c], errors="coerce")
+        ex_df = ex_df.dropna(subset=["Entry", "Stop", "Target", "Close"])
+        if not ex_df.empty:
+            parts.append(ex_df)
+    except Exception as e:
+        print(f"{ef} చదవలేకపోయాం:", e)
+
 cols = ["Scan", "SignalDate", "Symbol", "SignalStatus", "Class", "Band", "Score", "Entry", "Stop",
         "Target", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct",
         "AfterStopMaxPct", "AfterStopObsDays", "Whipsaw", "DaysToTargetAfterStop", "NowOnRadar"]
-
 if not parts:
     pd.DataFrame(columns=cols).to_csv("data/performance.csv", index=False)
     print("history snapshots లేవు")
