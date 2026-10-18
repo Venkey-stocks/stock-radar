@@ -9,7 +9,7 @@ Date,Symbol,Status,Close,Entry,Stop,Target,StopDistPct,TargetPct,RR,Reason,StopR
 2026-10-16,ZAGGLE,Setup,169.59,185.94,174.88,203.95,5.95,9.7,1.63,Reward:Risk below 1:2,Below swing low Rs 176.1 with 0.25 ATR buffer (ATR Rs 5.0),Nearest resistance: swing high Rs 203.9 (+9.7%)
 2026-10-16,CMPDI,Setup,204.64,219.2,201.91,247.0,7.89,12.7,1.61,Reward:Risk below 1:2,Below swing low Rs 203.7 with 0.25 ATR buffer (ATR Rs 7.2),Nearest resistance: swing high Rs 247.0 (+12.7%)
 2026-10-16,ARE&M,Setup,743.0,816.63,785.87,865.81,3.77,6.0,1.6,Reward:Risk below 1:2,Below swing low Rs 790.2 with 0.25 ATR buffer (ATR Rs 17.5),Nearest resistance: swing high Rs 865.8 (+6.0%)
-2026-10-16,POWERGRID,Setup,250.45,271.44,261.57,287.16,3.64,5.8,1.59,Reward:Risk below 1:2,Below swing low Rs 263.0 with 0.25 ATR buffer (ATR Rs 5.7),Nearest resistance: swing high Rs 287.2 (+5.8%)
+2026-10-16,POWERGRID,Setup,250.45,271.44,261.57,287.17,3.64,5.8,1.59,Reward:Risk below 1:2,Below swing low Rs 263.0 with 0.25 ATR buffer (ATR Rs 5.7),Nearest resistance: swing high Rs 287.2 (+5.8%)
 2026-10-16,STYLAMIND,Setup,3371.2,3431.85,3221.73,3763.9,6.12,9.7,1.58,Reward:Risk below 1:2,Below swing low Rs 3250.0 with 0.25 ATR buffer (ATR Rs 113.1),Nearest resistance: swing high Rs 3763.9 (+9.7%)
 2026-10-16,KEI,Setup,4482.3,4769.52,4467.93,5245.0,6.32,10.0,1.58,Reward:Risk below 1:2,Below swing low Rs 4502.2 with 0.25 ATR buffer (ATR Rs 137.1),Nearest resistance: swing high Rs 5245.0 (+10.0%)
 2026-10-16,KAJARIACER,Setup,1211.0,1268.43,1198.51,1378.04,5.51,8.6,1.57,Reward:Risk below 1:2,Below swing low Rs 1207.6 with 0.25 ATR buffer (ATR Rs 36.5),No overhead resistance found; 3 ATR projection (estimate)
