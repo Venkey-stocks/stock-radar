@@ -2133,6 +2133,13 @@ function exportExcludedToCSV() {
     alert("ఎగుమతి చేయడానికి Excluded ట్యాబ్‌లో డేటా లేదు!");
     return;
   }
+  // ====== EXCLUDED TAB EXCEL EXPORT FUNCTION ======
+function exportExcludedToCSV() {
+  const data = window._lastExclFiltered || [];
+  if (!data.length) {
+    alert("Export cheyadaniki Excluded tab lo data ledu!");
+    return;
+  }
   const headers = ["Scan", "Symbol", "Status", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR", "Reason"];
   const csvRows = [headers.join(",")];
   data.forEach(r => {
