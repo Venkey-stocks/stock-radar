@@ -246,12 +246,31 @@ for escan, ef in EXCL_FILES.items():
 cols = ["Scan", "SignalDate", "Symbol", "SignalStatus", "Class", "Band", "Score", "Entry", "Stop",
         "Target", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct",
         "AfterStopMaxPct", "AfterStopObsDays", "Whipsaw", "DaysToTargetAfterStop", "NowOnRadar"]
+
+# Paatha backfilled excluded records ni parts lo kalapadam
+perf_path = "data/performance.csv"
+if os.path.exists(perf_path):
+    try:
+        old_perf = pd.read_csv(perf_path)
+        if not old_perf.empty and "SignalDate" in old_perf.columns:
+            # Excluded scans paatha records ni matrame theeskovadam
+            old_excl = old_perf[old_perf["Scan"].astype(str).str.startswith("ex")].copy()
+            if not old_excl.empty:
+                old_excl = old_excl.rename(columns={"SignalDate": "Date", "SignalStatus": "Status"})
+                for req_c in ("Scan", "Date", "Symbol", "Entry", "Stop", "Target"):
+                    if req_c in old_excl.columns:
+                        old_excl[req_c] = old_excl[req_c]
+                parts.append(old_excl)
+    except Exception as e:
+        print("Paatha performance data merge cheyadam lo error:", e)
+
 if not parts:
     pd.DataFrame(columns=cols).to_csv("data/performance.csv", index=False)
     print("history snapshots లేవు")
     raise SystemExit(0)
 
 sig = pd.concat(parts, ignore_index=True)
+sig = sig.drop_duplicates(subset=["Scan", "Date", "Symbol"], keep="first")
 if "Class" not in sig.columns:
     sig["Class"] = ""
 sig["Class"] = sig["Class"].fillna("")
