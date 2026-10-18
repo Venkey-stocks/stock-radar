@@ -45,6 +45,9 @@ jobs:
       - name: Market health
         run: python market_health.py
         continue-on-error: true
+      - name: Backfill excluded history
+        run: python backfill_excluded.py
+        continue-on-error: true
       - name: Performance tracker
         run: python track_performance.py
         continue-on-error: true
