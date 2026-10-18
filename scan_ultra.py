@@ -324,8 +324,8 @@ rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=F
 os.makedirs("data/history", exist_ok=True)
 out.to_csv("data/ultra_short.csv", index=False)                       # తాజా ఫలితం
 out.to_csv("data/history/ultra_%s.csv" % date_str, index=False)       # రోజువారీ snapshot (Miss Report కి)
-rej_out.to_csv("data/ultra_rejected.csv", index=False)                # RR వల్ల తొలగినవి (Excluded tab కి)
-
+rej_out.to_csv("data/ultra_rejected.csv", index=False)                # RR వల్ల తొలగినవి
+rej_out.to_csv("data/excluded_ultra.csv", index=False)                 # Performance tracking కోసం
 print("data తేదీ:", date_str)
 print("Reward:Risk %.0f కంటే తక్కువ అని తొలగినవి:" % MIN_RR, rejected["low_rr"])
 print("మొత్తం ఫలితాలు:", len(out))
