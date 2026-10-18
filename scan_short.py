@@ -164,19 +164,23 @@ def analyze(sym, g):
     if (c[-20:] * v[-20:]).mean() < MIN_TRADED_VALUE:
         return None
 
-    # తప్పనిసరి Trend
+    # తప్పనిసరి Trend (సడలించిన రివర్సల్ & మొమెంటమ్ నిబంధనలు)
     sma20 = c[-20:].mean()
     sma50 = c[-50:].mean()
     sma200 = c[-200:].mean()
     sma50_prev = c[-60:-10].mean()
-    if not (close > sma50 and close > sma200 and sma50 > sma50_prev):
+
+    # ప్రాథమిక ట్రెండ్ లేదా వేగవంతమైన బౌన్స్ (ధర 50-DMA లేదా 200-DMA పైన ఉన్నా, లేదా 20-DMA పైన బలంగా ఉన్నా అనుమతింపు)
+    trend_ok = (close > sma50 and sma50 > sma50_prev) or (close > sma200) or (close > sma20 * 1.02 and close > sma50)
+    if not trend_ok:
         return None
+
     ext = (close / sma20 - 1) * 100
-    if ext > 15:
-        return None                       # 20-రోజుల average నుంచి చాలా పైకి వెళ్ళింది
+    if ext > 18:
+        return None                       # 20-రోజుల average నుంచి బాగా పైకి వెళ్ళినవి మాత్రమే నిరోధిస్తాం
     r63 = c[-1] / c[-64] - 1
-    if main_ret is not None and r63 <= main_ret:
-        return None                       # Nifty కంటే బలం లేదు
+    if main_ret is not None and r63 <= (main_ret - 0.05):
+        return None                       # నిఫ్టీ కంటే మరీ బలహీనంగా ఉన్నవి మాత్రమే తిరస్కరణు
 
     vol_avg20 = v[-21:-1].mean()
     if vol_avg20 <= 0:
