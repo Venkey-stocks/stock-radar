@@ -698,7 +698,7 @@ function openRationale(sym, tabType){
     ctn.appendChild(el);
   });
   
-  $('dr_price').textContent='Rs '+fmt(r.Close || r.Entry);$('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)';
+  $('dr_price').textContent='Rs '+fmt(r.Close || r.Entry);$('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)'+(has(r.StopTight)?' [Tight: Rs '+fmt(r.StopTight)+']':'');
 $('dr_target').textContent='Rs '+fmt(r.Target || r.Level)+' (+'+(r.TargetPct || '')+')';$('dr_stage').textContent=meta.code;
   $('dr_chart_link').href='https://in.tradingview.com/chart/?symbol=NSE:'+encodeURIComponent(r.Symbol);
   
@@ -1293,7 +1293,7 @@ function draw(){
     +'<div class="tags">'+tags+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
-    +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
+    +'<div class="n stop"><small>Safe Stop ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b>'+(has(r.StopTight)?'<small style="font-size:10px;color:var(--mut)">Tight: Rs '+fmt(r.StopTight)+'</small>':'')+'</div>'
     +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
     +'<div class="exp">'+explain(r)+' Last close: '+fmt(r.Close)+'.</div>'
     +chartBtn(r)
