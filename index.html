@@ -338,7 +338,6 @@ th{color:var(--mut);font-weight:600}
   <div class="rs" id="mreasons"></div>
   <div class="wrap"><table id="mtable"></table></div>
 </div>
-
 <div id="excl" style="display:none">
   <div class="note">Stocks dropped because Reward:Risk was below 1:2.</div>
   <div class="bar">
@@ -347,6 +346,13 @@ th{color:var(--mut);font-weight:600}
     </select>
     <select id="enear" onchange="drawExcl()">
       <option value="">All Reward:Risk</option><option value="near">Near (R:R 1.5 or more)</option>
+    </select>
+    <select id="ereason" onchange="drawExcl()">
+      <option value="">All reasons</option>
+      <option value="Stop too far">Stop too far</option>
+      <option value="Target too close">Target too close</option>
+      <option value="Resistance">Resistance nearby</option>
+      <option value="Support">Support too low</option>
     </select>
     <input type="text" id="esearch" placeholder="Search symbol" oninput="drawExcl()">
     <button onclick="resetExcl()">Reset</button>
@@ -1877,16 +1883,32 @@ function drawMiss(){
   $('meta').textContent='Miss Report | '+rows.length+' shown';
 }
 
-function resetExcl(){$('escan').value='';$('enear').value='';$('esearch').value='';drawExcl();}
+function resetExcl(){
+  $('escan').value='';
+  $('enear').value='';
+  if($('ereason')) $('ereason').value='';
+  $('esearch').value='';
+  drawExcl();
+}
 
 function drawExcl(){
   const sc=$('escan').value, nr=$('enear').value, q=$('esearch').value.trim().toUpperCase();
+  const re=($('ereason')?$('ereason').value.trim().toLowerCase():'');
   let all=[];
   EX_SRC.forEach(a=>{
     (DATA[a[1]]||[]).forEach(r=>{all.push(Object.assign({_s:a[0],_l:a[2]},r));});
   });
 
-  const base=all.filter(r=>(!sc||r._s==sc)&&(!q||String(r.Symbol).toUpperCase().indexOf(q)>=0));
+  const base=all.filter(r=>{
+    if(sc && r._s!==sc) return false;
+    if(q && String(r.Symbol).toUpperCase().indexOf(q)<0) return false;
+    if(re){
+      const reasonCombined = ((r.StopReason||'') + ' ' + (r.TargetReason||'') + ' ' + (r.Reason||'')).toLowerCase();
+      if(reasonCombined.indexOf(re)<0) return false;
+    }
+    return true;
+  });
+
   const rows=base.filter(r=>!nr||(+r.RR)>=1.5).sort((a,b)=>(+b.RR)-(+a.RR));
   window._lastExclFiltered = rows;
 
@@ -1907,7 +1929,6 @@ function drawExcl(){
 
   $('meta').textContent='Excluded (R:R below 1:2) | '+rows.length+' shown';
 }
-
 function drawSect(){
   const b=$('sband').value;
   const src=[['ultra','Ultra Short'],['short','Short Term'],['early','Early Movers'],['multi','Multibagger'],['quality','Quality'],['newl','New Listings']];
