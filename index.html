@@ -67,6 +67,9 @@ label{color:var(--mut);font-size:13px}
 .err{color:var(--r)}
 .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:12px}
 .st{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.st.clickable{cursor:pointer;transition:border-color .2s,background .2s}
+.st.clickable:hover{border-color:var(--b)}
+.st.active-filter{border-color:var(--b);background:rgba(56,139,253,0.18)}
 .st small{display:block;color:var(--mut);font-size:11px}
 .st b{font-size:18px}
 .pos{color:var(--g)}.neg{color:var(--r)}.amb{color:var(--y)}
@@ -1811,13 +1814,22 @@ function drawResults(){
   $('meta').textContent='Upcoming results dates | '+rows.length+' shown';
 }
 
+let PERF_RESULT_FILTER = '';
+
+function filterPerfByResult(resType){
+  if(PERF_RESULT_FILTER === resType){
+    PERF_RESULT_FILTER = '';
+  } else {
+    PERF_RESULT_FILTER = resType;
+  }
+  drawPerf();
+}
+
 function resetPerf(){
-  $('pscan').value='';
-  $('pband').value='';
-  $('pclass').value='';
-  $('prad').value='';
-  $('pfrom').value='';
-  $('pto').value='';
+  PERF_RESULT_FILTER = '';
+  $('pscan').value='';$('pband').value='';
+  $('pclass').value='';$('prad').value='';
+  $('pfrom').value='';$('pto').value='';
   drawPerf();
 }
 
@@ -1848,7 +1860,7 @@ function wsTxt(w){
 function drawPerf(){
   const sc=$('pscan').value, bd=$('pband').value, cl=$('pclass').value, f=$('pfrom').value, t=$('pto').value, rd=$('prad').value;
   
-  const rows=(DATA.perf||[]).filter(r=>{
+  const baseRows=(DATA.perf||[]).filter(r=>{
     if(sc && r.Scan!=sc) return false;
     if(cl && r.Class!=cl) return false;
     if(f && r.SignalDate<f) return false;
@@ -1863,30 +1875,44 @@ function drawPerf(){
     return true;
   }).sort((a,b)=>b.SignalDate.localeCompare(a.SignalDate)||b.Score-a.Score);
 
-  const cnt=k=>rows.filter(r=>r.Result==k).length;
+  const cnt=k=>baseRows.filter(r=>r.Result==k).length;
   const win=cnt('Target hit'), loss=cnt('Stop hit');
-  const withPnl=rows.filter(r=>r.PnLPct!=='');
+  const openPendingCnt = cnt('Open') + cnt('Pending');
+  const withPnl=baseRows.filter(r=>r.PnLPct!=='');
   const avg=withPnl.length?withPnl.reduce((a,r)=>a+(+r.PnLPct),0)/withPnl.length:0;
   const rate=(win+loss)?Math.round(win*100/(win+loss))+'%':'-';
   
-  const box=(l,v,c)=>'<div class="st"><small>'+l+'</small><b class="'+(c||'')+'">'+v+'</b></div>';
-  $('pstats').innerHTML=box('Signals',rows.length)
-    +box('Target hit',win,'pos')
-    +box('Stop hit',loss,'neg')
-    +box('Open / Pending',cnt('Open')+cnt('Pending'))
-    +box('Hit rate',rate)
-    +box('Avg return %',avg.toFixed(2)+'%',avg>=0?'pos':'neg');
+  const cardBox=(label, val, cls, filterKey)=>{
+    const isAct = (PERF_RESULT_FILTER === filterKey);
+    const actCls = isAct ? ' active-filter' : '';
+    const clickAttr = filterKey !== null ? ` onclick="filterPerfByResult('${filterKey}')"` : '';
+    const cursorCls = filterKey !== null ? ' clickable' : '';
+    return `<div class="st${cursorCls}${actCls}"${clickAttr} title="క్లిక్ చేసి ${label} స్టాక్స్ మాత్రమే చూడండి"><small>${label}</small><b class="${cls||''}">${val}</b></div>`;
+  };
+
+  $('pstats').innerHTML = cardBox('Signals', baseRows.length, '', '')
+    + cardBox('Target hit', win, 'pos', 'Target hit')
+    + cardBox('Stop hit', loss, 'neg', 'Stop hit')
+    + cardBox('Open / Pending', openPendingCnt, '', 'OpenPending')
+    + cardBox('Hit rate', rate, '', null)
+    + cardBox('Avg return %', avg.toFixed(2)+'%', avg>=0?'pos':'neg', null);
+
+  const displayRows = baseRows.filter(r=>{
+    if(!PERF_RESULT_FILTER) return true;
+    if(PERF_RESULT_FILTER === 'OpenPending') return (r.Result === 'Open' || r.Result === 'Pending');
+    return r.Result === PERF_RESULT_FILTER;
+  });
     
   $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Type</th><th>Score</th><th>Entry</th><th>Stop</th><th>Target</th><th>Result</th><th>Exit/Last</th><th>P/L %</th></tr>'
-   +(rows.length?rows.map(r=>{
+   +(displayRows.length?displayRows.map(r=>{
      const c=r.PnLPct===''?'':(+r.PnLPct>=0?'pos':'neg');
      return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b></td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td></tr>';
-   }).join(''):'<tr><td colspan="11">No signals in this range yet.</td></tr>');
+   }).join(''):'<tr><td colspan="11">ఈ ఫిల్టర్‌కు సరిపోలే సిగ్నల్స్ లేవు.</td></tr>');
    
+  const filterLabel = PERF_RESULT_FILTER ? ` [ఫిల్టర్: ${PERF_RESULT_FILTER}]` : '';
   const bandTxt = bd == 'high' ? ' [High Conviction 80+]' : (bd == 'good' ? ' [Good Setup 65-79]' : (bd == 'early' ? ' [Early Watch <65]' : ''));
-  $('meta').textContent='Performance tracking'+bandTxt+' | '+rows.length+' signals';
+  $('meta').textContent='Performance tracking'+bandTxt+filterLabel+' | '+baseRows.length+' సిగ్నల్స్‌లో '+displayRows.length+' చూపిస్తున్నాం';
 }
-
 function resetMiss(){$('mscan').value='';$('mres').value='';$('mfrom').value='';$('mto').value='';drawMiss();}
 
 function drawMiss(){
