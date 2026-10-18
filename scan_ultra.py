@@ -140,7 +140,7 @@ def analyze(sym, g):
     if atr <= 0:
         return None
 
-    # ---------- STOP: swing low కింద (ATR బఫర్), కనీసం 1 ATR దూరం ----------
+    # ---------- STOP: swing low కింద (ATR బఫర్ + 0.75% డైనమిక్ విప్‌సా బఫర్) ----------
     seg_l = l[-SWING_LOOKBACK:]
     pivl = pd.Series(seg_l).rolling(5, center=True).min().values
     swing_lows = seg_l[(seg_l == pivl) & (seg_l < entry * 0.995)]
@@ -150,15 +150,25 @@ def analyze(sym, g):
     else:
         sw = float(l[-10:].min())
         sw_name = "10-day low Rs %.1f" % sw
-    swing_stop = sw - ATR_BUFFER * atr
-    atr_stop = entry - ATR_MIN_STOP * atr
-    if swing_stop <= atr_stop:
-        stop = swing_stop
-        stop_reason = "Below %s with %.2f ATR buffer (ATR Rs %.1f)" % (sw_name, ATR_BUFFER, atr)
+
+    # Tight stop (పాత లెవెల్)
+    tight_swing_stop = sw - ATR_BUFFER * atr
+    tight_atr_stop = entry - ATR_MIN_STOP * atr
+    stop_tight = min(tight_swing_stop, tight_atr_stop)
+
+    # Dynamic Safe Stop (Swing low కింద 0.75% ప్రొటెక్షన్ బఫర్)
+    whipsaw_buffer = sw * 0.0075
+    safe_swing_stop = (sw - whipsaw_buffer) - (ATR_BUFFER * atr)
+    safe_atr_stop = entry - (ATR_MIN_STOP + 0.25) * atr
+
+    if safe_swing_stop <= safe_atr_stop:
+        stop = safe_swing_stop
+        stop_reason = "Below %s with 0.75%% dynamic buffer + %.2f ATR (ATR Rs %.1f)" % (sw_name, ATR_BUFFER, atr)
     else:
-        stop = atr_stop
-        stop_reason = "%s is too close; stop set %.1f ATR below entry (ATR Rs %.1f)" % (
-            sw_name, ATR_MIN_STOP, atr)
+        stop = safe_atr_stop
+        stop_reason = "%s is too close; safe stop set %.2f ATR below entry (ATR Rs %.1f)" % (
+            sw_name, ATR_MIN_STOP + 0.25, atr)
+
     if stop >= entry:
         return None
     risk = entry - stop
@@ -193,7 +203,7 @@ def analyze(sym, g):
         rej_rows.append({
             "Date": date_str, "Symbol": sym, "Status": status,
             "Close": round(close, 2), "Entry": round(entry, 2),
-            "Stop": round(stop, 2), "Target": round(target, 2),
+            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2), "Target": round(target, 2),
             "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
             "RR": round(rr, 2), "Reason": "Reward:Risk below 1:2",
             "StopReason": stop_reason, "TargetReason": target_reason,
@@ -292,8 +302,9 @@ def analyze(sym, g):
     return {
         "Date": date_str, "Symbol": sym, "Status": status, "Score": s, "Band": band,
         "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
-        "Target": round(target, 2), "StopDistPct": round(stop_pct, 2),
-        "RR": round(rr, 2), "StopReason": stop_reason, "TargetReason": target_reason,
+        "StopTight": round(stop_tight, 2), "Target": round(target, 2),
+        "StopDistPct": round(stop_pct, 2), "RR": round(rr, 2),
+        "StopReason": stop_reason, "TargetReason": target_reason,
         "VolRatio": round(vol_ratio, 2),
         "TargetPct": round(target_pct, 1), "Resistance": round(res, 2),
         "High52": round(high52, 2), "Gap": "Yes" if gap else "",
@@ -311,13 +322,13 @@ for sym, g in groups.items():
     except Exception as e:
         print("దాటవేసాం", sym, e)
 
-columns = ["Date", "Symbol", "Status", "Score", "Band", "Close", "Entry", "Stop", "Target",
+columns = ["Date", "Symbol", "Status", "Score", "Band", "Close", "Entry", "Stop", "StopTight", "Target",
            "StopDistPct", "RR", "StopReason", "TargetReason", "VolRatio", "TargetPct",
            "Resistance", "High52", "Gap", "Warning", "Reasons", "Events", "EventAdj"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
-rej_cols = ["Date", "Symbol", "Status", "Close", "Entry", "Stop", "Target", "StopDistPct",
+rej_cols = ["Date", "Symbol", "Status", "Close", "Entry", "Stop", "StopTight", "Target", "StopDistPct",
             "TargetPct", "RR", "Reason", "StopReason", "TargetReason"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
