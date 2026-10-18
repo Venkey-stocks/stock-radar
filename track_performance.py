@@ -199,11 +199,11 @@ EXCL_FILES = {
 }
 
 for escan, ef in EXCL_FILES.items():
-    # ఒకవేళ excluded ఫైల్ లేకపోతే rejected ఫైల్ నుంచి నేరుగా తీసుకునే ఏర్పాటు
     alt_map = {
         "exsh": "data/short_rejected.csv",
         "exul": "data/ultra_rejected.csv",
-        "exea": "data/early_rejected.csv"
+        "exea": "data/early_rejected.csv",
+        "exnl": "data/newlistings_rejected.csv"
     }
     target_file = ef if os.path.exists(ef) else alt_map.get(escan, ef)
     if not os.path.exists(target_file):
@@ -236,7 +236,7 @@ for escan, ef in EXCL_FILES.items():
             
         ex_df["Close"] = ex_df["Close"].fillna(ex_df["Entry"])
         
-        # ఒరిజినల్ Entry, Stop, Target ఉన్న రికార్డులను ట్రాకింగ్‌లోకి తీసుకోవడం
+        # అసలైన ఒరిజినల్ Entry, Stop, Target విలువలు ఉన్న రికార్డులను తీసుకోవడం
         ex_df = ex_df.dropna(subset=["Entry", "Stop", "Target"])
         
         if not ex_df.empty:
