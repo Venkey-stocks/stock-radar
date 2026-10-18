@@ -1208,8 +1208,14 @@ function updateTrailingStopAlerts(){
             if(el.textContent.includes(m.sym) && !el.querySelector('.trail-alert-box')){
               const box = document.createElement('div');
               box.className = 'trail-alert-box';
-              box.style.cssText = 'margin-top:8px;padding:8px 12px;border-radius:6px;border-left:4px solid #2ea043;background:rgba(46,160,67,0.12);color:#7ee787;font-size:12px;line-height:1.4;';
-              box.innerHTML = '<b>&#128640; Trailing Stop Alert: '+esc(tr.level)+'</b><br>'+esc(tr.msg);
+              const isDanger = tr.cls === 'neg';
+              const isWarn = tr.cls === 'amb';
+              const boxBg = isDanger ? 'rgba(239,68,68,0.15)' : (isWarn ? 'rgba(245,158,11,0.15)' : 'rgba(46,160,67,0.12)');
+              const boxBorder = isDanger ? '#ef4444' : (isWarn ? '#f59e0b' : '#2ea043');
+              const txtColor = isDanger ? '#fca5a5' : (isWarn ? '#fcd34d' : '#7ee787');
+              const icon = isDanger ? '🚨' : (isWarn ? '⚠️' : '&#128640;');
+              box.style.cssText = 'margin-top:8px;padding:8px 12px;border-radius:6px;border-left:4px solid '+boxBorder+';background:'+boxBg+';color:'+txtColor+';font-size:12px;line-height:1.4;';
+              box.innerHTML = '<b>'+icon+' '+esc(tr.level)+'</b><br>'+esc(tr.msg);
               el.appendChild(box);
             }
           });
