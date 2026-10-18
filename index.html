@@ -1142,8 +1142,29 @@ function fixWarn(w){
 function getTrailingAdvice(m, curP){
   if(m.status !== 'Holding' || !m.buyPrice || !curP) return null;
   const buy = +m.buyPrice;
+  const stop = +m.stop || 0;
   const gainPct = ((curP - buy) / buy) * 100;
 
+  // 1. స్టాప్-లాస్ బ్రీచ్ & వార్నింగ్ అలర్ట్స్ (రిస్క్ ప్రొటెక్షన్)
+  if(stop > 0){
+    if(curP <= stop){
+      return {
+        level: '🚨 Stop-Loss Hit!',
+        trailStop: stop,
+        msg: 'ప్రమాదం! ప్రస్తుత ధర (Rs '+curP+') మీ స్టాప్-లాస్ (Rs '+stop+') కంటే క్రిందకు పడిపోయింది. క్యాపిటల్ కాపాడుకోవడానికి వెంటనే ఎగ్జిట్ అవ్వండి.',
+        cls: 'neg'
+      };
+    } else if(curP <= stop * 1.015){
+      return {
+        level: '⚠️ Near Stop-Loss',
+        trailStop: stop,
+        msg: 'హెచ్చరిక! ప్రస్తుత ధర స్టాప్-లాస్‌కు చాలా దగ్గరలో ఉంది (ప్రస్తుత ధర: Rs '+curP+' | SL: Rs '+stop+'). సిద్ధంగా ఉండండి.',
+        cls: 'amb'
+      };
+    }
+  }
+
+  // 2. ట్రెయిలింగ్ ప్రాఫిట్ లాక్ అలర్ట్స్
   if(gainPct >= 15){
     const trailPrice = Math.round(curP * 0.93 * 100) / 100;
     return {
@@ -1170,7 +1191,6 @@ function getTrailingAdvice(m, curP){
   }
   return null;
 }
-
 // ===== Smart Auto-Injector for Trailing Stop Alerts =====
 function updateTrailingStopAlerts(){
   const mineRows = loadMine();
