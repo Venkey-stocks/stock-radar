@@ -1903,6 +1903,7 @@ function drawPerf(){
     if(PERF_RESULT_FILTER === 'OpenPending') return (r.Result === 'Open' || r.Result === 'Pending');
     return r.Result === PERF_RESULT_FILTER;
   });
+  window._lastPerfFiltered = displayRows;
     
   $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Type</th><th>Score</th><th>Entry</th><th>Stop</th><th>Target</th><th>Result</th><th>Exit/Last</th><th>P/L %</th></tr>'
    +(displayRows.length?displayRows.map(r=>{
