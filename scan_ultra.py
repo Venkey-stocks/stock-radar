@@ -113,24 +113,23 @@ def analyze(sym, g):
     dry = v[-6:-1].mean() / vol_avg20
 
     # ---------- Status ----------
-    cp_need = 0.5 if (gap and close >= o[-1]) else 0.7
+    cp_need = 0.5 if (gap and close >= o[-1]) else 0.65
     if above:
         if close > res * 1.08:
             return None            # ఇప్పటికే ఎక్కువ పైకి వెళ్ళింది
-        if vol_ratio >= 2 and close_pos >= cp_need:
+        if vol_ratio >= 1.8 and close_pos >= cp_need:
             status = "Breakout"
         elif vol_ratio >= 1.2:
             status = "Near Miss"
         else:
             return None
     else:
-        if 0 <= dist_res <= 1 and vol_ratio >= 2:
+        if 0 <= dist_res <= 1.5 and vol_ratio >= 1.8:
             status = "Near Miss"
-        elif 0 <= dist_res <= 5 and contr < 1.0 and dry < 1.0:
+        elif 0 <= dist_res <= 10.0 and contr < 1.1 and dry < 1.15:
             status = "Setup"
         else:
             return None
-
     # ---------- Entry ----------
     entry = res * 1.002 if status == "Setup" else close
 
