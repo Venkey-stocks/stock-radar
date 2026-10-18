@@ -300,8 +300,22 @@ th{color:var(--mut);font-weight:600}
 <div id="perf" style="display:none">
   <div class="bar">
     <select id="pscan" onchange="drawPerf()">
-      <option value="">All scans</option><option value="ultra">Ultra Short</option><option value="short">Short Term</option><option value="early">Early Movers</option><option value="multi">Multibagger</option><option value="quality">Quality</option><option value="newl">New Listings</option>
-    </select>
+  <option value="">All scans</option>
+  <optgroup label="Active Scans">
+    <option value="ultra">Ultra Short</option>
+    <option value="short">Short Term</option>
+    <option value="early">Early Movers</option>
+    <option value="multi">Multibagger</option>
+    <option value="quality">Quality</option>
+    <option value="newl">New Listings</option>
+  </optgroup>
+  <optgroup label="Excluded (R:R < 1:2)">
+    <option value="exul">Excluded: Ultra Short</option>
+    <option value="exsh">Excluded: Short Term</option>
+    <option value="exea">Excluded: Early Movers</option>
+    <option value="exnl">Excluded: New Listings</option>
+  </optgroup>
+</select>
     <select id="pband" onchange="drawPerf()">
       <option value="">All Decision Bands</option>
       <option value="high">High Conviction Only (Score 80+)</option>
