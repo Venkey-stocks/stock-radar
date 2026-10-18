@@ -1865,7 +1865,7 @@ function drawMiss(){
   const c=k=>all.filter(r=>r.Result==k).length;
   const caught=c('Caught'), missed=c('Missed');
   const rate=(caught+missed)?Math.round(caught*100/(caught+missed))+'%':'-';
- const box=(l,v,k)=>'<div class="st"><small>'+l+'</small><b class="'+(k||'')+'">'+v+'</b></div>';
+  const box=(l,v,k)=>'<div class="st"><small>'+l+'</small><b class="'+(k||'')+'">'+v+'</b></div>';
   const btnExport='<button onclick="exportMissToCSV()" style="margin-left:auto;align-self:center;padding:7px 14px;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;">📥 Export to Excel</button>';
   $('mstats').innerHTML=box('Big movers (15%+)',all.length)+box('Caught',caught,'pos')+box('Missed',missed,'neg')+box('Catch rate',rate)+btnExport;
   window._lastMissFiltered = rows;
@@ -1886,69 +1886,25 @@ function drawExcl(){
     (DATA[a[1]]||[]).forEach(r=>{all.push(Object.assign({_s:a[0],_l:a[2]},r));});
   });
 
-  const rows = all.filter(r => {
-    if(sc && r._s !== sc) return false;
-    if(q && !(r.Symbol && r.Symbol.toUpperCase().includes(q))) return false;
-    if(nr === 'near' && (r.RR < 1.5 || r.RR >= 2.0)) return false;
-    return true;
-  });
-
-  window._lastExclFiltered = rows;
-
-  const btnExport = '<button onclick="exportExcludedToCSV()" style="margin-left:auto;align-self:center;padding:7px 14px;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;">📥 Export to Excel</button>';
-  
-  if($('estats')) {
-    $('estats').innerHTML = '<div class="st"><small>Excluded Total</small><b>' + all.length + '</b></div>' +
-                            '<div class="st"><small>Filtered Shown</small><b class="amb">' + rows.length + '</b></div>' + btnExport;
-  }
-
-  const tb = $('etable');
-  if(tb){
-    tb.innerHTML = '<tr><th>Scan</th><th>Symbol</th><th>Status</th><th>Close</th><th>Entry</th><th>Stop</th><th>Target</th><th>Stop %</th><th>Target %</th><th>RR</th><th>Reason</th></tr>' +
-      (rows.length ? rows.map(r => {
-        return '<tr><td>' + (r._s || '') + '</td><td><b>' + (r.Symbol || '') + '</b></td><td>' + (r.Status || '') + '</td><td>' + fmt(r.Close) + '</td><td>' + fmt(r.Entry) + '</td><td>' + fmt(r.Stop) + '</td><td>' + fmt(r.Target) + '</td><td>' + (r.StopDistPct || '-') + '%</td><td class="pos">+' + (r.TargetPct || '-') + '%</td><td class="amb">' + (r.RR || '-') + '</td><td style="color:#8b949e;font-size:11px;">' + (r.Reason || '-') + '</td></tr>';
-      }).join('') : '<tr><td colspan="11">No excluded stocks match filters.</td></tr>');
-  }
-
-  if($('emeta')) $('emeta').textContent = 'Excluded Stocks | ' + rows.length + ' shown';
-}
-
-  const rows = all.filter(r => {
-    if(sc && r._s !== sc) return false;
-    if(q && !(r.Symbol && r.Symbol.toUpperCase().includes(q))) return false;
-    if(nr === 'near' && (r.RR < 1.5 || r.RR >= 2.0)) return false;
-    return true;
-  });
-
-  window._lastExclFiltered = rows;
-
-  // Header stats & Export Button
-  const btnExport = '<button onclick="exportExcludedToCSV()" style="margin-left:auto;align-self:center;padding:7px 14px;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;">📥 Export to Excel</button>';
-  
-  if($('estats')) {
-    $('estats').innerHTML = '<div class="st"><small>Excluded Total</small><b>' + all.length + '</b></div>' +
-                            '<div class="st"><small>Filtered Shown</small><b class="amb">' + rows.length + '</b></div>' + btnExport;
-  }
-
-  const tb = $('etable');
-  if(tb){
-    tb.innerHTML = '<tr><th>Scan</th><th>Symbol</th><th>Status</th><th>Close</th><th>Entry</th><th>Stop</th><th>Target</th><th>Stop %</th><th>Target %</th><th>RR</th><th>Reason</th></tr>' +
-      (rows.length ? rows.map(r => {
-        return '<tr><td>' + (r._s || '') + '</td><td><b>' + (r.Symbol || '') + '</b></td><td>' + (r.Status || '') + '</td><td>' + fmt(r.Close) + '</td><td>' + fmt(r.Entry) + '</td><td>' + fmt(r.Stop) + '</td><td>' + fmt(r.Target) + '</td><td>' + (r.StopDistPct || '-') + '%</td><td class="pos">+' + (r.TargetPct || '-') + '%</td><td class="amb">' + (r.RR || '-') + '</td><td style="color:#8b949e;font-size:11px;">' + (r.Reason || '-') + '</td></tr>';
-      }).join('') : '<tr><td colspan="11">No excluded stocks match filters.</td></tr>');
-  }
-
-  if($('emeta')) $('emeta').textContent = 'Excluded Stocks | ' + rows.length + ' shown';
-}
   const base=all.filter(r=>(!sc||r._s==sc)&&(!q||String(r.Symbol).toUpperCase().indexOf(q)>=0));
   const rows=base.filter(r=>!nr||(+r.RR)>=1.5).sort((a,b)=>(+b.RR)-(+a.RR));
+  window._lastExclFiltered = rows;
+
   const box=(l,v,c)=>'<div class="st"><small>'+l+'</small><b class="'+(c||'')+'">'+v+'</b></div>';
   const cnt=k=>all.filter(r=>r._s==k).length;
-  $('estats').innerHTML=box('Excluded',all.length)+box('Ultra Short',cnt('ultra'))+box('Short Term',cnt('short'))+box('Early Movers',cnt('early'));
-  $('etable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Entry</th><th>Stop</th><th>Target</th><th>R:R</th><th>Why stop</th><th>Why target</th></tr>'
-   +(rows.length?rows.map(r=>{
-     return '<tr><td>'+esc(r.Date||'-')+'</td><td>'+esc(r._l)+'</td><td><b>'+esc(r.Symbol)+'</b></td><td>'+fmt(r.Entry)+'</td><td class="neg">'+fmt(r.Stop)+'</td><td class="pos">'+fmt(r.Target)+'</td><td>1:'+esc(r.RR)+'</td><td>'+esc(r.StopReason||'-')+'</td><td>'+esc(r.TargetReason||'-')+'</td></tr>';
-   }).join(''):'<tr><td colspan="9">Nothing excluded for this selection.</td></tr>');
+  const btnExport = '<button onclick="exportExcludedToCSV()" style="margin-left:auto;align-self:center;padding:7px 14px;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;">📥 Export to Excel</button>';
+
+  if($('estats')) {
+    $('estats').innerHTML=box('Excluded',all.length)+box('Ultra Short',cnt('ultra'))+box('Short Term',cnt('short'))+box('Early Movers',cnt('early'))+btnExport;
+  }
+
+  if($('etable')) {
+    $('etable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Entry</th><th>Stop</th><th>Target</th><th>R:R</th><th>Why stop</th><th>Why target</th></tr>'
+     +(rows.length?rows.map(r=>{
+       return '<tr><td>'+esc(r.Date||'-')+'</td><td>'+esc(r._l)+'</td><td><b>'+esc(r.Symbol)+'</b></td><td>'+fmt(r.Entry)+'</td><td class="neg">'+fmt(r.Stop)+'</td><td class="pos">'+fmt(r.Target)+'</td><td>1:'+esc(r.RR)+'</td><td>'+esc(r.StopReason||'-')+'</td><td>'+esc(r.TargetReason||'-')+'</td></tr>';
+     }).join(''):'<tr><td colspan="9">Nothing excluded for this selection.</td></tr>');
+  }
+
   $('meta').textContent='Excluded (R:R below 1:2) | '+rows.length+' shown';
 }
 
@@ -2096,7 +2052,7 @@ fetch('data/profiles.json?v='+Date.now())
 function exportMissToCSV() {
   const data = window._lastMissFiltered || [];
   if (!data.length) {
-    alert("ఎగుమతి చేయడానికి Miss Report డేటా లేదు!");
+    alert("Export cheyadaniki Miss Report lo data ledu!");
     return;
   }
   const headers = ["Date", "Scan", "Stock", "Close", "Peak Close", "Gain %", "Days", "Result", "Reason"];
@@ -2129,24 +2085,22 @@ function exportMissToCSV() {
 function exportExcludedToCSV() {
   const data = window._lastExclFiltered || [];
   if (!data.length) {
-    alert("ఎగుమతి చేయడానికి Excluded ట్యాబ్‌లో డేటా లేదు!");
+    alert("Export cheyadaniki Excluded tab lo data ledu!");
     return;
   }
-  const headers = ["Scan", "Symbol", "Status", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR", "Reason"];
+  const headers = ["Date", "Scan", "Stock", "Entry", "Stop", "Target", "RR", "Why stop", "Why target"];
   const csvRows = [headers.join(",")];
   data.forEach(r => {
     const row = [
-      r._s || "",
+      r.Date || "",
+      r._l || r._s || "",
       r.Symbol || "",
-      r.Status || "",
-      r.Close || "",
       r.Entry || "",
       r.Stop || "",
       r.Target || "",
-      (r.StopDistPct || "") + "%",
-      (r.TargetPct || "") + "%",
       r.RR || "",
-      '"' + (r.Reason || "").replace(/"/g, '""') + '"'
+      '"' + (r.StopReason || "").replace(/"/g, '""') + '"',
+      '"' + (r.TargetReason || "").replace(/"/g, '""') + '"'
     ];
     csvRows.push(row.join(","));
   });
