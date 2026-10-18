@@ -18,7 +18,7 @@ jobs:
       - name: Events
         run: python fetch_events.py
         continue-on-error: true
-     - name: Results calendar
+      - name: Results calendar
         run: python fetch_results_calendar.py
         continue-on-error: true
       - name: Ultra scan
@@ -47,6 +47,7 @@ jobs:
         continue-on-error: true
       - name: Performance tracker
         run: python track_performance.py
+        continue-on-error: true
       - name: Miss report
         run: python miss_report.py
         continue-on-error: true
