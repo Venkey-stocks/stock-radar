@@ -1895,6 +1895,33 @@ function drawExcl(){
 
   window._lastExclFiltered = rows;
 
+  const btnExport = '<button onclick="exportExcludedToCSV()" style="margin-left:auto;align-self:center;padding:7px 14px;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;">📥 Export to Excel</button>';
+  
+  if($('estats')) {
+    $('estats').innerHTML = '<div class="st"><small>Excluded Total</small><b>' + all.length + '</b></div>' +
+                            '<div class="st"><small>Filtered Shown</small><b class="amb">' + rows.length + '</b></div>' + btnExport;
+  }
+
+  const tb = $('etable');
+  if(tb){
+    tb.innerHTML = '<tr><th>Scan</th><th>Symbol</th><th>Status</th><th>Close</th><th>Entry</th><th>Stop</th><th>Target</th><th>Stop %</th><th>Target %</th><th>RR</th><th>Reason</th></tr>' +
+      (rows.length ? rows.map(r => {
+        return '<tr><td>' + (r._s || '') + '</td><td><b>' + (r.Symbol || '') + '</b></td><td>' + (r.Status || '') + '</td><td>' + fmt(r.Close) + '</td><td>' + fmt(r.Entry) + '</td><td>' + fmt(r.Stop) + '</td><td>' + fmt(r.Target) + '</td><td>' + (r.StopDistPct || '-') + '%</td><td class="pos">+' + (r.TargetPct || '-') + '%</td><td class="amb">' + (r.RR || '-') + '</td><td style="color:#8b949e;font-size:11px;">' + (r.Reason || '-') + '</td></tr>';
+      }).join('') : '<tr><td colspan="11">No excluded stocks match filters.</td></tr>');
+  }
+
+  if($('emeta')) $('emeta').textContent = 'Excluded Stocks | ' + rows.length + ' shown';
+}
+
+  const rows = all.filter(r => {
+    if(sc && r._s !== sc) return false;
+    if(q && !(r.Symbol && r.Symbol.toUpperCase().includes(q))) return false;
+    if(nr === 'near' && (r.RR < 1.5 || r.RR >= 2.0)) return false;
+    return true;
+  });
+
+  window._lastExclFiltered = rows;
+
   // Header stats & Export Button
   const btnExport = '<button onclick="exportExcludedToCSV()" style="margin-left:auto;align-self:center;padding:7px 14px;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;">📥 Export to Excel</button>';
   
