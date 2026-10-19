@@ -148,6 +148,8 @@ for sym, g in groups.items():
         cc = g["Close"].values
         ret63[sym] = cc[-1] / cc[-64] - 1
 rs_rank = pd.Series(ret63).rank(pct=True)
+
+
 def analyze(sym, g):
     if len(g) < MIN_ROWS or g["Date"].iloc[-1] != last_date:
         return None
@@ -177,10 +179,10 @@ def analyze(sym, g):
 
     ext = (close / sma20 - 1) * 100
     if ext > 18:
-        return None                       # 20-రోజుల average నుంచి బాగా పైకి వెళ్ళినవి మాత్రమే నిరోధిస్తాం
+        return None                               # 20-రోజుల average నుంచి బాగా పైకి వెళ్ళినవి మాత్రమే నిరోధిస్తాం
     r63 = c[-1] / c[-64] - 1
     if main_ret is not None and r63 <= (main_ret - 0.05):
-        return None                       # నిఫ్టీ కంటే మరీ బలహీనంగా ఉన్నవి మాత్రమే తిరస్కరణు
+        return None                               # నిఫ్టీ కంటే మరీ బలహీనంగా ఉన్నవి మాత్రమే తిరస్కరణు
 
     vol_avg20 = v[-21:-1].mean()
     if vol_avg20 <= 0:
@@ -194,7 +196,7 @@ def analyze(sym, g):
     setup_kind = ""
     base_w = 0
     cam_info = None
-    for N in (15, 25, 40):                # 3, 5, 8 వారాల base
+    for N in (15, 25, 40):                 # 3, 5, 8 వారాల base
         bh = h[-N - 1:-1].max()
         bl = l[-N - 1:-1].min()
         depth = (bh - bl) / bh
@@ -233,7 +235,7 @@ def analyze(sym, g):
     if atr <= 0:
         return None
 
-    # ---------- STOP: swing low కింద (ATR బఫర్), కనీసం 1.5 ATR దూరం ----------
+    # ---------- STOP: swing low కింద (ATR బఫర్ + 0.75% డైనమిక్ విప్‌సా బఫర్) ----------
     seg_l = l[-SWING_LOOKBACK:]
     pivl = pd.Series(seg_l).rolling(5, center=True).min().values
     swing_lows = seg_l[(seg_l == pivl) & (seg_l < entry * 0.995)]
@@ -243,15 +245,25 @@ def analyze(sym, g):
     else:
         sw = float(l[-10:].min())
         sw_name = "10-day low Rs %.1f" % sw
-    swing_stop = sw - ATR_BUFFER * atr
-    atr_stop = entry - ATR_MIN_STOP * atr
-    if swing_stop <= atr_stop:
-        stop = swing_stop
-        stop_reason = "Below %s with %.1f ATR buffer (ATR Rs %.1f)" % (sw_name, ATR_BUFFER, atr)
+
+    # Tight stop (పాత లెవెల్)
+    tight_swing_stop = sw - ATR_BUFFER * atr
+    tight_atr_stop = entry - ATR_MIN_STOP * atr
+    stop_tight = min(tight_swing_stop, tight_atr_stop)
+
+    # Dynamic Safe Stop (Swing low కింద 0.75% ప్రొటెక్షన్ బఫర్)
+    whipsaw_buffer = sw * 0.0075
+    safe_swing_stop = (sw - whipsaw_buffer) - (ATR_BUFFER * atr)
+    safe_atr_stop = entry - (ATR_MIN_STOP + 0.25) * atr
+
+    if safe_swing_stop <= safe_atr_stop:
+        stop = safe_swing_stop
+        stop_reason = "Below %s with 0.75%% dynamic buffer + %.1f ATR (ATR Rs %.1f)" % (sw_name, ATR_BUFFER, atr)
     else:
-        stop = atr_stop
-        stop_reason = "%s is too close; stop set %.1f ATR below entry (ATR Rs %.1f)" % (
-            sw_name, ATR_MIN_STOP, atr)
+        stop = safe_atr_stop
+        stop_reason = "%s is too close; safe stop set %.1f ATR below entry (ATR Rs %.1f)" % (
+            sw_name, ATR_MIN_STOP + 0.25, atr)
+
     if stop >= entry:
         return None
     risk = entry - stop
@@ -321,7 +333,7 @@ def analyze(sym, g):
             "Class": "High Potential" if is_hp else "Standard",
             "Setup": setup_kind,
             "Close": round(close, 2), "Entry": round(entry, 2),
-            "Stop": round(stop, 2), "Target": round(target, 2),
+            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2), "Target": round(target, 2),
             "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
             "RR": round(rr, 2), "Reason": "Reward:Risk below 1:2",
             "StopReason": stop_reason, "TargetReason": target_reason,
@@ -447,6 +459,7 @@ def analyze(sym, g):
         "Class": "High Potential" if is_hp else "Standard",
         "Score": s, "Band": band, "Setup": setup_kind,
         "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
+        "StopTight": round(stop_tight, 2),
         "Target": round(target, 2), "StopDistPct": round(stop_pct, 2),
         "RR": round(rr, 2), "StopReason": stop_reason, "TargetReason": target_reason,
         "TargetPct": round(target_pct, 1), "VolRatio": round(vol_ratio, 2),
@@ -465,13 +478,13 @@ for sym, g in groups.items():
     except Exception as e:
         print("దాటవేసాం", sym, e)
 
-columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close", "Entry", "Stop",
+columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close", "Entry", "Stop", "StopTight",
            "Target", "StopDistPct", "RR", "StopReason", "TargetReason", "TargetPct", "VolRatio",
            "RSI", "ADX", "Boosters", "High52", "Warning", "Reasons", "Events", "EventAdj"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
-rej_cols = ["Date", "Symbol", "Status", "Class", "Setup", "Close", "Entry", "Stop", "Target",
+rej_cols = ["Date", "Symbol", "Status", "Class", "Setup", "Close", "Entry", "Stop", "StopTight", "Target",
             "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
