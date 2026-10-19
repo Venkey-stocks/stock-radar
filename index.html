@@ -165,7 +165,7 @@ th{color:var(--mut);font-weight:600}
   <!-- Universal Search Bar -->
   <div class="search-wrapper">
     <span class="search-icon">&#128269;</span>
-    <input type="text" id="global_search" placeholder="స్టాక్ పేరుతో రాడార్‌లో వెతకండి..." oninput="handleGlobalSearch(this.value)">
+    <input type="text" id="global_search" placeholder="Search stock in radar..." oninput="handleGlobalSearch(this.value)">
     <div class="search-results-dropdown" id="search_results"></div>
   </div>
 </div>
@@ -780,20 +780,20 @@ function openRationale(sym, tabType){
       const isVcp = (r.Reasons && r.Reasons.includes('coiling')) || (r.Setup && r.Setup.includes('Base'));
       const isDry = (r.Reasons && r.Reasons.includes('dried up')) || (+r.VolRatio < 1.0);
       
-      let vcpText = 'టెక్నికల్ బ్రేక్‌అవుట్ సెటప్ గుర్తించబడింది.';
-      if(isVcp && isDry) vcpText = '💎 VCP ప్రైస్ కాంట్రాక్షన్ మరియు వాల్యూమ్ డ్రై-అప్ సెటప్ అత్యంత పటిష్టంగా నమోదైంది.';
-      else if(isVcp) vcpText = '💎 VCP ప్రైస్ కాంట్రాక్షన్ రేంజ్ టైట్ అవుతూ బ్రేక్‌అవుట్‌కు సిద్ధమైంది.';
+      let vcpText = 'Technical Breakout setup గుర్తించబడింది.';
+      if(isVcp && isDry) vcpText = '💎 VCP Price Contraction మరియు Volume Dry-up setup చాలా బలంగా నమోదైంది.';
+      else if(isVcp) vcpText = '💎 VCP Price Contraction తో రేంజ్ టైట్ అయ్యి Breakout కి సిద్ధంగా ఉంది.';
       
-      let stopSentence = 'సేఫ్ స్టాప్-లాస్ రూ. ' + fmt(r.Stop) + ' (' + r.StopDistPct + '% రిస్క్)';
+      let stopSentence = 'Safe Stop Rs ' + fmt(r.Stop) + ' (' + r.StopDistPct + '% risk)';
       if(has(r.StopTight)){
-        stopSentence += ', టైట్ స్టాప్ రూ. ' + fmt(r.StopTight);
+        stopSentence += ', Tight Stop Rs ' + fmt(r.StopTight);
       }
       
       lines=[
-        {title:'1. Setup & Pattern',desc:`${vcpText} మొమెంటమ్ స్కోరు ${r.Score}/100 తో బలంగా ఉంది.`},
-        {title:'2. Risk Management',desc:`${stopSentence}. రివార్డ్:రిస్క్ నిష్పత్తి 1:${r.RR||'2.0'} తో ట్రేడింగ్‌కు అత్యంత అనుకూలంగా ఉంది.`},
-        {title:'3. Target Projection',desc:`చార్ట్ నిర్మాణం మరియు రెసిస్టెన్స్ ఆధారంగా నిర్దేశిత టార్గెట్ రూ. ${fmt(r.Target||r.Level)} (+${r.TargetPct||''}) వద్ద లెక్కించబడింది.`},
-        {title:'4. Trend & Moving Averages',desc:`స్వల్పకాలిక ట్రెండ్ బుల్లిష్‌గా ఉంది. కీలకమైన 20-DMA మరియు 50-DMA సపోర్ట్ పైన నిలకడగా ట్రేడ్ అవుతోంది.`}
+        {title:'Setup & Pattern',desc:`${vcpText} Momentum Score ${r.Score}/100 తో బలంగా ఉంది.`},
+        {title:'Risk Management',desc:`${stopSentence}. Reward:Risk ratio 1:${r.RR||'2.0'} తో ట్రేడింగ్‌కు అనుకూలంగా ఉంది.`},
+        {title:'Target Projection',desc:`Chart structure & Resistance ఆధారంగా Target Rs ${fmt(r.Target||r.Level)} (+${r.TargetPct||''}%) లెక్కించబడింది.`},
+        {title:'Trend & Moving Averages',desc:`Short-term trend Bullish గా ఉంది. కీలకమైన 20-DMA మరియు 50-DMA support పైన నిలకడగా ట్రేడ్ అవుతోంది.`}
       ];
     }
   }
