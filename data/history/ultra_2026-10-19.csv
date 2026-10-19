@@ -1,2 +1,1 @@
-Symbol,Status,Score,Band
-SOLARINDS,Setup,46.7,Early Watch
+Date,Symbol,Status,Score,Band,Close,Entry,Stop,StopTight,Target,StopDistPct,RR,StopReason,TargetReason,VolRatio,TargetPct,Resistance,High52,Gap,Warning,Reasons,Events,EventAdj

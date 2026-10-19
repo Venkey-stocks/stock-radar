@@ -1,6 +1,6 @@
 Scan,SignalDate,Symbol,SignalStatus,Class,Band,Score,Entry,Stop,Target,Result,DaysHeld,ResultDate,ExitPrice,PnLPct,AfterStopMaxPct,AfterStopObsDays,Whipsaw,DaysToTargetAfterStop,NowOnRadar
-short,2026-10-05,LGEINDIA,Breakout,Standard,High Conviction,81.9,1770.9,1685.51,2036.54,Open,10,,1706.4,-3.64,,,,,No
-exsh,2026-10-05,LGEINDIA,Excluded,Standard,High Conviction,81.9,1770.9,1685.51,2036.54,Open,10,,1706.4,-3.64,,,,,No
+short,2026-10-05,LGEINDIA,Breakout,Standard,High Conviction,81.9,1770.9,1685.51,2036.54,Stop hit,10,2026-10-19,1685.51,-4.82,,0,,,No
+exsh,2026-10-05,LGEINDIA,Excluded,Standard,High Conviction,81.9,1770.9,1685.51,2036.54,Stop hit,10,2026-10-19,1685.51,-4.82,,0,,,No
 short,2026-10-05,REDINGTON,Near Miss,High Potential,Good Setup,65.8,420.34,392.11,504.41,Pending,10,,,,,,,,No
 exsh,2026-10-05,REDINGTON,Excluded,High Potential,Good Setup,65.8,420.34,392.11,504.41,Stop hit,3,2026-10-08,392.11,-6.72,4.95,7,No,,No
 ultra,2026-10-05,LGEINDIA,Near Miss,,Early Watch,63.9,1770.9,1691.01,2036.54,Expired,5,2026-10-12,1732.7,-2.16,,,,,No
@@ -9,32 +9,32 @@ short,2026-10-05,LENSKART,Pullback,Standard,Early Watch,61.4,692.75,647.65,796.6
 exsh,2026-10-05,LENSKART,Excluded,Standard,Early Watch,61.4,692.75,647.65,796.66,Stop hit,3,2026-10-08,647.65,-6.51,5.3,7,No,,No
 short,2026-10-05,JSWINFRA,Pullback,Standard,Early Watch,60.9,359.4,340.61,413.31,Stop hit,3,2026-10-08,340.61,-5.23,2.43,7,No,,No
 exsh,2026-10-05,JSWINFRA,Excluded,Standard,Early Watch,60.9,359.4,340.61,413.31,Stop hit,3,2026-10-08,340.61,-5.23,2.43,7,No,,No
-short,2026-10-05,GODREJAGRO,Pullback,Standard,Early Watch,58.5,640.9,619.38,737.04,Stop hit,8,2026-10-15,619.38,-3.36,2.68,2,No,,No
-exsh,2026-10-05,GODREJAGRO,Excluded,Standard,Early Watch,58.5,640.9,619.38,737.04,Stop hit,8,2026-10-15,619.38,-3.36,2.68,2,No,,No
+short,2026-10-05,GODREJAGRO,Pullback,Standard,Early Watch,58.5,640.9,619.38,737.04,Stop hit,8,2026-10-15,619.38,-3.36,3.5,2,No,,No
+exsh,2026-10-05,GODREJAGRO,Excluded,Standard,Early Watch,58.5,640.9,619.38,737.04,Stop hit,8,2026-10-15,619.38,-3.36,3.5,2,No,,No
 short,2026-10-05,AEROFLEX,Pullback,Standard,Early Watch,57.2,544.35,507.59,626.0,Stop hit,8,2026-10-15,507.59,-6.75,5.49,2,No,,No
 exsh,2026-10-05,AEROFLEX,Excluded,Standard,Early Watch,57.2,544.35,507.59,626.0,Stop hit,8,2026-10-15,507.59,-6.75,5.49,2,No,,No
 short,2026-10-05,CASTROLIND,Near Miss,Standard,Early Watch,56.7,203.81,194.04,234.38,Pending,10,,,,,,,,No
-exsh,2026-10-05,CASTROLIND,Excluded,Standard,Early Watch,56.7,203.81,194.04,234.38,Stop hit,4,2026-10-09,194.04,-4.79,2.71,6,No,,No
+exsh,2026-10-05,CASTROLIND,Excluded,Standard,Early Watch,56.7,203.81,194.04,234.38,Stop hit,4,2026-10-09,194.04,-4.79,2.93,6,No,,No
 short,2026-10-05,CYIENTDLM,Pullback,Standard,Early Watch,55.9,946.8,879.42,1088.82,Stop hit,9,2026-10-16,879.42,-7.12,0.14,1,No,,No
 exsh,2026-10-05,CYIENTDLM,Excluded,Standard,Early Watch,55.9,946.8,879.42,1088.82,Stop hit,9,2026-10-16,879.42,-7.12,0.14,1,No,,No
-short,2026-10-05,KTKBANK,Pullback,Standard,Early Watch,55.2,326.75,316.33,375.76,Open,10,,332.15,1.65,,,,,No
+short,2026-10-05,KTKBANK,Pullback,Standard,Early Watch,55.2,326.75,316.33,375.76,Open,10,,329.65,0.89,,,,,No
 short,2026-10-05,GRAPHITE,Pullback,Standard,Early Watch,55.2,816.4,756.14,938.86,Stop hit,10,2026-10-19,756.14,-7.38,,0,,,No
-exsh,2026-10-05,KTKBANK,Excluded,Standard,Early Watch,55.2,326.75,316.33,375.76,Open,10,,332.15,1.65,,,,,No
+exsh,2026-10-05,KTKBANK,Excluded,Standard,Early Watch,55.2,326.75,316.33,375.76,Open,10,,329.65,0.89,,,,,No
 exsh,2026-10-05,GRAPHITE,Excluded,Standard,Early Watch,55.2,816.4,756.14,938.86,Stop hit,10,2026-10-19,756.14,-7.38,,0,,,No
-short,2026-10-05,COFORGE,Pullback,Standard,Early Watch,53.0,1852.0,1720.28,2129.8,Open,10,,1952.4,5.42,,,,,No
-exsh,2026-10-05,COFORGE,Excluded,Standard,Early Watch,53.0,1852.0,1720.28,2129.8,Open,10,,1952.4,5.42,,,,,No
-short,2026-10-05,BALRAMCHIN,Pullback,Standard,Early Watch,52.7,671.5,637.36,772.22,Open,10,,704.25,4.88,,,,,No
-exsh,2026-10-05,BALRAMCHIN,Excluded,Standard,Early Watch,52.7,671.5,637.36,772.22,Open,10,,704.25,4.88,,,,,No
+short,2026-10-05,COFORGE,Pullback,Standard,Early Watch,53.0,1852.0,1720.28,2129.8,Open,10,,1925.0,3.94,,,,,No
+exsh,2026-10-05,COFORGE,Excluded,Standard,Early Watch,53.0,1852.0,1720.28,2129.8,Open,10,,1925.0,3.94,,,,,No
+short,2026-10-05,BALRAMCHIN,Pullback,Standard,Early Watch,52.7,671.5,637.36,772.22,Open,10,,701.85,4.52,,,,,No
+exsh,2026-10-05,BALRAMCHIN,Excluded,Standard,Early Watch,52.7,671.5,637.36,772.22,Open,10,,701.85,4.52,,,,,No
 short,2026-10-05,USHAMART,Pullback,Standard,Early Watch,52.1,510.5,480.52,587.07,Stop hit,6,2026-10-13,480.52,-5.87,3.01,4,No,,No
 exsh,2026-10-05,USHAMART,Excluded,Standard,Early Watch,52.1,510.5,480.52,587.07,Stop hit,6,2026-10-13,480.52,-5.87,3.01,4,No,,No
 short,2026-10-05,PAYTM,Pullback,Standard,Early Watch,51.6,1684.0,1622.78,1936.6,Stop hit,3,2026-10-08,1622.78,-3.64,7.02,7,No,,No
 exsh,2026-10-05,PAYTM,Excluded,Standard,Early Watch,51.6,1684.0,1622.78,1936.6,Stop hit,3,2026-10-08,1622.78,-3.64,7.02,7,No,,No
 ultra,2026-10-05,PTC,Near Miss,,Early Watch,51.0,157.52,152.99,181.15,Stop hit,1,2026-10-06,152.37,-3.27,-0.15,5,No,,No
 exul,2026-10-05,PTC,Excluded,Standard,Early Watch,51.0,157.52,152.99,181.15,Stop hit,1,2026-10-06,152.37,-3.27,-0.15,5,No,,Yes
-short,2026-10-05,HATSUN,Pullback,Standard,Early Watch,49.3,1143.5,1077.22,1315.02,Open,10,,1156.0,1.09,,,,,No
-exsh,2026-10-05,HATSUN,Excluded,Standard,Early Watch,49.3,1143.5,1077.22,1315.02,Open,10,,1156.0,1.09,,,,,No
-short,2026-10-05,AIIL,Pullback,Standard,Early Watch,49.2,551.6,526.67,634.34,Open,10,,558.5,1.25,,,,,No
-exsh,2026-10-05,AIIL,Excluded,Standard,Early Watch,49.2,551.6,526.67,634.34,Open,10,,558.5,1.25,,,,,No
+short,2026-10-05,HATSUN,Pullback,Standard,Early Watch,49.3,1143.5,1077.22,1315.02,Open,10,,1145.8,0.2,,,,,No
+exsh,2026-10-05,HATSUN,Excluded,Standard,Early Watch,49.3,1143.5,1077.22,1315.02,Open,10,,1145.8,0.2,,,,,No
+short,2026-10-05,AIIL,Pullback,Standard,Early Watch,49.2,551.6,526.67,634.34,Open,10,,548.95,-0.48,,,,,No
+exsh,2026-10-05,AIIL,Excluded,Standard,Early Watch,49.2,551.6,526.67,634.34,Open,10,,548.95,-0.48,,,,,No
 short,2026-10-05,RBA,Pullback,Standard,Early Watch,48.4,93.99,89.41,108.09,Stop hit,6,2026-10-13,89.41,-4.87,6.92,4,No,,No
 exsh,2026-10-05,RBA,Excluded,Standard,Early Watch,48.4,93.99,89.41,108.09,Stop hit,6,2026-10-13,89.41,-4.87,6.92,4,No,,No
 ultra,2026-10-05,AKUMS,Setup,,Early Watch,48.2,840.48,795.55,966.55,No entry,5,,,,,,,,No
@@ -43,18 +43,18 @@ short,2026-10-05,APARINDS,Pullback,Standard,Early Watch,47.1,18102.0,16938.04,20
 exsh,2026-10-05,APARINDS,Excluded,Standard,Early Watch,47.1,18102.0,16938.04,20817.3,Stop hit,8,2026-10-15,16938.04,-6.43,1.45,2,No,,No
 ultra,2026-10-05,LAURUSLABS,Setup,,Early Watch,46.2,2059.41,1950.15,2368.32,Expired,5,2026-10-12,2069.2,0.48,,,,,No
 exul,2026-10-05,LAURUSLABS,Excluded,Standard,Early Watch,46.2,2059.41,1950.15,2368.32,Expired,5,2026-10-12,2069.2,0.48,,,,,Yes
-short,2026-10-05,TMB,Pullback,Standard,Early Watch,44.5,886.25,844.25,1019.19,Open,10,,869.75,-1.86,,,,,No
-exsh,2026-10-05,TMB,Excluded,Standard,Early Watch,44.5,886.25,844.25,1019.19,Open,10,,869.75,-1.86,,,,,No
+short,2026-10-05,TMB,Pullback,Standard,Early Watch,44.5,886.25,844.25,1019.19,Open,10,,868.35,-2.02,,,,,No
+exsh,2026-10-05,TMB,Excluded,Standard,Early Watch,44.5,886.25,844.25,1019.19,Open,10,,868.35,-2.02,,,,,No
 short,2026-10-05,APOLLO,Pullback,Standard,Early Watch,43.8,401.7,387.61,461.96,Stop hit,4,2026-10-09,387.61,-3.51,13.22,6,No,,No
 exsh,2026-10-05,APOLLO,Excluded,Standard,Early Watch,43.8,401.7,387.61,461.96,Stop hit,4,2026-10-09,387.61,-3.51,13.22,6,No,,No
-short,2026-10-05,BEPL,Pullback,Standard,Early Watch,43.5,124.77,120.79,143.49,Stop hit,4,2026-10-09,120.79,-3.19,8.87,6,No,,No
-exsh,2026-10-05,BEPL,Excluded,Standard,Early Watch,43.5,124.77,120.79,143.49,Stop hit,4,2026-10-09,120.79,-3.19,8.87,6,No,,No
+short,2026-10-05,BEPL,Pullback,Standard,Early Watch,43.5,124.77,120.79,143.49,Stop hit,4,2026-10-09,120.79,-3.19,9.11,6,No,,No
+exsh,2026-10-05,BEPL,Excluded,Standard,Early Watch,43.5,124.77,120.79,143.49,Stop hit,4,2026-10-09,120.79,-3.19,9.11,6,No,,No
 short,2026-10-05,CHENNPETRO,Pullback,Standard,Early Watch,42.0,1401.0,1323.77,1611.15,Target hit,2,2026-10-07,1611.15,15.0,,,,,No
-exsh,2026-10-05,CHENNPETRO,Excluded,Standard,Early Watch,42.0,1401.0,1323.77,1611.15,Target hit,2,2026-10-07,1611.15,15.0,,,,,No
-short,2026-10-05,PERSISTENT,Pullback,Standard,Early Watch,40.5,5530.0,5156.84,6359.5,Open,10,,5807.0,5.01,,,,,No
-exsh,2026-10-05,PERSISTENT,Excluded,Standard,Early Watch,40.5,5530.0,5156.84,6359.5,Open,10,,5807.0,5.01,,,,,No
-short,2026-10-05,GPPL,Near Miss,Standard,Early Watch,40.0,170.24,157.5,195.78,Pending,10,,167.55,-1.58,,,,,No
-exsh,2026-10-05,GPPL,Excluded,Standard,Early Watch,40.0,170.24,157.5,195.78,Open,10,,167.55,-1.58,,,,,No
+exsh,2026-10-05,CHENNPETRO,Excluded,Standard,Early Watch,42.0,1401.0,1323.77,1611.15,Target hit,2,2026-10-07,1611.15,15.0,,,,,Yes
+short,2026-10-05,PERSISTENT,Pullback,Standard,Early Watch,40.5,5530.0,5156.84,6359.5,Open,10,,5690.0,2.89,,,,,No
+exsh,2026-10-05,PERSISTENT,Excluded,Standard,Early Watch,40.5,5530.0,5156.84,6359.5,Open,10,,5690.0,2.89,,,,,No
+short,2026-10-05,GPPL,Near Miss,Standard,Early Watch,40.0,170.24,157.5,195.78,Pending,10,,166.08,-2.44,,,,,No
+exsh,2026-10-05,GPPL,Excluded,Standard,Early Watch,40.0,170.24,157.5,195.78,Open,10,,166.08,-2.44,,,,,No
 ultra,2026-10-06,PANAMAPET,Near Miss,,Good Setup,71.3,504.1,474.72,579.72,Expired,5,2026-10-13,498.85,-1.04,,,,,No
 exul,2026-10-06,PANAMAPET,Excluded,Standard,Good Setup,71.3,504.1,474.72,579.72,Expired,5,2026-10-13,498.85,-1.04,,,,,No
 short,2026-10-06,PGIL,Pullback,High Potential,Good Setup,69.2,1266.7,1232.47,1520.04,Stop hit,5,2026-10-13,1232.47,-2.7,7.35,4,No,,No
@@ -64,23 +64,23 @@ exsh,2026-10-06,VINCOFE,Excluded,Standard,Early Watch,59.8,187.21,173.46,215.29,
 short,2026-10-06,ACE,Near Miss,High Potential,Early Watch,58.2,1270.54,1178.92,1524.64,Pending,9,,,,,,,,No
 exsh,2026-10-06,ACE,Excluded,High Potential,Early Watch,58.2,1270.54,1178.92,1524.64,Stop hit,2,2026-10-08,1178.92,-7.21,3.14,7,No,,No
 short,2026-10-06,RGL,Pullback,Standard,Early Watch,54.8,163.62,157.85,188.16,Stop hit,2,2026-10-08,157.85,-3.53,9.47,7,No,,No
-exsh,2026-10-06,RGL,Excluded,Standard,Early Watch,54.8,163.62,157.85,188.16,Stop hit,2,2026-10-08,157.85,-3.53,9.47,7,No,,No
-short,2026-10-06,GLAND,Near Miss,Standard,Early Watch,54.7,3030.05,2838.26,3484.56,Pending,9,,3051.9,0.72,,,,,No
-exsh,2026-10-06,GLAND,Excluded,Standard,Early Watch,54.7,3030.05,2838.26,3484.56,Open,9,,3051.9,0.72,,,,,No
-short,2026-10-06,LAURUSLABS,Near Miss,High Potential,Early Watch,52.4,2059.41,1950.15,2471.29,Pending,9,,2073.3,0.67,,,,,Yes
-exsh,2026-10-06,LAURUSLABS,Excluded,High Potential,Early Watch,52.4,2059.41,1950.15,2471.29,Open,9,,2073.3,0.67,,,,,No
-short,2026-10-06,SOLARINDS,Pullback,Standard,Early Watch,50.7,20071.0,18631.35,23081.65,Open,9,,19963.0,-0.54,,,,,No
-exsh,2026-10-06,SOLARINDS,Excluded,Standard,Early Watch,50.7,20071.0,18631.35,23081.65,Open,9,,19963.0,-0.54,,,,,No
+exsh,2026-10-06,RGL,Excluded,Standard,Early Watch,54.8,163.62,157.85,188.16,Stop hit,2,2026-10-08,157.85,-3.53,9.47,7,No,,Yes
+short,2026-10-06,GLAND,Near Miss,Standard,Early Watch,54.7,3030.05,2838.26,3484.56,Pending,9,,3019.8,-0.34,,,,,No
+exsh,2026-10-06,GLAND,Excluded,Standard,Early Watch,54.7,3030.05,2838.26,3484.56,Open,9,,3019.8,-0.34,,,,,No
+short,2026-10-06,LAURUSLABS,Near Miss,High Potential,Early Watch,52.4,2059.41,1950.15,2471.29,Pending,9,,2069.0,0.47,,,,,Yes
+exsh,2026-10-06,LAURUSLABS,Excluded,High Potential,Early Watch,52.4,2059.41,1950.15,2471.29,Open,9,,2069.0,0.47,,,,,No
+short,2026-10-06,SOLARINDS,Pullback,Standard,Early Watch,50.7,20071.0,18631.35,23081.65,Open,9,,19803.0,-1.34,,,,,No
+exsh,2026-10-06,SOLARINDS,Excluded,Standard,Early Watch,50.7,20071.0,18631.35,23081.65,Open,9,,19803.0,-1.34,,,,,No
 short,2026-10-06,ACMESOLAR,Pullback,Standard,Early Watch,48.6,448.2,423.08,515.43,Stop hit,2,2026-10-08,423.08,-5.6,0.87,7,No,,No
-exsh,2026-10-06,ACMESOLAR,Excluded,Standard,Early Watch,48.6,448.2,423.08,515.43,Stop hit,2,2026-10-08,423.08,-5.6,0.87,7,No,,No
+exsh,2026-10-06,ACMESOLAR,Excluded,Standard,Early Watch,48.6,448.2,423.08,515.43,Stop hit,2,2026-10-08,423.08,-5.6,0.87,7,No,,Yes
 short,2026-10-06,TALBROAUTO,Pullback,Standard,Early Watch,48.0,429.45,407.59,493.87,Stop hit,2,2026-10-08,407.59,-5.09,0.57,7,No,,No
 exsh,2026-10-06,TALBROAUTO,Excluded,Standard,Early Watch,48.0,429.45,407.59,493.87,Stop hit,2,2026-10-08,407.59,-5.09,0.57,7,No,,No
 short,2026-10-06,MCX,Pullback,Standard,Early Watch,47.0,3310.0,3146.85,3806.5,Stop hit,8,2026-10-16,3146.85,-4.93,2.46,1,No,,No
 exsh,2026-10-06,MCX,Excluded,Standard,Early Watch,47.0,3310.0,3146.85,3806.5,Stop hit,8,2026-10-16,3146.85,-4.93,2.46,1,No,,No
 short,2026-10-06,HERITGFOOD,Pullback,Standard,Early Watch,46.7,406.1,389.36,467.02,Stop hit,2,2026-10-08,389.36,-4.12,10.25,7,No,,No
 exsh,2026-10-06,HERITGFOOD,Excluded,Standard,Early Watch,46.7,406.1,389.36,467.02,Stop hit,2,2026-10-08,389.36,-4.12,10.25,7,No,,No
-short,2026-10-06,TNPETRO,Pullback,Standard,Early Watch,44.6,126.03,118.38,144.93,Stop hit,2,2026-10-08,118.38,-6.07,5.09,7,No,,No
-exsh,2026-10-06,TNPETRO,Excluded,Standard,Early Watch,44.6,126.03,118.38,144.93,Stop hit,2,2026-10-08,118.38,-6.07,5.09,7,No,,No
+short,2026-10-06,TNPETRO,Pullback,Standard,Early Watch,44.6,126.03,118.38,144.93,Stop hit,2,2026-10-08,118.38,-6.07,7.03,7,No,,No
+exsh,2026-10-06,TNPETRO,Excluded,Standard,Early Watch,44.6,126.03,118.38,144.93,Stop hit,2,2026-10-08,118.38,-6.07,7.03,7,No,,Yes
 short,2026-10-06,KIRIINDUS,Pullback,Standard,Early Watch,43.3,564.1,531.97,648.71,Stop hit,5,2026-10-13,531.97,-5.7,0.01,4,No,,No
 exsh,2026-10-06,KIRIINDUS,Excluded,Standard,Early Watch,43.3,564.1,531.97,648.71,Stop hit,5,2026-10-13,531.97,-5.7,0.01,4,No,,No
 short,2026-10-06,PCBL,Pullback,Standard,Early Watch,39.9,327.7,315.43,376.86,Stop hit,3,2026-10-09,315.43,-3.74,2.3,6,No,,No
@@ -95,616 +95,645 @@ short,2026-10-07,AEGISVOPAK,Pullback,Standard,Early Watch,52.2,294.25,284.81,338
 exsh,2026-10-07,AEGISVOPAK,Excluded,Standard,Early Watch,52.2,294.25,284.81,338.39,Stop hit,1,2026-10-08,284.81,-3.21,1.82,7,No,,No
 short,2026-10-07,ASKAUTOLTD,Pullback,Standard,Early Watch,50.9,626.55,601.4,720.53,Stop hit,1,2026-10-08,601.4,-4.01,1.75,7,No,,No
 exsh,2026-10-07,ASKAUTOLTD,Excluded,Standard,Early Watch,50.9,626.55,601.4,720.53,Stop hit,1,2026-10-08,601.4,-4.01,1.75,7,No,,No
-short,2026-10-07,WELENT,Pullback,Standard,Early Watch,48.6,740.75,712.29,851.86,Open,8,,723.85,-2.28,,,,,No
-exsh,2026-10-07,WELENT,Excluded,Standard,Early Watch,48.6,740.75,712.29,851.86,Open,8,,723.85,-2.28,,,,,No
+short,2026-10-07,WELENT,Pullback,Standard,Early Watch,48.6,740.75,712.29,851.86,Stop hit,8,2026-10-19,712.29,-3.84,,0,,,No
+exsh,2026-10-07,WELENT,Excluded,Standard,Early Watch,48.6,740.75,712.29,851.86,Stop hit,8,2026-10-19,712.29,-3.84,,0,,,No
 short,2026-10-07,ORCHPHARMA,Pullback,Standard,Early Watch,44.6,1023.95,959.04,1177.54,Stop hit,4,2026-10-13,959.04,-6.34,0.97,4,No,,No
 exsh,2026-10-07,ORCHPHARMA,Excluded,Standard,Early Watch,44.6,1023.95,959.04,1177.54,Stop hit,4,2026-10-13,959.04,-6.34,0.97,4,No,,No
 short,2026-10-07,GESHIP,Near Miss,Standard,Early Watch,41.5,1586.17,1516.48,1824.09,Pending,8,,,,,,,,No
 exsh,2026-10-07,GESHIP,Excluded,Standard,Early Watch,41.5,1586.17,1516.48,1824.09,Stop hit,4,2026-10-13,1516.48,-4.39,3.2,4,No,,No
 short,2026-10-07,JTLIND,Pullback,Standard,Early Watch,40.6,88.2,81.95,101.43,Stop hit,2,2026-10-09,81.95,-7.09,10.43,6,No,,No
 exsh,2026-10-07,JTLIND,Excluded,Standard,Early Watch,40.6,88.2,81.95,101.43,Stop hit,2,2026-10-09,81.95,-7.09,10.43,6,No,,No
-short,2026-10-08,PNBHOUSING,Near Miss,Standard,Early Watch,46.7,1156.91,1072.33,1330.45,Pending,7,,1166.8,0.85,,,,,No
-exsh,2026-10-08,PNBHOUSING,Excluded,Standard,Early Watch,46.7,1156.91,1072.33,1330.45,Open,7,,1166.8,0.85,,,,,No
-quality,2026-10-09,DIXON,Quality,,High Conviction,93.6,12774.0,10219.2,17883.6,Open,6,,12407.0,-2.87,,,,,No
-quality,2026-10-09,EMMVEE,Quality,,High Conviction,88.8,300.05,241.37,420.07,Open,6,,270.75,-9.77,,,,,No
-quality,2026-10-09,IKS,Quality,,High Conviction,87.7,1716.6,1379.84,2403.24,Open,6,,1719.3,0.16,,,,,No
-quality,2026-10-09,CEMPRO,Quality,,High Conviction,87.0,1125.1,900.08,1575.14,Open,6,,1184.8,5.31,,,,,No
-quality,2026-10-09,TRENT,Quality,,High Conviction,86.3,2918.2,2480.47,4085.48,Open,6,,2915.4,-0.1,,,,,No
-quality,2026-10-09,NYKAA,Quality,,High Conviction,85.2,343.0,274.4,480.2,Open,6,,343.5,0.15,,,,,Yes
-quality,2026-10-09,NETWEB,Quality,,High Conviction,85.0,4721.6,3777.28,6610.24,Open,6,,4650.6,-1.5,,,,,No
-quality,2026-10-09,RADICO,Quality,,High Conviction,84.2,4550.0,3640.0,6370.0,Open,6,,4493.3,-1.25,,,,,No
-quality,2026-10-09,KALYANKJIL,Quality,,High Conviction,80.7,554.0,443.2,775.6,Open,6,,559.25,0.95,,,,,No
-quality,2026-10-09,PERSISTENT,Quality,,High Conviction,80.4,5770.0,4616.0,8078.0,Open,6,,5807.0,0.64,,,,,No
-quality,2026-10-09,NAM-INDIA,Quality,,Good Setup,78.6,1045.0,888.25,1463.0,Open,6,,1050.7,0.55,,,,,No
-multi,2026-10-09,GARUDA,Multibagger,,Good Setup,78.5,163.63,130.9,229.08,Open,6,,163.68,0.03,,,,,No
-quality,2026-10-09,AJANTPHARM,Quality,,Good Setup,78.5,3410.1,2728.08,4774.14,Open,6,,3362.9,-1.38,,,,,No
-quality,2026-10-09,MCX,Quality,,Good Setup,78.0,3318.2,2654.56,4645.48,Open,6,,3200.6,-3.54,,,,,No
-quality,2026-10-09,ANANDRATHI,Quality,,Good Setup,77.8,2038.7,1676.39,2854.18,Open,6,,2154.5,5.68,,,,,No
-multi,2026-10-09,SHILCTECH,Multibagger,,Good Setup,77.0,3925.3,3140.24,5495.42,Open,6,,3777.3,-3.77,,,,,No
-quality,2026-10-09,LODHA,Quality,,Good Setup,77.0,1064.8,851.84,1490.72,Open,6,,1046.0,-1.77,,,,,No
-multi,2026-10-09,SEAMECLTD,Multibagger,,Good Setup,76.3,1571.2,1256.96,2199.68,Open,6,,1578.9,0.49,,,,,No
-quality,2026-10-09,ZYDUSLIFE,Quality,,Good Setup,75.7,1117.5,894.0,1564.5,Open,6,,1122.5,0.45,,,,,No
-quality,2026-10-09,POWERINDIA,Quality,,Good Setup,75.5,30605.0,26014.25,42847.0,Open,6,,28855.0,-5.72,,,,,No
-quality,2026-10-09,ANTHEM,Quality,,Good Setup,75.1,862.3,693.5,1207.22,Open,6,,820.6,-4.84,,,,,No
-quality,2026-10-09,EMCURE,Quality,,Good Setup,75.1,1833.5,1466.8,2566.9,Open,6,,1811.3,-1.21,,,,,No
-multi,2026-10-09,PARAS,Multibagger,,Good Setup,75.0,1267.9,950.93,1901.85,Open,6,,1276.2,0.65,,,,,No
-quality,2026-10-09,ABB,Quality,,Good Setup,74.8,6780.0,5763.0,9492.0,Open,6,,6892.5,1.66,,,,,No
-quality,2026-10-09,SAILIFE,Quality,,Good Setup,74.4,1487.9,1190.32,2083.06,Open,6,,1394.8,-6.26,,,,,No
-quality,2026-10-09,NUVAMA,Quality,,Good Setup,73.5,1764.4,1411.52,2470.16,Open,6,,1690.0,-4.22,,,,,No
-quality,2026-10-09,IPCALAB,Quality,,Good Setup,73.3,1915.4,1532.32,2681.56,Open,6,,1848.7,-3.48,,,,,No
-multi,2026-10-09,RAJOOENG,Multibagger,,Good Setup,72.7,59.45,45.46,87.44,Open,6,,59.0,-0.76,,,,,No
-multi,2026-10-09,SUPRIYA,Multibagger,,Good Setup,72.7,847.65,635.74,1271.48,Open,6,,888.6,4.83,,,,,No
-quality,2026-10-09,TVSMOTOR,Quality,,Good Setup,72.4,3866.8,3163.44,5413.52,Open,6,,4129.5,6.79,,,,,No
-multi,2026-10-09,IGIL,Multibagger,,Good Setup,72.1,309.05,247.24,432.67,Open,6,,322.0,4.19,,,,,No
-quality,2026-10-09,GABRIEL,Quality,,Good Setup,71.9,1362.2,1089.76,1907.08,Open,6,,1526.0,12.02,,,,,No
-quality,2026-10-09,INDHOTEL,Quality,,Good Setup,71.9,715.65,607.3,1001.91,Open,6,,768.4,7.37,,,,,Yes
-quality,2026-10-09,DATAPATTNS,Quality,,Good Setup,70.5,4084.8,3367.78,5718.72,Open,6,,4073.0,-0.29,,,,,No
-multi,2026-10-09,SENORES,Multibagger,,Good Setup,70.2,1320.0,990.0,1980.0,Open,6,,1318.8,-0.09,,,,,No
-quality,2026-10-09,CAPLIPOINT,Quality,,Good Setup,70.2,2460.8,1968.64,3445.12,Open,6,,2302.6,-6.43,,,,,No
-multi,2026-10-09,DAMCAPITAL,Multibagger,,Good Setup,70.1,143.45,114.76,200.83,Open,6,,143.3,-0.1,,,,,No
-quality,2026-10-09,MOTILALOFS,Quality,,Good Setup,69.7,1026.0,820.8,1436.4,Open,6,,1044.85,1.84,,,,,No
-quality,2026-10-09,COFORGE,Quality,,Good Setup,69.2,1867.9,1494.32,2615.06,Open,6,,1952.4,4.52,,,,,No
-quality,2026-10-09,CGCL,Quality,,Good Setup,68.7,241.82,193.46,338.55,Open,6,,251.76,4.11,,,,,No
-multi,2026-10-09,SKIPPER,Multibagger,,Good Setup,68.3,530.25,410.55,769.65,Open,6,,524.8,-1.03,,,,,No
-multi,2026-10-09,NGLFINE,Multibagger,,Good Setup,68.0,2925.0,2193.75,4387.5,Open,6,,2781.1,-4.92,,,,,No
-quality,2026-10-09,TITAN,Quality,,Good Setup,68.0,4410.0,3748.5,6174.0,Open,6,,4484.0,1.68,,,,,No
-quality,2026-10-09,KPIL,Quality,,Good Setup,67.6,1391.9,1176.47,1948.66,Open,6,,1368.0,-1.72,,,,,No
-multi,2026-10-09,GOLDIAM,Multibagger,,Good Setup,66.8,305.9,244.72,428.26,Open,6,,324.8,6.18,,,,,No
+short,2026-10-08,PNBHOUSING,Near Miss,Standard,Early Watch,46.7,1156.91,1072.33,1330.45,Pending,7,,1147.9,-0.78,,,,,No
+exsh,2026-10-08,PNBHOUSING,Excluded,Standard,Early Watch,46.7,1156.91,1072.33,1330.45,Open,7,,1147.9,-0.78,,,,,No
+quality,2026-10-09,DIXON,Quality,,High Conviction,93.6,12774.0,10219.2,17883.6,Open,6,,12100.0,-5.28,,,,,No
+quality,2026-10-09,EMMVEE,Quality,,High Conviction,88.8,300.05,241.37,420.07,Open,6,,270.1,-9.98,,,,,No
+quality,2026-10-09,IKS,Quality,,High Conviction,87.7,1716.6,1379.84,2403.24,Open,6,,1685.8,-1.79,,,,,No
+quality,2026-10-09,CEMPRO,Quality,,High Conviction,87.0,1125.1,900.08,1575.14,Open,6,,1168.8,3.88,,,,,No
+quality,2026-10-09,TRENT,Quality,,High Conviction,86.3,2918.2,2480.47,4085.48,Open,6,,2891.6,-0.91,,,,,No
+quality,2026-10-09,NYKAA,Quality,,High Conviction,85.2,343.0,274.4,480.2,Open,6,,336.65,-1.85,,,,,Yes
+quality,2026-10-09,NETWEB,Quality,,High Conviction,85.0,4721.6,3777.28,6610.24,Open,6,,4699.9,-0.46,,,,,No
+quality,2026-10-09,RADICO,Quality,,High Conviction,84.2,4550.0,3640.0,6370.0,Open,6,,4435.5,-2.52,,,,,No
+quality,2026-10-09,KALYANKJIL,Quality,,High Conviction,80.7,554.0,443.2,775.6,Open,6,,551.3,-0.49,,,,,No
+quality,2026-10-09,PERSISTENT,Quality,,High Conviction,80.4,5770.0,4616.0,8078.0,Open,6,,5690.0,-1.39,,,,,No
+quality,2026-10-09,NAM-INDIA,Quality,,Good Setup,78.6,1045.0,888.25,1463.0,Open,6,,1038.4,-0.63,,,,,No
+multi,2026-10-09,GARUDA,Multibagger,,Good Setup,78.5,163.63,130.9,229.08,Open,6,,162.36,-0.78,,,,,No
+quality,2026-10-09,AJANTPHARM,Quality,,Good Setup,78.5,3410.1,2728.08,4774.14,Open,6,,3298.9,-3.26,,,,,No
+quality,2026-10-09,MCX,Quality,,Good Setup,78.0,3318.2,2654.56,4645.48,Open,6,,3184.5,-4.03,,,,,No
+quality,2026-10-09,ANANDRATHI,Quality,,Good Setup,77.8,2038.7,1676.39,2854.18,Open,6,,2163.9,6.14,,,,,No
+multi,2026-10-09,SHILCTECH,Multibagger,,Good Setup,77.0,3925.3,3140.24,5495.42,Open,6,,3875.4,-1.27,,,,,No
+quality,2026-10-09,LODHA,Quality,,Good Setup,77.0,1064.8,851.84,1490.72,Open,6,,1030.0,-3.27,,,,,No
+multi,2026-10-09,SEAMECLTD,Multibagger,,Good Setup,76.3,1571.2,1256.96,2199.68,Open,6,,1588.7,1.11,,,,,No
+quality,2026-10-09,ZYDUSLIFE,Quality,,Good Setup,75.7,1117.5,894.0,1564.5,Open,6,,1113.9,-0.32,,,,,No
+quality,2026-10-09,POWERINDIA,Quality,,Good Setup,75.5,30605.0,26014.25,42847.0,Open,6,,28730.0,-6.13,,,,,No
+quality,2026-10-09,ANTHEM,Quality,,Good Setup,75.1,862.3,693.5,1207.22,Open,6,,808.5,-6.24,,,,,No
+quality,2026-10-09,EMCURE,Quality,,Good Setup,75.1,1833.5,1466.8,2566.9,Open,6,,1766.6,-3.65,,,,,No
+multi,2026-10-09,PARAS,Multibagger,,Good Setup,75.0,1267.9,950.93,1901.85,Open,6,,1265.1,-0.22,,,,,No
+quality,2026-10-09,ABB,Quality,,Good Setup,74.8,6780.0,5763.0,9492.0,Open,6,,6974.0,2.86,,,,,No
+quality,2026-10-09,SAILIFE,Quality,,Good Setup,74.4,1487.9,1190.32,2083.06,Open,6,,1395.9,-6.18,,,,,No
+quality,2026-10-09,NUVAMA,Quality,,Good Setup,73.5,1764.4,1411.52,2470.16,Open,6,,1683.8,-4.57,,,,,No
+quality,2026-10-09,IPCALAB,Quality,,Good Setup,73.3,1915.4,1532.32,2681.56,Open,6,,1814.5,-5.27,,,,,No
+multi,2026-10-09,RAJOOENG,Multibagger,,Good Setup,72.7,59.45,45.46,87.44,Open,6,,59.95,0.84,,,,,No
+multi,2026-10-09,SUPRIYA,Multibagger,,Good Setup,72.7,847.65,635.74,1271.48,Open,6,,873.25,3.02,,,,,No
+quality,2026-10-09,TVSMOTOR,Quality,,Good Setup,72.4,3866.8,3163.44,5413.52,Open,6,,4074.0,5.36,,,,,No
+multi,2026-10-09,IGIL,Multibagger,,Good Setup,72.1,309.05,247.24,432.67,Open,6,,321.95,4.17,,,,,No
+quality,2026-10-09,GABRIEL,Quality,,Good Setup,71.9,1362.2,1089.76,1907.08,Open,6,,1486.1,9.1,,,,,No
+quality,2026-10-09,INDHOTEL,Quality,,Good Setup,71.9,715.65,607.3,1001.91,Open,6,,760.0,6.2,,,,,Yes
+quality,2026-10-09,DATAPATTNS,Quality,,Good Setup,70.5,4084.8,3367.78,5718.72,Open,6,,4051.8,-0.81,,,,,No
+multi,2026-10-09,SENORES,Multibagger,,Good Setup,70.2,1320.0,990.0,1980.0,Open,6,,1253.6,-5.03,,,,,No
+quality,2026-10-09,CAPLIPOINT,Quality,,Good Setup,70.2,2460.8,1968.64,3445.12,Open,6,,2258.8,-8.21,,,,,No
+multi,2026-10-09,DAMCAPITAL,Multibagger,,Good Setup,70.1,143.45,114.76,200.83,Open,6,,142.51,-0.66,,,,,No
+quality,2026-10-09,MOTILALOFS,Quality,,Good Setup,69.7,1026.0,820.8,1436.4,Open,6,,1021.0,-0.49,,,,,No
+quality,2026-10-09,COFORGE,Quality,,Good Setup,69.2,1867.9,1494.32,2615.06,Open,6,,1925.0,3.06,,,,,No
+quality,2026-10-09,CGCL,Quality,,Good Setup,68.7,241.82,193.46,338.55,Open,6,,243.69,0.77,,,,,No
+multi,2026-10-09,SKIPPER,Multibagger,,Good Setup,68.3,530.25,410.55,769.65,Open,6,,520.85,-1.77,,,,,No
+multi,2026-10-09,NGLFINE,Multibagger,,Good Setup,68.0,2925.0,2193.75,4387.5,Open,6,,2772.9,-5.2,,,,,No
+quality,2026-10-09,TITAN,Quality,,Good Setup,68.0,4410.0,3748.5,6174.0,Open,6,,4424.2,0.32,,,,,No
+quality,2026-10-09,KPIL,Quality,,Good Setup,67.6,1391.9,1176.47,1948.66,Open,6,,1346.7,-3.25,,,,,No
+multi,2026-10-09,GOLDIAM,Multibagger,,Good Setup,66.8,305.9,244.72,428.26,Open,6,,319.85,4.56,,,,,No
 exsh,2026-10-09,YATHARTH,Excluded,Standard,Good Setup,66.6,1022.2,955.74,1199.43,Stop hit,2,2026-10-13,955.74,-6.5,5.15,4,No,,No
-quality,2026-10-09,ABSLAMC,Quality,,Good Setup,66.5,1004.05,853.44,1405.67,Open,6,,965.05,-3.88,,,,,No
-quality,2026-10-09,APLAPOLLO,Quality,,Early Watch,64.1,2114.1,1694.75,2959.74,Open,6,,2136.3,1.05,,,,,No
-quality,2026-10-09,SCHNEIDER,Quality,,Early Watch,63.9,1176.9,1000.37,1647.66,Open,6,,1145.7,-2.65,,,,,No
-multi,2026-10-09,DYCL,Multibagger,,Early Watch,63.1,420.6,315.45,630.9,Open,6,,401.8,-4.47,,,,,No
-quality,2026-10-09,KARURVYSYA,Quality,,Early Watch,62.8,339.9,271.92,475.86,Open,6,,370.4,8.97,,,,,No
-multi,2026-10-09,BHARATSE,Multibagger,,Early Watch,62.7,210.18,164.9,300.74,Open,6,,205.26,-2.34,,,,,No
-quality,2026-10-09,MAHABANK,Quality,,Early Watch,60.9,83.16,69.8,116.42,Open,6,,81.21,-2.34,,,,,No
-quality,2026-10-09,MEDANTA,Quality,,Early Watch,60.8,1312.7,1053.13,1837.78,Open,6,,1248.8,-4.87,,,,,No
-quality,2026-10-09,SHRIPISTON,Quality,,Early Watch,60.4,4284.5,3427.6,5998.3,Open,6,,4722.8,10.23,,,,,No
-quality,2026-10-09,INOXINDIA,Quality,,Early Watch,59.2,2056.9,1645.52,2879.66,Open,6,,1993.2,-3.1,,,,,No
-exsh,2026-10-09,ARIS,Excluded,Standard,Early Watch,58.8,140.31,128.83,170.91,Open,6,,144.88,3.26,,,,,Yes
-quality,2026-10-09,BAJAJHLDNG,Quality,,Early Watch,58.3,10820.0,9197.0,15148.0,Open,6,,11239.0,3.87,,,,,No
-exsh,2026-10-09,ABDL,Excluded,Standard,Early Watch,58.3,711.55,663.45,839.81,Open,6,,743.6,4.5,,,,,No
-quality,2026-10-09,ICICIBANK,Quality,,Early Watch,57.1,1355.0,1151.75,1897.0,Open,6,,1389.3,2.53,,,,,No
-multi,2026-10-09,SJS,Multibagger,,Early Watch,56.7,1994.8,1556.75,2870.9,Open,6,,2025.6,1.54,,,,,No
-exsh,2026-10-09,AUROPHARMA,Excluded,Standard,Early Watch,56.3,1693.0,1639.68,1835.2,Open,6,,1655.5,-2.22,,,,,No
-exsh,2026-10-09,MBAPL,Excluded,Standard,Early Watch,54.6,165.32,156.74,188.19,Open,6,,169.5,2.53,,,,,No
+quality,2026-10-09,ABSLAMC,Quality,,Good Setup,66.5,1004.05,853.44,1405.67,Open,6,,958.7,-4.52,,,,,No
+quality,2026-10-09,APLAPOLLO,Quality,,Early Watch,64.1,2114.1,1694.75,2959.74,Open,6,,2144.6,1.44,,,,,No
+quality,2026-10-09,SCHNEIDER,Quality,,Early Watch,63.9,1176.9,1000.37,1647.66,Open,6,,1131.1,-3.89,,,,,No
+multi,2026-10-09,DYCL,Multibagger,,Early Watch,63.1,420.6,315.45,630.9,Open,6,,396.4,-5.75,,,,,No
+quality,2026-10-09,KARURVYSYA,Quality,,Early Watch,62.8,339.9,271.92,475.86,Open,6,,370.05,8.87,,,,,No
+multi,2026-10-09,BHARATSE,Multibagger,,Early Watch,62.7,210.18,164.9,300.74,Open,6,,202.62,-3.6,,,,,No
+quality,2026-10-09,MAHABANK,Quality,,Early Watch,60.9,83.16,69.8,116.42,Open,6,,80.96,-2.65,,,,,No
+quality,2026-10-09,MEDANTA,Quality,,Early Watch,60.8,1312.7,1053.13,1837.78,Open,6,,1238.1,-5.68,,,,,No
+quality,2026-10-09,SHRIPISTON,Quality,,Early Watch,60.4,4284.5,3427.6,5998.3,Open,6,,4621.0,7.85,,,,,No
+quality,2026-10-09,INOXINDIA,Quality,,Early Watch,59.2,2056.9,1645.52,2879.66,Open,6,,1999.4,-2.8,,,,,No
+exsh,2026-10-09,ARIS,Excluded,Standard,Early Watch,58.8,140.31,128.83,170.91,Open,6,,138.01,-1.64,,,,,No
+quality,2026-10-09,BAJAJHLDNG,Quality,,Early Watch,58.3,10820.0,9197.0,15148.0,Open,6,,11265.0,4.11,,,,,No
+exsh,2026-10-09,ABDL,Excluded,Standard,Early Watch,58.3,711.55,663.45,839.81,Open,6,,739.95,3.99,,,,,No
+quality,2026-10-09,ICICIBANK,Quality,,Early Watch,57.1,1355.0,1151.75,1897.0,Open,6,,1381.0,1.92,,,,,No
+multi,2026-10-09,SJS,Multibagger,,Early Watch,56.7,1994.8,1556.75,2870.9,Open,6,,2003.9,0.46,,,,,No
+exsh,2026-10-09,AUROPHARMA,Excluded,Standard,Early Watch,56.3,1693.0,1639.68,1835.2,Stop hit,6,2026-10-19,1639.68,-3.15,,0,,,No
+exsh,2026-10-09,MBAPL,Excluded,Standard,Early Watch,54.6,165.32,156.74,188.19,Open,6,,164.35,-0.59,,,,,No
 exsh,2026-10-09,SYRMA,Excluded,Standard,Early Watch,54.3,1719.9,1607.56,2019.47,Stop hit,5,2026-10-16,1607.56,-6.53,0.4,1,No,,No
-quality,2026-10-09,ASTRAMICRO,Quality,,Early Watch,52.6,1652.9,1322.32,2314.06,Open,6,,1624.0,-1.75,,,,,No
-multi,2026-10-09,VINCOFE,Multibagger,,Early Watch,52.2,173.46,130.1,260.19,Open,6,,173.69,0.13,,,,,No
-exsh,2026-10-09,SGMART,Excluded,Standard,Early Watch,51.7,775.6,729.94,897.36,Open,6,,792.0,2.11,,,,,No
+quality,2026-10-09,ASTRAMICRO,Quality,,Early Watch,52.6,1652.9,1322.32,2314.06,Open,6,,1617.2,-2.16,,,,,No
+multi,2026-10-09,VINCOFE,Multibagger,,Early Watch,52.2,173.46,130.1,260.19,Open,6,,172.33,-0.65,,,,,No
+exsh,2026-10-09,SGMART,Excluded,Standard,Early Watch,51.7,775.6,729.94,897.36,Open,6,,776.25,0.08,,,,,No
 exsh,2026-10-09,WSTCSTPAPR,Excluded,Standard,Early Watch,50.9,727.65,680.88,852.38,Target hit,1,2026-10-12,852.38,17.14,,,,,No
 exsh,2026-10-09,RBLBANK,Excluded,Standard,Early Watch,50.0,418.0,400.16,465.57,Stop hit,2,2026-10-13,400.0,-4.31,-2.61,4,No,,No
 exsh,2026-10-09,QUADFUTURE,Excluded,Standard,Early Watch,49.7,511.25,467.89,626.86,Stop hit,2,2026-10-13,467.89,-8.48,3.31,4,No,,No
 exsh,2026-10-09,MAHABANK,Excluded,Standard,Early Watch,43.2,83.16,79.45,93.05,Stop hit,4,2026-10-15,79.45,-4.46,2.74,2,No,,No
-exsh,2026-10-09,CARTRADE,Excluded,Standard,Early Watch,40.9,2951.0,2778.96,3409.77,Open,6,,3004.8,1.82,,,,,No
-exsh,2026-10-09,CUB,Excluded,Standard,Early Watch,40.9,231.42,218.55,265.74,Open,6,,227.96,-1.5,,,,,No
+exsh,2026-10-09,CARTRADE,Excluded,Standard,Early Watch,40.9,2951.0,2778.96,3409.77,Open,6,,3032.9,2.78,,,,,No
+exsh,2026-10-09,CUB,Excluded,Standard,Early Watch,40.9,231.42,218.55,265.74,Open,6,,230.95,-0.2,,,,,Yes
 newl,2026-10-12,3BBLACKBIO,New listing,,Good Setup,79.0,1586.4,1467.42,1824.36,Stop hit,2,2026-10-14,1467.42,-7.5,1.4,3,No,,No
 newl,2026-10-12,AUGMONT,New listing,,Good Setup,79.0,1337.8,1237.47,1538.47,Stop hit,2,2026-10-14,1235.1,-7.68,12.27,3,No,,No
-newl,2026-10-12,KNACK,New listing,,Good Setup,79.0,207.14,191.6,238.21,Open,5,,206.45,-0.33,,,,,No
+newl,2026-10-12,KNACK,New listing,,Good Setup,79.0,207.14,191.6,238.21,Open,5,,205.6,-0.74,,,,,No
 newl,2026-10-12,KOTIC,New listing,,Good Setup,79.0,162.99,150.77,187.44,Stop hit,1,2026-10-13,150.77,-7.5,2.81,4,No,,No
 newl,2026-10-12,LCL,New listing,,Good Setup,79.0,630.85,583.54,725.48,Open,5,,594.45,-5.77,,,,,No
 newl,2026-10-12,KMCSHIL,New listing,,Good Setup,79.0,169.77,157.04,195.24,Stop hit,1,2026-10-13,157.04,-7.5,7.55,4,No,,No
 newl,2026-10-12,KISSHT,New listing,,Good Setup,79.0,369.1,341.42,424.47,Stop hit,5,2026-10-19,341.42,-7.5,,0,,,No
-newl,2026-10-12,INDOMIM,New listing,,Good Setup,79.0,1272.6,1197.9,1463.49,Stop hit,1,2026-10-13,1197.9,-5.87,4.62,4,No,,No
+newl,2026-10-12,INDOMIM,New listing,,Good Setup,79.0,1272.6,1197.9,1463.49,Stop hit,1,2026-10-13,1197.9,-5.87,4.62,4,No,,Yes
 newl,2026-10-12,FREDUN,New listing,,Good Setup,79.0,1552.3,1435.88,1785.15,Stop hit,3,2026-10-15,1435.88,-7.5,4.47,2,No,,No
-newl,2026-10-12,TGVSL,New listing,,Good Setup,79.0,121.4,112.3,139.61,Open,5,,125.06,3.01,,,,,No
-newl,2026-10-12,TIMEX,New listing,,Good Setup,79.0,724.4,676.27,833.06,Stop hit,4,2026-10-16,676.27,-6.64,3.59,1,No,,No
-newl,2026-10-12,RAMBHAJO,New listing,,Good Setup,79.0,357.45,330.64,411.07,Open,5,,388.0,8.55,,,,,No
-newl,2026-10-12,PRADPME,New listing,,Good Setup,79.0,635.35,587.7,730.65,Open,5,,662.25,4.23,,,,,No
+newl,2026-10-12,TGVSL,New listing,,Good Setup,79.0,121.4,112.3,139.61,Open,5,,124.39,2.46,,,,,No
+newl,2026-10-12,TIMEX,New listing,,Good Setup,79.0,724.4,676.27,833.06,Stop hit,4,2026-10-16,676.27,-6.64,4.95,1,No,,No
+newl,2026-10-12,RAMBHAJO,New listing,,Good Setup,79.0,357.45,330.64,411.07,Open,5,,393.0,9.95,,,,,No
+newl,2026-10-12,PRADPME,New listing,,Good Setup,79.0,635.35,587.7,730.65,Open,5,,631.4,-0.62,,,,,No
 newl,2026-10-12,AMAL,New listing,,Good Setup,79.0,917.9,849.06,1055.59,Target hit,1,2026-10-13,1055.59,15.0,,,,,No
-newl,2026-10-12,HTEL,New listing,,Good Setup,75.0,90.37,83.59,103.93,Open,5,,84.99,-5.95,,,,,No
+newl,2026-10-12,HTEL,New listing,,Good Setup,75.0,90.37,83.59,103.93,Stop hit,5,2026-10-19,83.59,-7.5,,0,,,No
 newl,2026-10-12,FERMENTA,New listing,,Good Setup,75.0,517.55,478.73,595.18,Stop hit,5,2026-10-19,478.73,-7.5,,0,,,No
 newl,2026-10-12,BPLPHARMA,New listing,,Good Setup,75.0,1864.0,1724.2,2143.6,Stop hit,5,2026-10-19,1724.2,-7.5,,0,,,No
-newl,2026-10-12,SHUKRAPHAR,New listing,,Good Setup,75.0,66.94,61.92,76.98,Open,5,,69.16,3.32,,,,,No
-newl,2026-10-12,PANORAMA,New listing,,Good Setup,75.0,61.62,57.0,70.86,Open,5,,63.51,3.07,,,,,No
+newl,2026-10-12,SHUKRAPHAR,New listing,,Good Setup,75.0,66.94,61.92,76.98,Open,5,,68.62,2.51,,,,,No
+newl,2026-10-12,PANORAMA,New listing,,Good Setup,75.0,61.62,57.0,70.86,Open,5,,63.1,2.4,,,,,No
 newl,2026-10-12,INDOKEM,New listing,,Good Setup,75.0,619.1,572.67,711.96,Target hit,1,2026-10-13,711.96,15.0,,,,,No
-newl,2026-10-12,TANAA,New listing,,Good Setup,75.0,325.9,304.92,374.78,Open,5,,330.45,1.4,,,,,No
-newl,2026-10-12,FRONTSP,New listing,,Good Setup,75.0,1378.0,1325.61,1584.7,Open,5,,1347.9,-2.18,,,,,No
-newl,2026-10-12,GYFTR,New listing,,Good Setup,75.0,170.61,157.81,196.2,Open,5,,174.49,2.27,,,,,No
+newl,2026-10-12,TANAA,New listing,,Good Setup,75.0,325.9,304.92,374.78,Open,5,,328.65,0.84,,,,,No
+newl,2026-10-12,FRONTSP,New listing,,Good Setup,75.0,1378.0,1325.61,1584.7,Stop hit,5,2026-10-19,1325.61,-3.8,,0,,,No
+newl,2026-10-12,GYFTR,New listing,,Good Setup,75.0,170.61,157.81,196.2,Open,5,,174.67,2.38,,,,,No
 exsh,2026-10-12,AZAD,Excluded,Standard,Good Setup,71.4,2968.4,2759.72,3524.89,Stop hit,3,2026-10-15,2759.72,-7.03,2.62,2,No,,No
-newl,2026-10-12,BLEL,New listing,,Good Setup,70.0,495.6,458.43,569.94,Open,5,,492.55,-0.62,,,,,No
+newl,2026-10-12,BLEL,New listing,,Good Setup,70.0,495.6,458.43,569.94,Open,5,,475.45,-4.07,,,,,No
 newl,2026-10-12,KLBRENG-B,New listing,,Good Setup,70.0,503.25,487.28,578.74,Stop hit,3,2026-10-15,487.28,-3.17,2.41,2,No,,No
-newl,2026-10-12,TECHNOCRAF,New listing,,Good Setup,70.0,474.15,450.55,545.27,Open,5,,503.35,6.16,,,,,No
-newl,2026-10-12,MERCURYEV,New listing,,Good Setup,70.0,36.97,35.64,42.52,Open,5,,36.2,-2.08,,,,,No
-newl,2026-10-12,JNPR,New listing,,Good Setup,70.0,275.25,254.61,316.54,Open,5,,260.2,-5.47,,,,,No
-newl,2026-10-12,MVELECTRO,New listing,,Good Setup,70.0,888.6,821.95,1021.89,Open,5,,936.5,5.39,,,,,No
-newl,2026-10-12,LALITHAA,New listing,,Good Setup,70.0,382.6,353.91,439.99,Stop hit,1,2026-10-13,353.91,-7.5,4.97,4,No,,No
+newl,2026-10-12,TECHNOCRAF,New listing,,Good Setup,70.0,474.15,450.55,545.27,Open,5,,499.5,5.35,,,,,No
+newl,2026-10-12,MERCURYEV,New listing,,Good Setup,70.0,36.97,35.64,42.52,Open,5,,36.11,-2.33,,,,,No
+newl,2026-10-12,JNPR,New listing,,Good Setup,70.0,275.25,254.61,316.54,Open,5,,263.0,-4.45,,,,,No
+newl,2026-10-12,MVELECTRO,New listing,,Good Setup,70.0,888.6,821.95,1021.89,Open,5,,891.25,0.3,,,,,No
+newl,2026-10-12,LALITHAA,New listing,,Good Setup,70.0,382.6,353.91,439.99,Stop hit,1,2026-10-13,353.91,-7.5,5.13,4,No,,No
 exsh,2026-10-12,FINCABLES,Excluded,Standard,Good Setup,67.4,1438.3,1354.59,1661.53,Stop hit,5,2026-10-19,1354.59,-5.82,,0,,,No
 newl,2026-10-12,FEDDERSHOL,New listing,,Good Setup,65.0,59.78,58.51,68.75,Stop hit,1,2026-10-13,58.2,-2.64,11.68,4,No,,No
-newl,2026-10-12,ELANTAS,New listing,,Good Setup,65.0,13707.0,12936.33,15763.05,Open,5,,13880.0,1.26,,,,,No
-newl,2026-10-12,WPIL,New listing,,Good Setup,65.0,430.9,411.84,495.53,Open,5,,438.25,1.71,,,,,No
+newl,2026-10-12,ELANTAS,New listing,,Good Setup,65.0,13707.0,12936.33,15763.05,Open,5,,13556.0,-1.1,,,,,No
+newl,2026-10-12,WPIL,New listing,,Good Setup,65.0,430.9,411.84,495.53,Open,5,,436.05,1.2,,,,,No
 newl,2026-10-12,MOLBIO,New listing,,Early Watch,60.0,1438.6,1330.7,1654.39,Target hit,4,2026-10-16,1654.39,15.0,,,,,No
 newl,2026-10-12,CMLL,New listing,,Early Watch,60.0,529.25,495.64,608.64,Target hit,1,2026-10-13,608.64,15.0,,,,,No
-newl,2026-10-12,VOEPL,New listing,,Early Watch,60.0,524.95,485.58,603.69,Open,5,,527.0,0.39,,,,,No
-newl,2026-10-12,SHANKESH,New listing,,Early Watch,60.0,98.58,91.19,113.37,Open,5,,100.39,1.84,,,,,No
+newl,2026-10-12,VOEPL,New listing,,Early Watch,60.0,524.95,485.58,603.69,Open,5,,513.0,-2.28,,,,,No
+newl,2026-10-12,SHANKESH,New listing,,Early Watch,60.0,98.58,91.19,113.37,Open,5,,101.06,2.52,,,,,No
 exsh,2026-10-12,PRECWIRE,Excluded,Standard,Early Watch,59.4,485.15,451.55,574.75,Stop hit,3,2026-10-15,451.55,-6.93,0.75,2,No,,No
 exsh,2026-10-12,LALPATHLAB,Excluded,Standard,Early Watch,58.6,1969.7,1869.84,2235.99,Stop hit,3,2026-10-15,1869.84,-5.07,2.04,2,No,,No
 newl,2026-10-12,CORDELIA,New listing,,Early Watch,55.0,100.98,97.56,116.13,Stop hit,1,2026-10-13,97.56,-3.39,3.32,4,No,,No
-newl,2026-10-12,TAALTECH,New listing,,Early Watch,55.0,1018.4,942.02,1171.16,Open,5,,979.8,-3.79,,,,,No
+newl,2026-10-12,TAALTECH,New listing,,Early Watch,55.0,1018.4,942.02,1171.16,Stop hit,5,2026-10-19,942.02,-7.5,,0,,,No
 newl,2026-10-12,RIR,New listing,,Early Watch,55.0,174.12,168.93,200.24,Stop hit,3,2026-10-15,168.93,-2.98,5.31,2,No,,No
-newl,2026-10-12,TEMPSENS,New listing,,Early Watch,55.0,576.4,533.17,662.86,Open,5,,547.35,-5.04,,,,,No
-newl,2026-10-12,XTRANET,New listing,,Early Watch,55.0,287.5,265.94,330.62,Open,5,,301.5,4.87,,,,,No
-exsh,2026-10-12,WESTLIFE,Excluded,Standard,Early Watch,54.2,586.9,547.62,691.64,Open,5,,569.35,-2.99,,,,,No
-exsh,2026-10-12,UNIMECH,Excluded,Standard,Early Watch,52.2,1797.1,1663.91,2152.27,Open,5,,1747.2,-2.78,,,,,No
+newl,2026-10-12,TEMPSENS,New listing,,Early Watch,55.0,576.4,533.17,662.86,Stop hit,5,2026-10-19,533.17,-7.5,,0,,,No
+newl,2026-10-12,XTRANET,New listing,,Early Watch,55.0,287.5,265.94,330.62,Open,5,,300.5,4.52,,,,,No
+exsh,2026-10-12,WESTLIFE,Excluded,Standard,Early Watch,54.2,586.9,547.62,691.64,Stop hit,5,2026-10-19,547.62,-6.69,,0,,,No
+exsh,2026-10-12,UNIMECH,Excluded,Standard,Early Watch,52.2,1797.1,1663.91,2152.27,Stop hit,5,2026-10-19,1663.91,-7.41,,0,,,No
 exsh,2026-10-12,SHYAMMETL,Excluded,Standard,Early Watch,51.2,1088.5,1040.45,1216.64,Target hit,4,2026-10-16,1216.64,11.77,,,,,No
-exsh,2026-10-12,INDOBORAX,Excluded,Standard,Early Watch,50.7,489.1,451.2,590.16,Open,5,,464.95,-4.94,,,,,No
+exsh,2026-10-12,INDOBORAX,Excluded,Standard,Early Watch,50.7,489.1,451.2,590.16,Open,5,,458.2,-6.32,,,,,No
 newl,2026-10-12,KUSUMGAR,New listing,,Early Watch,50.0,595.55,571.23,684.88,Stop hit,4,2026-10-16,571.23,-4.08,3.81,1,No,,No
 newl,2026-10-12,KPL,New listing,,Early Watch,50.0,3564.3,3435.3,4098.95,Stop hit,1,2026-10-13,3435.3,-3.62,2.76,4,No,,No
-exsh,2026-10-12,TARSONS,Excluded,Standard,Early Watch,48.3,330.5,306.32,394.97,Open,5,,324.0,-1.97,,,,,No
+exsh,2026-10-12,TARSONS,Excluded,Standard,Early Watch,48.3,330.5,306.32,394.97,Open,5,,315.25,-4.61,,,,,No
 exul,2026-10-12,KISSHT,Excluded,Standard,Early Watch,44.3,373.65,349.44,438.22,Stop hit,4,2026-10-16,349.44,-6.48,1.45,1,No,,No
-exsh,2026-10-12,EDELWEISS,Excluded,Standard,Early Watch,44.0,132.9,124.92,154.18,Open,5,,131.6,-0.98,,,,,No
+exsh,2026-10-12,EDELWEISS,Excluded,Standard,Early Watch,44.0,132.9,124.92,154.18,Open,5,,128.16,-3.57,,,,,No
 exul,2026-10-12,NAVINFLUOR,Excluded,Standard,Early Watch,40.9,8561.0,8250.39,9389.29,Stop hit,3,2026-10-15,8250.39,-3.63,0.29,2,No,,Yes
-newl,2026-10-13,SYMBIOTEC,New listing,,Good Setup,70.0,1146.2,1060.23,1318.13,Open,4,,1283.0,11.94,,,,,No
+newl,2026-10-13,SYMBIOTEC,New listing,,Good Setup,70.0,1146.2,1060.23,1318.13,Open,4,,1238.6,8.06,,,,,No
 exsh,2026-10-14,EIMCOELECO,Excluded,Standard,High Conviction,86.6,2454.2,2290.76,2890.03,Stop hit,2,2026-10-16,2290.76,-6.66,0.4,1,No,,No
-early,2026-10-14,EIMCOELECO,Breakout,Short Term,High Conviction,84.6,2454.2,2188.81,2998.99,Open,3,,2267.0,-7.63,,,,,No
-exea,2026-10-14,EIMCOELECO,Excluded,Standard,High Conviction,84.6,2454.2,2188.81,2998.99,Open,3,,2267.0,-7.63,,,,,No
-early,2026-10-14,NAZARA,Breakout,Short Term,Good Setup,77.6,405.2,369.51,480.08,Open,3,,410.75,1.37,,,,,No
-exea,2026-10-14,NAZARA,Excluded,Standard,Good Setup,77.6,405.2,369.51,480.08,Open,3,,410.75,1.37,,,,,Yes
+early,2026-10-14,EIMCOELECO,Breakout,Short Term,High Conviction,84.6,2454.2,2188.81,2998.99,Open,3,,2254.2,-8.15,,,,,No
+exea,2026-10-14,EIMCOELECO,Excluded,Standard,High Conviction,84.6,2454.2,2188.81,2998.99,Open,3,,2254.2,-8.15,,,,,No
+early,2026-10-14,NAZARA,Breakout,Short Term,Good Setup,77.6,405.2,369.51,480.08,Open,3,,404.2,-0.25,,,,,No
+exea,2026-10-14,NAZARA,Excluded,Standard,Good Setup,77.6,405.2,369.51,480.08,Open,3,,404.2,-0.25,,,,,Yes
 early,2026-10-14,GANDHAR,Breakout,Short Term,Good Setup,75.6,310.95,281.92,372.33,Stop hit,3,2026-10-19,281.92,-9.34,,0,,,No
 exea,2026-10-14,GANDHAR,Excluded,Standard,Good Setup,75.6,310.95,281.92,372.33,Stop hit,3,2026-10-19,281.92,-9.34,,0,,,Yes
-early,2026-10-14,LAURUSLABS,Pre-Breakout,Short Term,Good Setup,68.2,2073.34,1974.01,2321.59,Pending,3,,2073.3,-0.0,,,,,Yes
-exea,2026-10-14,LAURUSLABS,Excluded,Standard,Good Setup,68.2,2073.34,1974.01,2321.59,Open,3,,2073.3,-0.0,,,,,No
+early,2026-10-14,LAURUSLABS,Pre-Breakout,Short Term,Good Setup,68.2,2073.34,1974.01,2321.59,Pending,3,,2069.0,-0.21,,,,,Yes
+exea,2026-10-14,LAURUSLABS,Excluded,Standard,Good Setup,68.2,2073.34,1974.01,2321.59,Open,3,,2069.0,-0.21,,,,,No
 exsh,2026-10-14,JGCHEM,Excluded,Standard,Good Setup,67.8,681.7,619.41,847.8,Stop hit,3,2026-10-19,619.41,-9.14,,0,,,No
-early,2026-10-15,SOUTHBANK,Breakout,Long Term,High Conviction,95.9,51.48,45.91,78.16,Open,2,,52.66,2.29,,,,,Yes
-exea,2026-10-15,SOUTHBANK,Excluded,Standard,High Conviction,95.9,51.48,45.91,78.16,Open,2,,52.66,2.29,,,,,No
-early,2026-10-15,KRISHANA,Breakout,Long Term,High Conviction,92.3,211.95,180.3,329.26,Open,2,,209.12,-1.34,,,,,No
-exea,2026-10-15,KRISHANA,Excluded,Standard,High Conviction,92.3,211.95,180.3,329.26,Open,2,,209.12,-1.34,,,,,Yes
-exsh,2026-10-15,SOUTHBANK,Excluded,Standard,High Conviction,87.9,51.48,48.81,58.59,Open,2,,52.66,2.29,,,,,No
-early,2026-10-15,KOTAKBANK,Breakout,Long Term,High Conviction,87.1,447.95,413.5,611.56,Open,2,,444.5,-0.77,,,,,Yes
-exea,2026-10-15,KOTAKBANK,Excluded,Standard,High Conviction,87.1,447.95,413.5,611.56,Open,2,,444.5,-0.77,,,,,No
-early,2026-10-15,ADVANCE,Breakout,Long Term,High Conviction,85.4,158.43,112.47,294.63,Open,2,,156.19,-1.41,,,,,No
-exea,2026-10-15,ADVANCE,Excluded,Standard,High Conviction,85.4,158.43,112.47,294.63,Open,2,,156.19,-1.41,,,,,Yes
-early,2026-10-15,OAL,Breakout,Long Term,High Conviction,80.8,579.15,501.26,1046.51,Open,2,,627.15,8.29,,,,,Yes
-exea,2026-10-15,OAL,Excluded,Standard,High Conviction,80.8,579.15,501.26,1046.51,Open,2,,627.15,8.29,,,,,No
-early,2026-10-15,SKYGOLD,Breakout,Long Term,Good Setup,77.1,1001.45,755.91,1619.07,Open,2,,1063.35,6.18,,,,,Yes
-exea,2026-10-15,SKYGOLD,Excluded,Standard,Good Setup,77.1,1001.45,755.91,1619.07,Open,2,,1063.35,6.18,,,,,No
-exsh,2026-10-15,OAL,Excluded,Standard,Good Setup,72.8,579.15,532.41,703.78,Open,2,,627.15,8.29,,,,,No
-early,2026-10-15,GCSL,Breakout,Long Term,Good Setup,72.7,735.3,673.11,985.37,Open,2,,747.0,1.59,,,,,Yes
-exea,2026-10-15,GCSL,Excluded,Standard,Good Setup,72.7,735.3,673.11,985.37,Open,2,,747.0,1.59,,,,,No
+early,2026-10-15,SOUTHBANK,Breakout,Long Term,High Conviction,95.9,51.48,45.91,78.16,Open,2,,54.26,5.4,,,,,Yes
+exea,2026-10-15,SOUTHBANK,Excluded,Standard,High Conviction,95.9,51.48,45.91,78.16,Open,2,,54.26,5.4,,,,,No
+early,2026-10-15,KRISHANA,Breakout,Long Term,High Conviction,92.3,211.95,180.3,329.26,Open,2,,212.89,0.44,,,,,Yes
+exea,2026-10-15,KRISHANA,Excluded,Standard,High Conviction,92.3,211.95,180.3,329.26,Open,2,,212.89,0.44,,,,,No
+exsh,2026-10-15,SOUTHBANK,Excluded,Standard,High Conviction,87.9,51.48,48.81,58.59,Open,2,,54.26,5.4,,,,,Yes
+early,2026-10-15,KOTAKBANK,Breakout,Long Term,High Conviction,87.1,447.95,413.5,611.56,Open,2,,442.3,-1.26,,,,,No
+exea,2026-10-15,KOTAKBANK,Excluded,Standard,High Conviction,87.1,447.95,413.5,611.56,Open,2,,442.3,-1.26,,,,,Yes
+early,2026-10-15,ADVANCE,Breakout,Long Term,High Conviction,85.4,158.43,112.47,294.63,Open,2,,156.82,-1.02,,,,,No
+exea,2026-10-15,ADVANCE,Excluded,Standard,High Conviction,85.4,158.43,112.47,294.63,Open,2,,156.82,-1.02,,,,,Yes
+early,2026-10-15,OAL,Breakout,Long Term,High Conviction,80.8,579.15,501.26,1046.51,Open,2,,624.4,7.81,,,,,Yes
+exea,2026-10-15,OAL,Excluded,Standard,High Conviction,80.8,579.15,501.26,1046.51,Open,2,,624.4,7.81,,,,,No
+early,2026-10-15,SKYGOLD,Breakout,Long Term,Good Setup,77.1,1001.45,755.91,1619.07,Open,2,,1028.1,2.66,,,,,No
+exea,2026-10-15,SKYGOLD,Excluded,Standard,Good Setup,77.1,1001.45,755.91,1619.07,Open,2,,1028.1,2.66,,,,,Yes
+exsh,2026-10-15,OAL,Excluded,Standard,Good Setup,72.8,579.15,532.41,703.78,Open,2,,624.4,7.81,,,,,No
+early,2026-10-15,GCSL,Breakout,Long Term,Good Setup,72.7,735.3,673.11,985.37,Open,2,,732.75,-0.35,,,,,Yes
+exea,2026-10-15,GCSL,Excluded,Standard,Good Setup,72.7,735.3,673.11,985.37,Open,2,,732.75,-0.35,,,,,No
 early,2026-10-15,PREMEXPLN,Pre-Breakout,Short Term,Good Setup,70.1,703.38,669.34,776.92,Pending,2,,,,,,,,No
-exea,2026-10-15,PREMEXPLN,Excluded,Standard,Good Setup,70.1,703.38,669.34,776.92,Open,2,,692.6,-1.53,,,,,No
-exsh,2026-10-15,MUFIN,Excluded,Standard,Early Watch,55.6,139.54,133.0,156.98,Open,2,,138.42,-0.8,,,,,No
-exsh,2026-10-15,PREMEXPLN,Excluded,Standard,Early Watch,54.3,690.6,679.57,720.01,Open,2,,692.6,0.29,,,,,No
-exsh,2026-10-15,SOLARA,Excluded,Standard,Early Watch,31.8,648.8,589.67,806.47,Open,2,,676.95,4.34,,,,,No
-early,2026-10-16,TIPSMUSIC,Breakout,Long Term,High Conviction,95.4,746.9,643.53,1226.04,Open,1,,776.3,3.94,,,,,Yes
-exea,2026-10-16,TIPSMUSIC,Excluded,Standard,High Conviction,95.4,746.9,643.53,1226.04,Open,1,,776.3,3.94,,,,,No
-early,2026-10-16,KMEW,Breakout,Long Term,High Conviction,88.2,3327.7,2935.47,5681.09,Open,1,,3308.6,-0.57,,,,,No
-exea,2026-10-16,KMEW,Excluded,Standard,High Conviction,88.2,3327.7,2935.47,5681.09,Open,1,,3308.6,-0.57,,,,,Yes
-exsh,2026-10-16,KARURVYSYA,Excluded,Standard,High Conviction,85.9,355.65,338.54,401.28,Open,1,,370.4,4.15,,,,,No
-early,2026-10-16,PVRINOX,Breakout,Long Term,High Conviction,84.7,1401.0,1165.72,2201.36,Open,1,,1398.4,-0.19,,,,,No
-exea,2026-10-16,PVRINOX,Excluded,Standard,High Conviction,84.7,1401.0,1165.72,2201.36,Open,1,,1398.4,-0.19,,,,,Yes
-early,2026-10-16,INDHOTEL,Breakout,Long Term,High Conviction,83.5,772.1,716.87,1056.51,Open,1,,768.4,-0.48,,,,,Yes
-exea,2026-10-16,INDHOTEL,Excluded,Standard,High Conviction,83.5,772.1,716.87,1056.51,Open,1,,768.4,-0.48,,,,,No
-exsh,2026-10-16,ORIENTHOT,Excluded,Standard,High Conviction,82.4,151.8,144.76,170.57,Open,1,,151.26,-0.36,,,,,No
-early,2026-10-16,SHYAMMETL,Breakout,Long Term,High Conviction,81.3,1198.5,1034.74,1752.43,Open,1,,1231.9,2.79,,,,,Yes
-exea,2026-10-16,SHYAMMETL,Excluded,Standard,High Conviction,81.3,1198.5,1034.74,1752.43,Open,1,,1231.9,2.79,,,,,No
-early,2026-10-16,NYKAA,Pre-Breakout,Long Term,High Conviction,80.5,350.25,325.29,499.98,Pending,1,,,,,,,,Yes
-exea,2026-10-16,NYKAA,Excluded,Standard,High Conviction,80.5,350.25,325.29,499.98,Open,1,,343.5,-1.93,,,,,No
+exea,2026-10-15,PREMEXPLN,Excluded,Standard,Good Setup,70.1,703.38,669.34,776.92,Open,2,,692.85,-1.5,,,,,No
+exsh,2026-10-15,MUFIN,Excluded,Standard,Early Watch,55.6,139.54,133.0,156.98,Open,2,,141.94,1.72,,,,,No
+exsh,2026-10-15,PREMEXPLN,Excluded,Standard,Early Watch,54.3,690.6,679.57,720.01,Open,2,,692.85,0.33,,,,,No
+exsh,2026-10-15,SOLARA,Excluded,Standard,Early Watch,31.8,648.8,589.67,806.47,Open,2,,645.65,-0.49,,,,,No
+early,2026-10-16,TIPSMUSIC,Breakout,Long Term,High Conviction,95.4,746.9,643.53,1226.04,Open,1,,771.7,3.32,,,,,Yes
+exea,2026-10-16,TIPSMUSIC,Excluded,Standard,High Conviction,95.4,746.9,643.53,1226.04,Open,1,,771.7,3.32,,,,,No
+early,2026-10-16,KMEW,Breakout,Long Term,High Conviction,88.2,3327.7,2935.47,5681.09,Open,1,,3324.0,-0.11,,,,,Yes
+exea,2026-10-16,KMEW,Excluded,Standard,High Conviction,88.2,3327.7,2935.47,5681.09,Open,1,,3324.0,-0.11,,,,,No
+exsh,2026-10-16,KARURVYSYA,Excluded,Standard,High Conviction,85.9,355.65,338.54,401.28,Open,1,,370.05,4.05,,,,,No
+early,2026-10-16,PVRINOX,Breakout,Long Term,High Conviction,84.7,1401.0,1165.72,2201.36,Open,1,,1402.1,0.08,,,,,Yes
+exea,2026-10-16,PVRINOX,Excluded,Standard,High Conviction,84.7,1401.0,1165.72,2201.36,Open,1,,1402.1,0.08,,,,,No
+early,2026-10-16,INDHOTEL,Breakout,Long Term,High Conviction,83.5,772.1,716.87,1056.51,Open,1,,760.0,-1.57,,,,,No
+exea,2026-10-16,INDHOTEL,Excluded,Standard,High Conviction,83.5,772.1,716.87,1056.51,Open,1,,760.0,-1.57,,,,,Yes
+exsh,2026-10-16,ORIENTHOT,Excluded,Standard,High Conviction,82.4,151.8,144.76,170.57,Open,1,,148.99,-1.85,,,,,No
+early,2026-10-16,SHYAMMETL,Breakout,Long Term,High Conviction,81.3,1198.5,1034.74,1752.43,Open,1,,1226.6,2.34,,,,,Yes
+exea,2026-10-16,SHYAMMETL,Excluded,Standard,High Conviction,81.3,1198.5,1034.74,1752.43,Open,1,,1226.6,2.34,,,,,No
+early,2026-10-16,NYKAA,Pre-Breakout,Long Term,High Conviction,80.5,350.25,325.29,499.98,Pending,1,,,,,,,,No
+exea,2026-10-16,NYKAA,Excluded,Standard,High Conviction,80.5,350.25,325.29,499.98,Open,1,,336.65,-3.88,,,,,No
 exnl,2026-10-16,LCL,Excluded,Standard,Good Setup,79.0,611.65,566.67,659.5,Open,1,,594.45,-2.81,,,,,Yes
-exnl,2026-10-16,SHUKRAPHAR,Excluded,Standard,Good Setup,79.0,68.88,62.63,75.4,Open,1,,69.16,0.41,,,,,Yes
-exnl,2026-10-16,BLEL,Excluded,Standard,Good Setup,79.0,505.05,457.48,529.95,Open,1,,492.55,-2.48,,,,,No
-exnl,2026-10-16,CMLL,Excluded,Standard,Good Setup,79.0,582.35,497.9,614.75,Open,1,,574.5,-1.35,,,,,Yes
-exnl,2026-10-16,TGVSL,Excluded,Standard,Good Setup,79.0,126.61,115.83,130.49,Open,1,,125.06,-1.22,,,,,Yes
-exnl,2026-10-16,KNACK,Excluded,Standard,Good Setup,79.0,207.1,177.75,216.9,Open,1,,206.45,-0.31,,,,,Yes
-exnl,2026-10-16,MVELECTRO,Excluded,Standard,Good Setup,79.0,937.4,803.11,970.0,Open,1,,936.5,-0.1,,,,,Yes
-exnl,2026-10-16,MOMSBELIEF,Excluded,Standard,Good Setup,79.0,285.52,213.45,299.3,Open,1,,265.49,-7.02,,,,,Yes
+exnl,2026-10-16,SHUKRAPHAR,Excluded,Standard,Good Setup,79.0,68.88,62.63,75.4,Open,1,,68.62,-0.38,,,,,Yes
+exnl,2026-10-16,BLEL,Excluded,Standard,Good Setup,79.0,505.05,457.48,529.95,Open,1,,475.45,-5.86,,,,,No
+exnl,2026-10-16,CMLL,Excluded,Standard,Good Setup,79.0,582.35,497.9,614.75,Open,1,,558.2,-4.15,,,,,Yes
+exnl,2026-10-16,TGVSL,Excluded,Standard,Good Setup,79.0,126.61,115.83,130.49,Open,1,,124.39,-1.75,,,,,Yes
+exnl,2026-10-16,KNACK,Excluded,Standard,Good Setup,79.0,207.1,177.75,216.9,Open,1,,205.6,-0.72,,,,,Yes
+exnl,2026-10-16,MVELECTRO,Excluded,Standard,Good Setup,79.0,937.4,803.11,970.0,Open,1,,891.25,-4.92,,,,,Yes
+exnl,2026-10-16,MOMSBELIEF,Excluded,Standard,Good Setup,79.0,285.52,213.45,299.3,Target hit,1,2026-10-19,299.3,4.83,,,,,Yes
 exnl,2026-10-16,INDOKEM,Excluded,Standard,Good Setup,79.0,707.45,584.44,729.3,Target hit,1,2026-10-19,729.3,3.09,,,,,Yes
-early,2026-10-16,TECHM,Breakout,Long Term,Good Setup,78.4,1790.0,1582.72,2623.25,Open,1,,1780.6,-0.53,,,,,Yes
-exea,2026-10-16,TECHM,Excluded,Standard,Good Setup,78.4,1790.0,1582.72,2623.25,Open,1,,1780.6,-0.53,,,,,No
-exnl,2026-10-16,TANAA,Excluded,Standard,Good Setup,75.0,333.3,291.25,364.5,Open,1,,330.45,-0.86,,,,,Yes
+early,2026-10-16,TECHM,Breakout,Long Term,Good Setup,78.4,1790.0,1582.72,2623.25,Open,1,,1779.1,-0.61,,,,,Yes
+exea,2026-10-16,TECHM,Excluded,Standard,Good Setup,78.4,1790.0,1582.72,2623.25,Open,1,,1779.1,-0.61,,,,,No
+exnl,2026-10-16,TANAA,Excluded,Standard,Good Setup,75.0,333.3,291.25,364.5,Open,1,,328.65,-1.4,,,,,Yes
 exnl,2026-10-16,VOEPL,Excluded,Standard,Good Setup,75.0,511.0,472.22,527.95,Target hit,1,2026-10-19,527.95,3.32,,,,,Yes
-exnl,2026-10-16,FREDUN,Excluded,Standard,Good Setup,75.0,1477.7,1331.57,1536.0,Open,1,,1439.4,-2.59,,,,,Yes
-multi,2026-10-16,SAMBHV,Multibagger,,Good Setup,72.3,172.47,149.25,292.35,Open,1,,172.8,0.19,,,,,Yes
-exnl,2026-10-16,WPIL,Excluded,Standard,Good Setup,70.0,439.15,415.19,452.0,Open,1,,438.25,-0.2,,,,,Yes
-exnl,2026-10-16,MOLBIO,Excluded,Standard,Good Setup,70.0,1574.4,1368.11,1686.8,Open,1,,1478.5,-6.09,,,,,Yes
-exnl,2026-10-16,TECHNOCRAF,Excluded,Standard,Good Setup,70.0,498.2,454.52,513.0,Open,1,,503.35,1.03,,,,,Yes
-exnl,2026-10-16,SYMBIOTEC,Excluded,Standard,Good Setup,70.0,1279.5,1046.24,1309.9,Open,1,,1283.0,0.27,,,,,Yes
-early,2026-10-16,SHANTIGOLD,Breakout,Long Term,Good Setup,65.7,423.3,280.96,757.38,Open,1,,429.75,1.52,,,,,Yes
-exea,2026-10-16,SHANTIGOLD,Excluded,Standard,Good Setup,65.7,423.3,280.96,757.38,Open,1,,429.75,1.52,,,,,No
-exnl,2026-10-16,BPLPHARMA,Excluded,Standard,Good Setup,65.0,1804.0,1580.3,1950.0,Open,1,,1760.2,-2.43,,,,,No
-exnl,2026-10-16,JNPR,Excluded,Standard,Good Setup,65.0,265.9,249.41,273.25,Open,1,,260.2,-2.14,,,,,Yes
-exnl,2026-10-16,SUNSHINE,Excluded,Standard,Early Watch,60.0,454.35,422.18,469.9,Open,1,,450.95,-0.75,,,,,Yes
-exnl,2026-10-16,TEMPSENS,Excluded,Standard,Early Watch,60.0,555.85,507.58,574.45,Open,1,,547.35,-1.53,,,,,No
-exnl,2026-10-16,GYFTR,Excluded,Standard,Early Watch,60.0,172.36,157.95,177.0,Open,1,,174.49,1.24,,,,,Yes
-exsh,2026-10-16,KMEW,Excluded,Standard,Early Watch,56.3,3327.7,3092.36,3955.27,Open,1,,3308.6,-0.57,,,,,No
-exnl,2026-10-16,CORDELIA,Excluded,Standard,Early Watch,55.0,97.66,89.16,109.65,Open,1,,94.26,-3.48,,,,,No
-exnl,2026-10-16,KMCSHIL,Excluded,Standard,Early Watch,55.0,161.69,143.01,185.5,Open,1,,157.4,-2.65,,,,,Yes
-exnl,2026-10-16,FERMENTA,Excluded,Standard,Early Watch,55.0,486.0,432.72,537.75,Open,1,,474.25,-2.42,,,,,Yes
-exnl,2026-10-16,INDOMIM,Excluded,Standard,Early Watch,55.0,1180.6,903.35,1349.0,Open,1,,1171.1,-0.8,,,,,Yes
-exsh,2026-10-16,NYKAA,Excluded,Standard,Early Watch,52.3,345.0,330.03,384.93,Open,1,,343.5,-0.43,,,,,No
+exnl,2026-10-16,FREDUN,Excluded,Standard,Good Setup,75.0,1477.7,1331.57,1536.0,Open,1,,1438.4,-2.66,,,,,Yes
+multi,2026-10-16,SAMBHV,Multibagger,,Good Setup,72.3,172.47,149.25,292.35,Open,1,,166.13,-3.68,,,,,Yes
+exnl,2026-10-16,WPIL,Excluded,Standard,Good Setup,70.0,439.15,415.19,452.0,Open,1,,436.05,-0.71,,,,,Yes
+exnl,2026-10-16,MOLBIO,Excluded,Standard,Good Setup,70.0,1574.4,1368.11,1686.8,Open,1,,1434.8,-8.87,,,,,Yes
+exnl,2026-10-16,TECHNOCRAF,Excluded,Standard,Good Setup,70.0,498.2,454.52,513.0,Open,1,,499.5,0.26,,,,,Yes
+exnl,2026-10-16,SYMBIOTEC,Excluded,Standard,Good Setup,70.0,1279.5,1046.24,1309.9,Open,1,,1238.6,-3.2,,,,,Yes
+early,2026-10-16,SHANTIGOLD,Breakout,Long Term,Good Setup,65.7,423.3,280.96,757.38,Open,1,,414.65,-2.04,,,,,No
+exea,2026-10-16,SHANTIGOLD,Excluded,Standard,Good Setup,65.7,423.3,280.96,757.38,Open,1,,414.65,-2.04,,,,,Yes
+exnl,2026-10-16,BPLPHARMA,Excluded,Standard,Good Setup,65.0,1804.0,1580.3,1950.0,Open,1,,1729.5,-4.13,,,,,No
+exnl,2026-10-16,JNPR,Excluded,Standard,Good Setup,65.0,265.9,249.41,273.25,Open,1,,263.0,-1.09,,,,,Yes
+exnl,2026-10-16,SUNSHINE,Excluded,Standard,Early Watch,60.0,454.35,422.18,469.9,Open,1,,440.75,-2.99,,,,,No
+exnl,2026-10-16,TEMPSENS,Excluded,Standard,Early Watch,60.0,555.85,507.58,574.45,Open,1,,534.7,-3.8,,,,,No
+exnl,2026-10-16,GYFTR,Excluded,Standard,Early Watch,60.0,172.36,157.95,177.0,Target hit,1,2026-10-19,177.0,2.69,,,,,Yes
+exsh,2026-10-16,KMEW,Excluded,Standard,Early Watch,56.3,3327.7,3092.36,3955.27,Open,1,,3324.0,-0.11,,,,,No
+exnl,2026-10-16,CORDELIA,Excluded,Standard,Early Watch,55.0,97.66,89.16,109.65,Open,1,,94.7,-3.03,,,,,No
+exnl,2026-10-16,KMCSHIL,Excluded,Standard,Early Watch,55.0,161.69,143.01,185.5,Open,1,,156.98,-2.91,,,,,Yes
+exnl,2026-10-16,FERMENTA,Excluded,Standard,Early Watch,55.0,486.0,432.72,537.75,Open,1,,460.5,-5.25,,,,,No
+exnl,2026-10-16,INDOMIM,Excluded,Standard,Early Watch,55.0,1180.6,903.35,1349.0,Open,1,,1162.5,-1.53,,,,,No
+exsh,2026-10-16,NYKAA,Excluded,Standard,Early Watch,52.3,345.0,330.03,384.93,Open,1,,336.65,-2.42,,,,,No
 exnl,2026-10-16,VEDPOWER,Excluded,Standard,Early Watch,50.0,32.38,29.97,34.8,Open,1,,32.0,-1.17,,,,,No
-exnl,2026-10-16,KLBRENG-B,Excluded,Standard,Early Watch,50.0,489.45,440.98,535.0,Open,1,,479.85,-1.96,,,,,No
-exsh,2026-10-16,BAJAJHLDNG,Excluded,Standard,Early Watch,43.7,11198.0,10797.07,12267.14,Open,1,,11239.0,0.37,,,,,Yes
-exul,2026-10-16,GOLDIAM,Setup,Standard,Good Setup,,335.87,313.27,380.59,Open,1,,324.8,-3.3,,,,,Yes
+exnl,2026-10-16,KLBRENG-B,Excluded,Standard,Early Watch,50.0,489.45,440.98,535.0,Open,1,,464.9,-5.02,,,,,No
+exsh,2026-10-16,BAJAJHLDNG,Excluded,Standard,Early Watch,43.7,11198.0,10797.07,12267.14,Open,1,,11265.0,0.6,,,,,Yes
+exul,2026-10-16,GOLDIAM,Setup,Standard,Good Setup,,335.87,313.27,380.59,Open,1,,319.85,-4.77,,,,,Yes
 exul,2026-10-16,GESHIP,Setup,Standard,Good Setup,,1586.17,1493.88,1766.73,Stop hit,1,2026-10-19,1493.88,-5.82,,0,,,No
 exul,2026-10-16,JSWDULUX,Setup,Standard,Good Setup,,3274.54,3095.27,3623.26,Stop hit,1,2026-10-19,3094.0,-5.51,,0,,,Yes
 exul,2026-10-16,RATEGAIN,Setup,Standard,Good Setup,,892.78,835.94,997.25,Stop hit,1,2026-10-19,826.7,-7.4,,0,,,No
-exul,2026-10-16,MAZDOCK,Setup,Standard,Good Setup,,2284.56,2145.76,2529.43,Stop hit,1,2026-10-19,2090.0,-8.52,,0,,,Yes
+exul,2026-10-16,MAZDOCK,Setup,Standard,Good Setup,,2284.56,2145.76,2529.43,Stop hit,1,2026-10-19,2090.0,-8.52,,0,,,No
 exul,2026-10-16,LINDEINDIA,Setup,Standard,Good Setup,,6492.46,6210.71,6968.18,Stop hit,1,2026-10-19,6178.5,-4.84,,0,,,Yes
-exul,2026-10-16,NYKAA,Setup,Standard,Good Setup,,347.14,327.31,377.09,Open,1,,343.5,-1.05,,,,,Yes
-exul,2026-10-16,CMPDI,Setup,Standard,Good Setup,,219.2,200.39,247.0,Open,1,,201.45,-8.1,,,,,Yes
-exul,2026-10-16,PREMIERENE,Setup,Standard,Good Setup,,932.76,867.16,1029.6,Open,1,,927.35,-0.58,,,,,Yes
-exul,2026-10-16,PREMEXPLN,Setup,Standard,Good Setup,,695.29,664.65,740.07,Open,1,,692.6,-0.39,,,,,Yes
+exul,2026-10-16,NYKAA,Setup,Standard,Good Setup,,347.14,327.31,377.09,Open,1,,336.65,-3.02,,,,,Yes
+exul,2026-10-16,CMPDI,Setup,Standard,Good Setup,,219.2,200.39,247.0,Stop hit,1,2026-10-19,200.39,-8.58,,0,,,No
+exul,2026-10-16,PREMIERENE,Setup,Standard,Good Setup,,932.76,867.16,1029.6,Open,1,,899.0,-3.62,,,,,Yes
+exul,2026-10-16,PREMEXPLN,Setup,Standard,Good Setup,,695.29,664.65,740.07,Open,1,,692.85,-0.35,,,,,Yes
 exul,2026-10-16,ZAGGLE,Setup,Standard,Good Setup,,185.94,173.56,203.95,Stop hit,1,2026-10-19,168.82,-9.21,,0,,,No
 exul,2026-10-16,KEI,Setup,Standard,Good Setup,,4769.52,4434.16,5245.0,Stop hit,1,2026-10-19,4434.16,-7.03,,0,,,No
-exul,2026-10-16,STYLAMIND,Setup,Standard,Good Setup,,3431.85,3197.36,3763.9,Open,1,,3329.4,-2.99,,,,,Yes
-exul,2026-10-16,PETRONET,Setup,Standard,Good Setup,,300.2,284.42,322.68,Open,1,,294.3,-1.97,,,,,Yes
-exul,2026-10-16,LLOYDSME,Setup,Standard,Good Setup,,1922.64,1779.56,2125.0,Open,1,,1843.1,-4.14,,,,,Yes
+exul,2026-10-16,STYLAMIND,Setup,Standard,Good Setup,,3431.85,3197.36,3763.9,Open,1,,3305.2,-3.69,,,,,Yes
+exul,2026-10-16,PETRONET,Setup,Standard,Good Setup,,300.2,284.42,322.68,Open,1,,293.65,-2.18,,,,,Yes
+exul,2026-10-16,LLOYDSME,Setup,Standard,Good Setup,,1922.64,1779.56,2125.0,Open,1,,1804.1,-6.17,,,,,Yes
 exul,2026-10-16,MRF,Setup,Standard,Good Setup,,126753.0,122527.99,132653.47,Stop hit,1,2026-10-19,122527.99,-3.33,,0,,,Yes
-exul,2026-10-16,KAJARIACER,Setup,Standard,Good Setup,,1268.43,1189.45,1378.04,Open,1,,1211.5,-4.49,,,,,Yes
-exul,2026-10-16,FILATEX,Setup,Standard,Good Setup,,114.81,102.5,131.75,Open,1,,106.2,-7.5,,,,,Yes
-exul,2026-10-16,JTLIND,Setup,Standard,Good Setup,,94.04,83.76,108.12,Open,1,,85.14,-9.46,,,,,No
-exul,2026-10-16,KMEW,Setup,Standard,Good Setup,,3396.18,3053.01,3866.86,Open,1,,3308.6,-2.58,,,,,Yes
-exul,2026-10-16,LAURUSLABS,Setup,Standard,Good Setup,,2073.34,1961.4,2224.37,Open,1,,2073.3,-0.0,,,,,Yes
-exul,2026-10-16,LLOYDSENGG,Setup,Standard,Good Setup,,104.41,92.63,120.17,Open,1,,95.16,-8.86,,,,,No
+exul,2026-10-16,KAJARIACER,Setup,Standard,Good Setup,,1268.43,1189.45,1378.04,Open,1,,1208.5,-4.72,,,,,Yes
+exul,2026-10-16,FILATEX,Setup,Standard,Good Setup,,114.81,102.5,131.75,Stop hit,1,2026-10-19,102.5,-10.72,,0,,,No
+exul,2026-10-16,JTLIND,Setup,Standard,Good Setup,,94.04,83.76,108.12,Stop hit,1,2026-10-19,83.76,-10.93,,0,,,No
+exul,2026-10-16,KMEW,Setup,Standard,Good Setup,,3396.18,3053.01,3866.86,Open,1,,3324.0,-2.13,,,,,Yes
+exul,2026-10-16,LAURUSLABS,Setup,Standard,Good Setup,,2073.34,1961.4,2224.37,Open,1,,2069.0,-0.21,,,,,Yes
+exul,2026-10-16,LLOYDSENGG,Setup,Standard,Good Setup,,104.41,92.63,120.17,Open,1,,94.31,-9.67,,,,,No
 exul,2026-10-16,ARE&M,Setup,Standard,Good Setup,,816.63,779.94,865.81,Stop hit,1,2026-10-19,743.55,-8.95,,0,,,No
 exul,2026-10-16,POWERGRID,Setup,Standard,Good Setup,,271.44,259.6,287.17,Stop hit,1,2026-10-19,250.0,-7.9,,0,,,Yes
-exul,2026-10-16,FCL,Setup,Standard,Good Setup,,61.52,53.87,71.68,Open,1,,56.11,-8.79,,,,,Yes
-exul,2026-10-16,GLAND,Setup,Standard,Good Setup,,3177.34,2961.66,3465.06,Open,1,,3051.9,-3.95,,,,,Yes
+exul,2026-10-16,FCL,Setup,Standard,Good Setup,,61.52,53.87,71.68,Open,1,,55.81,-9.28,,,,,No
+exul,2026-10-16,GLAND,Setup,Standard,Good Setup,,3177.34,2961.66,3465.06,Open,1,,3019.8,-4.96,,,,,Yes
 exul,2026-10-16,JINDALSAW,Near Miss,Standard,Good Setup,,301.55,287.82,319.5,Stop hit,1,2026-10-19,287.0,-4.83,,0,,,No
 exul,2026-10-16,REDINGTON,Setup,Standard,Good Setup,,420.34,385.82,465.19,Stop hit,1,2026-10-19,385.0,-8.41,,0,,,No
-exul,2026-10-16,PARACABLES,Setup,Standard,Good Setup,,63.48,57.76,70.9,Open,1,,63.7,0.35,,,,,No
-exul,2026-10-16,JGCHEM,Setup,Standard,Good Setup,,696.29,596.74,824.38,Open,1,,621.95,-10.68,,,,,No
+exul,2026-10-16,PARACABLES,Setup,Standard,Good Setup,,63.48,57.76,70.9,Open,1,,66.21,4.3,,,,,No
+exul,2026-10-16,JGCHEM,Setup,Standard,Good Setup,,696.29,596.74,824.38,Open,1,,613.75,-11.85,,,,,No
 exul,2026-10-16,FINCABLES,Setup,Standard,Good Setup,,1502.0,1372.0,1669.08,Stop hit,1,2026-10-19,1360.0,-9.45,,0,,,No
-exul,2026-10-16,SHADOWFAX,Setup,Standard,Good Setup,,302.95,274.01,339.52,Open,1,,286.15,-5.55,,,,,Yes
-exul,2026-10-16,EBGNG,Setup,Standard,Good Setup,,741.88,650.47,856.33,Open,1,,697.15,-6.03,,,,,Yes
-exul,2026-10-16,AMAGI,Setup,Standard,Good Setup,,605.06,545.82,677.8,Open,1,,565.0,-6.62,,,,,Yes
-exul,2026-10-16,RATNAVEER,Setup,Standard,Good Setup,,358.42,317.49,408.62,Open,1,,351.85,-1.83,,,,,Yes
-exul,2026-10-16,INDGN,Setup,Standard,Good Setup,,628.25,577.7,690.04,Open,1,,594.8,-5.32,,,,,Yes
-exul,2026-10-16,SSWL,Setup,Standard,Good Setup,,434.87,386.14,493.79,Open,1,,417.15,-4.07,,,,,Yes
-exul,2026-10-16,TIMEX,Setup,Standard,Good Setup,,761.22,679.5,858.48,Open,1,,693.8,-8.86,,,,,Yes
-exul,2026-10-16,RPGLIFE,Setup,Standard,Good Setup,,3134.06,2776.09,3557.21,Open,1,,2908.6,-7.19,,,,,Yes
-exul,2026-10-16,DEEPINDS,Setup,Standard,Good Setup,,810.12,723.04,912.52,Open,1,,735.0,-9.27,,,,,No
-exul,2026-10-16,ICRA,Setup,Standard,Good Setup,,4651.89,4206.9,5173.7,Open,1,,4483.9,-3.61,,,,,Yes
-exul,2026-10-16,JAINREC,Setup,Standard,Good Setup,,308.92,274.13,349.5,Open,1,,291.35,-5.69,,,,,Yes
+exul,2026-10-16,SHADOWFAX,Setup,Standard,Good Setup,,302.95,274.01,339.52,Open,1,,284.25,-6.17,,,,,Yes
+exul,2026-10-16,EBGNG,Setup,Standard,Good Setup,,741.88,650.47,856.33,Open,1,,700.2,-5.62,,,,,Yes
+exul,2026-10-16,AMAGI,Setup,Standard,Good Setup,,605.06,545.82,677.8,Open,1,,564.6,-6.69,,,,,Yes
+exul,2026-10-16,RATNAVEER,Setup,Standard,Good Setup,,358.42,317.49,408.62,Open,1,,350.3,-2.27,,,,,Yes
+exul,2026-10-16,INDGN,Setup,Standard,Good Setup,,628.25,577.7,690.04,Open,1,,588.3,-6.36,,,,,Yes
+exul,2026-10-16,SSWL,Setup,Standard,Good Setup,,434.87,386.14,493.79,Open,1,,412.05,-5.25,,,,,Yes
+exul,2026-10-16,TIMEX,Setup,Standard,Good Setup,,761.22,679.5,858.48,Open,1,,701.15,-7.89,,,,,Yes
+exul,2026-10-16,RPGLIFE,Setup,Standard,Good Setup,,3134.06,2776.09,3557.21,Open,1,,2843.0,-9.29,,,,,No
+exul,2026-10-16,DEEPINDS,Setup,Standard,Good Setup,,810.12,723.04,912.52,Stop hit,1,2026-10-19,723.04,-10.75,,0,,,No
+exul,2026-10-16,ICRA,Setup,Standard,Good Setup,,4651.89,4206.9,5173.7,Open,1,,4491.3,-3.45,,,,,Yes
+exul,2026-10-16,JAINREC,Setup,Standard,Good Setup,,308.92,274.13,349.5,Open,1,,285.65,-7.53,,,,,Yes
 exul,2026-10-16,SMSPHARMA,Setup,Standard,Good Setup,,495.44,445.35,554.17,Stop hit,1,2026-10-19,445.35,-10.11,,0,,,No
-exul,2026-10-16,JKTYRE,Setup,Standard,Good Setup,,359.02,334.96,386.85,Open,1,,336.35,-6.31,,,,,Yes
-exul,2026-10-16,SAREGAMA,Setup,Standard,Good Setup,,519.69,471.06,574.5,Open,1,,499.3,-3.92,,,,,Yes
-exul,2026-10-16,SHRIPISTON,Setup,Standard,Good Setup,,4852.69,4380.3,5386.3,Open,1,,4722.8,-2.68,,,,,Yes
-exul,2026-10-16,UNIMECH,Setup,Standard,Good Setup,,1904.8,1688.7,2145.85,Open,1,,1747.2,-8.27,,,,,Yes
-exul,2026-10-16,PTC,Setup,Standard,Good Setup,,153.45,146.09,161.69,Open,1,,149.04,-2.87,,,,,Yes
-exul,2026-10-16,PGIL,Setup,Standard,Good Setup,,1360.62,1210.6,1526.82,Open,1,,1289.7,-5.21,,,,,Yes
-exul,2026-10-16,KTKBANK,Setup,Standard,Good Setup,,346.09,317.92,377.47,Open,1,,332.15,-4.03,,,,,Yes
-exul,2026-10-16,RPEL,Setup,Standard,Good Setup,,1938.87,1662.6,2246.54,Open,1,,1745.0,-10.0,,,,,No
-exul,2026-10-16,SOLARINDS,Setup,Standard,Good Setup,,20438.8,18366.88,22700.0,Open,1,,19963.0,-2.33,,,,,No
-exul,2026-10-16,DYNAMATECH,Setup,Standard,Good Setup,,14527.0,12864.29,16307.5,Open,1,,13810.0,-4.94,,,,,Yes
-exul,2026-10-16,MBAPL,Setup,Standard,Good Setup,,174.75,157.79,192.86,Open,1,,169.5,-3.0,,,,,Yes
-exul,2026-10-16,SONACOMS,Setup,Standard,Good Setup,,838.67,771.9,909.18,Open,1,,806.3,-3.86,,,,,Yes
-exul,2026-10-16,VINCOFE,Setup,Standard,Good Setup,,191.73,170.49,213.76,Open,1,,173.69,-9.41,,,,,No
-exul,2026-10-16,KSL,Setup,Standard,Good Setup,,1034.97,918.63,1152.03,Open,1,,934.0,-9.76,,,,,No
-exul,2026-10-16,SOUTHBANK,Near Miss,Standard,Good Setup,,51.45,46.0,56.82,Open,1,,52.66,2.35,,,,,No
-exul,2026-10-16,PPLPHARMA,Setup,Standard,Good Setup,,217.13,202.17,231.93,Stop hit,1,2026-10-19,197.0,-9.27,,0,,,Yes
-exul,2026-10-16,EDELWEISS,Setup,Standard,Good Setup,,146.29,130.41,161.93,Open,1,,131.6,-10.04,,,,,No
+exul,2026-10-16,JKTYRE,Setup,Standard,Good Setup,,359.02,334.96,386.85,Stop hit,1,2026-10-19,334.96,-6.7,,0,,,Yes
+exul,2026-10-16,SAREGAMA,Setup,Standard,Good Setup,,519.69,471.06,574.5,Open,1,,510.15,-1.84,,,,,Yes
+exul,2026-10-16,SHRIPISTON,Setup,Standard,Good Setup,,4852.69,4380.3,5386.3,Open,1,,4621.0,-4.77,,,,,Yes
+exul,2026-10-16,UNIMECH,Setup,Standard,Good Setup,,1904.8,1688.7,2145.85,Stop hit,1,2026-10-19,1688.7,-11.35,,0,,,No
+exul,2026-10-16,PTC,Setup,Standard,Good Setup,,153.45,146.09,161.69,Open,1,,149.29,-2.71,,,,,Yes
+exul,2026-10-16,PGIL,Setup,Standard,Good Setup,,1360.62,1210.6,1526.82,Open,1,,1277.7,-6.09,,,,,Yes
+exul,2026-10-16,KTKBANK,Setup,Standard,Good Setup,,346.09,317.92,377.47,Open,1,,329.65,-4.75,,,,,Yes
+exul,2026-10-16,RPEL,Setup,Standard,Good Setup,,1938.87,1662.6,2246.54,Open,1,,1777.8,-8.31,,,,,No
+exul,2026-10-16,SOLARINDS,Setup,Standard,Good Setup,,20438.8,18366.88,22700.0,Open,1,,19803.0,-3.11,,,,,Yes
+exul,2026-10-16,DYNAMATECH,Setup,Standard,Good Setup,,14527.0,12864.29,16307.5,Open,1,,13621.0,-6.24,,,,,Yes
+exul,2026-10-16,MBAPL,Setup,Standard,Good Setup,,174.75,157.79,192.86,Open,1,,164.35,-5.95,,,,,Yes
+exul,2026-10-16,SONACOMS,Setup,Standard,Good Setup,,838.67,771.9,909.18,Open,1,,794.0,-5.33,,,,,Yes
+exul,2026-10-16,VINCOFE,Setup,Standard,Good Setup,,191.73,170.49,213.76,Open,1,,172.33,-10.12,,,,,No
+exul,2026-10-16,KSL,Setup,Standard,Good Setup,,1034.97,918.63,1152.03,Open,1,,947.55,-8.45,,,,,Yes
+exul,2026-10-16,SOUTHBANK,Near Miss,Standard,Good Setup,,51.45,46.0,56.82,Open,1,,54.26,5.46,,,,,Yes
+exul,2026-10-16,PPLPHARMA,Setup,Standard,Good Setup,,217.13,202.17,231.93,Stop hit,1,2026-10-19,197.0,-9.27,,0,,,No
+exul,2026-10-16,EDELWEISS,Setup,Standard,Good Setup,,146.29,130.41,161.93,Stop hit,1,2026-10-19,130.41,-10.86,,0,,,No
 exul,2026-10-16,GODREJPROP,Setup,Standard,Good Setup,,1735.46,1642.25,1825.97,Stop hit,1,2026-10-19,1605.0,-7.52,,0,,,Yes
-exul,2026-10-16,AUROPHARMA,Setup,Standard,Good Setup,,1743.48,1627.68,1854.46,Open,1,,1655.5,-5.05,,,,,Yes
-exul,2026-10-16,LTFOODS,Setup,Standard,Good Setup,,434.72,401.98,465.69,Open,1,,405.45,-6.73,,,,,Yes
-exul,2026-10-16,BERGEPAINT,Setup,Standard,Good Setup,,483.31,454.84,509.5,Open,1,,466.75,-3.43,,,,,Yes
-exul,2026-10-16,PNBHOUSING,Setup,Standard,Good Setup,,1227.25,1115.79,1329.46,Open,1,,1166.8,-4.93,,,,,Yes
-exul,2026-10-16,RGL,Setup,Standard,Good Setup,,174.15,150.15,195.93,Open,1,,160.66,-7.75,,,,,Yes
-exul,2026-10-16,BHARTIARTL,Breakout,Standard,Good Setup,,1905.0,1794.71,2005.8,Open,1,,1902.5,-0.13,,,,,No
-exul,2026-10-16,SENORES,Setup,Standard,Good Setup,,1444.78,1372.21,1509.8,Stop hit,1,2026-10-19,1323.6,-8.39,,0,,,Yes
-exul,2026-10-16,KARURVYSYA,Near Miss,Standard,Good Setup,,355.65,317.48,389.87,Open,1,,370.4,4.15,,,,,Yes
-exul,2026-10-16,EPL,Setup,Standard,Good Setup,,243.19,224.65,259.83,Open,1,,230.83,-5.08,,,,,Yes
-exul,2026-10-16,ALGOQUANT,Setup,Standard,Good Setup,,76.35,64.85,86.54,Open,1,,72.26,-5.36,,,,,No
+exul,2026-10-16,AUROPHARMA,Setup,Standard,Good Setup,,1743.48,1627.68,1854.46,Stop hit,1,2026-10-19,1627.68,-6.64,,0,,,Yes
+exul,2026-10-16,LTFOODS,Setup,Standard,Good Setup,,434.72,401.98,465.69,Stop hit,1,2026-10-19,401.98,-7.53,,0,,,Yes
+exul,2026-10-16,BERGEPAINT,Setup,Standard,Good Setup,,483.31,454.84,509.5,Open,1,,470.0,-2.75,,,,,Yes
+exul,2026-10-16,PNBHOUSING,Setup,Standard,Good Setup,,1227.25,1115.79,1329.46,Open,1,,1147.9,-6.47,,,,,Yes
+exul,2026-10-16,RGL,Setup,Standard,Good Setup,,174.15,150.15,195.93,Open,1,,165.09,-5.2,,,,,Yes
+exul,2026-10-16,BHARTIARTL,Breakout,Standard,Good Setup,,1905.0,1794.71,2005.8,Open,1,,1875.2,-1.56,,,,,No
+exul,2026-10-16,SENORES,Setup,Standard,Good Setup,,1444.78,1372.21,1509.8,Stop hit,1,2026-10-19,1323.6,-8.39,,0,,,No
+exul,2026-10-16,KARURVYSYA,Near Miss,Standard,Good Setup,,355.65,317.48,389.87,Open,1,,370.05,4.05,,,,,Yes
+exul,2026-10-16,EPL,Setup,Standard,Good Setup,,243.19,224.65,259.83,Open,1,,231.03,-5.0,,,,,Yes
+exul,2026-10-16,ALGOQUANT,Setup,Standard,Good Setup,,76.35,64.85,86.54,Open,1,,72.83,-4.61,,,,,No
 exul,2026-10-16,TORNTPHARM,Setup,Standard,Good Setup,,5020.02,4761.37,5250.0,Stop hit,1,2026-10-19,4551.2,-9.34,,0,,,Yes
-exul,2026-10-16,GRWRHITECH,Setup,Standard,Good Setup,,7311.09,6553.68,7975.48,Open,1,,7009.5,-4.13,,,,,Yes
-exul,2026-10-16,ORIENTHOT,Breakout,Standard,Good Setup,,151.8,135.89,165.88,Open,1,,151.26,-0.36,,,,,No
+exul,2026-10-16,GRWRHITECH,Setup,Standard,Good Setup,,7311.09,6553.68,7975.48,Open,1,,6957.5,-4.84,,,,,Yes
+exul,2026-10-16,ORIENTHOT,Breakout,Standard,Good Setup,,151.8,135.89,165.88,Open,1,,148.99,-1.85,,,,,No
 exul,2026-10-16,KRBL,Setup,Standard,Good Setup,,411.77,379.8,438.85,Stop hit,1,2026-10-19,379.8,-7.76,,0,,,Yes
-exul,2026-10-16,TIPSMUSIC,Breakout,Standard,Good Setup,,746.9,631.33,842.73,Open,1,,776.3,3.94,,,,,No
+exul,2026-10-16,TIPSMUSIC,Breakout,Standard,Good Setup,,746.9,631.33,842.73,Open,1,,771.7,3.32,,,,,No
 exul,2026-10-16,DEEPAKNTR,Setup,Standard,Good Setup,,1671.14,1596.54,1730.89,Stop hit,1,2026-10-19,1596.54,-4.46,,0,,,Yes
-exul,2026-10-16,ALICON,Setup,Standard,Good Setup,,910.82,823.36,980.89,Open,1,,848.2,-6.88,,,,,Yes
-exul,2026-10-16,PRESTIGE,Setup,Standard,Good Setup,,1510.41,1395.21,1602.68,Open,1,,1490.1,-1.34,,,,,Yes
-exul,2026-10-16,VBL,Setup,Standard,Good Setup,,445.24,423.12,462.81,Open,1,,425.0,-4.55,,,,,Yes
-exul,2026-10-16,TATAELXSI,Breakout,Standard,Good Setup,,3850.1,3312.83,4270.81,Open,1,,3795.0,-1.43,,,,,No
-exul,2026-10-16,ZYDUSLIFE,Setup,Standard,Good Setup,,1234.56,1106.96,1334.31,Open,1,,1122.5,-9.08,,,,,Yes
-exul,2026-10-16,INDHOTEL,Breakout,Standard,Good Setup,,772.1,699.14,828.98,Open,1,,768.4,-0.48,,,,,No
-exul,2026-10-16,KPITTECH,Near Miss,Standard,Good Setup,,555.0,530.2,574.05,Open,1,,542.0,-2.34,,,,,No
-exul,2026-10-16,SGMART,Near Miss,Standard,Good Setup,,798.2,716.13,860.6,Open,1,,792.0,-0.78,,,,,Yes
-exul,2026-10-16,PAYTM,Setup,Standard,Good Setup,,1853.6,1595.96,2048.66,Open,1,,1703.9,-8.08,,,,,Yes
-exul,2026-10-16,RVNL,Setup,Standard,Good Setup,,214.72,192.17,231.38,Open,1,,198.14,-7.72,,,,,Yes
-exul,2026-10-16,EIDPARRY,Setup,Standard,Good Setup,,718.88,677.58,749.65,Open,1,,682.55,-5.05,,,,,Yes
-exul,2026-10-16,SHREECEM,Setup,Standard,Good Setup,,23046.0,21365.37,24291.86,Open,1,,22830.0,-0.94,,,,,Yes
+exul,2026-10-16,ALICON,Setup,Standard,Good Setup,,910.82,823.36,980.89,Open,1,,850.85,-6.58,,,,,Yes
+exul,2026-10-16,PRESTIGE,Setup,Standard,Good Setup,,1510.41,1395.21,1602.68,Open,1,,1475.0,-2.34,,,,,Yes
+exul,2026-10-16,VBL,Setup,Standard,Good Setup,,445.24,423.12,462.81,Stop hit,1,2026-10-19,423.12,-4.97,,0,,,Yes
+exul,2026-10-16,TATAELXSI,Breakout,Standard,Good Setup,,3850.1,3312.83,4270.81,Open,1,,3790.0,-1.56,,,,,No
+exul,2026-10-16,ZYDUSLIFE,Setup,Standard,Good Setup,,1234.56,1106.96,1334.31,Open,1,,1113.9,-9.77,,,,,No
+exul,2026-10-16,INDHOTEL,Breakout,Standard,Good Setup,,772.1,699.14,828.98,Open,1,,760.0,-1.57,,,,,No
+exul,2026-10-16,KPITTECH,Near Miss,Standard,Good Setup,,555.0,530.2,574.05,Open,1,,536.95,-3.25,,,,,No
+exul,2026-10-16,SGMART,Near Miss,Standard,Good Setup,,798.2,716.13,860.6,Open,1,,776.25,-2.75,,,,,Yes
+exul,2026-10-16,PAYTM,Setup,Standard,Good Setup,,1853.6,1595.96,2048.66,Open,1,,1685.8,-9.05,,,,,Yes
+exul,2026-10-16,RVNL,Setup,Standard,Good Setup,,214.72,192.17,231.38,Open,1,,194.5,-9.42,,,,,No
+exul,2026-10-16,EIDPARRY,Setup,Standard,Good Setup,,718.88,677.58,749.65,Stop hit,1,2026-10-19,677.58,-5.75,,0,,,Yes
+exul,2026-10-16,SHREECEM,Setup,Standard,Good Setup,,23046.0,21365.37,24291.86,Open,1,,22290.0,-3.28,,,,,Yes
 exul,2026-10-16,KENNAMET,Setup,Standard,Good Setup,,4508.9,4026.23,4860.0,Stop hit,1,2026-10-19,4026.23,-10.7,,0,,,Yes
-exul,2026-10-16,BDL,Setup,Standard,Good Setup,,1198.59,1078.67,1285.27,Open,1,,1104.0,-7.89,,,,,Yes
-exul,2026-10-16,GODIGIT,Setup,Standard,Good Setup,,289.98,246.87,320.9,Open,1,,284.6,-1.86,,,,,Yes
-exul,2026-10-16,JKCEMENT,Setup,Standard,Good Setup,,5239.46,4737.7,5600.16,Open,1,,4987.0,-4.82,,,,,Yes
-exul,2026-10-16,POWERICA,Setup,Standard,Good Setup,,624.25,549.06,676.95,Open,1,,588.45,-5.73,,,,,Yes
+exul,2026-10-16,BDL,Setup,Standard,Good Setup,,1198.59,1078.67,1285.27,Open,1,,1088.0,-9.23,,,,,Yes
+exul,2026-10-16,GODIGIT,Setup,Standard,Good Setup,,289.98,246.87,320.9,Open,1,,287.45,-0.87,,,,,Yes
+exul,2026-10-16,JKCEMENT,Setup,Standard,Good Setup,,5239.46,4737.7,5600.16,Open,1,,4878.5,-6.89,,,,,Yes
+exul,2026-10-16,POWERICA,Setup,Standard,Good Setup,,624.25,549.06,676.95,Open,1,,565.45,-9.42,,,,,No
 exul,2026-10-16,DELHIVERY,Setup,Standard,Good Setup,,438.48,408.48,458.8,Stop hit,1,2026-10-19,403.1,-8.07,,0,,,Yes
 exul,2026-10-16,RBA,Setup,Standard,Good Setup,,97.94,93.09,101.25,Stop hit,1,2026-10-19,92.5,-5.55,,0,,,Yes
-exul,2026-10-16,SHYAMMETL,Near Miss,Standard,Good Setup,,1198.5,1036.07,1309.29,Open,1,,1231.9,2.79,,,,,No
-exul,2026-10-16,AEROPLANE,Near Miss,Standard,Good Setup,,234.78,191.48,263.29,Open,1,,230.82,-1.69,,,,,No
+exul,2026-10-16,SHYAMMETL,Near Miss,Standard,Good Setup,,1198.5,1036.07,1309.29,Open,1,,1226.6,2.34,,,,,Yes
+exul,2026-10-16,AEROPLANE,Near Miss,Standard,Good Setup,,234.78,191.48,263.29,Open,1,,222.72,-5.14,,,,,No
 exul,2026-10-16,CMSINFO,Setup,Standard,Good Setup,,237.98,217.79,251.21,Stop hit,1,2026-10-19,217.79,-8.48,,0,,,No
-exul,2026-10-16,GCSL,Setup,Standard,Good Setup,,743.48,672.45,790.21,Open,1,,747.0,0.47,,,,,No
-exul,2026-10-16,WAAREEENER,Breakout,Standard,Good Setup,,2565.4,2433.01,2650.92,Open,1,,2550.0,-0.6,,,,,No
-exul,2026-10-16,FIRSTCRY,Setup,Standard,Good Setup,,195.69,162.89,216.6,Open,1,,176.11,-10.01,,,,,No
+exul,2026-10-16,GCSL,Setup,Standard,Good Setup,,743.48,672.45,790.21,Open,1,,732.75,-1.44,,,,,Yes
+exul,2026-10-16,WAAREEENER,Breakout,Standard,Good Setup,,2565.4,2433.01,2650.92,Open,1,,2515.0,-1.96,,,,,No
+exul,2026-10-16,FIRSTCRY,Setup,Standard,Good Setup,,195.69,162.89,216.6,Open,1,,174.18,-10.99,,,,,No
 exul,2026-10-16,ARVIND,Setup,Standard,Good Setup,,573.04,538.1,595.24,Stop hit,1,2026-10-19,524.1,-8.54,,0,,,No
-exul,2026-10-16,INDIANB,Near Miss,Standard,Good Setup,,854.1,821.32,874.9,Open,1,,865.8,1.37,,,,,No
+exul,2026-10-16,INDIANB,Near Miss,Standard,Good Setup,,854.1,821.32,874.9,Open,1,,856.85,0.32,,,,,No
 exul,2026-10-16,AGARWALEYE,Setup,Standard,Good Setup,,507.51,476.83,526.8,Stop hit,1,2026-10-19,466.95,-7.99,,0,,,No
-exul,2026-10-16,IIFLCAPS,Setup,Standard,Good Setup,,357.11,338.5,368.4,Open,1,,344.5,-3.53,,,,,Yes
+exul,2026-10-16,IIFLCAPS,Setup,Standard,Good Setup,,357.11,338.5,368.4,Open,1,,345.3,-3.31,,,,,Yes
 exul,2026-10-16,PAGEIND,Setup,Standard,Good Setup,,38541.93,35981.62,40109.99,Stop hit,1,2026-10-19,35981.62,-6.64,,0,,,Yes
-exul,2026-10-16,NPST,Setup,Standard,Good Setup,,1933.86,1732.26,2055.78,Open,1,,1776.0,-8.16,,,,,Yes
+exul,2026-10-16,NPST,Setup,Standard,Good Setup,,1933.86,1732.26,2055.78,Open,1,,1776.2,-8.15,,,,,Yes
 exul,2026-10-16,FLUOROCHEM,Setup,Standard,Good Setup,,4689.36,4363.7,4884.67,Stop hit,1,2026-10-19,4363.7,-6.94,,0,,,Yes
 exul,2026-10-16,ELGIEQUIP,Setup,Standard,Good Setup,,625.15,593.7,644.0,Stop hit,1,2026-10-19,570.55,-8.73,,0,,,No
-exul,2026-10-16,PVRINOX,Setup,Standard,Good Setup,,1427.85,1159.0,1587.92,Open,1,,1398.4,-2.06,,,,,Yes
-exul,2026-10-16,BALRAMCHIN,Setup,Standard,Good Setup,,737.47,663.38,780.95,Open,1,,704.25,-4.5,,,,,Yes
-exul,2026-10-16,FIEMIND,Setup,Standard,Good Setup,,1992.78,1859.65,2069.23,Open,1,,1864.1,-6.46,,,,,No
-exul,2026-10-16,HSCL,Setup,Standard,Good Setup,,694.19,651.64,718.0,Stop hit,1,2026-10-19,651.64,-6.13,,0,,,Yes
-exul,2026-10-16,INDUSTOWER,Setup,Standard,Good Setup,,393.08,368.17,406.55,Open,1,,386.3,-1.72,,,,,Yes
+exul,2026-10-16,PVRINOX,Setup,Standard,Good Setup,,1427.85,1159.0,1587.92,Open,1,,1402.1,-1.8,,,,,Yes
+exul,2026-10-16,BALRAMCHIN,Setup,Standard,Good Setup,,737.47,663.38,780.95,Open,1,,701.85,-4.83,,,,,Yes
+exul,2026-10-16,FIEMIND,Setup,Standard,Good Setup,,1992.78,1859.65,2069.23,Stop hit,1,2026-10-19,1859.65,-6.68,,0,,,No
+exul,2026-10-16,HSCL,Setup,Standard,Good Setup,,694.19,651.64,718.0,Stop hit,1,2026-10-19,651.64,-6.13,,0,,,No
+exul,2026-10-16,INDUSTOWER,Setup,Standard,Good Setup,,393.08,368.17,406.55,Open,1,,382.4,-2.72,,,,,Yes
 exul,2026-10-16,CRISIL,Setup,Standard,Good Setup,,4715.61,4535.6,4811.17,Stop hit,1,2026-10-19,4535.6,-3.82,,0,,,Yes
-exul,2026-10-16,ONEPOINT,Setup,Standard,Good Setup,,87.78,66.63,98.9,Open,1,,83.88,-4.44,,,,,Yes
-exul,2026-10-16,CRAFTSMAN,Setup,Standard,Good Setup,,11464.88,10437.25,11999.0,Open,1,,11068.0,-3.46,,,,,Yes
-exul,2026-10-16,FORCEMOT,Setup,Standard,Good Setup,,17917.76,17096.59,18339.0,Open,1,,17800.0,-0.66,,,,,Yes
-exul,2026-10-16,BLUESTARCO,Setup,Standard,Good Setup,,1627.25,1479.6,1702.25,Open,1,,1556.8,-4.33,,,,,Yes
-exul,2026-10-16,AARTIIND,Near Miss,Standard,Good Setup,,503.0,477.06,515.92,Open,1,,489.5,-2.68,,,,,No
+exul,2026-10-16,ONEPOINT,Setup,Standard,Good Setup,,87.78,66.63,98.9,Open,1,,83.89,-4.43,,,,,Yes
+exul,2026-10-16,CRAFTSMAN,Setup,Standard,Good Setup,,11464.88,10437.25,11999.0,Open,1,,11158.0,-2.68,,,,,Yes
+exul,2026-10-16,FORCEMOT,Setup,Standard,Good Setup,,17917.76,17096.59,18339.0,Open,1,,17563.0,-1.98,,,,,Yes
+exul,2026-10-16,BLUESTARCO,Setup,Standard,Good Setup,,1627.25,1479.6,1702.25,Open,1,,1571.2,-3.44,,,,,Yes
+exul,2026-10-16,AARTIIND,Near Miss,Standard,Good Setup,,503.0,477.06,515.92,Stop hit,1,2026-10-19,477.06,-5.16,,0,,,No
 exul,2026-10-16,BOSCHLTD,Setup,Standard,Good Setup,,48747.3,46200.23,50000.0,Stop hit,1,2026-10-19,45400.0,-6.87,,0,,,Yes
-exul,2026-10-16,DLF,Setup,Standard,Good Setup,,684.97,641.34,706.13,Open,1,,676.2,-1.28,,,,,Yes
+exul,2026-10-16,DLF,Setup,Standard,Good Setup,,684.97,641.34,706.13,Open,1,,672.85,-1.77,,,,,Yes
 exul,2026-10-16,ONGC,Setup,Standard,Good Setup,,239.48,229.66,244.29,Stop hit,1,2026-10-19,223.0,-6.88,,0,,,Yes
-exul,2026-10-16,AVADHSUGAR,Setup,Standard,Good Setup,,1025.2,726.09,1173.2,Open,1,,973.55,-5.04,,,,,Yes
+exul,2026-10-16,AVADHSUGAR,Setup,Standard,Good Setup,,1025.2,726.09,1173.2,Open,1,,987.55,-3.67,,,,,Yes
 exul,2026-10-16,CAMS,Setup,Standard,Good Setup,,726.5,693.54,742.28,Stop hit,1,2026-10-19,693.54,-4.54,,0,,,Yes
-exul,2026-10-16,LUPIN,Setup,Standard,Good Setup,,2139.27,2008.33,2201.44,Stop hit,1,2026-10-19,1955.8,-8.58,,0,,,Yes
-exul,2026-10-16,BATAINDIA,Setup,Standard,Good Setup,,657.31,616.6,676.46,Open,1,,635.6,-3.3,,,,,No
-exul,2026-10-16,ACUTAAS,Setup,Standard,Good Setup,,3516.92,3135.66,3697.23,Open,1,,3298.5,-6.21,,,,,Yes
-exul,2026-10-16,RAMBHAJO,Setup,Standard,Good Setup,,403.81,255.32,472.32,Open,1,,388.0,-3.92,,,,,Yes
-exul,2026-10-16,CUPID,Setup,Standard,Good Setup,,369.69,259.23,420.4,Open,1,,345.15,-6.64,,,,,Yes
-exul,2026-10-16,MANORAMA,Setup,Standard,Good Setup,,2054.1,1845.58,2148.68,Open,1,,1871.1,-8.91,,,,,Yes
-exul,2026-10-16,SKYGOLD,Near Miss,Standard,Good Setup,,1060.6,759.39,1196.02,Open,1,,1063.35,0.26,,,,,No
+exul,2026-10-16,LUPIN,Setup,Standard,Good Setup,,2139.27,2008.33,2201.44,Stop hit,1,2026-10-19,1955.8,-8.58,,0,,,No
+exul,2026-10-16,BATAINDIA,Setup,Standard,Good Setup,,657.31,616.6,676.46,Open,1,,635.55,-3.31,,,,,No
+exul,2026-10-16,ACUTAAS,Setup,Standard,Good Setup,,3516.92,3135.66,3697.23,Open,1,,3253.4,-7.49,,,,,Yes
+exul,2026-10-16,RAMBHAJO,Setup,Standard,Good Setup,,403.81,255.32,472.32,Open,1,,393.0,-2.68,,,,,Yes
+exul,2026-10-16,CUPID,Setup,Standard,Good Setup,,369.69,259.23,420.4,Open,1,,336.3,-9.03,,,,,Yes
+exul,2026-10-16,MANORAMA,Setup,Standard,Good Setup,,2054.1,1845.58,2148.68,Stop hit,1,2026-10-19,1845.58,-10.15,,0,,,No
+exul,2026-10-16,SKYGOLD,Near Miss,Standard,Good Setup,,1060.6,759.39,1196.02,Open,1,,1028.1,-3.06,,,,,No
 exul,2026-10-16,FIVESTAR,Setup,Standard,Good Setup,,554.26,511.12,573.52,Stop hit,1,2026-10-19,503.0,-9.25,,0,,,No
-exul,2026-10-16,MANAPPURAM,Setup,Standard,Good Setup,,334.92,307.54,346.9,Open,1,,322.7,-3.65,,,,,Yes
-exul,2026-10-16,TRANSRAILL,Setup,Standard,Good Setup,,499.0,444.32,522.84,Open,1,,460.6,-7.7,,,,,Yes
-exul,2026-10-16,ASTRAMICRO,Setup,Standard,Good Setup,,1729.45,1585.39,1791.46,Open,1,,1624.0,-6.1,,,,,Yes
-exul,2026-10-16,GABRIEL,Setup,Standard,Good Setup,,1497.99,1268.75,1596.7,Open,1,,1526.0,1.87,,,,,Yes
-exul,2026-10-16,INDOBORAX,Setup,Standard,Good Setup,,509.72,474.82,524.6,Stop hit,1,2026-10-19,474.82,-6.85,,0,,,Yes
+exul,2026-10-16,MANAPPURAM,Setup,Standard,Good Setup,,334.92,307.54,346.9,Open,1,,319.55,-4.59,,,,,Yes
+exul,2026-10-16,TRANSRAILL,Setup,Standard,Good Setup,,499.0,444.32,522.84,Open,1,,450.75,-9.67,,,,,No
+exul,2026-10-16,ASTRAMICRO,Setup,Standard,Good Setup,,1729.45,1585.39,1791.46,Open,1,,1617.2,-6.49,,,,,Yes
+exul,2026-10-16,GABRIEL,Setup,Standard,Good Setup,,1497.99,1268.75,1596.7,Open,1,,1486.1,-0.79,,,,,Yes
+exul,2026-10-16,INDOBORAX,Setup,Standard,Good Setup,,509.72,474.82,524.6,Stop hit,1,2026-10-19,474.82,-6.85,,0,,,No
 exul,2026-10-16,ALKEM,Setup,Standard,Good Setup,,5477.43,5062.52,5654.88,Stop hit,1,2026-10-19,5042.5,-7.94,,0,,,Yes
-exul,2026-10-16,IIFL,Setup,Standard,Good Setup,,639.53,567.1,670.04,Open,1,,616.6,-3.59,,,,,No
-exul,2026-10-16,ICICIBANK,Near Miss,Standard,Good Setup,,1397.0,1312.78,1431.83,Open,1,,1389.3,-0.55,,,,,No
-exul,2026-10-16,GRANULES,Setup,Standard,Good Setup,,892.18,815.59,923.65,Stop hit,1,2026-10-19,815.59,-8.58,,0,,,Yes
-exul,2026-10-16,MAPMYINDIA,Setup,Standard,Good Setup,,971.74,851.45,1021.5,Open,1,,885.15,-8.91,,,,,Yes
+exul,2026-10-16,IIFL,Setup,Standard,Good Setup,,639.53,567.1,670.04,Open,1,,612.5,-4.23,,,,,No
+exul,2026-10-16,ICICIBANK,Near Miss,Standard,Good Setup,,1397.0,1312.78,1431.83,Open,1,,1381.0,-1.15,,,,,Yes
+exul,2026-10-16,GRANULES,Setup,Standard,Good Setup,,892.18,815.59,923.65,Stop hit,1,2026-10-19,815.59,-8.58,,0,,,No
+exul,2026-10-16,MAPMYINDIA,Setup,Standard,Good Setup,,971.74,851.45,1021.5,Open,1,,873.95,-10.06,,,,,No
 exul,2026-10-16,NATCOPHARM,Setup,Standard,Good Setup,,852.57,790.65,877.54,Stop hit,1,2026-10-19,785.05,-7.92,,0,,,Yes
-exul,2026-10-16,ATUL,Setup,Standard,Good Setup,,6315.1,5914.63,6474.57,Open,1,,6156.0,-2.52,,,,,Yes
+exul,2026-10-16,ATUL,Setup,Standard,Good Setup,,6315.1,5914.63,6474.57,Open,1,,6082.0,-3.69,,,,,Yes
 exul,2026-10-16,EQUITASBNK,Setup,Standard,Good Setup,,75.05,69.97,77.09,Stop hit,1,2026-10-19,69.97,-6.77,,0,,,Yes
-exul,2026-10-16,CUB,Setup,Standard,Good Setup,,239.43,215.63,248.85,Open,1,,227.96,-4.79,,,,,Yes
-exul,2026-10-16,TARSONS,Setup,Standard,Good Setup,,357.56,313.17,375.0,Open,1,,324.0,-9.39,,,,,No
-exul,2026-10-16,COHANCE,Setup,Standard,Good Setup,,483.21,427.56,505.0,Open,1,,461.1,-4.58,,,,,Yes
-exul,2026-10-16,LICI,Setup,Standard,Good Setup,,418.64,393.3,428.15,Open,1,,395.65,-5.49,,,,,Yes
+exul,2026-10-16,CUB,Setup,Standard,Good Setup,,239.43,215.63,248.85,Open,1,,230.95,-3.54,,,,,Yes
+exul,2026-10-16,TARSONS,Setup,Standard,Good Setup,,357.56,313.17,375.0,Stop hit,1,2026-10-19,313.17,-12.41,,0,,,No
+exul,2026-10-16,COHANCE,Setup,Standard,Good Setup,,483.21,427.56,505.0,Open,1,,457.7,-5.28,,,,,Yes
+exul,2026-10-16,LICI,Setup,Standard,Good Setup,,418.64,393.3,428.15,Stop hit,1,2026-10-19,393.3,-6.05,,0,,,Yes
 exul,2026-10-16,ISGEC,Setup,Standard,Good Setup,,936.87,879.67,958.48,Stop hit,1,2026-10-19,879.67,-6.11,,0,,,Yes
-exul,2026-10-16,JAYNECOIND,Near Miss,Standard,Good Setup,,100.62,88.5,105.17,Open,1,,97.48,-3.12,,,,,No
-exul,2026-10-16,ETHOSLTD,Setup,Standard,Good Setup,,2754.5,2516.6,2846.0,Open,1,,2575.5,-6.5,,,,,Yes
-exul,2026-10-16,AIIL,Near Miss,Standard,Good Setup,,571.9,536.98,584.85,Open,1,,558.5,-2.34,,,,,No
-exul,2026-10-16,CHOICEIN,Setup,Standard,Good Setup,,800.6,734.69,824.0,Open,1,,740.6,-7.49,,,,,Yes
-exul,2026-10-16,STARHEALTH,Setup,Standard,Good Setup,,573.7,539.01,586.25,Open,1,,545.15,-4.98,,,,,Yes
-exul,2026-10-16,JMFINANCIL,Setup,Standard,Good Setup,,129.91,120.6,133.23,Stop hit,1,2026-10-19,120.6,-7.17,,0,,,Yes
-exul,2026-10-16,CHALET,Setup,Standard,Good Setup,,906.21,814.94,938.88,Open,1,,841.7,-7.12,,,,,Yes
-exul,2026-10-16,SARDAEN,Setup,Standard,Good Setup,,526.05,484.53,540.43,Open,1,,488.65,-7.11,,,,,Yes
-exul,2026-10-16,AADHARHFC,Setup,Standard,Good Setup,,471.64,433.89,484.95,Open,1,,441.95,-6.3,,,,,Yes
-exul,2026-10-16,BSE,Setup,Standard,Good Setup,,3451.89,3140.75,3560.62,Open,1,,3362.1,-2.6,,,,,Yes
-exul,2026-10-16,RHIM,Setup,Standard,Good Setup,,401.8,372.74,412.01,Stop hit,1,2026-10-19,372.74,-7.23,,0,,,Yes
+exul,2026-10-16,JAYNECOIND,Near Miss,Standard,Good Setup,,100.62,88.5,105.17,Open,1,,97.98,-2.62,,,,,No
+exul,2026-10-16,ETHOSLTD,Setup,Standard,Good Setup,,2754.5,2516.6,2846.0,Open,1,,2593.8,-5.83,,,,,Yes
+exul,2026-10-16,AIIL,Near Miss,Standard,Good Setup,,571.9,536.98,584.85,Open,1,,548.95,-4.01,,,,,No
+exul,2026-10-16,CHOICEIN,Setup,Standard,Good Setup,,800.6,734.69,824.0,Stop hit,1,2026-10-19,734.69,-8.23,,0,,,Yes
+exul,2026-10-16,STARHEALTH,Setup,Standard,Good Setup,,573.7,539.01,586.25,Open,1,,542.05,-5.52,,,,,Yes
+exul,2026-10-16,JMFINANCIL,Setup,Standard,Good Setup,,129.91,120.6,133.23,Stop hit,1,2026-10-19,120.6,-7.17,,0,,,No
+exul,2026-10-16,CHALET,Setup,Standard,Good Setup,,906.21,814.94,938.88,Open,1,,842.7,-7.01,,,,,Yes
+exul,2026-10-16,SARDAEN,Setup,Standard,Good Setup,,526.05,484.53,540.43,Stop hit,1,2026-10-19,484.53,-7.89,,0,,,Yes
+exul,2026-10-16,AADHARHFC,Setup,Standard,Good Setup,,471.64,433.89,484.95,Open,1,,447.1,-5.2,,,,,Yes
+exul,2026-10-16,BSE,Setup,Standard,Good Setup,,3451.89,3140.75,3560.62,Open,1,,3336.0,-3.36,,,,,Yes
+exul,2026-10-16,RHIM,Setup,Standard,Good Setup,,401.8,372.74,412.01,Stop hit,1,2026-10-19,372.74,-7.23,,0,,,No
 exul,2026-10-16,BECTORFOOD,Setup,Standard,Good Setup,,229.48,210.98,235.98,Stop hit,1,2026-10-19,210.0,-8.49,,0,,,No
-exul,2026-10-16,LTM,Near Miss,Standard,Good Setup,,4390.0,3870.1,4568.9,Open,1,,4300.1,-2.05,,,,,Yes
-exul,2026-10-16,ARIS,Setup,Standard,Good Setup,,147.68,131.4,153.25,Open,1,,144.88,-1.9,,,,,Yes
-exul,2026-10-16,APOLLOTYRE,Setup,Standard,Good Setup,,439.33,401.68,452.0,Open,1,,415.5,-5.42,,,,,Yes
-exul,2026-10-16,JSL,Setup,Standard,Good Setup,,768.38,716.42,786.05,Open,1,,739.35,-3.78,,,,,Yes
-exul,2026-10-16,ITDC,Setup,Standard,Good Setup,,729.46,641.05,758.5,Open,1,,660.75,-9.42,,,,,No
-exul,2026-10-16,MASTEK,Near Miss,Standard,Good Setup,,1830.8,1566.93,1917.63,Open,1,,1821.4,-0.51,,,,,Yes
-exul,2026-10-16,RKFORGE,Setup,Standard,Good Setup,,742.48,679.26,763.5,Open,1,,698.05,-5.98,,,,,Yes
-exul,2026-10-16,GROWW,Near Miss,Standard,Good Setup,,200.85,187.57,205.21,Open,1,,200.19,-0.33,,,,,No
-exul,2026-10-16,WIPRO,Breakout,Standard,Good Setup,,184.4,162.65,191.34,Open,1,,184.32,-0.04,,,,,No
+exul,2026-10-16,LTM,Near Miss,Standard,Good Setup,,4390.0,3870.1,4568.9,Open,1,,4264.9,-2.85,,,,,Yes
+exul,2026-10-16,ARIS,Setup,Standard,Good Setup,,147.68,131.4,153.25,Open,1,,138.01,-6.55,,,,,Yes
+exul,2026-10-16,APOLLOTYRE,Setup,Standard,Good Setup,,439.33,401.68,452.0,Open,1,,416.75,-5.14,,,,,Yes
+exul,2026-10-16,JSL,Setup,Standard,Good Setup,,768.38,716.42,786.05,Open,1,,734.9,-4.36,,,,,Yes
+exul,2026-10-16,ITDC,Setup,Standard,Good Setup,,729.46,641.05,758.5,Open,1,,661.45,-9.32,,,,,No
+exul,2026-10-16,MASTEK,Near Miss,Standard,Good Setup,,1830.8,1566.93,1917.63,Open,1,,1808.4,-1.22,,,,,Yes
+exul,2026-10-16,RKFORGE,Setup,Standard,Good Setup,,742.48,679.26,763.5,Stop hit,1,2026-10-19,679.26,-8.51,,0,,,Yes
+exul,2026-10-16,GROWW,Near Miss,Standard,Good Setup,,200.85,187.57,205.21,Open,1,,198.08,-1.38,,,,,No
+exul,2026-10-16,WIPRO,Breakout,Standard,Good Setup,,184.4,162.65,191.34,Open,1,,182.14,-1.23,,,,,No
 exul,2026-10-16,NAVA,Setup,Standard,Good Setup,,585.07,543.06,598.5,Stop hit,1,2026-10-19,543.06,-7.18,,0,,,Yes
-exul,2026-10-16,MEESHO,Setup,Standard,Good Setup,,245.99,219.98,254.4,Open,1,,226.06,-8.1,,,,,Yes
-exul,2026-10-16,AIAENG,Setup,Standard,Good Setup,,4047.88,3723.44,4153.09,Stop hit,1,2026-10-19,3690.1,-8.84,,0,,,Yes
-exul,2026-10-16,APOLLO,Near Miss,Standard,Good Setup,,429.0,382.13,444.13,Open,1,,423.35,-1.32,,,,,No
-exul,2026-10-16,IGIL,Setup,Standard,Good Setup,,338.58,303.78,349.5,Open,1,,322.0,-4.9,,,,,Yes
-exul,2026-10-16,CDSL,Setup,Standard,Good Setup,,1397.19,1267.31,1438.0,Open,1,,1276.0,-8.67,,,,,Yes
-exul,2026-10-16,BEPL,Setup,Standard,Good Setup,,133.07,122.99,136.0,Open,1,,128.0,-3.81,,,,,Yes
-exul,2026-10-16,CEIGALL,Setup,Standard,Good Setup,,396.79,366.82,405.16,Open,1,,385.8,-2.77,,,,,Yes
-exul,2026-10-16,MAHABANK,Setup,Standard,Good Setup,,85.05,77.98,87.0,Open,1,,81.21,-4.51,,,,,Yes
+exul,2026-10-16,MEESHO,Setup,Standard,Good Setup,,245.99,219.98,254.4,Open,1,,229.59,-6.67,,,,,Yes
+exul,2026-10-16,AIAENG,Setup,Standard,Good Setup,,4047.88,3723.44,4153.09,Stop hit,1,2026-10-19,3690.1,-8.84,,0,,,No
+exul,2026-10-16,APOLLO,Near Miss,Standard,Good Setup,,429.0,382.13,444.13,Open,1,,423.8,-1.21,,,,,No
+exul,2026-10-16,IGIL,Setup,Standard,Good Setup,,338.58,303.78,349.5,Open,1,,321.95,-4.91,,,,,Yes
+exul,2026-10-16,CDSL,Setup,Standard,Good Setup,,1397.19,1267.31,1438.0,Stop hit,1,2026-10-19,1267.31,-9.3,,0,,,Yes
+exul,2026-10-16,BEPL,Setup,Standard,Good Setup,,133.07,122.99,136.0,Stop hit,1,2026-10-19,122.99,-7.57,,0,,,No
+exul,2026-10-16,CEIGALL,Setup,Standard,Good Setup,,396.79,366.82,405.16,Open,1,,393.8,-0.75,,,,,Yes
+exul,2026-10-16,MAHABANK,Setup,Standard,Good Setup,,85.05,77.98,87.0,Open,1,,80.96,-4.81,,,,,Yes
 exul,2026-10-16,TMB,Setup,Standard,Good Setup,,932.96,857.99,954.2,Stop hit,1,2026-10-19,857.3,-8.11,,0,,,Yes
-exul,2026-10-16,360ONE,Setup,Standard,Good Setup,,1124.24,1022.48,1152.0,Open,1,,1045.1,-7.04,,,,,Yes
-exul,2026-10-16,POWERMECH,Setup,Standard,Good Setup,,2540.07,2317.79,2598.5,Open,1,,2415.4,-4.91,,,,,Yes
-exul,2026-10-16,HAL,Near Miss,Standard,Good Setup,,4989.0,4551.25,5097.4,Open,1,,4978.9,-0.2,,,,,Yes
-exul,2026-10-16,DALBHARAT,Setup,Standard,Good Setup,,1818.03,1651.01,1859.8,Open,1,,1687.9,-7.16,,,,,No
-exul,2026-10-16,ARVSMART,Setup,Standard,Good Setup,,670.14,580.28,691.41,Open,1,,603.0,-10.02,,,,,No
-exul,2026-10-16,EMAMILTD,Setup,Standard,Good Setup,,408.47,364.83,418.8,Open,1,,372.0,-8.93,,,,,Yes
-exul,2026-10-16,KERNEX,Setup,Standard,Good Setup,,1822.34,1621.39,1869.7,Open,1,,1733.0,-4.9,,,,,Yes
-exul,2026-10-16,JUBLINGREA,Setup,Standard,Good Setup,,678.75,615.08,693.58,Open,1,,627.3,-7.58,,,,,Yes
-exul,2026-10-16,HCLTECH,Near Miss,Standard,Good Setup,,1380.0,1205.23,1419.93,Open,1,,1385.4,0.39,,,,,No
-exul,2026-10-16,THANGAMAYL,Setup,Standard,Good Setup,,5360.2,4699.74,5507.0,Open,1,,5086.5,-5.11,,,,,Yes
-exul,2026-10-16,MPHASIS,Near Miss,Standard,Good Setup,,2500.0,2236.82,2556.9,Open,1,,2492.6,-0.3,,,,,No
-exul,2026-10-16,SENCO,Setup,Standard,Good Setup,,359.52,319.5,367.93,Open,1,,335.9,-6.57,,,,,No
-exul,2026-10-16,SHAILY,Setup,Standard,Good Setup,,3406.8,2996.08,3484.61,Open,1,,3150.1,-7.53,,,,,Yes
-exul,2026-10-16,BEML,Setup,Standard,Good Setup,,2146.67,1899.39,2192.09,Open,1,,1979.4,-7.79,,,,,Yes
-exul,2026-10-16,INFY,Breakout,Standard,Good Setup,,1161.2,1010.45,1187.7,Open,1,,1146.7,-1.25,,,,,No
-exul,2026-10-16,TCS,Breakout,Standard,Good Setup,,2465.0,2029.62,2542.62,Open,1,,2480.8,0.64,,,,,No
-exsh,2026-10-16,KAPSTON,Pullback,Standard,Good Setup,,539.3,512.36,593.0,Open,1,,543.0,0.69,,,,,No
-exsh,2026-10-16,BOSCHLTD,Pullback,Standard,Good Setup,,45560.0,43769.64,49100.0,Open,1,,45355.0,-0.45,,,,,No
-exsh,2026-10-16,MARKSANS,Pullback,Standard,Good Setup,,311.0,291.93,344.55,Open,1,,310.75,-0.08,,,,,No
-exsh,2026-10-16,CRAFTSMAN,Near Miss,Standard,Good Setup,,11048.05,10500.1,11999.0,Open,1,,11068.0,0.18,,,,,No
-exsh,2026-10-16,TRENT,Near Miss,Standard,Good Setup,,3010.71,2868.38,3244.5,Open,1,,2915.4,-3.17,,,,,No
-exsh,2026-10-16,WHEELS,Near Miss,Standard,Good Setup,,2503.0,2105.02,3136.07,Open,1,,2475.0,-1.12,,,,,Yes
-exsh,2026-10-16,PARAS,Pullback,Standard,Good Setup,,1298.9,1225.01,1414.03,Open,1,,1276.2,-1.75,,,,,No
-exsh,2026-10-16,STYLAMIND,Near Miss,Standard,Good Setup,,3431.85,3216.08,3763.9,Open,1,,3329.4,-2.99,,,,,No
-exsh,2026-10-16,PVRINOX,Near Miss,High Potential,Good Setup,,1427.85,1176.39,1801.35,Open,1,,1398.4,-2.06,,,,,No
+exul,2026-10-16,360ONE,Setup,Standard,Good Setup,,1124.24,1022.48,1152.0,Open,1,,1055.0,-6.16,,,,,Yes
+exul,2026-10-16,POWERMECH,Setup,Standard,Good Setup,,2540.07,2317.79,2598.5,Open,1,,2357.5,-7.19,,,,,Yes
+exul,2026-10-16,HAL,Near Miss,Standard,Good Setup,,4989.0,4551.25,5097.4,Open,1,,4959.0,-0.6,,,,,Yes
+exul,2026-10-16,DALBHARAT,Setup,Standard,Good Setup,,1818.03,1651.01,1859.8,Stop hit,1,2026-10-19,1651.01,-9.19,,0,,,No
+exul,2026-10-16,ARVSMART,Setup,Standard,Good Setup,,670.14,580.28,691.41,Open,1,,598.9,-10.63,,,,,No
+exul,2026-10-16,EMAMILTD,Setup,Standard,Good Setup,,408.47,364.83,418.8,Open,1,,375.05,-8.18,,,,,Yes
+exul,2026-10-16,KERNEX,Setup,Standard,Good Setup,,1822.34,1621.39,1869.7,Open,1,,1737.6,-4.65,,,,,Yes
+exul,2026-10-16,JUBLINGREA,Setup,Standard,Good Setup,,678.75,615.08,693.58,Open,1,,623.7,-8.11,,,,,Yes
+exul,2026-10-16,HCLTECH,Near Miss,Standard,Good Setup,,1380.0,1205.23,1419.93,Open,1,,1379.9,-0.01,,,,,No
+exul,2026-10-16,THANGAMAYL,Setup,Standard,Good Setup,,5360.2,4699.74,5507.0,Open,1,,5017.5,-6.39,,,,,Yes
+exul,2026-10-16,MPHASIS,Near Miss,Standard,Good Setup,,2500.0,2236.82,2556.9,Open,1,,2500.0,0.0,,,,,No
+exul,2026-10-16,SENCO,Setup,Standard,Good Setup,,359.52,319.5,367.93,Open,1,,341.0,-5.15,,,,,No
+exul,2026-10-16,SHAILY,Setup,Standard,Good Setup,,3406.8,2996.08,3484.61,Open,1,,3105.2,-8.85,,,,,Yes
+exul,2026-10-16,BEML,Setup,Standard,Good Setup,,2146.67,1899.39,2192.09,Open,1,,1938.4,-9.7,,,,,No
+exul,2026-10-16,INFY,Breakout,Standard,Good Setup,,1161.2,1010.45,1187.7,Open,1,,1130.7,-2.63,,,,,No
+exul,2026-10-16,TCS,Breakout,Standard,Good Setup,,2465.0,2029.62,2542.62,Open,1,,2460.9,-0.17,,,,,No
+exsh,2026-10-16,KAPSTON,Pullback,Standard,Good Setup,,539.3,512.36,593.0,Open,1,,542.5,0.59,,,,,No
+exsh,2026-10-16,BOSCHLTD,Pullback,Standard,Good Setup,,45560.0,43769.64,49100.0,Open,1,,45195.0,-0.8,,,,,No
+exsh,2026-10-16,MARKSANS,Pullback,Standard,Good Setup,,311.0,291.93,344.55,Open,1,,303.05,-2.56,,,,,No
+exsh,2026-10-16,CRAFTSMAN,Near Miss,Standard,Good Setup,,11048.05,10500.1,11999.0,Open,1,,11158.0,1.0,,,,,Yes
+exsh,2026-10-16,TRENT,Near Miss,Standard,Good Setup,,3010.71,2868.38,3244.5,Stop hit,1,2026-10-19,2868.38,-4.73,,0,,,No
+exsh,2026-10-16,WHEELS,Near Miss,Standard,Good Setup,,2503.0,2105.02,3136.07,Open,1,,2439.4,-2.54,,,,,Yes
+exsh,2026-10-16,PARAS,Pullback,Standard,Good Setup,,1298.9,1225.01,1414.03,Open,1,,1265.1,-2.6,,,,,No
+exsh,2026-10-16,STYLAMIND,Near Miss,Standard,Good Setup,,3431.85,3216.08,3763.9,Open,1,,3305.2,-3.69,,,,,No
+exsh,2026-10-16,PVRINOX,Near Miss,High Potential,Good Setup,,1427.85,1176.39,1801.35,Open,1,,1402.1,-1.8,,,,,No
 exsh,2026-10-16,URBANCO,Pullback,Standard,Good Setup,,158.12,147.04,174.46,Stop hit,1,2026-10-19,147.04,-7.01,,0,,,No
-exsh,2026-10-16,TIPSMUSIC,Breakout,Standard,Good Setup,,746.9,634.57,906.61,Open,1,,776.3,3.94,,,,,Yes
-exsh,2026-10-16,INDHOTEL,Breakout,Standard,Good Setup,,772.1,703.51,866.9,Open,1,,768.4,-0.48,,,,,Yes
-exsh,2026-10-16,RKFORGE,Pullback,Standard,Good Setup,,691.45,657.15,736.45,Open,1,,698.05,0.95,,,,,No
-exsh,2026-10-16,INDSWFTLAB,Pullback,Standard,Good Setup,,359.25,324.35,404.0,Open,1,,358.65,-0.17,,,,,No
-exsh,2026-10-16,FEDERALBNK,Breakout,Standard,Good Setup,,338.0,322.9,356.95,Stop hit,1,2026-10-19,322.9,-4.47,,0,,,No
-exsh,2026-10-16,CENTUM,Pullback,Standard,Good Setup,,4026.2,3669.62,4450.0,Open,1,,3982.5,-1.09,,,,,No
-exsh,2026-10-16,SKIPPER,Pullback,Standard,Good Setup,,526.45,499.12,558.61,Open,1,,524.8,-0.31,,,,,No
-exsh,2026-10-16,GCSL,Near Miss,Standard,Good Setup,,743.48,676.78,821.36,Open,1,,747.0,0.47,,,,,No
-exsh,2026-10-16,SMSPHARMA,Pullback,Standard,Good Setup,,450.5,415.73,489.0,Open,1,,436.6,-3.09,,,,,No
-exsh,2026-10-16,BHARTIARTL,Breakout,Standard,Good Setup,,1905.0,1806.3,2005.8,Open,1,,1902.5,-0.13,,,,,No
-exsh,2026-10-16,ARTEMISMED,Pullback,Standard,Good Setup,,306.35,287.14,325.9,Open,1,,302.85,-1.14,,,,,No
-exsh,2026-10-16,INDORAMA,Pullback,Standard,Good Setup,,97.56,87.86,107.5,Open,1,,95.31,-2.31,,,,,No
-exsh,2026-10-16,ARVIND,Pullback,Standard,Good Setup,,525.7,501.98,548.61,Open,1,,514.8,-2.07,,,,,No
-exsh,2026-10-16,SENCO,Pullback,Standard,Good Setup,,337.25,315.0,358.8,Open,1,,335.9,-0.4,,,,,No
-exsh,2026-10-16,WELCORP,Pullback,Standard,Good Setup,,2571.5,2338.89,2784.8,Open,1,,2615.7,1.72,,,,,No
-exsh,2026-10-16,EMIL,Pullback,Standard,Good Setup,,182.81,167.21,196.74,Open,1,,180.58,-1.22,,,,,No
-exsh,2026-10-16,BECTORFOOD,Pullback,Standard,Good Setup,,210.49,200.73,218.87,Open,1,,207.34,-1.5,,,,,No
-exsh,2026-10-16,VOLTAMP,Breakout,Standard,Good Setup,,10622.0,10135.89,11024.22,Open,1,,10513.0,-1.03,,,,,No
-exsh,2026-10-16,SUPRIYA,Pullback,Standard,Good Setup,,886.0,828.9,933.15,Open,1,,888.6,0.29,,,,,No
-exsh,2026-10-16,DIVGIITTS,Pullback,Standard,Good Setup,,987.4,897.13,1061.97,Open,1,,961.0,-2.67,,,,,No
-exsh,2026-10-16,LLOYDSME,Pullback,Standard,Good Setup,,1851.7,1768.39,1918.8,Open,1,,1843.1,-0.46,,,,,No
-exsh,2026-10-16,DLF,Near Miss,Standard,Good Setup,,684.97,658.97,706.13,Open,1,,676.2,-1.28,,,,,Yes
-exsh,2026-10-16,GODIGIT,Near Miss,Standard,Good Setup,,289.98,251.64,320.9,Open,1,,284.6,-1.86,,,,,Yes
-exsh,2026-10-16,HLEGLAS,Pullback,Standard,Good Setup,,415.3,379.08,443.3,Open,1,,406.6,-2.09,,,,,No
-exsh,2026-10-16,APLAPOLLO,Pullback,Standard,Good Setup,,2152.7,2056.85,2224.5,Open,1,,2136.3,-0.76,,,,,No
-exsh,2026-10-16,EMUDHRA,Pullback,Standard,Good Setup,,555.85,510.82,589.14,Open,1,,544.05,-2.12,,,,,No
-exsh,2026-10-16,SATIN,Pullback,Standard,Good Setup,,231.21,213.94,244.0,Open,1,,227.2,-1.73,,,,,No
-exsh,2026-10-16,FORCEMOT,Near Miss,Standard,Good Setup,,17860.65,17180.51,18339.0,Open,1,,17800.0,-0.34,,,,,Yes
-exsh,2026-10-16,OPTIEMUS,Pullback,Standard,Good Setup,,788.65,699.66,850.65,Open,1,,779.0,-1.22,,,,,No
-exsh,2026-10-16,GLAXO,Pullback,Standard,Good Setup,,2566.1,2440.23,2652.28,Open,1,,2529.8,-1.41,,,,,No
-exsh,2026-10-16,RPGLIFE,Pullback,Standard,Good Setup,,2940.6,2729.03,3082.0,Open,1,,2908.6,-1.09,,,,,No
+exsh,2026-10-16,TIPSMUSIC,Breakout,Standard,Good Setup,,746.9,634.57,906.61,Open,1,,771.7,3.32,,,,,Yes
+exsh,2026-10-16,INDHOTEL,Breakout,Standard,Good Setup,,772.1,703.51,866.9,Open,1,,760.0,-1.57,,,,,No
+exsh,2026-10-16,RKFORGE,Pullback,Standard,Good Setup,,691.45,657.15,736.45,Open,1,,685.0,-0.93,,,,,No
+exsh,2026-10-16,INDSWFTLAB,Pullback,Standard,Good Setup,,359.25,324.35,404.0,Open,1,,351.9,-2.05,,,,,No
+exsh,2026-10-16,FEDERALBNK,Breakout,Standard,Good Setup,,338.0,322.9,356.95,Stop hit,1,2026-10-19,322.9,-4.47,,0,,,Yes
+exsh,2026-10-16,CENTUM,Pullback,Standard,Good Setup,,4026.2,3669.62,4450.0,Open,1,,3985.4,-1.01,,,,,No
+exsh,2026-10-16,SKIPPER,Pullback,Standard,Good Setup,,526.45,499.12,558.61,Open,1,,520.85,-1.06,,,,,No
+exsh,2026-10-16,GCSL,Near Miss,Standard,Good Setup,,743.48,676.78,821.36,Open,1,,732.75,-1.44,,,,,Yes
+exsh,2026-10-16,SMSPHARMA,Pullback,Standard,Good Setup,,450.5,415.73,489.0,Open,1,,434.65,-3.52,,,,,No
+exsh,2026-10-16,BHARTIARTL,Breakout,Standard,Good Setup,,1905.0,1806.3,2005.8,Open,1,,1875.2,-1.56,,,,,No
+exsh,2026-10-16,ARTEMISMED,Pullback,Standard,Good Setup,,306.35,287.14,325.9,Open,1,,301.25,-1.66,,,,,No
+exsh,2026-10-16,INDORAMA,Pullback,Standard,Good Setup,,97.56,87.86,107.5,Open,1,,92.24,-5.45,,,,,No
+exsh,2026-10-16,ARVIND,Pullback,Standard,Good Setup,,525.7,501.98,548.61,Open,1,,509.1,-3.16,,,,,No
+exsh,2026-10-16,SENCO,Pullback,Standard,Good Setup,,337.25,315.0,358.8,Open,1,,341.0,1.11,,,,,No
+exsh,2026-10-16,WELCORP,Pullback,Standard,Good Setup,,2571.5,2338.89,2784.8,Open,1,,2592.9,0.83,,,,,No
+exsh,2026-10-16,EMIL,Pullback,Standard,Good Setup,,182.81,167.21,196.74,Open,1,,176.47,-3.47,,,,,No
+exsh,2026-10-16,BECTORFOOD,Pullback,Standard,Good Setup,,210.49,200.73,218.87,Open,1,,203.67,-3.24,,,,,No
+exsh,2026-10-16,VOLTAMP,Breakout,Standard,Good Setup,,10622.0,10135.89,11024.22,Open,1,,10410.0,-2.0,,,,,No
+exsh,2026-10-16,SUPRIYA,Pullback,Standard,Good Setup,,886.0,828.9,933.15,Open,1,,873.25,-1.44,,,,,No
+exsh,2026-10-16,DIVGIITTS,Pullback,Standard,Good Setup,,987.4,897.13,1061.97,Open,1,,944.1,-4.39,,,,,No
+exsh,2026-10-16,LLOYDSME,Pullback,Standard,Good Setup,,1851.7,1768.39,1918.8,Open,1,,1804.1,-2.57,,,,,No
+exsh,2026-10-16,DLF,Near Miss,Standard,Good Setup,,684.97,658.97,706.13,Open,1,,672.85,-1.77,,,,,Yes
+exsh,2026-10-16,GODIGIT,Near Miss,Standard,Good Setup,,289.98,251.64,320.9,Open,1,,287.45,-0.87,,,,,Yes
+exsh,2026-10-16,HLEGLAS,Pullback,Standard,Good Setup,,415.3,379.08,443.3,Open,1,,399.45,-3.82,,,,,No
+exsh,2026-10-16,APLAPOLLO,Pullback,Standard,Good Setup,,2152.7,2056.85,2224.5,Open,1,,2144.6,-0.38,,,,,No
+exsh,2026-10-16,EMUDHRA,Pullback,Standard,Good Setup,,555.85,510.82,589.14,Open,1,,540.0,-2.85,,,,,No
+exsh,2026-10-16,SATIN,Pullback,Standard,Good Setup,,231.21,213.94,244.0,Open,1,,229.25,-0.85,,,,,No
+exsh,2026-10-16,FORCEMOT,Near Miss,Standard,Good Setup,,17860.65,17180.51,18339.0,Open,1,,17563.0,-1.67,,,,,Yes
+exsh,2026-10-16,OPTIEMUS,Pullback,Standard,Good Setup,,788.65,699.66,850.65,Open,1,,748.7,-5.07,,,,,No
+exsh,2026-10-16,GLAXO,Pullback,Standard,Good Setup,,2566.1,2440.23,2652.28,Open,1,,2495.4,-2.76,,,,,No
+exsh,2026-10-16,RPGLIFE,Pullback,Standard,Good Setup,,2940.6,2729.03,3082.0,Open,1,,2843.0,-3.32,,,,,No
 exsh,2026-10-16,SHAILY,Pullback,Standard,Good Setup,,3109.7,2983.0,3195.16,Target hit,1,2026-10-19,3195.16,2.75,,,,,No
-exsh,2026-10-16,THELEELA,Breakout,High Potential,Good Setup,,616.3,563.7,650.4,Open,1,,623.35,1.14,,,,,No
-exsh,2026-10-16,WIPRO,Near Miss,Standard,Good Setup,,184.87,174.64,191.34,Open,1,,184.32,-0.3,,,,,Yes
-exsh,2026-10-16,MANAPPURAM,Pullback,Standard,Good Setup,,323.95,309.4,333.04,Open,1,,322.7,-0.39,,,,,No
+exsh,2026-10-16,THELEELA,Breakout,High Potential,Good Setup,,616.3,563.7,650.4,Open,1,,622.75,1.05,,,,,No
+exsh,2026-10-16,WIPRO,Near Miss,Standard,Good Setup,,184.87,174.64,191.34,Open,1,,182.14,-1.48,,,,,Yes
+exsh,2026-10-16,MANAPPURAM,Pullback,Standard,Good Setup,,323.95,309.4,333.04,Open,1,,319.55,-1.36,,,,,No
 exsh,2026-10-16,PARACABLES,Pullback,Standard,Good Setup,,60.52,56.0,63.35,Target hit,1,2026-10-19,63.35,4.68,,,,,Yes
-exsh,2026-10-16,ETHOSLTD,Pullback,Standard,Good Setup,,2611.4,2492.39,2683.9,Open,1,,2575.5,-1.37,,,,,No
-exsh,2026-10-16,MANALIPETC,Pullback,Standard,Good Setup,,84.42,76.71,89.1,Open,1,,82.72,-2.01,,,,,No
-exsh,2026-10-16,ROLEXRINGS,Pullback,Standard,Good Setup,,173.14,160.27,181.0,Open,1,,170.23,-1.68,,,,,No
-exsh,2026-10-16,NOCIL,Pullback,Standard,Good Setup,,165.76,154.63,172.37,Open,1,,162.22,-2.14,,,,,No
-exsh,2026-10-16,SHRIPISTON,Pullback,Standard,Good Setup,,4629.9,4363.09,4785.8,Open,1,,4722.8,2.01,,,,,No
-exsh,2026-10-16,GNA,Pullback,Standard,Good Setup,,538.5,495.43,563.45,Open,1,,523.9,-2.71,,,,,No
-exsh,2026-10-16,CRISIL,Pullback,Standard,Good Setup,,4547.9,4350.03,4662.0,Open,1,,4488.9,-1.3,,,,,No
-exsh,2026-10-16,GOLDIAM,Pullback,Standard,Good Setup,,320.35,302.39,330.66,Open,1,,324.8,1.39,,,,,No
-exsh,2026-10-16,BEML,Pullback,Standard,Good Setup,,1968.5,1871.66,2022.49,Open,1,,1979.4,0.55,,,,,No
-exsh,2026-10-16,INDIANB,Breakout,Standard,Good Setup,,854.1,816.73,874.9,Open,1,,865.8,1.37,,,,,No
-exsh,2026-10-16,VIDYAWIRES,Pullback,Standard,Good Setup,,93.01,85.83,97.0,Open,1,,93.5,0.53,,,,,No
-exsh,2026-10-16,ITCHOTELS,Breakout,Standard,Good Setup,,162.48,155.06,166.41,Open,1,,161.29,-0.73,,,,,No
-exsh,2026-10-16,JSWDULUX,Pullback,Standard,Good Setup,,3045.0,2917.34,3112.5,Open,1,,3077.5,1.07,,,,,No
-exsh,2026-10-16,SSWL,Pullback,Standard,Good Setup,,418.1,388.11,434.0,Open,1,,417.15,-0.23,,,,,No
-exsh,2026-10-16,BELRISE,Pullback,Standard,Good Setup,,231.51,218.04,238.67,Open,1,,230.45,-0.46,,,,,No
-exsh,2026-10-16,LXCHEM,Pullback,Standard,Good Setup,,179.02,165.4,186.0,Open,1,,175.21,-2.13,,,,,No
-exsh,2026-10-16,WELSPUNLIV,Pullback,Standard,Good Setup,,219.3,192.4,233.0,Open,1,,223.55,1.94,,,,,No
-exsh,2026-10-16,AXISCADES,Pullback,Standard,Good Setup,,2116.0,1929.39,2211.0,Open,1,,2107.0,-0.43,,,,,No
-exsh,2026-10-16,IIFL,Pullback,Standard,Good Setup,,615.4,570.31,638.25,Open,1,,616.6,0.19,,,,,No
-exsh,2026-10-16,HAL,Pullback,Standard,Good Setup,,4989.0,4769.08,5097.4,Open,1,,4978.9,-0.2,,,,,No
-exsh,2026-10-16,HBLENGINE,Breakout,Standard,Good Setup,,833.15,749.82,873.79,Open,1,,805.7,-3.29,,,,,No
-exsh,2026-10-16,SENORES,Pullback,Standard,Good Setup,,1318.4,1231.31,1360.0,Open,1,,1318.8,0.03,,,,,No
-exsh,2026-10-16,ICICIBANK,Breakout,Standard,Good Setup,,1397.0,1321.42,1431.83,Open,1,,1389.3,-0.55,,,,,No
-exsh,2026-10-16,EQUITASBNK,Near Miss,Standard,Good Setup,,70.91,65.06,73.4,Open,1,,69.65,-1.78,,,,,No
-exsh,2026-10-16,DRREDDY,Near Miss,Standard,Good Setup,,1255.31,1184.59,1284.75,Open,1,,1235.2,-1.6,,,,,Yes
-exsh,2026-10-16,NPST,Pullback,Standard,Good Setup,,1843.6,1696.84,1903.6,Open,1,,1776.0,-3.67,,,,,No
-exsh,2026-10-16,MPHASIS,Breakout,Standard,Good Setup,,2500.0,2361.98,2556.9,Open,1,,2492.6,-0.3,,,,,No
-exsh,2026-10-16,INFY,Breakout,Standard,Good Setup,,1161.2,1097.18,1187.7,Open,1,,1146.7,-1.25,,,,,No
-exsh,2026-10-16,RPEL,Pullback,Standard,Good Setup,,1811.5,1657.66,1875.0,Open,1,,1745.0,-3.67,,,,,No
-exsh,2026-10-16,SAREGAMA,Pullback,Standard,Good Setup,,504.0,473.75,516.5,Open,1,,499.3,-0.93,,,,,No
-exsh,2026-10-16,LLOYDSENGG,Pullback,Standard,Good Setup,,96.37,88.49,99.48,Open,1,,95.16,-1.26,,,,,No
-exsh,2026-10-16,JASH,Pullback,Standard,Good Setup,,544.95,475.06,571.7,Open,1,,534.45,-1.93,,,,,No
-exsh,2026-10-16,GROWW,Breakout,Standard,Good Setup,,200.85,188.67,205.21,Open,1,,200.19,-0.33,,,,,No
-exsh,2026-10-16,MASTEK,Breakout,Standard,Good Setup,,1830.8,1575.9,1917.63,Open,1,,1821.4,-0.51,,,,,No
+exsh,2026-10-16,ETHOSLTD,Pullback,Standard,Good Setup,,2611.4,2492.39,2683.9,Open,1,,2593.8,-0.67,,,,,No
+exsh,2026-10-16,MANALIPETC,Pullback,Standard,Good Setup,,84.42,76.71,89.1,Open,1,,81.69,-3.23,,,,,No
+exsh,2026-10-16,ROLEXRINGS,Pullback,Standard,Good Setup,,173.14,160.27,181.0,Open,1,,168.89,-2.45,,,,,No
+exsh,2026-10-16,NOCIL,Pullback,Standard,Good Setup,,165.76,154.63,172.37,Open,1,,159.83,-3.58,,,,,No
+exsh,2026-10-16,SHRIPISTON,Pullback,Standard,Good Setup,,4629.9,4363.09,4785.8,Open,1,,4621.0,-0.19,,,,,No
+exsh,2026-10-16,GNA,Pullback,Standard,Good Setup,,538.5,495.43,563.45,Open,1,,517.85,-3.83,,,,,No
+exsh,2026-10-16,CRISIL,Pullback,Standard,Good Setup,,4547.9,4350.03,4662.0,Open,1,,4527.4,-0.45,,,,,No
+exsh,2026-10-16,GOLDIAM,Pullback,Standard,Good Setup,,320.35,302.39,330.66,Open,1,,319.85,-0.16,,,,,No
+exsh,2026-10-16,BEML,Pullback,Standard,Good Setup,,1968.5,1871.66,2022.49,Open,1,,1938.4,-1.53,,,,,No
+exsh,2026-10-16,INDIANB,Breakout,Standard,Good Setup,,854.1,816.73,874.9,Open,1,,856.85,0.32,,,,,No
+exsh,2026-10-16,VIDYAWIRES,Pullback,Standard,Good Setup,,93.01,85.83,97.0,Open,1,,91.87,-1.23,,,,,No
+exsh,2026-10-16,ITCHOTELS,Breakout,Standard,Good Setup,,162.48,155.06,166.41,Open,1,,158.5,-2.45,,,,,No
+exsh,2026-10-16,JSWDULUX,Pullback,Standard,Good Setup,,3045.0,2917.34,3112.5,Target hit,1,2026-10-19,3112.5,2.22,,,,,No
+exsh,2026-10-16,SSWL,Pullback,Standard,Good Setup,,418.1,388.11,434.0,Open,1,,412.05,-1.45,,,,,No
+exsh,2026-10-16,BELRISE,Pullback,Standard,Good Setup,,231.51,218.04,238.67,Open,1,,227.2,-1.86,,,,,No
+exsh,2026-10-16,LXCHEM,Pullback,Standard,Good Setup,,179.02,165.4,186.0,Open,1,,171.14,-4.4,,,,,No
+exsh,2026-10-16,WELSPUNLIV,Pullback,Standard,Good Setup,,219.3,192.4,233.0,Open,1,,217.32,-0.9,,,,,No
+exsh,2026-10-16,AXISCADES,Pullback,Standard,Good Setup,,2116.0,1929.39,2211.0,Open,1,,2096.7,-0.91,,,,,No
+exsh,2026-10-16,IIFL,Pullback,Standard,Good Setup,,615.4,570.31,638.25,Open,1,,612.5,-0.47,,,,,No
+exsh,2026-10-16,HAL,Pullback,Standard,Good Setup,,4989.0,4769.08,5097.4,Open,1,,4959.0,-0.6,,,,,No
+exsh,2026-10-16,HBLENGINE,Breakout,Standard,Good Setup,,833.15,749.82,873.79,Open,1,,812.95,-2.42,,,,,No
+exsh,2026-10-16,SENORES,Pullback,Standard,Good Setup,,1318.4,1231.31,1360.0,Open,1,,1253.6,-4.92,,,,,No
+exsh,2026-10-16,ICICIBANK,Breakout,Standard,Good Setup,,1397.0,1321.42,1431.83,Open,1,,1381.0,-1.15,,,,,No
+exsh,2026-10-16,EQUITASBNK,Near Miss,Standard,Good Setup,,70.91,65.06,73.4,Open,1,,70.04,-1.23,,,,,No
+exsh,2026-10-16,DRREDDY,Near Miss,Standard,Good Setup,,1255.31,1184.59,1284.75,Open,1,,1242.5,-1.02,,,,,Yes
+exsh,2026-10-16,NPST,Pullback,Standard,Good Setup,,1843.6,1696.84,1903.6,Open,1,,1776.2,-3.66,,,,,No
+exsh,2026-10-16,MPHASIS,Breakout,Standard,Good Setup,,2500.0,2361.98,2556.9,Open,1,,2500.0,0.0,,,,,No
+exsh,2026-10-16,INFY,Breakout,Standard,Good Setup,,1161.2,1097.18,1187.7,Open,1,,1130.7,-2.63,,,,,No
+exsh,2026-10-16,RPEL,Pullback,Standard,Good Setup,,1811.5,1657.66,1875.0,Open,1,,1777.8,-1.86,,,,,No
+exsh,2026-10-16,SAREGAMA,Pullback,Standard,Good Setup,,504.0,473.75,516.5,Open,1,,510.15,1.22,,,,,Yes
+exsh,2026-10-16,LLOYDSENGG,Pullback,Standard,Good Setup,,96.37,88.49,99.48,Open,1,,94.31,-2.14,,,,,No
+exsh,2026-10-16,JASH,Pullback,Standard,Good Setup,,544.95,475.06,571.7,Open,1,,535.15,-1.8,,,,,No
+exsh,2026-10-16,GROWW,Breakout,Standard,Good Setup,,200.85,188.67,205.21,Open,1,,198.08,-1.38,,,,,No
+exsh,2026-10-16,MASTEK,Breakout,Standard,Good Setup,,1830.8,1575.9,1917.63,Open,1,,1808.4,-1.22,,,,,No
 exsh,2026-10-16,SPLPETRO,Pullback,Standard,Good Setup,,767.25,717.7,783.8,Target hit,1,2026-10-19,783.8,2.16,,,,,No
-exsh,2026-10-16,HCLTECH,Breakout,Standard,Good Setup,,1380.0,1256.72,1419.93,Open,1,,1385.4,0.39,,,,,No
-exsh,2026-10-16,STYLEBAAZA,Pullback,Standard,Good Setup,,399.5,369.35,409.0,Open,1,,391.85,-1.91,,,,,No
-exsh,2026-10-16,TCS,Breakout,Standard,Good Setup,,2465.0,2208.97,2542.62,Open,1,,2480.8,0.64,,,,,No
-exsh,2026-10-16,ELECTCAST,Pullback,Standard,Good Setup,,76.7,70.76,78.37,Open,1,,76.0,-0.91,,,,,No
-exsh,2026-10-16,AARTIPHARM,Pullback,Standard,Good Setup,,873.65,804.45,892.54,Open,1,,863.8,-1.13,,,,,No
+exsh,2026-10-16,HCLTECH,Breakout,Standard,Good Setup,,1380.0,1256.72,1419.93,Open,1,,1379.9,-0.01,,,,,No
+exsh,2026-10-16,STYLEBAAZA,Pullback,Standard,Good Setup,,399.5,369.35,409.0,Open,1,,392.75,-1.69,,,,,No
+exsh,2026-10-16,TCS,Breakout,Standard,Good Setup,,2465.0,2208.97,2542.62,Open,1,,2460.9,-0.17,,,,,No
+exsh,2026-10-16,ELECTCAST,Pullback,Standard,Good Setup,,76.7,70.76,78.37,Open,1,,74.61,-2.72,,,,,No
+exsh,2026-10-16,AARTIPHARM,Pullback,Standard,Good Setup,,873.65,804.45,892.54,Open,1,,832.35,-4.73,,,,,No
 exsh,2026-10-16,GABRIEL,Near Miss,Standard,Good Setup,,1455.0,1302.21,1495.0,Target hit,1,2026-10-19,1495.0,2.75,,,,,Yes
-exsh,2026-10-16,CHEMPLASTS,Pullback,Standard,Good Setup,,212.35,178.28,218.7,Open,1,,209.95,-1.13,,,,,No
-exea,2026-10-16,NEOGEN,Breakout,Standard,Good Setup,,2484.8,2291.95,2785.0,Open,1,,2486.7,0.08,,,,,Yes
-exea,2026-10-16,ORIENTHOT,Breakout,Standard,Good Setup,,151.8,136.69,175.26,Open,1,,151.26,-0.36,,,,,Yes
-exea,2026-10-16,SHREEJISPG,Breakout,Standard,Good Setup,,840.0,648.42,1060.02,Open,1,,838.95,-0.12,,,,,Yes
-exea,2026-10-16,WSTCSTPAPR,Breakout,Standard,Good Setup,,840.0,676.49,978.05,Open,1,,820.9,-2.27,,,,,Yes
-exea,2026-10-16,SMCGLOBAL,Breakout,Standard,Good Setup,,110.11,93.19,124.0,Open,1,,109.41,-0.64,,,,,No
-exea,2026-10-16,BBOX,Breakout,Standard,Good Setup,,907.25,767.82,998.65,Open,1,,922.15,1.64,,,,,Yes
-exea,2026-10-16,ORIENTELEC,Breakout,Standard,Good Setup,,200.91,177.78,215.64,Open,1,,199.5,-0.7,,,,,Yes
-exea,2026-10-16,LOKESHMACH,Breakout,Standard,Good Setup,,428.1,331.68,488.0,Open,1,,407.85,-4.73,,,,,No
-exea,2026-10-16,BLUSPRING,Breakout,Standard,Good Setup,,165.19,135.25,181.9,Open,1,,163.73,-0.88,,,,,Yes
-exea,2026-10-16,GLAND,Breakout,Standard,Good Setup,,3043.4,2803.63,3171.0,Open,1,,3051.9,0.28,,,,,Yes
-exea,2026-10-16,HBLENGINE,Breakout,Standard,Good Setup,,833.15,749.82,873.79,Open,1,,805.7,-3.29,,,,,No
-exea,2026-10-16,PTCIL,Breakout,Standard,Good Setup,,24680.0,21598.39,26085.0,Open,1,,24300.0,-1.54,,,,,Yes
-exea,2026-10-16,FINEORG,Breakout,Standard,Good Setup,,5461.5,4999.27,5666.0,Open,1,,5400.0,-1.13,,,,,Yes
-exea,2026-10-16,DRREDDY,Pre-Breakout,Standard,Good Setup,,1255.31,1184.59,1284.75,Open,1,,1235.2,-1.6,,,,,Yes
-exea,2026-10-16,THELEELA,Breakout,Standard,Good Setup,,616.3,534.64,650.4,Open,1,,623.35,1.14,,,,,Yes
-exea,2026-10-16,PREMIERPOL,Breakout,Standard,Good Setup,,111.51,90.4,120.0,Open,1,,109.19,-2.08,,,,,Yes
-exea,2026-10-16,HCLTECH,Breakout,Standard,Good Setup,,1380.0,1280.1,1419.93,Open,1,,1385.4,0.39,,,,,Yes
-exea,2026-10-16,TARIL,Breakout,Standard,Good Setup,,329.1,296.03,342.49,Open,1,,324.3,-1.46,,,,,Yes
-exea,2026-10-16,UTTAMSUGAR,Breakout,Standard,Good Setup,,369.15,280.02,401.0,Open,1,,359.05,-2.74,,,,,Yes
-exea,2026-10-16,MOTILALOFS,Breakout,Standard,Good Setup,,1057.6,966.13,1088.32,Open,1,,1044.85,-1.21,,,,,No
-exea,2026-10-16,APOLLO,Breakout,Standard,Good Setup,,429.0,384.24,444.13,Open,1,,423.35,-1.32,,,,,No
-exea,2026-10-16,TFCILTD,Breakout,Standard,Good Setup,,155.69,135.89,161.95,Open,1,,157.55,1.19,,,,,Yes
-exea,2026-10-16,SSWL,Breakout,Standard,Good Setup,,418.1,369.0,434.0,Open,1,,417.15,-0.23,,,,,Yes
-exea,2026-10-16,TCS,Breakout,Standard,Good Setup,,2465.0,2208.97,2542.62,Open,1,,2480.8,0.64,,,,,Yes
-exea,2026-10-16,TATVA,Breakout,Standard,Good Setup,,1944.0,1684.82,2008.7,Open,1,,1950.0,0.31,,,,,Yes
-exea,2026-10-16,ARFIN,Breakout,Standard,Good Setup,,102.72,88.56,106.06,Open,1,,102.51,-0.2,,,,,Yes
-exea,2026-10-16,GOODLUCK,Breakout,Standard,Good Setup,,593.05,490.51,615.0,Open,1,,586.7,-1.07,,,,,Yes
-exea,2026-10-16,DPABHUSHAN,Breakout,Standard,Good Setup,,2293.5,1279.1,2495.0,Open,1,,2365.2,3.13,,,,,No
-exea,2026-10-16,CHEMPLASTS,Breakout,Standard,Good Setup,,212.35,178.28,218.7,Open,1,,209.95,-1.13,,,,,Yes
-exea,2026-10-16,SBC,Breakout,Standard,Good Setup,,63.33,46.46,66.35,Open,1,,64.56,1.94,,,,,No
-exea,2026-10-16,CUPID,Breakout,Standard,Good Setup,,353.7,263.66,368.95,Open,1,,345.15,-2.42,,,,,Yes
-exea,2026-10-16,AVADHSUGAR,Breakout,Standard,Good Setup,,995.4,790.25,1023.15,Open,1,,973.55,-2.2,,,,,Yes
-exea,2026-10-16,ONEPOINT,Breakout,Standard,Good Setup,,84.98,66.22,87.6,Open,1,,83.88,-1.29,,,,,No
-exea,2026-10-16,MOBIKWIK,Breakout,Standard,Good Setup,,228.6,189.51,233.75,Open,1,,227.14,-0.64,,,,,Yes
-exea,2026-10-16,SHRINGARMS,Breakout,Standard,Good Setup,,313.83,214.27,324.95,Open,1,,316.59,0.88,,,,,Yes
-early,2026-10-19,KARURVYSYA,Breakout,Long Term,High Conviction,91.3,370.4,338.33,553.99,Open,0,,370.4,0.0,,,,,Yes
+exsh,2026-10-16,CHEMPLASTS,Pullback,Standard,Good Setup,,212.35,178.28,218.7,Open,1,,207.91,-2.09,,,,,No
+exea,2026-10-16,NEOGEN,Breakout,Standard,Good Setup,,2484.8,2291.95,2785.0,Open,1,,2481.8,-0.12,,,,,Yes
+exea,2026-10-16,ORIENTHOT,Breakout,Standard,Good Setup,,151.8,136.69,175.26,Open,1,,148.99,-1.85,,,,,Yes
+exea,2026-10-16,SHREEJISPG,Breakout,Standard,Good Setup,,840.0,648.42,1060.02,Open,1,,814.0,-3.1,,,,,Yes
+exea,2026-10-16,WSTCSTPAPR,Breakout,Standard,Good Setup,,840.0,676.49,978.05,Open,1,,822.7,-2.06,,,,,Yes
+exea,2026-10-16,SMCGLOBAL,Breakout,Standard,Good Setup,,110.11,93.19,124.0,Open,1,,107.66,-2.23,,,,,No
+exea,2026-10-16,BBOX,Breakout,Standard,Good Setup,,907.25,767.82,998.65,Open,1,,894.45,-1.41,,,,,Yes
+exea,2026-10-16,ORIENTELEC,Breakout,Standard,Good Setup,,200.91,177.78,215.64,Open,1,,194.38,-3.25,,,,,Yes
+exea,2026-10-16,LOKESHMACH,Breakout,Standard,Good Setup,,428.1,331.68,488.0,Open,1,,390.2,-8.85,,,,,No
+exea,2026-10-16,BLUSPRING,Breakout,Standard,Good Setup,,165.19,135.25,181.9,Open,1,,161.44,-2.27,,,,,Yes
+exea,2026-10-16,GLAND,Breakout,Standard,Good Setup,,3043.4,2803.63,3171.0,Open,1,,3019.8,-0.78,,,,,Yes
+exea,2026-10-16,HBLENGINE,Breakout,Standard,Good Setup,,833.15,749.82,873.79,Open,1,,812.95,-2.42,,,,,No
+exea,2026-10-16,PTCIL,Breakout,Standard,Good Setup,,24680.0,21598.39,26085.0,Open,1,,25045.0,1.48,,,,,Yes
+exea,2026-10-16,FINEORG,Breakout,Standard,Good Setup,,5461.5,4999.27,5666.0,Open,1,,5398.0,-1.16,,,,,Yes
+exea,2026-10-16,DRREDDY,Pre-Breakout,Standard,Good Setup,,1255.31,1184.59,1284.75,Open,1,,1242.5,-1.02,,,,,Yes
+exea,2026-10-16,THELEELA,Breakout,Standard,Good Setup,,616.3,534.64,650.4,Open,1,,622.75,1.05,,,,,Yes
+exea,2026-10-16,PREMIERPOL,Breakout,Standard,Good Setup,,111.51,90.4,120.0,Open,1,,106.04,-4.91,,,,,Yes
+exea,2026-10-16,HCLTECH,Breakout,Standard,Good Setup,,1380.0,1280.1,1419.93,Open,1,,1379.9,-0.01,,,,,Yes
+exea,2026-10-16,TARIL,Breakout,Standard,Good Setup,,329.1,296.03,342.49,Open,1,,326.1,-0.91,,,,,Yes
+exea,2026-10-16,UTTAMSUGAR,Breakout,Standard,Good Setup,,369.15,280.02,401.0,Open,1,,360.25,-2.41,,,,,Yes
+exea,2026-10-16,MOTILALOFS,Breakout,Standard,Good Setup,,1057.6,966.13,1088.32,Open,1,,1021.0,-3.46,,,,,No
+exea,2026-10-16,APOLLO,Breakout,Standard,Good Setup,,429.0,384.24,444.13,Open,1,,423.8,-1.21,,,,,Yes
+exea,2026-10-16,TFCILTD,Breakout,Standard,Good Setup,,155.69,135.89,161.95,Open,1,,156.18,0.31,,,,,Yes
+exea,2026-10-16,SSWL,Breakout,Standard,Good Setup,,418.1,369.0,434.0,Open,1,,412.05,-1.45,,,,,No
+exea,2026-10-16,TCS,Breakout,Standard,Good Setup,,2465.0,2208.97,2542.62,Open,1,,2460.9,-0.17,,,,,Yes
+exea,2026-10-16,TATVA,Breakout,Standard,Good Setup,,1944.0,1684.82,2008.7,Open,1,,1903.4,-2.09,,,,,Yes
+exea,2026-10-16,ARFIN,Breakout,Standard,Good Setup,,102.72,88.56,106.06,Open,1,,100.61,-2.05,,,,,Yes
+exea,2026-10-16,GOODLUCK,Breakout,Standard,Good Setup,,593.05,490.51,615.0,Open,1,,588.25,-0.81,,,,,Yes
+exea,2026-10-16,DPABHUSHAN,Breakout,Standard,Good Setup,,2293.5,1279.1,2495.0,Open,1,,2302.7,0.4,,,,,No
+exea,2026-10-16,CHEMPLASTS,Breakout,Standard,Good Setup,,212.35,178.28,218.7,Open,1,,207.91,-2.09,,,,,No
+exea,2026-10-16,SBC,Breakout,Standard,Good Setup,,63.33,46.46,66.35,Open,1,,64.5,1.85,,,,,No
+exea,2026-10-16,CUPID,Breakout,Standard,Good Setup,,353.7,263.66,368.95,Open,1,,336.3,-4.92,,,,,Yes
+exea,2026-10-16,AVADHSUGAR,Breakout,Standard,Good Setup,,995.4,790.25,1023.15,Open,1,,987.55,-0.79,,,,,Yes
+exea,2026-10-16,ONEPOINT,Breakout,Standard,Good Setup,,84.98,66.22,87.6,Open,1,,83.89,-1.28,,,,,No
+exea,2026-10-16,MOBIKWIK,Breakout,Standard,Good Setup,,228.6,189.51,233.75,Open,1,,224.63,-1.74,,,,,Yes
+exea,2026-10-16,SHRINGARMS,Breakout,Standard,Good Setup,,313.83,214.27,324.95,Target hit,1,2026-10-19,324.95,3.54,,,,,No
+early,2026-10-19,KARURVYSYA,Breakout,Long Term,High Conviction,94.9,370.05,338.28,555.03,Open,0,,370.05,0.0,,,,,Yes
 exea,2026-10-19,KARURVYSYA,Excluded,Standard,High Conviction,91.3,370.4,338.33,553.99,Open,0,,,,,,,,No
-exnl,2026-10-19,HEXAGON,Excluded,Standard,Good Setup,79.0,72.13,66.15,77.9,Open,0,,72.13,0.0,,,,,Yes
-exnl,2026-10-19,PRADPME,Excluded,Standard,Good Setup,79.0,662.25,426.2,725.45,Open,0,,662.25,0.0,,,,,Yes
-exnl,2026-10-19,RAMBHAJO,Excluded,Standard,Good Setup,79.0,388.0,256.33,403.0,Open,0,,388.0,0.0,,,,,Yes
-exnl,2026-10-19,HTEL,Excluded,Standard,Good Setup,75.0,84.99,65.87,103.72,Open,0,,84.99,0.0,,,,,Yes
-early,2026-10-19,KROSS,Breakout,Long Term,Good Setup,73.0,306.0,242.69,583.47,Open,0,,306.0,0.0,,,,,Yes
+early,2026-10-19,MVGJL,Breakout,Long Term,High Conviction,82.4,241.15,201.2,445.2,Open,0,,241.15,0.0,,,,,Yes
+exea,2026-10-19,MVGJL,Excluded,Standard,High Conviction,82.4,241.15,201.2,445.2,Open,0,,,,,,,,No
+early,2026-10-19,KROSS,Breakout,Long Term,Good Setup,79.0,297.55,242.69,575.02,Open,0,,297.55,0.0,,,,,Yes
+exnl,2026-10-19,HEXAGON,Excluded,Standard,Good Setup,79.0,68.55,63.3,70.48,Open,0,,68.55,0.0,,,,,Yes
+exnl,2026-10-19,RAMBHAJO,Excluded,Standard,Good Setup,79.0,393.0,256.23,403.0,Open,0,,393.0,0.0,,,,,Yes
+early,2026-10-19,SHRINGARMS,Breakout,Long Term,Good Setup,77.3,319.19,213.84,608.84,Open,0,,319.19,0.0,,,,,Yes
+exnl,2026-10-19,PRADPME,Excluded,Standard,Good Setup,75.0,631.4,425.44,725.45,Open,0,,631.4,0.0,,,,,Yes
 exea,2026-10-19,KROSS,Excluded,Standard,Good Setup,73.0,306.0,242.69,583.47,Open,0,,,,,,,,No
-exnl,2026-10-19,KISSHT,Excluded,Standard,Good Setup,65.0,352.3,328.07,373.0,Open,0,,352.3,0.0,,,,,Yes
-exnl,2026-10-19,SHANKESH,Excluded,Standard,Early Watch,60.0,100.39,91.6,115.9,Open,0,,100.39,0.0,,,,,Yes
+exnl,2026-10-19,HTEL,Excluded,Standard,Good Setup,65.0,81.91,65.79,86.45,Open,0,,81.91,0.0,,,,,Yes
+exnl,2026-10-19,KISSHT,Excluded,Standard,Good Setup,65.0,352.3,328.07,373.0,Open,0,,,,,,,,No
+exnl,2026-10-19,SHANKESH,Excluded,Standard,Early Watch,60.0,101.06,91.59,115.9,Open,0,,101.06,0.0,,,,,Yes
 exsh,2026-10-19,KOTAKBANK,Excluded,Standard,Early Watch,57.1,444.5,428.14,488.11,Open,0,,,,,,,,No
-exnl,2026-10-19,PERNIASPOP,Excluded,Standard,Early Watch,55.0,542.0,512.64,588.9,Open,0,,542.0,0.0,,,,,Yes
-exsh,2026-10-19,RATNAVEER,Excluded,Standard,Early Watch,50.0,351.85,326.5,419.45,Open,0,,,,,,,,No
-exul,2026-10-19,BOROLTD,Setup,Standard,Good Setup,,300.6,266.29,363.4,Pending,0,,,,,,,,Yes
-exul,2026-10-19,KOPRAN,Setup,Standard,Good Setup,,296.42,260.94,348.73,Pending,0,,,,,,,,Yes
-exul,2026-10-19,APLAPOLLO,Setup,Standard,Good Setup,,2274.64,2126.23,2464.03,Pending,0,,,,,,,,Yes
-exul,2026-10-19,FRACTAL,Setup,Standard,Good Setup,,776.55,723.72,842.65,Pending,0,,,,,,,,Yes
-exul,2026-10-19,ADANIENSOL,Setup,Standard,Good Setup,,1439.37,1347.66,1551.0,Pending,0,,,,,,,,Yes
-exul,2026-10-19,TRENT,Setup,Standard,Good Setup,,3010.71,2813.9,3244.5,Pending,0,,,,,,,,Yes
-exul,2026-10-19,GRASIM,Setup,Standard,Good Setup,,3223.73,3119.48,3343.1,Pending,0,,,,,,,,Yes
-exul,2026-10-19,TBOTEK,Setup,Standard,Good Setup,,1776.04,1606.02,1952.79,Pending,0,,,,,,,,Yes
+exnl,2026-10-19,PERNIASPOP,Excluded,Standard,Early Watch,55.0,538.25,508.89,588.9,Open,0,,538.25,0.0,,,,,Yes
+exnl,2026-10-19,FRONTSP,Excluded,Standard,Early Watch,55.0,1307.0,1130.15,1503.6,Open,0,,1307.0,0.0,,,,,Yes
+exul,2026-10-19,BANKBARODA,Near Miss,Standard,Good Setup,,238.2,230.84,251.4,Open,0,,238.2,0.0,,,,,Yes
+exul,2026-10-19,KOPRAN,Setup,Standard,Good Setup,,296.42,260.81,350.23,Pending,0,,,,,,,,Yes
+exul,2026-10-19,UNIONBANK,Near Miss,Standard,Good Setup,,180.7,173.07,190.58,Open,0,,180.7,0.0,,,,,Yes
+exul,2026-10-19,APLAPOLLO,Setup,Standard,Good Setup,,2274.64,2126.13,2465.27,Pending,0,,,,,,,,Yes
+exul,2026-10-19,FRACTAL,Setup,Standard,Good Setup,,776.55,723.57,842.65,Pending,0,,,,,,,,Yes
+exul,2026-10-19,ADANIENSOL,Setup,Standard,Good Setup,,1439.37,1347.62,1551.0,Pending,0,,,,,,,,Yes
+exul,2026-10-19,TRENT,Setup,Standard,Good Setup,,3010.71,2813.07,3244.5,Pending,0,,,,,,,,Yes
+exul,2026-10-19,KROSS,Near Miss,Standard,Good Setup,,297.55,245.43,353.04,Open,0,,297.55,0.0,,,,,Yes
+exul,2026-10-19,TBOTEK,Setup,Standard,Good Setup,,1776.04,1605.9,1954.22,Pending,0,,,,,,,,Yes
 exul,2026-10-19,MCX,Setup,Standard,Good Setup,,3488.36,3170.11,3809.21,Pending,0,,,,,,,,Yes
-exul,2026-10-19,KALYANKJIL,Setup,Standard,Good Setup,,592.13,565.13,617.83,Pending,0,,,,,,,,Yes
-exul,2026-10-19,LGEINDIA,Setup,Standard,Good Setup,,1828.65,1680.71,1966.65,Pending,0,,,,,,,,Yes
+exul,2026-10-19,WHEELS,Setup,Standard,Good Setup,,2474.94,2095.37,2853.69,Pending,0,,,,,,,,Yes
+exul,2026-10-19,LGEINDIA,Setup,Standard,Good Setup,,1828.65,1680.47,1969.5,Pending,0,,,,,,,,Yes
+exul,2026-10-19,KALYANKJIL,Setup,Standard,Good Setup,,592.13,565.08,617.83,Pending,0,,,,,,,,Yes
+exul,2026-10-19,SAMBHV,Setup,Standard,Good Setup,,175.85,150.1,199.89,Pending,0,,,,,,,,Yes
 exul,2026-10-19,NCC,Setup,Standard,Good Setup,,139.7,131.55,147.18,Pending,0,,,,,,,,Yes
-exul,2026-10-19,SAMBHV,Setup,Standard,Good Setup,,175.85,150.15,199.25,Pending,0,,,,,,,,Yes
-exul,2026-10-19,PIDILITIND,Setup,Standard,Good Setup,,1602.1,1501.74,1687.7,Pending,0,,,,,,,,Yes
-exul,2026-10-19,ABDL,Setup,Standard,Good Setup,,768.43,668.87,850.93,Pending,0,,,,,,,,Yes
-exul,2026-10-19,NAVINFLUOR,Setup,Standard,Good Setup,,8699.86,8386.61,8949.5,Pending,0,,,,,,,,Yes
-exul,2026-10-19,AFCONS,Setup,Standard,Good Setup,,264.93,235.74,287.95,Pending,0,,,,,,,,Yes
-exul,2026-10-19,KPRMILL,Setup,Standard,Good Setup,,1156.71,1100.67,1197.9,Pending,0,,,,,,,,Yes
-exul,2026-10-19,BALUFORGE,Setup,Standard,Good Setup,,530.56,470.83,569.73,Pending,0,,,,,,,,Yes
-exul,2026-10-19,TFCILTD,Setup,Standard,Good Setup,,162.27,134.43,180.77,Pending,0,,,,,,,,Yes
+exul,2026-10-19,PIDILITIND,Setup,Standard,Good Setup,,1602.1,1501.5,1687.7,Pending,0,,,,,,,,Yes
+exul,2026-10-19,ABDL,Setup,Standard,Good Setup,,768.43,668.71,852.82,Pending,0,,,,,,,,Yes
+exul,2026-10-19,NAVINFLUOR,Setup,Standard,Good Setup,,8699.86,8386.56,8949.5,Pending,0,,,,,,,,Yes
+exul,2026-10-19,AFCONS,Setup,Standard,Good Setup,,264.93,235.73,287.95,Pending,0,,,,,,,,Yes
+exul,2026-10-19,KPRMILL,Setup,Standard,Good Setup,,1156.71,1100.47,1197.9,Pending,0,,,,,,,,Yes
+exul,2026-10-19,TFCILTD,Setup,Standard,Good Setup,,162.27,134.4,181.15,Pending,0,,,,,,,,Yes
 exul,2026-10-19,AVANTIFEED,Setup,Standard,Good Setup,,786.32,689.51,842.99,Pending,0,,,,,,,,Yes
-exul,2026-10-19,TATASTEEL,Setup,Standard,Good Setup,,192.18,180.59,198.89,Pending,0,,,,,,,,Yes
-exul,2026-10-19,OIL,Setup,Standard,Good Setup,,483.77,457.58,498.98,Pending,0,,,,,,,,Yes
-exul,2026-10-19,GALAXYSURF,Setup,Standard,Good Setup,,2702.39,2142.19,3019.45,Pending,0,,,,,,,,Yes
-exul,2026-10-19,TMPV,Setup,Standard,Good Setup,,310.62,292.48,320.15,Pending,0,,,,,,,,Yes
-exul,2026-10-19,ABCAPITAL,Setup,Standard,Good Setup,,410.87,373.01,430.7,Pending,0,,,,,,,,Yes
+exul,2026-10-19,OIL,Setup,Standard,Good Setup,,483.77,457.57,498.98,Pending,0,,,,,,,,Yes
+exul,2026-10-19,JAICORPLTD,Near Miss,Standard,Good Setup,,98.86,88.02,105.04,Open,0,,98.86,0.0,,,,,Yes
+exul,2026-10-19,ABCAPITAL,Setup,Standard,Good Setup,,410.87,372.93,430.7,Pending,0,,,,,,,,Yes
 exul,2026-10-19,MGL,Setup,Standard,Good Setup,,1114.22,1045.44,1149.11,Pending,0,,,,,,,,Yes
+exul,2026-10-19,SHANTIGOLD,Setup,Standard,Good Setup,,425.85,284.14,495.11,Pending,0,,,,,,,,Yes
 exul,2026-10-19,TMCV,Setup,Standard,Good Setup,,456.96,409.55,479.98,Pending,0,,,,,,,,Yes
-exul,2026-10-19,J&KBANK,Setup,Standard,Good Setup,,150.0,141.39,153.87,Pending,0,,,,,,,,Yes
-exul,2026-10-19,SBC,Setup,Standard,Good Setup,,66.48,46.86,74.61,Pending,0,,,,,,,,Yes
-exul,2026-10-19,ABBOTINDIA,Setup,Standard,Good Setup,,27905.7,26184.51,28581.2,Pending,0,,,,,,,,Yes
-exul,2026-10-19,SCI,Setup,Standard,Good Setup,,294.39,270.3,302.67,Pending,0,,,,,,,,Yes
-exul,2026-10-19,TRUALT,Setup,Standard,Good Setup,,473.44,428.98,488.0,Pending,0,,,,,,,,Yes
-exul,2026-10-19,MOTHERSON,Setup,Standard,Good Setup,,166.55,154.04,170.68,Pending,0,,,,,,,,Yes
-exul,2026-10-19,IREDA,Setup,Standard,Good Setup,,117.62,109.37,120.34,Pending,0,,,,,,,,Yes
-exul,2026-10-19,CGCL,Setup,Standard,Good Setup,,277.15,244.87,287.45,Pending,0,,,,,,,,Yes
-exul,2026-10-19,ITCHOTELS,Setup,Standard,Good Setup,,165.73,154.11,169.14,Pending,0,,,,,,,,Yes
-exul,2026-10-19,ASTRAL,Setup,Standard,Good Setup,,1472.34,1362.67,1502.04,Pending,0,,,,,,,,Yes
-exul,2026-10-19,PNB,Breakout,Standard,Good Setup,,122.82,113.16,125.36,Open,0,,122.82,0.0,,,,,Yes
-exul,2026-10-19,SHREEJISPG,Setup,Standard,Good Setup,,843.68,647.35,885.44,Pending,0,,,,,,,,Yes
-exsh,2026-10-19,SAMBHV,Near Miss,Standard,Good Setup,,175.85,149.76,214.85,Pending,0,,,,,,,,Yes
-exsh,2026-10-19,PETRONET,Near Miss,Standard,Good Setup,,300.2,285.01,322.68,Pending,0,,,,,,,,Yes
+exul,2026-10-19,J&KBANK,Setup,Standard,Good Setup,,150.0,141.35,153.87,Pending,0,,,,,,,,Yes
+exul,2026-10-19,SBC,Setup,Standard,Good Setup,,66.48,46.85,74.75,Pending,0,,,,,,,,Yes
+exul,2026-10-19,ZEEL,Setup,Standard,Good Setup,,80.13,75.86,81.92,Pending,0,,,,,,,,Yes
+exul,2026-10-19,ABBOTINDIA,Setup,Standard,Good Setup,,27905.7,26182.28,28581.2,Pending,0,,,,,,,,Yes
+exul,2026-10-19,SYNGENE,Near Miss,Standard,Good Setup,,397.5,354.38,412.8,Open,0,,397.5,0.0,,,,,Yes
+exul,2026-10-19,SCI,Setup,Standard,Good Setup,,294.39,270.22,302.67,Pending,0,,,,,,,,Yes
+exul,2026-10-19,TRUALT,Setup,Standard,Good Setup,,473.44,428.95,488.0,Pending,0,,,,,,,,Yes
+exul,2026-10-19,MOTHERSON,Setup,Standard,Good Setup,,166.55,154.03,170.68,Pending,0,,,,,,,,Yes
+exul,2026-10-19,PNB,Near Miss,Standard,Good Setup,,121.9,113.16,124.62,Open,0,,121.9,0.0,,,,,Yes
+exul,2026-10-19,ITCHOTELS,Setup,Standard,Good Setup,,165.73,154.07,169.14,Pending,0,,,,,,,,Yes
+exul,2026-10-19,FEDERALBNK,Breakout,Standard,Good Setup,,348.85,320.39,356.95,Open,0,,348.85,0.0,,,,,Yes
+exul,2026-10-19,ASTRAL,Setup,Standard,Good Setup,,1472.34,1362.61,1502.04,Pending,0,,,,,,,,Yes
+exul,2026-10-19,SHREEJISPG,Setup,Standard,Good Setup,,843.68,646.72,893.03,Pending,0,,,,,,,,Yes
+exul,2026-10-19,NUVOCO,Setup,Standard,Good Setup,,349.45,311.31,357.6,Pending,0,,,,,,,,Yes
+exul,2026-10-19,JUSTDIAL,Near Miss,Standard,Good Setup,,731.75,635.3,748.8,Open,0,,731.75,0.0,,,,,Yes
+exsh,2026-10-19,MVGJL,Breakout,Standard,Good Setup,,241.15,202.36,309.17,Open,0,,241.15,0.0,,,,,Yes
 exsh,2026-10-19,IIFLCAPS,Near Miss,Standard,Good Setup,,350.65,338.3,368.4,Pending,0,,,,,,,,Yes
-exsh,2026-10-19,TVSMOTOR,Near Miss,Standard,Good Setup,,4186.26,3984.38,4475.0,Pending,0,,,,,,,,Yes
-exsh,2026-10-19,NAUKRI,Near Miss,Standard,Good Setup,,1271.74,1205.89,1322.7,Pending,0,,,,,,,,Yes
-exsh,2026-10-19,BOROLTD,Pullback,Standard,Good Setup,,275.7,252.78,289.0,Open,0,,275.7,0.0,,,,,Yes
-exsh,2026-10-19,INDUSTOWER,Near Miss,Standard,Good Setup,,393.08,367.86,406.55,Pending,0,,,,,,,,Yes
-exsh,2026-10-19,CGCL,Pullback,Standard,Good Setup,,251.76,238.36,258.71,Open,0,,251.76,0.0,,,,,Yes
-exsh,2026-10-19,ANANDRATHI,Near Miss,Standard,Good Setup,,2179.13,2085.41,2225.79,Pending,0,,,,,,,,Yes
-exsh,2026-10-19,CEIGALL,Near Miss,Standard,Good Setup,,393.39,366.29,405.16,Pending,0,,,,,,,,Yes
-exsh,2026-10-19,ACUTAAS,Near Miss,Standard,Good Setup,,3350.69,3129.01,3441.73,Pending,0,,,,,,,,Yes
-exsh,2026-10-19,SHREEJISPG,Near Miss,Standard,Good Setup,,843.68,646.66,913.27,Pending,0,,,,,,,,Yes
-exsh,2026-10-19,PNB,Breakout,Standard,Good Setup,,122.82,112.98,125.36,Open,0,,122.82,0.0,,,,,Yes
-exsh,2026-10-19,JUSTDIAL,Breakout,Standard,Good Setup,,763.8,634.65,788.9,Open,0,,763.8,0.0,,,,,Yes
-exea,2026-10-19,ONWARDTEC,Breakout,Standard,Good Setup,,479.35,269.77,841.76,Open,0,,479.35,0.0,,,,,Yes
-exea,2026-10-19,INDUSTOWER,Pre-Breakout,Standard,Good Setup,,393.08,370.66,406.55,Pending,0,,,,,,,,Yes
-exea,2026-10-19,PNB,Breakout,Standard,Good Setup,,122.82,113.47,125.36,Open,0,,122.82,0.0,,,,,Yes
-exea,2026-10-19,JUSTDIAL,Breakout,Standard,Good Setup,,763.8,639.5,788.9,Open,0,,763.8,0.0,,,,,Yes
+exsh,2026-10-19,BANKBARODA,Breakout,Standard,Good Setup,,238.2,228.03,251.4,Open,0,,238.2,0.0,,,,,Yes
+exsh,2026-10-19,UNIONBANK,Breakout,Standard,Good Setup,,180.7,170.42,190.58,Open,0,,180.7,0.0,,,,,Yes
+exsh,2026-10-19,FLUOROCHEM,Pullback,Standard,Good Setup,,4454.1,4197.03,4646.9,Open,0,,4454.1,0.0,,,,,Yes
+exsh,2026-10-19,MANINDS,Pullback,Standard,Good Setup,,884.5,792.39,944.0,Open,0,,884.5,0.0,,,,,Yes
+exsh,2026-10-19,KOPRAN,Pullback,Standard,Good Setup,,278.25,246.86,295.83,Open,0,,278.25,0.0,,,,,Yes
+exsh,2026-10-19,PLATIND,Near Miss,Standard,Good Setup,,229.45,214.59,237.49,Pending,0,,,,,,,,Yes
+exsh,2026-10-19,ANANDRATHI,Near Miss,Standard,Good Setup,,2179.13,2084.37,2225.79,Pending,0,,,,,,,,Yes
+exsh,2026-10-19,KIRLOSBROS,Pullback,Standard,Good Setup,,1713.9,1612.41,1750.34,Open,0,,1713.9,0.0,,,,,Yes
+exsh,2026-10-19,HIKAL,Pullback,Standard,Good Setup,,217.25,202.47,222.22,Open,0,,217.25,0.0,,,,,Yes
+exsh,2026-10-19,MTARTECH,Pullback,Standard,Good Setup,,7178.0,6537.88,7388.0,Open,0,,7178.0,0.0,,,,,Yes
+exsh,2026-10-19,PNB,Breakout,Standard,Good Setup,,121.9,112.98,124.62,Open,0,,121.9,0.0,,,,,Yes
+exsh,2026-10-19,NUVOCO,Near Miss,Standard,Good Setup,,344.74,310.75,354.8,Pending,0,,,,,,,,Yes
+exsh,2026-10-19,TRUALT,Pullback,Standard,Good Setup,,441.45,408.39,450.8,Open,0,,441.45,0.0,,,,,Yes
+exsh,2026-10-19,CEIGALL,Near Miss,High Potential,Good Setup,,396.79,366.17,405.16,Pending,0,,,,,,,,Yes
+exsh,2026-10-19,BHARTIHEXA,Near Miss,Standard,Good Setup,,1668.33,1462.22,1724.33,Pending,0,,,,,,,,Yes
+exsh,2026-10-19,RATNAVEER,Pullback,Standard,Good Setup,,350.3,316.52,357.7,Open,0,,350.3,0.0,,,,,Yes
+exsh,2026-10-19,JUSTDIAL,Breakout,Standard,Good Setup,,731.75,633.96,748.8,Open,0,,731.75,0.0,,,,,Yes
+exea,2026-10-19,ONWARDTEC,Breakout,Standard,Good Setup,,453.35,269.77,815.76,Open,0,,453.35,0.0,,,,,Yes
+exea,2026-10-19,BHARTIHEXA,Breakout,Standard,Good Setup,,1632.6,1473.39,1694.56,Open,0,,1632.6,0.0,,,,,Yes
+exea,2026-10-19,PNB,Breakout,Standard,Good Setup,,121.9,112.64,124.62,Open,0,,121.9,0.0,,,,,Yes
+exul,2026-10-19,BOROLTD,Setup,Standard,Good Setup,,300.6,266.29,363.4,Open,0,,,,,,,,No
+exul,2026-10-19,GRASIM,Setup,Standard,Good Setup,,3223.73,3119.48,3343.1,Open,0,,,,,,,,No
+exul,2026-10-19,BALUFORGE,Setup,Standard,Good Setup,,530.56,470.83,569.73,Open,0,,,,,,,,No
+exul,2026-10-19,TATASTEEL,Setup,Standard,Good Setup,,192.18,180.59,198.89,Open,0,,,,,,,,No
+exul,2026-10-19,GALAXYSURF,Setup,Standard,Good Setup,,2702.39,2142.19,3019.45,Open,0,,,,,,,,No
+exul,2026-10-19,TMPV,Setup,Standard,Good Setup,,310.62,292.48,320.15,Open,0,,,,,,,,No
+exul,2026-10-19,IREDA,Setup,Standard,Good Setup,,117.62,109.37,120.34,Open,0,,,,,,,,No
+exul,2026-10-19,CGCL,Setup,Standard,Good Setup,,277.15,244.87,287.45,Open,0,,,,,,,,No
+exsh,2026-10-19,SAMBHV,Near Miss,Standard,Good Setup,,175.85,149.76,214.85,Open,0,,,,,,,,No
+exsh,2026-10-19,PETRONET,Near Miss,Standard,Good Setup,,300.2,285.01,322.68,Open,0,,,,,,,,No
+exsh,2026-10-19,TVSMOTOR,Near Miss,Standard,Good Setup,,4186.26,3984.38,4475.0,Open,0,,,,,,,,No
+exsh,2026-10-19,NAUKRI,Near Miss,Standard,Good Setup,,1271.74,1205.89,1322.7,Open,0,,,,,,,,No
+exsh,2026-10-19,BOROLTD,Pullback,Standard,Good Setup,,275.7,252.78,289.0,Open,0,,,,,,,,No
+exsh,2026-10-19,INDUSTOWER,Near Miss,Standard,Good Setup,,393.08,367.86,406.55,Open,0,,,,,,,,No
+exsh,2026-10-19,CGCL,Pullback,Standard,Good Setup,,251.76,238.36,258.71,Open,0,,,,,,,,No
+exsh,2026-10-19,ACUTAAS,Near Miss,Standard,Good Setup,,3350.69,3129.01,3441.73,Open,0,,,,,,,,No
+exsh,2026-10-19,SHREEJISPG,Near Miss,Standard,Good Setup,,843.68,646.66,913.27,Open,0,,,,,,,,No
+exea,2026-10-19,INDUSTOWER,Pre-Breakout,Standard,Good Setup,,393.08,370.66,406.55,Open,0,,,,,,,,No
+exea,2026-10-19,JUSTDIAL,Breakout,Standard,Good Setup,,763.8,639.5,788.9,Open,0,,,,,,,,No
