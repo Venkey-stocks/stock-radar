@@ -128,6 +128,16 @@ th{color:var(--mut);font-weight:600}
 .calc-box{background:#0e1117;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:14px}
 .calc-box .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .calc-box input{width:110px;padding:5px 8px;font-size:13px;text-align:right}
+
+/* Universal Search Styling */
+.search-wrapper{position:relative;flex:1;max-width:320px}
+.search-wrapper input{width:100%;padding:8px 12px 8px 34px;background:#161b22;border:1px solid var(--b);border-radius:20px;color:var(--tx);font-size:13.5px}
+.search-wrapper .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--b);font-size:14px;pointer-events:none}
+.search-results-dropdown{position:absolute;top:100%;left:0;right:0;background:#161b22;border:1px solid var(--line);border-radius:8px;margin-top:4px;max-height:300px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none}
+.search-item{padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.search-item:hover{background:#1f2633}
+.search-item .sym-name{font-weight:700;color:var(--tx)}
+.search-item .tab-name{font-size:11px;color:var(--mut);margin-top:2px}
 </style>
 </head>
 <body>
@@ -148,8 +158,18 @@ th{color:var(--mut);font-weight:600}
   </div>
 </div>
 
-<a class="mh" id="mh" href="/health"><span class="dot"></span><span id="mh_txt">Market Health</span></a>
-<a class="mh" href="/events" style="margin-left:6px">Events</a>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+  <a class="mh" id="mh" href="/health" style="margin-bottom:0"><span class="dot"></span><span id="mh_txt">Market Health</span></a>
+  <a class="mh" href="/events" style="margin-bottom:0">Events</a>
+  
+  <!-- Universal Search Bar -->
+  <div class="search-wrapper">
+    <span class="search-icon">&#128269;</span>
+    <input type="text" id="global_search" placeholder="స్టాక్ పేరుతో రాడార్‌లో వెతకండి..." oninput="handleGlobalSearch(this.value)">
+    <div class="search-results-dropdown" id="search_results"></div>
+  </div>
+</div>
+
 <div class="tabs">
   <button id="t_ultra" class="on" onclick="show('ultra')">Ultra Short (1-5 days)</button>
   <button id="t_short" onclick="show('short')">Short Term (1-20 days)</button>
@@ -303,22 +323,22 @@ th{color:var(--mut);font-weight:600}
 <div id="perf" style="display:none">
   <div class="bar">
     <select id="pscan" onchange="drawPerf()">
-  <option value="">All scans</option>
-  <optgroup label="Active Scans">
-    <option value="ultra">Ultra Short</option>
-    <option value="short">Short Term</option>
-    <option value="early">Early Movers</option>
-    <option value="multi">Multibagger</option>
-    <option value="quality">Quality</option>
-    <option value="newl">New Listings</option>
-  </optgroup>
-  <optgroup label="Excluded (R:R < 1:2)">
-    <option value="exul">Excluded: Ultra Short</option>
-    <option value="exsh">Excluded: Short Term</option>
-    <option value="exea">Excluded: Early Movers</option>
-    <option value="exnl">Excluded: New Listings</option>
-  </optgroup>
-</select>
+      <option value="">All scans</option>
+      <optgroup label="Active Scans">
+        <option value="ultra">Ultra Short</option>
+        <option value="short">Short Term</option>
+        <option value="early">Early Movers</option>
+        <option value="multi">Multibagger</option>
+        <option value="quality">Quality</option>
+        <option value="newl">New Listings</option>
+      </optgroup>
+      <optgroup label="Excluded (R:R < 1:2)">
+        <option value="exul">Excluded: Ultra Short</option>
+        <option value="exsh">Excluded: Short Term</option>
+        <option value="exea">Excluded: Early Movers</option>
+        <option value="exnl">Excluded: New Listings</option>
+      </optgroup>
+    </select>
     <select id="pband" onchange="drawPerf()">
       <option value="">All Decision Bands</option>
       <option value="high">High Conviction Only (Score 80+)</option>
@@ -430,7 +450,8 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
       <div class="fund" id="dr_levels_box" style="margin-top:14px">
         <div class="ft">Key Decision Levels</div>
         <div class="row"><span>Current Price</span><b id="dr_price">-</b></div>
-        <div class="row"><span>Stop-Loss</span><b class="neg" id="dr_stop">-</b></div>
+        <div class="row"><span>Safe Stop-Loss</span><b class="neg" id="dr_stop">-</b></div>
+        <div class="row"><span>Tight Stop-Loss</span><b id="dr_stop_tight" class="na">-</b></div>
         <div class="row"><span>Target / Pivot Level</span><b class="pos" id="dr_target">-</b></div>
         <div class="row"><span>Decision Band</span><b id="dr_stage">-</b></div>
       </div>
@@ -494,11 +515,100 @@ function togRow(h){
   ROWOPEN[k]=o;
 }
 
+// ===== Universal Stock Search Bar Logic =====
+function handleGlobalSearch(q){
+  q = (q||'').trim().toUpperCase();
+  const drop = $('search_results');
+  if(!q){
+    drop.style.display='none';
+    drop.innerHTML='';
+    return;
+  }
+  
+  const matches = [];
+  const tabNames = {
+    early: 'Early Movers',
+    ultra: 'Ultra Short',
+    short: 'Short Term',
+    multi: 'Multibagger',
+    quality: 'Quality',
+    newl: 'New Listings',
+    smart: 'Smart Money'
+  };
+  
+  const checked = new Set();
+  
+  Object.keys(tabNames).forEach(tabKey => {
+    (DATA[tabKey]||[]).forEach(r => {
+      const sym = (r.Symbol || r.sym || '').toUpperCase();
+      if(sym && sym.includes(q)){
+        const dedupeKey = sym + '_' + tabKey;
+        if(!checked.has(dedupeKey)){
+          checked.add(dedupeKey);
+          matches.push({
+            sym: sym,
+            tabKey: tabKey,
+            tabTitle: tabNames[tabKey],
+            date: r.Date || '-',
+            entry: r.Entry || r.Close || 0,
+            close: r.Close || r.Entry || 0,
+            score: r.Score || '-',
+            row: r
+          });
+        }
+      }
+    });
+  });
+  
+  if(!matches.length){
+    drop.innerHTML = '<div style="padding:12px;color:var(--mut);font-size:13px;text-align:center;">ఈ స్టాక్ ఇంకా మన రాడార్ నిబంధనలలో నమోదు కాలేదు.</div>';
+    drop.style.display='block';
+    return;
+  }
+  
+  drop.innerHTML = matches.slice(0, 10).map(m => {
+    const cp = curPrice({sym: m.sym});
+    const nowPrice = cp ? cp.p : m.close;
+    const entryP = +m.entry || nowPrice;
+    const diff = entryP > 0 ? (((nowPrice - entryP) / entryP) * 100) : 0;
+    const diffCls = diff >= 0 ? 'pos' : 'neg';
+    const diffTxt = (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%';
+    
+    return `<div class="search-item" onclick="selectSearchedStock('${m.sym}','${m.tabKey}')">
+      <div>
+        <div class="sym-name">${m.sym} <span class="tag smart" style="font-size:10px;padding:1px 6px">${m.score}/100</span></div>
+        <div class="tab-name">${m.tabTitle} &middot; సిగ్నల్ తేది: ${m.date}</div>
+      </div>
+      <div style="text-align:right">
+        <b style="font-size:13px">Rs ${fmt(nowPrice)}</b>
+        <div class="${diffCls}" style="font-size:11px;font-weight:700">${diffTxt}</div>
+      </div>
+    </div>`;
+  }).join('');
+  
+  drop.style.display='block';
+}
+
+function selectSearchedStock(sym, tabKey){
+  $('search_results').style.display='none';
+  $('global_search').value = sym;
+  show(tabKey);
+  setTimeout(()=>{
+    openRationale(sym, tabKey);
+  }, 200);
+}
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('.search-wrapper')){
+    const drop = $('search_results');
+    if(drop) drop.style.display='none';
+  }
+});
+
 function exportToExcel(){
   const tab = cur;
   let filename = (tab || 'stocks') + '_export.csv';
 
-  // My Stocks tab kosam export logic
   if(tab === 'mine'){
     const mine = loadMine();
     if(!mine || !mine.length){
@@ -506,33 +616,17 @@ function exportToExcel(){
       return;
     }
     filename = 'my_stocks_portfolio.csv';
-    
     let csv = 'Symbol,Status,Buy Price,Current Price,Entry,Stop Loss,Target,Return %,Trailing Alert,Trailing Stop Level\n';
-    
     mine.forEach(r => {
       const c = curPrice({sym: r.sym});
       const curP = c ? c.p : (r.lastPrice || r.buyPrice || 0);
       const buyP = r.buyPrice || r.entry || curP;
       const pct = buyP > 0 ? (((curP - buyP) / buyP) * 100).toFixed(2) : '0.00';
-      
       const tr = typeof getTrailingAdvice === 'function' ? getTrailingAdvice(r, curP) : null;
       const trailAlert = tr ? tr.level : 'No Alert';
       const trailStop = (tr && tr.suggestedStop) ? tr.suggestedStop : (r.stop || 'n/a');
-      
-      csv += [
-        r.sym,
-        r.status || 'Watching',
-        buyP,
-        curP,
-        r.entry || 'n/a',
-        r.stop || 'n/a',
-        r.target || 'n/a',
-        pct + '%',
-        '"' + trailAlert + '"',
-        trailStop
-      ].join(',') + '\n';
+      csv += [r.sym, r.status || 'Watching', buyP, curP, r.entry || 'n/a', r.stop || 'n/a', r.target || 'n/a', pct + '%', '"' + trailAlert + '"', trailStop].join(',') + '\n';
     });
-
     const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -543,7 +637,6 @@ function exportToExcel(){
     return;
   }
 
-  // Migatha Tabs kosam unna standard export logic
   const rows = DATA[tab] || [];
   if(!rows.length){
     alert('Download cheyadaniki ee tab lo data ledu!');
@@ -583,6 +676,7 @@ function exportToExcel(){
   link.click();
   document.body.removeChild(link);
 }
+
 function calcPositionSize(){
   if(!ACTIVE_ROW) return;
   const r = ACTIVE_ROW;
@@ -603,7 +697,8 @@ function calcPositionSize(){
   const totalProfit = qty * rewardPerShare;
   
   $('dr_calc_qty').textContent = qty.toLocaleString('en-IN') + ' shares';
-  $('dr_calc_cap').textContent = 'Rs ' + totalCap.toLocaleString('en-IN', {maximumFractionDigits: 0});$('dr_calc_profit').textContent = '+Rs ' + totalProfit.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  $('dr_calc_cap').textContent = 'Rs ' + totalCap.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  $('dr_calc_profit').textContent = '+Rs ' + totalProfit.toLocaleString('en-IN', {maximumFractionDigits: 0});
 }
 
 let EARLY_MAP={};
@@ -631,6 +726,7 @@ function getStageMeta(r){
   return {badge,color,code};
 }
 
+// ===== Clean Telugu Investment Scrutiny Drawer =====
 function openRationale(sym, tabType){
   const tab = tabType || cur;
   const rows = (DATA[tab]||[]);
@@ -648,11 +744,11 @@ function openRationale(sym, tabType){
   bnr.className='status-banner banner-'+meta.color;
   
   if(meta.badge==='PRIME ENTRY'){
-    $('dr_sub').textContent='High Conviction Setup: Fresh momentum with favorable Risk:Reward ratio.';
+    $('dr_sub').textContent='హై-కన్విక్షన్ సెటప్: అనుకూలమైన రిస్క్-రివార్డ్ నిష్పత్తితో సరికొత్త మొమెంటమ్.';
   }else if(meta.badge==='WATCHLIST'){
-    $('dr_sub').textContent='Consolidation / Pivot Watch: Price tightening with drying volume.';
+    $('dr_sub').textContent='కన్సాలిడేషన్ వాచ్: ప్రైస్ రేంజ్ టైట్ అవుతూ వాల్యూమ్ డ్రై-అప్ అయిన సెటప్.';
   }else{
-    $('dr_sub').textContent='Extended Run-up: High risk of pullback. Avoid chasing at current level.';
+    $('dr_sub').textContent='ఎక్స్‌టెండెడ్ రన్-అప్: పుల్‌బ్యాక్ రిస్క్ ఉంది. ప్రస్తుత ధర వద్ద చేజింగ్ చేయకండి.';
   }
   
   const ctn=$('dr_reasons');
@@ -662,31 +758,42 @@ function openRationale(sym, tabType){
   if(r.SimpleReasons&&r.SimpleReasons.trim().length>0&&r.SimpleReasons!=='[]'){
     lines=r.SimpleReasons.split(' || ').map(s=>{
       const idx=s.indexOf(':');
-      return idx>0?{title:s.slice(0,idx).trim(),desc:s.slice(idx+1).trim()}:{title:'Key Insight',desc:s};
+      return idx>0?{title:s.slice(0,idx).trim(),desc:s.slice(idx+1).trim()}:{title:'కీలక అంశం',desc:s};
     });
   }else{
     if(tab==='early'){
       if(r.Stage==='Fresh'){
         lines=[
-          {title:'Early Breakout Zone',desc:`Breakout level nundi price kevalam ${r.GainPct}% matrame perigindi.`},
-          {title:'Volume Confirmation',desc:`Normal average kante ${r.VolRatio||'2.0'}x retlu adhika volume tho breakout ayindi.`},
-          {title:'Defined Risk:Reward',desc:`Stop-loss kevalam ${r.StopDistPct}% daggara undi (Rs ${r.Stop}). Risk:Reward ratio 1:${r.RR} tho anukulam ga undi.`},
-          {title:'Sector Support',desc:`${r.Sector||'Leading Sector'} ranganiki chendindi. Multi-week base nundi breakout vachindi.`}
+          {title:'Early Breakout Zone',desc:`బ్రేక్‌అవుట్ లెవెల్ నుండి ధర కేవలం ${r.GainPct}% మాత్రమే పెరిగింది.`},
+          {title:'Volume Confirmation',desc:`సాధారణ యావరేజ్ కంటే ${r.VolRatio||'2.0'}x రెట్లు అధిక వాల్యూమ్‌తో బ్రేక్‌అవుట్ నమోదైంది.`},
+          {title:'Defined Risk:Reward',desc:`స్టాప్-లాస్ కేవలం ${r.StopDistPct}% దూరంలో ఉంది (రూ. ${fmt(r.Stop)}). రివార్డ్:రిస్క్ నిష్పత్తి 1:${r.RR} తో అనుకూలంగా ఉంది.`},
+          {title:'Sector Support',desc:`${r.Sector||'ముందంజలో ఉన్న'} రంగానికి చెందినది. మల్టీ-వీక్ బేస్ నుండి పటిష్టమైన బ్రేక్‌అవుట్ వచ్చింది.`}
         ];
       }else{
         lines=[
-          {title:'Pivot Resistance Testing',desc:`Resistance level (Rs ${r.Level}) ki kevalam ${Math.abs(r.GainPct)}% samipamlo consolidate avtundi.`},
-          {title:'Volume Dry-Up (VCP)',desc:'Volume baga dry aipoindi. Selling pressure taggindi.'},
-          {title:'Action Plan',desc:'Thondarapadi konakandi. Strong volume tho breakout vachinappudu entry teesukondi.'}
+          {title:'Pivot Resistance Testing',desc:`రెసిస్టెన్స్ లెవెల్ (రూ. ${fmt(r.Level)}) కు కేవలం ${Math.abs(r.GainPct)}% సమీపంలో కన్సాలిడేట్ అవుతోంది.`},
+          {title:'Volume Dry-Up (VCP)',desc:'వాల్యూమ్ బాగా డ్రై అయిపోయింది. సెల్లింగ్ ఒత్తిడి దాదాపు శూన్యమైంది.'},
+          {title:'Action Plan',desc:'తొందరపడి కొనకండి. బలమైన వాల్యూమ్‌తో బ్రేక్‌అవుట్ కన్ఫర్మ్ అయినప్పుడు ఎంట్రీ తీసుకోండి.'}
         ];
       }
     }else{
-      const setupDesc = r.Setup || r.Status || 'Bullish Momentum';
+      const isVcp = (r.Reasons && r.Reasons.includes('coiling')) || (r.Setup && r.Setup.includes('Base'));
+      const isDry = (r.Reasons && r.Reasons.includes('dried up')) || (+r.VolRatio < 1.0);
+      
+      let vcpText = 'టెక్నికల్ బ్రేక్‌అవుట్ సెటప్ గుర్తించబడింది.';
+      if(isVcp && isDry) vcpText = '💎 VCP ప్రైస్ కాంట్రాక్షన్ మరియు వాల్యూమ్ డ్రై-అప్ సెటప్ అత్యంత పటిష్టంగా నమోదైంది.';
+      else if(isVcp) vcpText = '💎 VCP ప్రైస్ కాంట్రాక్షన్ రేంజ్ టైట్ అవుతూ బ్రేక్‌అవుట్‌కు సిద్ధమైంది.';
+      
+      let stopSentence = 'సేఫ్ స్టాప్-లాస్ రూ. ' + fmt(r.Stop) + ' (' + r.StopDistPct + '% రిస్క్)';
+      if(has(r.StopTight)){
+        stopSentence += ', టైట్ స్టాప్ రూ. ' + fmt(r.StopTight);
+      }
+      
       lines=[
-        {title:'Setup & Pattern',desc:`${setupDesc} setup gurthimpabadindi. Momentum score ${r.Score}/100 tho balanga undi.`},
-        {title:'Risk Management',desc:`Stop-loss level Rs ${r.Stop} (${r.StopDistPct}% risk). Reward:Risk 1:${r.RR||'2.0'} tho anukulam ga undi.`},
-        {title:'Target Projection',desc:`Chart structure aadharamga Target Rs ${r.Target} (+${r.TargetPct}%) daggara lekkimpabadindi.`},
-        {title:'Trend & Moving Averages',desc:`Short-term trend balanga undi. 20-DMA paina sthiramga trade avtundi.`}
+        {title:'1. Setup & Pattern',desc:`${vcpText} మొమెంటమ్ స్కోరు ${r.Score}/100 తో బలంగా ఉంది.`},
+        {title:'2. Risk Management',desc:`${stopSentence}. రివార్డ్:రిస్క్ నిష్పత్తి 1:${r.RR||'2.0'} తో ట్రేడింగ్‌కు అత్యంత అనుకూలంగా ఉంది.`},
+        {title:'3. Target Projection',desc:`చార్ట్ నిర్మాణం మరియు రెసిస్టెన్స్ ఆధారంగా నిర్దేశిత టార్గెట్ రూ. ${fmt(r.Target||r.Level)} (+${r.TargetPct||''}) వద్ద లెక్కించబడింది.`},
+        {title:'4. Trend & Moving Averages',desc:`స్వల్పకాలిక ట్రెండ్ బుల్లిష్‌గా ఉంది. కీలకమైన 20-DMA మరియు 50-DMA సపోర్ట్ పైన నిలకడగా ట్రేడ్ అవుతోంది.`}
       ];
     }
   }
@@ -698,8 +805,21 @@ function openRationale(sym, tabType){
     ctn.appendChild(el);
   });
   
-  $('dr_price').textContent='Rs '+fmt(r.Close || r.Entry);$('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% risk)'+(has(r.StopTight)?' [Tight: Rs '+fmt(r.StopTight)+']':'');
-$('dr_target').textContent='Rs '+fmt(r.Target || r.Level)+' (+'+(r.TargetPct || '')+')';$('dr_stage').textContent=meta.code;
+  $('dr_price').textContent='Rs '+fmt(r.Close || r.Entry);
+  $('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% రిస్క్)';
+  
+  if($('dr_stop_tight')){
+    if(has(r.StopTight)){
+      $('dr_stop_tight').textContent = 'Rs ' + fmt(r.StopTight);
+      $('dr_stop_tight').className = 'neg';
+    } else {
+      $('dr_stop_tight').textContent = '-';
+      $('dr_stop_tight').className = 'na';
+    }
+  }
+  
+  $('dr_target').textContent='Rs '+fmt(r.Target || r.Level)+' (+'+(r.TargetPct || '')+'%)';
+  $('dr_stage').textContent=meta.code;
   $('dr_chart_link').href='https://in.tradingview.com/chart/?symbol=NSE:'+encodeURIComponent(r.Symbol);
   
   calcPositionSize();
@@ -708,11 +828,21 @@ $('dr_target').textContent='Rs '+fmt(r.Target || r.Level)+' (+'+(r.TargetPct || 
 
 function closeRationaleDrawer(){$('rationaleDrawer').style.display='none';}
 function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationaleDrawer();}
-  function rowCells(tab,r,ns){
+
+function rowCells(tab,r,ns){
   const cls=r.Band?r.Band.split(' ')[0]:'';
   const rs=RES[r.Symbol||r.sym];
   const al=(rs&&rs.n<=7)?'<span class="amb" title="Results in '+rs.n+' days">&#9888;</span>':'<span></span>';
   let info,extra;
+  
+  // VCP Badge detection for rows
+  let rowVcp = '';
+  if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
+    rowVcp = ' <span class="tag vcp">💎 VCP</span>';
+  } else if(r.IsDryUp === 'Yes' || (r.Reasons && r.Reasons.includes('dried up'))){
+    rowVcp = ' <span class="tag dryup">💧 Dry-up</span>';
+  }
+
   if(tab=='smart'){
     const isRadar=r.RadarSetup&&r.RadarSetup!='Not on radar';
     const isOverlap=(+r.OverlapCount)>=2;
@@ -738,7 +868,6 @@ function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationa
     const hitTxt=hit?(hit.c=='neg'?'Stop touched':(hit.c=='pos'?'Target reached':'Open')):'Open';
     const hitCls=hit?(hit.c=='neg'?'r':(hit.c=='pos'?'g':'')):'';
     
-    // List view lo alert badge kanipinche logic
     const curP = c ? c.p : (r.lastPrice || null);
     const tr = getTrailingAdvice(r, curP);
     let trailBadge = '';
@@ -757,7 +886,7 @@ function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationa
   }
   if(tab=='ultra'||tab=='short'||tab=='early'){
     const meta=getStageMeta(r);
-    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>';
+    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>' + rowVcp;
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
   } else if(tab=='newl'){
     info=esc(r.ListedOn||'n/a');
@@ -943,7 +1072,7 @@ function loadHist(){
     })));
 }
 
-  function syncMinePrices(){
+function syncMinePrices(){
   const arr = loadMine();
   if(!arr || !arr.length) return;
   let updated = false;
@@ -1112,7 +1241,6 @@ function openChart(btn){
 function closeChart(){$('chmodal').style.display='none';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeChart();closeDigestPop();closeRationaleDrawer();}});
 
-// ===== Completely Cleaned drawChart Function (No Syntax Mismatch) =====
 function drawChart(d,lv){
   const n=d.c.length;
   const W=720,H=360,L=8,R=64,T=14,B=24;
@@ -1144,7 +1272,7 @@ function drawChart(d,lv){
     if(has(val)&&isFinite(+val)){
       const yy=y(+val);
       s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+item[2]+'" stroke-width="1.5" stroke-dasharray="6 4"/>';
-      s+='<text x="'+(L+4)+'" y="'+(yy-4)+'" fill="'+item[2]+'" font-size="12" font-weight="700">'+item[1]+' '+(+val).toFixed(2)+'</text>';
+      s+='<text x="'+(L+4)+'" y="'+(yy-4)+'" fill daylight="'+item[2]+'" fill="'+item[2]+'" font-size="12" font-weight="700">'+item[1]+' '+(+val).toFixed(2)+'</text>';
     }
   }
   s+='<text x="'+L+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11">'+d.d[0]+'</text>'
@@ -1162,14 +1290,13 @@ function fixWarn(w){
   });
   return out;
 }
-  // ===== Dynamic Trailing Stop-Loss Engine =====
+
 function getTrailingAdvice(m, curP){
   if(m.status !== 'Holding' || !m.buyPrice || !curP) return null;
   const buy = +m.buyPrice;
   const stop = +m.stop || 0;
   const gainPct = ((curP - buy) / buy) * 100;
 
-  // 1. స్టాప్-లాస్ బ్రీచ్ & వార్నింగ్ అలర్ట్స్ (రిస్క్ ప్రొటెక్షన్)
   if(stop > 0){
     if(curP <= stop){
       return {
@@ -1188,7 +1315,6 @@ function getTrailingAdvice(m, curP){
     }
   }
 
-  // 2. ట్రెయిలింగ్ ప్రాఫిట్ లాక్ అలర్ట్స్
   if(gainPct >= 15){
     const trailPrice = Math.round(curP * 0.93 * 100) / 100;
     return {
@@ -1215,7 +1341,7 @@ function getTrailingAdvice(m, curP){
   }
   return null;
 }
-// ===== Smart Auto-Injector for Trailing Stop Alerts =====
+
 function updateTrailingStopAlerts(){
   const mineRows = loadMine();
   if(!mineRows.length) return;
@@ -1250,6 +1376,7 @@ function updateTrailingStopAlerts(){
 }
 setInterval(updateTrailingStopAlerts, 1500);
 
+// ===== Enhanced Draw Function (VCP Badges & Dual Stops) =====
 function draw(){
   const rows=(DATA[cur]||[]);
   const sel=$('status');
@@ -1273,8 +1400,17 @@ function draw(){
   const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
     const meta=getStageMeta(r);
+    
+    let vcpTag = '';
+    if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
+      vcpTag = '<span class="tag vcp">💎 VCP Tight</span>';
+    } else if(r.IsDryUp === 'Yes' || (r.Reasons && r.Reasons.includes('dried up'))){
+      vcpTag = '<span class="tag dryup">💧 Vol Dry-up</span>';
+    }
+
     const tagList=[...new Set([
       '<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>',
+      vcpTag,
       ns.has(r.Symbol)?'NEW today':'',
       r.Status,
       r.Class,
@@ -1458,9 +1594,9 @@ function drawEarly(){
 
     let vcpTag = '';
     if(r.IsVCP === 'Yes'){
-      vcpTag = '<span class="tag vcp">&#9889; VCP '+esc(r.VCPDesc ? '('+r.VCPDesc+')' : 'Tight')+'</span>';
+      vcpTag = '<span class="tag vcp">💎 VCP '+esc(r.VCPDesc ? '('+r.VCPDesc+')' : 'Tight')+'</span>';
     } else if(r.IsDryUp === 'Yes'){
-      vcpTag = '<span class="tag dryup">&#128167; Vol Dry-up</span>';
+      vcpTag = '<span class="tag dryup">💧 Vol Dry-up</span>';
     }
 
     const tags='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>'
@@ -1883,7 +2019,6 @@ function drawPerf(){
   const avg=withPnl.length?withPnl.reduce((a,r)=>a+(+r.PnLPct),0)/withPnl.length:0;
   const rate=(win+loss)?Math.round(win*100/(win+loss))+'%':'-';
   
-  // Whipsaw / Fake Stop: పూర్తి టార్గెట్ కొట్టినవి లేదా స్టాప్ తర్వాత +5% కంటే ఎక్కువ బౌన్స్‌బ్యాక్ అయినవి
   const isWhipsawCandidate = (r) => {
     if(r.Result !== 'Stop hit') return false;
     if(r.Whipsaw === 'Yes' || (r.DaysToTargetAfterStop && r.DaysToTargetAfterStop !== '')) return true;
@@ -1946,6 +2081,7 @@ function drawPerf(){
   const bandTxt = bd == 'high' ? ' [High Conviction 80+]' : (bd == 'good' ? ' [Good Setup 65-79]' : (bd == 'early' ? ' [Early Watch <65]' : ''));
   $('meta').textContent='Performance tracking'+bandTxt+filterLabel+' | మొత్తం '+baseRows.length+' సిగ్నల్స్‌లో '+displayRows.length+' చూపిస్తున్నాం';
 }
+
 function resetMiss(){$('mscan').value='';$('mres').value='';$('mfrom').value='';$('mto').value='';drawMiss();}
 
 function drawMiss(){
@@ -1968,10 +2104,8 @@ function drawMiss(){
 }
 
 function resetExcl(){
-  $('escan').value='';
-  $('enear').value='';
-  if($('ereason')) $('ereason').value='';
-  $('esearch').value='';
+  $('escan').value='';$('enear').value='';
+  if($('ereason')) $('ereason').value='';$('esearch').value='';
   drawExcl();
 }
 
@@ -2000,12 +2134,10 @@ function drawExcl(){
   const cnt=k=>all.filter(r=>r._s==k).length;
   const btnExport = '<button onclick="exportExcludedToCSV()" style="margin-left:auto;align-self:center;padding:7px 14px;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;">📥 Export to Excel</button>';
 
-  if($('estats')) {
-    $('estats').innerHTML=box('Excluded',all.length)+box('Ultra Short',cnt('ultra'))+box('Short Term',cnt('short'))+box('Early Movers',cnt('early'))+btnExport;
+  if($('estats')) {$('estats').innerHTML=box('Excluded',all.length)+box('Ultra Short',cnt('ultra'))+box('Short Term',cnt('short'))+box('Early Movers',cnt('early'))+btnExport;
   }
 
-  if($('etable')) {
-    $('etable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Entry</th><th>Stop</th><th>Target</th><th>R:R</th><th>Why stop</th><th>Why target</th></tr>'
+  if($('etable')) {$('etable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Entry</th><th>Stop</th><th>Target</th><th>R:R</th><th>Why stop</th><th>Why target</th></tr>'
      +(rows.length?rows.map(r=>{
        return '<tr><td>'+esc(r.Date||'-')+'</td><td>'+esc(r._l)+'</td><td><b>'+esc(r.Symbol)+'</b></td><td>'+fmt(r.Entry)+'</td><td class="neg">'+fmt(r.Stop)+'</td><td class="pos">'+fmt(r.Target)+'</td><td>1:'+esc(r.RR)+'</td><td>'+esc(r.StopReason||'-')+'</td><td>'+esc(r.TargetReason||'-')+'</td></tr>';
      }).join(''):'<tr><td colspan="9">Nothing excluded for this selection.</td></tr>');
@@ -2013,6 +2145,7 @@ function drawExcl(){
 
   $('meta').textContent='Excluded (R:R below 1:2) | '+rows.length+' shown';
 }
+
 function drawSect(){
   const b=$('sband').value;
   const src=[['ultra','Ultra Short'],['short','Short Term'],['early','Early Movers'],['multi','Multibagger'],['quality','Quality'],['newl','New Listings']];
@@ -2058,20 +2191,13 @@ function show(k){
   const scanTab=(k=='ultra'||k=='short');
   $('viewbar').style.display=(scanTab||k=='early'||k=='multi'||k=='quality'||k=='newl'||k=='mine'||k=='smart')?'flex':'none';
   syncView();
-  $('perf').style.display=k=='perf'?'block':'none';
-  $('miss').style.display=k=='miss'?'block':'none';
-  $('excl').style.display=k=='excl'?'block':'none';
-  $('sect').style.display=k=='sect'?'block':'none';
-  $('early').style.display=k=='early'?'block':'none';
-  $('multi').style.display=k=='multi'?'block':'none';
-  $('quality').style.display=k=='quality'?'block':'none';
-  $('newl').style.display=k=='newl'?'block':'none';
-  $('smart').style.display=k=='smart'?'block':'none';
-  $('mine').style.display=k=='mine'?'block':'none';
-  $('results').style.display=k=='results'?'block':'none';
-  $('bar_scan').style.display=scanTab?'flex':'none';
-  $('chg').style.display=scanTab?'block':'none';
-  $('list').style.display=scanTab?'grid':'none';
+  $('perf').style.display=k=='perf'?'block':'none';$('miss').style.display=k=='miss'?'block':'none';
+  $('excl').style.display=k=='excl'?'block':'none';$('sect').style.display=k=='sect'?'block':'none';
+  $('early').style.display=k=='early'?'block':'none';$('multi').style.display=k=='multi'?'block':'none';
+  $('quality').style.display=k=='quality'?'block':'none';$('newl').style.display=k=='newl'?'block':'none';
+  $('smart').style.display=k=='smart'?'block':'none';$('mine').style.display=k=='mine'?'block':'none';
+  $('results').style.display=k=='results'?'block':'none';$('bar_scan').style.display=scanTab?'flex':'none';
+  $('chg').style.display=scanTab?'block':'none';$('list').style.display=scanTab?'grid':'none';
   if(k=='perf'){drawPerf();return;}
   if(k=='miss'){drawMiss();return;}
   if(k=='excl'){drawExcl();return;}
@@ -2127,33 +2253,32 @@ Promise.all([load('ultra'),load('short')])
 fetch('data/market_health.json?v='+Date.now())
  .then(r=>r.ok?r.text():'')
  .then(t=>{
-   t=(t||'').trim();
-   if(t.charAt(0)!=='{') return;
-   const d=JSON.parse(t);
-   const st=['Favorable','Cautious','Weak'].indexOf(d.Status)>=0?d.Status:'Unknown';
-   const sc=isFinite(+d.Score)?(' ('+d.Score+'/100)'):'';
-   $('mh').className='mh '+st;
-   $('mh_txt').textContent='Market Health: '+st+sc;
-   const dh=$('d_health');
-   if(dh){
-     dh.className=st=='Favorable'?'pos':(st=='Weak'?'neg':'amb');
-     dh.textContent=st+sc;
-   }
+    t=(t||'').trim();
+    if(t.charAt(0)!=='{') return;
+    const d=JSON.parse(t);
+    const st=['Favorable','Cautious','Weak'].indexOf(d.Status)>=0?d.Status:'Unknown';
+    const sc=isFinite(+d.Score)?(' ('+d.Score+'/100)'):'';
+    $('mh').className='mh '+st;
+    $('mh_txt').textContent='Market Health: '+st+sc;
+    const dh=$('d_health');
+    if(dh){
+      dh.className=st=='Favorable'?'pos':(st=='Weak'?'neg':'amb');
+      dh.textContent=st+sc;
+    }
  })
  .catch(()=>{});
 
 fetch('data/profiles.json?v='+Date.now())
  .then(r=>r.ok?r.json():null)
  .then(j=>{
-   if(j&&j.profiles){
-     PROF=j.profiles;
-     if(DATA.ultra&&cur=='sect') drawSect();
-     else if(DATA.ultra&&['ultra','short','early','multi','quality','newl','mine','smart'].indexOf(cur)>=0) redrawCur();
+    if(j&&j.profiles){
+      PROF=j.profiles;
+      if(DATA.ultra&&cur=='sect') drawSect();
+      else if(DATA.ultra&&['ultra','short','early','multi','quality','newl','mine','smart'].indexOf(cur)>=0) redrawCur();
   }
  })
  .catch(()=>{});
 
-// ====== MISS REPORT EXCEL EXPORT FUNCTION ======
 function exportMissToCSV() {
   const data = window._lastMissFiltered || [];
   if (!data.length) {
@@ -2186,7 +2311,6 @@ function exportMissToCSV() {
   document.body.removeChild(a);
 }
 
-// ====== EXCLUDED TAB EXCEL EXPORT FUNCTION ======
 function exportExcludedToCSV() {
   const data = window._lastExclFiltered || [];
   if (!data.length) {
@@ -2218,7 +2342,8 @@ function exportExcludedToCSV() {
   a.click();
   document.body.removeChild(a);
 }
-  function exportPerfToCSV() {
+
+function exportPerfToCSV() {
   const data = window._lastPerfFiltered || [];
   if (!data.length) {
     alert("ఎక్స్‌పోర్ట్ చేయడానికి పెర్ఫార్మెన్స్ ట్యాబ్‌లో డేటా లేదు!");
