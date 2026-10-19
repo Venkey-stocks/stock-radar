@@ -1,5 +1,5 @@
-TOTAL EVENTS: 546
-BY CATEGORY: {'Results date': 427, 'Acquisition/Merger': 48, 'Order win': 32, 'Default/Insolvency (warning)': 20, 'Expansion/Production': 8, 'Bulk BUY': 5, 'Buyback': 2, 'Disruption/Suspension (warning)': 1, 'Auditor change (check)': 1, 'Fund raise (Rights/QIP)': 1, 'Open offer': 1}
+TOTAL EVENTS: 544
+BY CATEGORY: {'Results date': 427, 'Acquisition/Merger': 48, 'Order win': 32, 'Default/Insolvency (warning)': 20, 'Expansion/Production': 6, 'Bulk BUY': 5, 'Buyback': 2, 'Disruption/Suspension (warning)': 1, 'Auditor change (check)': 1, 'Fund raise (Rights/QIP)': 1, 'Open offer': 1}
 
 KEPT BUYERS (deals | name)
 1 | ANKITA VISHAL SHAH
