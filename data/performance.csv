@@ -287,7 +287,7 @@ exnl,2026-10-16,CMLL,Excluded,Standard,Good Setup,79.0,582.35,497.9,614.75,Open,
 exnl,2026-10-16,TGVSL,Excluded,Standard,Good Setup,79.0,126.61,115.83,130.49,Open,1,,124.39,-1.75,,,,,Yes
 exnl,2026-10-16,KNACK,Excluded,Standard,Good Setup,79.0,207.1,177.75,216.9,Open,1,,205.6,-0.72,,,,,Yes
 exnl,2026-10-16,MVELECTRO,Excluded,Standard,Good Setup,79.0,937.4,803.11,970.0,Open,1,,891.25,-4.92,,,,,Yes
-exnl,2026-10-16,MOMSBELIEF,Excluded,Standard,Good Setup,79.0,285.52,213.45,299.3,Target hit,1,2026-10-19,299.3,4.83,,,,,Yes
+exnl,2026-10-16,MOMSBELIEF,Excluded,Standard,Good Setup,79.0,285.52,213.45,299.3,Target hit,1,2026-10-19,299.3,4.83,,,,,No
 exnl,2026-10-16,INDOKEM,Excluded,Standard,Good Setup,79.0,707.45,584.44,729.3,Target hit,1,2026-10-19,729.3,3.09,,,,,Yes
 early,2026-10-16,TECHM,Breakout,Long Term,Good Setup,78.4,1790.0,1582.72,2623.25,Open,1,,1779.1,-0.61,,,,,Yes
 exea,2026-10-16,TECHM,Excluded,Standard,Good Setup,78.4,1790.0,1582.72,2623.25,Open,1,,1779.1,-0.61,,,,,No
@@ -639,12 +639,12 @@ exea,2026-10-16,MOBIKWIK,Breakout,Standard,Good Setup,,228.6,189.51,233.75,Open,
 exea,2026-10-16,SHRINGARMS,Breakout,Standard,Good Setup,,313.83,214.27,324.95,Target hit,1,2026-10-19,324.95,3.54,,,,,No
 early,2026-10-19,KARURVYSYA,Breakout,Long Term,High Conviction,94.9,370.05,338.28,555.03,Open,0,,370.05,0.0,,,,,Yes
 exea,2026-10-19,KARURVYSYA,Excluded,Standard,High Conviction,91.3,370.4,338.33,553.99,Open,0,,,,,,,,No
-early,2026-10-19,MVGJL,Breakout,Long Term,High Conviction,82.4,241.15,201.2,445.2,Open,0,,241.15,0.0,,,,,Yes
+early,2026-10-19,MVGJL,Breakout,Long Term,High Conviction,86.4,241.15,201.2,445.2,Open,0,,241.15,0.0,,,,,Yes
+early,2026-10-19,KROSS,Breakout,Long Term,High Conviction,83.0,297.55,242.69,575.02,Open,0,,297.55,0.0,,,,,Yes
 exea,2026-10-19,MVGJL,Excluded,Standard,High Conviction,82.4,241.15,201.2,445.2,Open,0,,,,,,,,No
-early,2026-10-19,KROSS,Breakout,Long Term,Good Setup,79.0,297.55,242.69,575.02,Open,0,,297.55,0.0,,,,,Yes
+early,2026-10-19,SHRINGARMS,Breakout,Long Term,High Conviction,81.3,319.19,213.84,608.84,Open,0,,319.19,0.0,,,,,Yes
 exnl,2026-10-19,HEXAGON,Excluded,Standard,Good Setup,79.0,68.55,63.3,70.48,Open,0,,68.55,0.0,,,,,Yes
 exnl,2026-10-19,RAMBHAJO,Excluded,Standard,Good Setup,79.0,393.0,256.23,403.0,Open,0,,393.0,0.0,,,,,Yes
-early,2026-10-19,SHRINGARMS,Breakout,Long Term,Good Setup,77.3,319.19,213.84,608.84,Open,0,,319.19,0.0,,,,,Yes
 exnl,2026-10-19,PRADPME,Excluded,Standard,Good Setup,75.0,631.4,425.44,725.45,Open,0,,631.4,0.0,,,,,Yes
 exea,2026-10-19,KROSS,Excluded,Standard,Good Setup,73.0,306.0,242.69,583.47,Open,0,,,,,,,,No
 exnl,2026-10-19,HTEL,Excluded,Standard,Good Setup,65.0,81.91,65.79,86.45,Open,0,,81.91,0.0,,,,,Yes
