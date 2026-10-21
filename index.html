@@ -2002,13 +2002,22 @@ function drawPerf(){
   const sc=$('pscan').value, bd=$('pband').value, cl=$('pclass').value, f=$('pfrom').value, t=$('pto').value, rd=$('prad').value;
   const vcpFilter = $('pvcp') ?$('pvcp').value : '';
   
+  const checkVcp = (r) => {
+    return String(r.IsVCP).trim() === 'Yes' 
+      || String(r.VCPType).includes('VCP') 
+      || String(r.VCPType).includes('Dry')
+      || String(r.SignalStatus).toLowerCase().includes('vcp') 
+      || String(r.Setup).toLowerCase().includes('base')
+      || String(r.Setup).toLowerCase().includes('vcp');
+  };
+
   const baseRows=(DATA.perf||[]).filter(r=>{
     if(sc && r.Scan!=sc) return false;
     if(cl && r.Class!=cl) return false;
     if(f && r.SignalDate<f) return false;
     if(t && r.SignalDate>t) return false;
     if(rd && (rd=='removed'?r.NowOnRadar=='No':r.NowOnRadar=='Yes')) return false;
-    if(vcpFilter=='vcp' && String(r.IsVCP).trim()!=='Yes') return false;
+    if(vcpFilter=='vcp' && !checkVcp(r)) return false;
     
     const score = parseFloat(r.Score) || 0;
     if(bd == 'high' && score < 80) return false;
@@ -2080,7 +2089,9 @@ function drawPerf(){
      const peakGainTxt = hasPeak ? `+${peakGainVal.toFixed(1)}%` : (r.PnLPct !== '' ? `${r.PnLPct}%` : '-');
      const peakCls = hasPeak ? 'pos' : '';
      
-     const vcpBadge = (r.IsVCP === 'Yes') ? `<span class="tag vcp" style="margin-left:4px">💎 ${esc(r.VCPType||'VCP')}</span>` : '';
+     const isVcp = checkVcp(r);
+     const vcpTypeLabel = (r.VCPType && r.VCPType !== '-') ? r.VCPType : 'VCP';
+     const vcpBadge = isVcp ? `<span class="tag vcp" style="margin-left:4px;background:rgba(56,139,253,0.18);color:#58a6ff;padding:2px 6px;border-radius:4px;font-size:11px;">💎 ${esc(vcpTypeLabel)}</span>` : '';
 
      return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b>'+vcpBadge+'</td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td><td class="'+peakCls+'" style="font-weight:700">'+peakGainTxt+'</td><td>'+wsBadge+'</td></tr>';
    }).join(''):'<tr><td colspan="13">ఈ ఫిల్టర్‌కు సరిపోయే సిగ్నల్స్ లేవు.</td></tr>');
@@ -2090,7 +2101,6 @@ function drawPerf(){
   const bandTxt = bd == 'high' ? ' [High Conviction 80+]' : (bd == 'good' ? ' [Good Setup 65-79]' : (bd == 'early' ? ' [Early Watch <65]' : ''));
   $('meta').textContent='Performance tracking'+bandTxt+vcpLabel+filterLabel+' | మొత్తం '+baseRows.length+' సిగ్నల్స్‌లో '+displayRows.length+' చూపిస్తున్నాం';
 }
-
 function resetMiss(){$('mscan').value='';$('mres').value='';$('mfrom').value='';$('mto').value='';drawMiss();}
 
 function drawMiss(){
