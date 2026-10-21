@@ -846,6 +846,7 @@ function openRationale(sym, tabType){
   calcPositionSize();
   $('rationaleDrawer').style.display = 'flex';
 }
+
 function closeRationaleDrawer(){$('rationaleDrawer').style.display='none';}
 function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationaleDrawer();}
 
@@ -1043,7 +1044,7 @@ function fundBox(r){
     +row('Promoter pledge',pl)+row('Debt / Equity',de)+nr+'</div>';
 }
 
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 function parseD(s){
   const m={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
