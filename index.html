@@ -826,22 +826,27 @@ function openRationale(sym, tabType){
     ctn.appendChild(el);
   });
   
-  $('dr_price').textContent = 'Rs ' + fmt(r.Close \vert{}\vert{} r.Entry);$('dr_stop').textContent = 'Rs ' + fmt(r.Stop) + ' (' + r.StopDistPct + '% రిస్క్)';
+  $('dr_price').textContent = 'Rs ' + fmt(r.Close || r.Entry);
+  $('dr_stop').textContent = 'Rs ' + fmt(r.Stop) + ' (' + r.StopDistPct + '% రిస్క్)';
   
   if($('dr_stop_tight')){
     if(has(r.StopTight)){
-      $('dr_stop_tight').textContent = 'Rs ' + fmt(r.StopTight);$('dr_stop_tight').className = 'neg';
+      $('dr_stop_tight').textContent = 'Rs ' + fmt(r.StopTight);
+      $('dr_stop_tight').className = 'neg';
     } else {
-      $('dr_stop_tight').textContent = '-';$('dr_stop_tight').className = 'na';
+      $('dr_stop_tight').textContent = '-';
+      $('dr_stop_tight').className = 'na';
     }
   }
   
-  $('dr_target').textContent = 'Rs ' + fmt(r.Target \vert{}\vert{} r.Level) + ' (+' + (r.TargetPct \vert{}\vert{} '') + '\%)';$('dr_stage').textContent = meta.code;
+  $('dr_target').textContent = 'Rs ' + fmt(r.Target || r.Level) + ' (+' + (r.TargetPct || '') + '%)';
+  $('dr_stage').textContent = meta.code;
   $('dr_chart_link').href = 'https://in.tradingview.com/chart/?symbol=NSE:' + encodeURIComponent(r.Symbol);
   
   calcPositionSize();
   $('rationaleDrawer').style.display = 'flex';
 }
+
 function closeRationaleDrawer(){$('rationaleDrawer').style.display='none';}
 function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationaleDrawer();}
 
@@ -1039,7 +1044,7 @@ function fundBox(r){
     +row('Promoter pledge',pl)+row('Debt / Equity',de)+nr+'</div>';
 }
 
-function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 function parseD(s){
   const m={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
@@ -1624,13 +1629,13 @@ function drawEarly(){
     let ex;
     if(r.Status=='Breakout') ex='Broke above recent high '+esc(r.DaysSince)+' day(s) ago on strong volume; now '+esc(r.GainPct)+'% from breakout level (Rs '+fmt(r.Level)+').';
     else ex='Tight range consolidation just below recent high (Rs '+fmt(r.Level)+') with drying volume.';
-    
+      
     const why=has(r.Reasons)?'<div class="why"><div class="ft">Why is it early?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+esc(x)+'</div>').join('')+'</div>':'';
     const fs=(has(r.FundScore)&&r.FundScore!=='n/a')?'<b class="'+(+r.FundScore>=60?'pos':(+r.FundScore>=40?'amb':'neg'))+'">'+esc(r.FundScore)+' / 100</b>':na;
     const fparts=has(r.Fundamentals)?r.Fundamentals.split(' | '):[];
     const pl=has(r.PledgePct)&&r.PledgePct!=='n/a'?pledgeHtml(r.PledgePct,na):na;
     const wl=has(r.Warning)?r.Warning.split('; '):[];
-    
+      
     return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'early\')">'
     +'<div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
     +'<div class="tags">'+tags+'</div>'
@@ -2012,7 +2017,7 @@ function wsTxt(w){
 
 function drawPerf(){
   const sc=$('pscan').value, bd=$('pband').value, cl=$('pclass').value, f=$('pfrom').value, t=$('pto').value, rd=$('prad').value;
-  const vcpFilter = $('pvcp') ?$('pvcp').value : '';
+  const vcpFilter = $('pvcp') ? $('pvcp').value : '';
   
   const checkVcp = (r) => {
     return String(r.IsVCP).trim() === 'Yes' 
@@ -2169,9 +2174,9 @@ function drawExcl(){
   }
 
   if($('etable')) {$('etable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Entry</th><th>Stop</th><th>Target</th><th>R:R</th><th>Why stop</th><th>Why target</th></tr>'
-     +(rows.length?rows.map(r=>{
-       return '<tr><td>'+esc(r.Date||'-')+'</td><td>'+esc(r._l)+'</td><td><b>'+esc(r.Symbol)+'</b></td><td>'+fmt(r.Entry)+'</td><td class="neg">'+fmt(r.Stop)+'</td><td class="pos">'+fmt(r.Target)+'</td><td>1:'+esc(r.RR)+'</td><td>'+esc(r.StopReason||'-')+'</td><td>'+esc(r.TargetReason||'-')+'</td></tr>';
-     }).join(''):'<tr><td colspan="9">Nothing excluded for this selection.</td></tr>');
+      +(rows.length?rows.map(r=>{
+        return '<tr><td>'+esc(r.Date||'-')+'</td><td>'+esc(r._l)+'</td><td><b>'+esc(r.Symbol)+'</b></td><td>'+fmt(r.Entry)+'</td><td class="neg">'+fmt(r.Stop)+'</td><td class="pos">'+fmt(r.Target)+'</td><td>1:'+esc(r.RR)+'</td><td>'+esc(r.StopReason||'-')+'</td><td>'+esc(r.TargetReason||'-')+'</td></tr>';
+      }).join(''):'<tr><td colspan="9">Nothing excluded for this selection.</td></tr>');
   }
 
   $('meta').textContent='Excluded (R:R below 1:2) | '+rows.length+' shown';
