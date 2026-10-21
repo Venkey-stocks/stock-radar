@@ -31,6 +31,8 @@ label{color:var(--mut);font-size:13px}
 .tag.overlap{border-color:#f0883e;color:#f0883e;font-weight:700}
 .tag.vcp{border-color:#388bfd;color:#58a6ff;background:rgba(56,139,253,0.15);font-weight:700}
 .tag.dryup{border-color:#a371f7;color:#d2a8ff;background:rgba(163,113,247,0.15);font-weight:700}
+.tag.asm{border-color:#d29922;color:#e3b341;background:rgba(210,153,34,0.15);font-weight:700}
+.tag.gsm{border-color:#f85149;color:#ff7b72;background:rgba(248,81,73,0.15);font-weight:700}
 .status-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.4px;display:inline-flex;align-items:center;gap:4px}
 .status-green{background:rgba(46,160,67,.2);color:#3fb950;border:1px solid rgba(46,160,67,.4)}
 .status-gold{background:rgba(210,153,34,.2);color:#d29922;border:1px solid rgba(210,153,34,.4)}
@@ -185,10 +187,21 @@ th{color:var(--mut);font-weight:600}
   <button id="t_excl" onclick="show('excl')">Excluded</button>
   <button id="t_sect" onclick="show('sect')">Sectors</button>
 </div>
+
+<!-- Global View & Surveillance Bar -->
 <div class="bar" id="viewbar">
   <label>View</label>
   <button id="v_list" onclick="setView('list')">List</button>
   <button id="v_cards" onclick="setView('cards')">Cards</button>
+  
+  <!-- Universal ASM/GSM Surveillance Filter -->
+  <label style="margin-left:6px">Surveillance</label>
+  <select id="surv_filter" onchange="redrawCur()" style="padding:6px 10px;font-size:13px;border-color:var(--y)">
+    <option value="">All Stocks (అన్ని స్టాక్స్)</option>
+    <option value="safe">🛡️ Safe Only (No ASM/GSM)</option>
+    <option value="surv">⚠️ ASM / GSM Only</option>
+  </select>
+  
   <button onclick="exportToExcel()" style="margin-left:auto;background:#238636;border-color:#2ea043;font-weight:600">&#128229; Export to Excel</button>
 </div>
 
@@ -241,7 +254,7 @@ th{color:var(--mut);font-weight:600}
 <div id="quality" style="display:none">
   <div class="note">Large companies (market cap above Rs 15,000 crore) with steady growth: sales and profit rising every year, high ROCE, positive cash flow, price above its 200-day average. Meant for a 1-3 year hold.</div>
   <div class="bar" id="qband" onchange="drawQuality()">
-    <select id="qband" onchange="drawQuality()">
+    <select id="qband_sel" onchange="drawQuality()">
       <option value="">All bands</option>
       <option>High Conviction</option><option>Good Setup</option><option>Early Watch</option>
     </select>
@@ -346,12 +359,17 @@ th{color:var(--mut);font-weight:600}
       <option value="early">Early Watch (Score 40-64)</option>
     </select>
     <select id="pclass" onchange="drawPerf()">
-        <option value="">All classes</option><option>Standard</option><option>High Potential</option>
-      </select>
-      <select id="pvcp" onchange="drawPerf()">
-        <option value="">All Setups (Standard + VCP)</option>
-        <option value="vcp">💎 VCP Setups Only</option>
-      </select>
+      <option value="">All classes</option><option>Standard</option><option>High Potential</option>
+    </select>
+    <select id="pvcp" onchange="drawPerf()">
+      <option value="">All Setups (Standard + VCP)</option>
+      <option value="vcp">💎 VCP Setups Only</option>
+    </select>
+    <select id="psurv" onchange="drawPerf()" style="border-color:var(--y)">
+      <option value="">All Surveillance</option>
+      <option value="safe">🛡️ Safe Only (No ASM/GSM)</option>
+      <option value="surv">⚠️ ASM / GSM Only</option>
+    </select>
     <select id="prad" onchange="drawPerf()">
       <option value="">On radar: all</option><option value="still">Still on radar</option><option value="removed">Removed (not on radar now)</option>
     </select>
@@ -380,6 +398,7 @@ th{color:var(--mut);font-weight:600}
   <div class="rs" id="mreasons"></div>
   <div class="wrap"><table id="mtable"></table></div>
 </div>
+
 <div id="excl" style="display:none">
   <div class="note">Stocks dropped because Reward:Risk was below 1:2.</div>
   <div class="bar">
@@ -479,6 +498,7 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
     </div>
   </div>
 </div>
+
 <script>
 const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv'};
 const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['early','exea','Early Movers'],['newl','exnl','New Listing']];
@@ -500,6 +520,17 @@ const HDR_Q=['Stock','Score','Sector','Entry','Stop','Target','Quality',''];
 const HDR_N=['Stock','Score','Listed','Entry','Stop','Target','Since listing',''];
 const HDR_MINE=['Stock','Status','Price','Entry','Stop','Target','Performance',''];
 const HDR_SMART=['Stock','Investor','Type','Action','Holding','Market Cap','Conviction / Radar',''];
+
+// ===== Robust Surveillance (ASM / GSM) Detection Helper =====
+function getSurvMeta(r){
+  if(!r) return null;
+  const str = ((r.Symbol||'') + ' ' + (r.Warning||'') + ' ' + (r.Reasons||'') + ' ' + (r.Surveillance||'') + ' ' + (r.ASM||'') + ' ' + (r.GSM||'') + ' ' + (r.SignalStatus||'')).toUpperCase();
+  const isGsm = str.includes('GSM') || String(r.GSM).toUpperCase() === 'YES';
+  const isAsm = str.includes('ASM') || String(r.ASM).toUpperCase() === 'YES';
+  if(!isGsm && !isAsm) return null;
+  if(isGsm) return { type: 'GSM', tag: '<span class="tag gsm">⚠️ GSM</span>', label: 'GSM ఫ్రేమ్‌వర్క్' };
+  return { type: 'ASM', tag: '<span class="tag asm">⚠️ ASM</span>', label: 'ASM సర్వైలెన్స్' };
+}
 
 function syncView(){
   $('v_list').className=VIEW=='list'?'on':'';$('v_cards').className=VIEW=='cards'?'on':'';
@@ -577,10 +608,12 @@ function handleGlobalSearch(q){
     const diff = entryP > 0 ? (((nowPrice - entryP) / entryP) * 100) : 0;
     const diffCls = diff >= 0 ? 'pos' : 'neg';
     const diffTxt = (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%';
+    const sm = getSurvMeta(m.row);
+    const survTag = sm ? ` ${sm.tag}` : '';
     
     return `<div class="search-item" onclick="selectSearchedStock('${m.sym}','${m.tabKey}')">
       <div>
-        <div class="sym-name">${m.sym} <span class="tag smart" style="font-size:10px;padding:1px 6px">${m.score}/100</span></div>
+        <div class="sym-name">${m.sym} <span class="tag smart" style="font-size:10px;padding:1px 6px">${m.score}/100</span>${survTag}</div>
         <div class="tab-name">${m.tabTitle} &middot; సిగ్నల్ తేది: ${m.date}</div>
       </div>
       <div style="text-align:right">
@@ -655,7 +688,7 @@ function exportToExcel(){
     const b = $('mband2').value, mc = $('mcap').value, sc = $('msector').value;
     exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc) && (!mc || (+r.MarketCapCr) <= (+mc)));
   } else if(tab == 'quality'){
-    const b = $('qband').value, sc = $('qsector').value;
+    const b = $('qband_sel').value, sc = $('qsector').value;
     exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc));
   } else {
     exportRows = rows;
@@ -758,7 +791,7 @@ function openRationale(sym, tabType){
   const ctn=$('dr_reasons');
   ctn.innerHTML='';
   
-  // మార్కెట్ హెల్త్ ఆధారిత ఆటో-గైడెన్స్ లెక్కించడం
+  // మార్కెట్ హెల్త్ మరియు సర్వైలెన్స్ ఆధారిత రిస్క్ నోట్
   let mWarning = '';
   const mScore = (typeof DATA !== 'undefined' && DATA.market_health && DATA.market_health.score) 
                  ? parseFloat(DATA.market_health.score) 
@@ -770,6 +803,11 @@ function openRationale(sym, tabType){
     mWarning = ' ✅ Market Favorable: బ్రేక్‌అవుట్ మొమెంటమ్ బాగుంది, full size తీసుకోవచ్చు.';
   } else {
     mWarning = ' ⚖️ Market Neutral: నిబంధనల ప్రకారం stop-loss తప్పక పాటించండి.';
+  }
+
+  const sm = getSurvMeta(r);
+  if(sm){
+    mWarning += ` 🚨 హెచ్చరిక: ఈ స్టాక్ ఎక్స్చేంజ్ ${sm.label} పరిధిలో ఉంది. 100% మార్జిన్ & సర్క్యూట్ రిస్క్ ఉంటుంది.`;
   }
 
   let lines=[];
@@ -856,13 +894,16 @@ function rowCells(tab,r,ns){
   const al=(rs&&rs.n<=7)?'<span class="amb" title="Results in '+rs.n+' days">&#9888;</span>':'<span></span>';
   let info,extra;
   
-  // VCP Badge detection for rows
+  // VCP & Surveillance Badge detection for rows
   let rowVcp = '';
   if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
     rowVcp = ' <span class="tag vcp">💎 VCP</span>';
   } else if(r.IsDryUp === 'Yes' || (r.Reasons && r.Reasons.includes('dried up'))){
     rowVcp = ' <span class="tag dryup">💧 Dry-up</span>';
   }
+
+  const sm = getSurvMeta(r);
+  const rowSurv = sm ? ` ${sm.tag}` : '';
 
   if(tab=='smart'){
     const isRadar=r.RadarSetup&&r.RadarSetup!='Not on radar';
@@ -871,7 +912,7 @@ function rowCells(tab,r,ns){
     if(isOverlap) badge+='<span class="tag overlap">&#128101; '+(+r.OverlapCount)+' Invs</span> ';
     if(isRadar) badge+='<span class="pos">&#128293; Radar</span>';
     else if(!isOverlap) badge='<span class="na">Sole pick</span>';
-    return '<span><b>'+esc(r.Symbol)+'</b></span>'
+    return '<span><b>'+esc(r.Symbol)+'</b>'+rowSurv+'</span>'
       +'<span><b>'+esc(r.Investor)+'</b></span>'
       +'<span class="hm"><span class="tag smart">'+esc(r.Type)+'</span></span>'
       +'<span>'+esc(r.Action)+'</span>'
@@ -896,7 +937,7 @@ function rowCells(tab,r,ns){
       trailBadge = ' <span class="tag '+(tr.cls==='pos'?'new':'late')+'" style="margin-left:4px">&#128640; '+tr.level+'</span>';
     }
 
-    return '<span><b>'+esc(r.sym)+'</b>'+trailBadge+'</span>'
+    return '<span><b>'+esc(r.sym)+'</b>'+rowSurv+trailBadge+'</span>'
       +'<span><span class="tag'+(r.status=='Holding'?' hold':'')+'">'+esc(r.status)+'</span></span>'
       +'<span class="hm"><b>'+(c?fmt(c.p):'n/a')+'</b></span>'
       +'<span>'+nz(r.entry)+'</span>'
@@ -907,16 +948,16 @@ function rowCells(tab,r,ns){
   }
   if(tab=='ultra'||tab=='short'||tab=='early'){
     const meta=getStageMeta(r);
-    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>' + rowVcp;
+    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>' + rowVcp + rowSurv;
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
   } else if(tab=='newl'){
-    info=esc(r.ListedOn||'n/a');
+    info=esc(r.ListedOn||'n/a') + rowSurv;
     extra='Since listing '+r['ChangeSinceListing%']+'% &middot; '+r.DataDays+' days of data';
   } else {
-    info=esc(r.Sector||'n/a');
+    info=esc(r.Sector||'n/a') + rowSurv;
     extra=roeLbl(r)+' '+r.ROCE+'% &middot; Sales '+r.SalesCAGR3+'% &middot; Profit '+r.ProfitCAGR3+'%';
   }
-  return '<span><b>'+esc(r.Symbol)+'</b></span>'
+  return '<span><b>'+esc(r.Symbol)+'</b>'+rowSurv+'</span>'
     +'<span><span class="score '+cls+'">'+r.Score+'</span></span>'
     +'<span class="hm">'+info+'</span>'
     +'<span>'+fmt(r.Entry)+'</span>'
@@ -1397,7 +1438,7 @@ function updateTrailingStopAlerts(){
 }
 setInterval(updateTrailingStopAlerts, 1500);
 
-// ===== Enhanced Draw Function (VCP Badges & Dual Stops) =====
+// ===== Enhanced Draw Function (VCP Badges & Dual Stops & ASM/GSM) =====
 function draw(){
   const rows=(DATA[cur]||[]);
   const sel=$('status');
@@ -1408,7 +1449,17 @@ function draw(){
     sel.value=sts.includes(v)?v:'';
   }
   const b=$('band').value, st=sel.value;
-  const list=rows.filter(r=>(!b||r.Band==b)&&(!st||r.Status==st)).sort((a,c)=>c.Score-a.Score);
+  const sv = $('surv_filter') ? $('surv_filter').value : '';
+  
+  const list=rows.filter(r=>{
+    if(b && r.Band!=b) return false;
+    if(st && r.Status!=st) return false;
+    const isSurv = !!getSurvMeta(r);
+    if(sv === 'safe' && isSurv) return false;
+    if(sv === 'surv' && !isSurv) return false;
+    return true;
+  }).sort((a,c)=>c.Score-a.Score);
+
   const H=HIST[cur];
   const curSyms=new Set(rows.map(r=>r.Symbol));
   let ns;
@@ -1418,6 +1469,7 @@ function draw(){
   } else {
     ns=NEWSET[cur]||new Set();
   }
+
   const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
     const meta=getStageMeta(r);
@@ -1429,15 +1481,20 @@ function draw(){
       vcpTag = '<span class="tag dryup">💧 Vol Dry-up</span>';
     }
 
+    const sm = getSurvMeta(r);
+    const survBadge = sm ? sm.tag : '';
+
     const tagList=[...new Set([
       '<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>',
       vcpTag,
+      survBadge,
       ns.has(r.Symbol)?'NEW today':'',
       r.Status,
       r.Class,
       tr(r.Setup),
       r.Gap=='Yes'?'Gap-up':''
     ].filter(Boolean))];
+
     const tags=tagList.map(t=>t.startsWith('<span')?t:'<span class="tag'+(t=='NEW today'?' new':'')+'">'+t+'</span>').join('');
     const why=has(r.Reasons)?'<div class="why"><div class="ft">Why this setup?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+x+'</div>').join('')+'</div>':'';
     let wl=has(r.Warning)?fixWarn(tr(r.Warning).split('; ')):[];
@@ -1491,7 +1548,18 @@ function drawMulti(){
     sel.value=secs.includes(v)?v:'';
   }
   const b=$('mband2').value, mc=$('mcap').value, sc=sel.value;
-  const list=rows.filter(r=>(!b||r.Band==b)&&(!sc||r.Sector==sc)&&(!mc||(+r.MarketCapCr)<=(+mc))).sort((a,c)=>c.Score-a.Score);
+  const sv = $('surv_filter') ? $('surv_filter').value : '';
+  
+  const list=rows.filter(r=>{
+    if(b && r.Band!=b) return false;
+    if(sc && r.Sector!=sc) return false;
+    if(mc && (+r.MarketCapCr) > (+mc)) return false;
+    const isSurv = !!getSurvMeta(r);
+    if(sv === 'safe' && isSurv) return false;
+    if(sv === 'surv' && !isSurv) return false;
+    return true;
+  }).sort((a,c)=>c.Score-a.Score);
+
   const na='<b class="na">n/a</b>';
   const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
   const cards=list.map(r=>{
@@ -1500,8 +1568,11 @@ function drawMulti(){
     let warn=has(r.Warning)?r.Warning.split('; '):[];
     const pl=pledgeHtml(r.PledgeOfPromoterPct,na);
     const de=has(r.DebtEquity)?'<b class="'+(+r.DebtEquity>1?'amb':'')+'">'+r.DebtEquity+'</b>':na;
-    return '<div class="card"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span></div>'
+    const sm = getSurvMeta(r);
+    const survBadge = sm ? sm.tag : '';
+
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'multi\')"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+survBadge+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
@@ -1533,8 +1604,19 @@ function drawQuality(){
     sel.innerHTML='<option value="">All sectors</option>'+secs.map(s=>'<option>'+s+'</option>').join('');
     sel.value=secs.includes(v)?v:'';
   }
-  const b=$('qband').value, mc=$('qcap').value, sc=sel.value;
-  const list=rows.filter(r=>(!b||r.Band==b)&&(!sc||r.Sector==sc)&&(!mc||(mc=='mid'?(+r.MarketCapCr)<=50000:(+r.MarketCapCr)>50000))).sort((a,c)=>c.Score-a.Score);
+  const b=$('qband_sel').value, mc=$('qcap').value, sc=sel.value;
+  const sv = $('surv_filter') ? $('surv_filter').value : '';
+
+  const list=rows.filter(r=>{
+    if(b && r.Band!=b) return false;
+    if(sc && r.Sector!=sc) return false;
+    if(mc && (mc=='mid'?(+r.MarketCapCr)>50000:(+r.MarketCapCr)<=50000)) return false;
+    const isSurv = !!getSurvMeta(r);
+    if(sv === 'safe' && isSurv) return false;
+    if(sv === 'surv' && !isSurv) return false;
+    return true;
+  }).sort((a,c)=>c.Score-a.Score);
+
   const na='<b class="na">n/a</b>';
   const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
   const cards=list.map(r=>{
@@ -1543,8 +1625,11 @@ function drawQuality(){
     let warn=has(r.Warning)?r.Warning.split('; '):[];
     const pl=pledgeHtml(r.PledgeOfPromoterPct,na);
     const de=has(r.DebtEquity)?'<b class="'+(+r.DebtEquity>1?'amb':'')+'">'+r.DebtEquity+'</b>':na;
-    return '<div class="card"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span></div>'
+    const sm = getSurvMeta(r);
+    const survBadge = sm ? sm.tag : '';
+
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'quality\')"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+survBadge+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
@@ -1570,15 +1655,26 @@ function drawQuality(){
 function drawNewl(){
   const rows=DATA.newl||[];
   const b=$('nband').value;
-  const list=rows.filter(r=>!b||r.Band==b).sort((a,c)=>c.Score-a.Score);
+  const sv = $('surv_filter') ? $('surv_filter').value : '';
+
+  const list=rows.filter(r=>{
+    if(b && r.Band!=b) return false;
+    const isSurv = !!getSurvMeta(r);
+    if(sv === 'safe' && isSurv) return false;
+    if(sv === 'surv' && !isSurv) return false;
+    return true;
+  }).sort((a,c)=>c.Score-a.Score);
+
   const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
   const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
-    const why=has(r.Why)?r.Why.split('; '):[];
     const warn=has(r.Warning)?r.Warning.split('; '):[];
     const ch=+r['ChangeSinceListing%'], r20=+r['Return20d%'];
-    return '<div class="card"><div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">Listed '+esc(r.ListedOn)+'</span><span class="tag">'+esc(r.DataDays)+' days of data</span></div>'
+    const sm = getSurvMeta(r);
+    const survBadge = sm ? sm.tag : '';
+
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'newl\')"><div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">Listed '+esc(r.ListedOn)+'</span><span class="tag">'+esc(r.DataDays)+' days of data</span>'+survBadge+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.RiskPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
@@ -1604,8 +1700,18 @@ function drawEarly(){
   rows.forEach(r=>{EARLY_MAP[r.Symbol]=r;});
 
   const b=$('yband').value, sg=$('ystage').value, hz=$('yhor').value;
-  const list=rows.filter(r=>(!b||r.Band==b)&&(!sg||r.Stage==sg)&&(!hz||r.Horizon==hz))
-    .sort((a,c)=>((+a.StageOrd)-(+c.StageOrd))||((+c.Score)-(+a.Score)));
+  const sv = $('surv_filter') ? $('surv_filter').value : '';
+
+  const list=rows.filter(r=>{
+    if(b && r.Band!=b) return false;
+    if(sg && r.Stage!=sg) return false;
+    if(hz && r.Horizon!=hz) return false;
+    const isSurv = !!getSurvMeta(r);
+    if(sv === 'safe' && isSurv) return false;
+    if(sv === 'surv' && !isSurv) return false;
+    return true;
+  }).sort((a,c)=>((+a.StageOrd)-(+c.StageOrd))||((+c.Score)-(+a.Score)));
+
   const na='<b class="na">n/a</b>';
   const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
   
@@ -1620,8 +1726,12 @@ function drawEarly(){
       vcpTag = '<span class="tag dryup">💧 Vol Dry-up</span>';
     }
 
+    const sm = getSurvMeta(r);
+    const survBadge = sm ? sm.tag : '';
+
     const tags='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>'
       +vcpTag
+      +survBadge
       +'<span class="tag">'+esc(meta.code)+'</span>'
       +'<span class="tag">'+esc(r.Horizon)+'</span>'
       +'<span class="tag">'+esc(has(r.Sector)?r.Sector:'Sector n/a')+'</span>';
@@ -1987,6 +2097,7 @@ function resetPerf(){
   PERF_RESULT_FILTER = '';
   $('pscan').value='';$('pband').value='';
   $('pclass').value='';$('prad').value='';
+  if($('psurv')) $('psurv').value='';
   $('pfrom').value='';$('pto').value='';
   drawPerf();
 }
@@ -2018,6 +2129,7 @@ function wsTxt(w){
 function drawPerf(){
   const sc=$('pscan').value, bd=$('pband').value, cl=$('pclass').value, f=$('pfrom').value, t=$('pto').value, rd=$('prad').value;
   const vcpFilter = $('pvcp') ? $('pvcp').value : '';
+  const survFilter = $('psurv') ? $('psurv').value : '';
   
   const checkVcp = (r) => {
     return String(r.IsVCP).trim() === 'Yes' 
@@ -2035,6 +2147,10 @@ function drawPerf(){
     if(t && r.SignalDate>t) return false;
     if(rd && (rd=='removed'?r.NowOnRadar=='No':r.NowOnRadar=='Yes')) return false;
     if(vcpFilter=='vcp' && !checkVcp(r)) return false;
+    
+    const isSurv = !!getSurvMeta(r);
+    if(survFilter === 'safe' && isSurv) return false;
+    if(survFilter === 'surv' && !isSurv) return false;
     
     const score = parseFloat(r.Score) || 0;
     if(bd == 'high' && score < 80) return false;
@@ -2061,6 +2177,7 @@ function drawPerf(){
   const wsRows = baseRows.filter(isWhipsawCandidate);
   const wsCount = wsRows.length;
   const wsPct = loss > 0 ? Math.round((wsCount / loss) * 100) + '%' : '0%';
+  const survCount = baseRows.filter(r=>getSurvMeta(r)).length;
 
   const cardBox=(label, val, cls, filterKey)=>{
     const isAct = (PERF_RESULT_FILTER === filterKey);
@@ -2074,6 +2191,7 @@ function drawPerf(){
     + cardBox('Target hit', win, 'pos', 'Target hit')
     + cardBox('Stop hit', loss, 'neg', 'Stop hit')
     + cardBox('Whipsaw (Fake Stop 5%+)', `${wsCount} (${wsPct})`, 'amb', 'Whipsaw')
+    + cardBox('⚠️ ASM/GSM', survCount, 'amb', 'Surveillance')
     + cardBox('Open / Pending', openPendingCnt, '', 'OpenPending')
     + cardBox('Hit rate', rate, '', null)
     + cardBox('Avg return %', avg.toFixed(2)+'%', avg>=0?'pos':'neg', null);
@@ -2082,6 +2200,7 @@ function drawPerf(){
     if(!PERF_RESULT_FILTER) return true;
     if(PERF_RESULT_FILTER === 'OpenPending') return (r.Result === 'Open' || r.Result === 'Pending');
     if(PERF_RESULT_FILTER === 'Whipsaw') return isWhipsawCandidate(r);
+    if(PERF_RESULT_FILTER === 'Surveillance') return !!getSurvMeta(r);
     return r.Result === PERF_RESULT_FILTER;
   });
 
@@ -2109,15 +2228,19 @@ function drawPerf(){
      const isVcp = checkVcp(r);
      const vcpTypeLabel = (r.VCPType && r.VCPType !== '-') ? r.VCPType : 'VCP';
      const vcpBadge = isVcp ? `<span class="tag vcp" style="margin-left:4px;background:rgba(56,139,253,0.18);color:#58a6ff;padding:2px 6px;border-radius:4px;font-size:11px;">💎 ${esc(vcpTypeLabel)}</span>` : '';
+     const sm = getSurvMeta(r);
+     const survBadge = sm ? ` ${sm.tag}` : '';
 
-     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b>'+vcpBadge+'</td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td><td class="'+peakCls+'" style="font-weight:700">'+peakGainTxt+'</td><td>'+wsBadge+'</td></tr>';
+     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b>'+vcpBadge+survBadge+'</td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td><td class="'+peakCls+'" style="font-weight:700">'+peakGainTxt+'</td><td>'+wsBadge+'</td></tr>';
    }).join(''):'<tr><td colspan="13">ఈ ఫిల్టర్‌కు సరిపోయే సిగ్నల్స్ లేవు.</td></tr>');
    
   const filterLabel = PERF_RESULT_FILTER ? ` [ఫిల్టర్: ${PERF_RESULT_FILTER}]` : '';
   const vcpLabel = vcpFilter === 'vcp' ? ' [💎 VCP Setups Only]' : '';
+  const survLabel = survFilter === 'surv' ? ' [⚠️ ASM/GSM Only]' : (survFilter === 'safe' ? ' [🛡️ Safe Only]' : '');
   const bandTxt = bd == 'high' ? ' [High Conviction 80+]' : (bd == 'good' ? ' [Good Setup 65-79]' : (bd == 'early' ? ' [Early Watch <65]' : ''));
-  $('meta').textContent='Performance tracking'+bandTxt+vcpLabel+filterLabel+' | మొత్తం '+baseRows.length+' సిగ్నల్స్‌లో '+displayRows.length+' చూపిస్తున్నాం';
+  $('meta').textContent='Performance tracking'+bandTxt+vcpLabel+survLabel+filterLabel+' | మొత్తం '+baseRows.length+' సిగ్నల్స్‌లో '+displayRows.length+' చూపిస్తున్నాం';
 }
+
 function resetMiss(){$('mscan').value='';$('mres').value='';$('mfrom').value='';$('mto').value='';drawMiss();}
 
 function drawMiss(){
