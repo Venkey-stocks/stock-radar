@@ -19,15 +19,15 @@ MIN_RR = 2.0               # కనీస Reward:Risk
 WIDE_STOP_PCT = 8.0        # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక (తొలగింపు కాదు)
 
 # ---- Event score (అంచనా బరువులు) ----
-EV_BOOST_MAIN = 5           # Order win / Acquisition / Buyback
-EV_BOOST_DEAL = 3           # Bulk BUY / Block BUY
+EV_BOOST_MAIN = 5          # Order win / Acquisition / Buyback
+EV_BOOST_DEAL = 3          # Bulk BUY / Block BUY
 EV_BOOST_CAP = 8
-EV_PEN_DEFAULT = -10        # Default/Insolvency
-EV_PEN_DISRUPT = -5         # Disruption/Suspension
-EV_PEN_AUDITOR = -3         # Auditor change
+EV_PEN_DEFAULT = -10       # Default/Insolvency
+EV_PEN_DISRUPT = -5        # Disruption/Suspension
+EV_PEN_AUDITOR = -3        # Auditor change
 
 rejected = {"low_rr": 0}
-rej_rows = []               # RR వల్ల తొలగిన stocks (Excluded tab కోసం)
+rej_rows = []              # RR వల్ల తొలగిన stocks (Excluded tab కోసం)
 
 
 def clip01(x):
@@ -45,19 +45,45 @@ ist = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=5,
 if last_date.date() == ist.date() and (ist.hour, ist.minute) < (15, 45):
     print("హెచ్చరిక: market ఇంకా మూసి ఉండకపోవచ్చు, ఈ రోజు candle అసంపూర్ణం కావచ్చు.")
 
-# ---------- Events (data/events.csv) ----------
+# ---------- Events & Surveillance (data/events.csv) ----------
 EV = {}
+SURV_MAP = {}  # Symbol -> 'ASM' or 'GSM'
+
+# 1. events.csv నుండి రీడ్ చేయడం
 if os.path.exists("data/events.csv"):
     try:
         evdf = pd.read_csv("data/events.csv")
         for _, e in evdf.iterrows():
             k = str(e.get("symbol", "")).upper().replace(".NS", "").strip()
-            EV.setdefault(k, set()).add(str(e.get("category", "")).strip())
+            cat = str(e.get("category", "")).strip()
+            EV.setdefault(k, set()).add(cat)
+            
+            # ASM/GSM కేటగిరీ గుర్తించడం
+            cat_upper = cat.upper()
+            if "GSM" in cat_upper:
+                SURV_MAP[k] = "GSM"
+            elif "ASM" in cat_upper:
+                SURV_MAP[k] = "ASM"
         print("events చదివాం, symbols:", len(EV))
     except Exception as ex:
         print("హెచ్చరిక: events.csv చదవడం కుదరలేదు:", ex)
 else:
     print("హెచ్చరిక: data/events.csv లేదు, event score లేకుండా నడుస్తోంది.")
+
+# 2. ఒకవేళ ప్రత్యేక surveillance.csv ఫైల్ ఉంటే దాని నుండి రీడ్ చేయడం
+if os.path.exists("data/surveillance.csv"):
+    try:
+        surv_df = pd.read_csv("data/surveillance.csv")
+        for _, row in surv_df.iterrows():
+            sym_clean = str(row.get("Symbol", "")).upper().replace(".NS", "").strip()
+            stype = str(row.get("Type", "ASM")).upper().strip()
+            if "GSM" in stype:
+                SURV_MAP[sym_clean] = "GSM"
+            else:
+                SURV_MAP[sym_clean] = "ASM"
+        print("ప్రత్యేక surveillance లిస్ట్ లోడ్ అయ్యింది, stocks:", len(SURV_MAP))
+    except Exception as e:
+        print("surveillance.csv చదవడం విఫలమైంది:", e)
 
 groups = {sym: g.sort_values("Date").reset_index(drop=True) for sym, g in df.groupby("Symbol")}
 
@@ -198,6 +224,10 @@ def analyze(sym, g):
         target_reason = "No overhead resistance found; %.0f ATR projection (estimate)" % NO_RES_ATR
     target_pct = (target / entry - 1) * 100
     rr = (target - entry) / risk
+    
+    clean_sym = sym.upper().replace(".NS", "").strip()
+    surv_status = SURV_MAP.get(clean_sym, "")
+
     if rr < MIN_RR:
         rejected["low_rr"] += 1
         rej_rows.append({
@@ -207,6 +237,7 @@ def analyze(sym, g):
             "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
             "RR": round(rr, 2), "Reason": "Reward:Risk below 1:2",
             "StopReason": stop_reason, "TargetReason": target_reason,
+            "Surveillance": surv_status
         })
         return None
 
@@ -214,8 +245,12 @@ def analyze(sym, g):
     if stop_pct > WIDE_STOP_PCT:
         warns.append("Wide stop (%.1f%% away); position size should be small" % stop_pct)
 
+    # ASM/GSM హెచ్చరికను Warning కాలమ్‌లో స్పష్టంగా చేర్చడం
+    if surv_status:
+        warns.append(f"Exchange {surv_status} Surveillance (100% Margin / Circuit risk)")
+
     # ---------- Events (Catalyst boost / penalty) ----------
-    cats = EV.get(sym.upper().replace(".NS", ""), set())
+    cats = EV.get(clean_sym, set())
     boost = 0
     pen = 0
     ev_names = []
@@ -310,6 +345,9 @@ def analyze(sym, g):
         "High52": round(high52, 2), "Gap": "Yes" if gap else "",
         "Warning": warning, "Reasons": reasons,
         "Events": events_txt, "EventAdj": ev_adj,
+        "Surveillance": surv_status,
+        "ASM": "Yes" if surv_status == "ASM" else "",
+        "GSM": "Yes" if surv_status == "GSM" else ""
     }
 
 
@@ -324,12 +362,13 @@ for sym, g in groups.items():
 
 columns = ["Date", "Symbol", "Status", "Score", "Band", "Close", "Entry", "Stop", "StopTight", "Target",
            "StopDistPct", "RR", "StopReason", "TargetReason", "VolRatio", "TargetPct",
-           "Resistance", "High52", "Gap", "Warning", "Reasons", "Events", "EventAdj"]
+           "Resistance", "High52", "Gap", "Warning", "Reasons", "Events", "EventAdj",
+           "Surveillance", "ASM", "GSM"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
 rej_cols = ["Date", "Symbol", "Status", "Close", "Entry", "Stop", "StopTight", "Target", "StopDistPct",
-            "TargetPct", "RR", "Reason", "StopReason", "TargetReason"]
+            "TargetPct", "RR", "Reason", "StopReason", "TargetReason", "Surveillance"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
 os.makedirs("data/history", exist_ok=True)
