@@ -758,12 +758,30 @@ function openRationale(sym, tabType){
   const ctn=$('dr_reasons');
   ctn.innerHTML='';
   
+  // మార్కెట్ హెల్త్ ఆధారిత ఆటో-గైడెన్స్ లెక్కించడం
+  let mWarning = '';
+  const mScore = (typeof DATA !== 'undefined' && DATA.market_health && DATA.market_health.score) 
+                 ? parseFloat(DATA.market_health.score) 
+                 : (window.MARKET_HEALTH_SCORE || 5.3);
+
+  if(mScore < 40) {
+    mWarning = ' ⚠️ Market Weak: Pullback risk ఉంది, position size 50% మాత్రమే తీసుకోండి.';
+  } else if(mScore >= 70) {
+    mWarning = ' ✅ Market Favorable: బ్రేక్‌అవుట్ మొమెంటమ్ బాగుంది, full size తీసుకోవచ్చు.';
+  } else {
+    mWarning = ' ⚖️ Market Neutral: నిబంధనల ప్రకారం stop-loss తప్పక పాటించండి.';
+  }
+
   let lines=[];
   if(r.SimpleReasons&&r.SimpleReasons.trim().length>0&&r.SimpleReasons!=='[]'){
     lines=r.SimpleReasons.split(' || ').map(s=>{
       const idx=s.indexOf(':');
       return idx>0?{title:s.slice(0,idx).trim(),desc:s.slice(idx+1).trim()}:{title:'కీలక అంశం',desc:s};
     });
+    // మార్కెట్ వార్నింగ్ చివరి కారణానికి జోడించడం
+    if(lines.length > 0){
+      lines[lines.length - 1].desc += mWarning;
+    }
   }else{
     if(tab==='early'){
       if(r.Stage==='Fresh'){
@@ -771,13 +789,13 @@ function openRationale(sym, tabType){
           {title:'Early Breakout Zone',desc:`బ్రేక్‌అవుట్ లెవెల్ నుండి ధర కేవలం ${r.GainPct}% మాత్రమే పెరిగింది.`},
           {title:'Volume Confirmation',desc:`సాధారణ యావరేజ్ కంటే ${r.VolRatio||'2.0'}x రెట్లు అధిక వాల్యూమ్‌తో బ్రేక్‌అవుట్ నమోదైంది.`},
           {title:'Defined Risk:Reward',desc:`స్టాప్-లాస్ కేవలం ${r.StopDistPct}% దూరంలో ఉంది (రూ. ${fmt(r.Stop)}). రివార్డ్:రిస్క్ నిష్పత్తి 1:${r.RR} తో అనుకూలంగా ఉంది.`},
-          {title:'Sector Support',desc:`${r.Sector||'ముందంజలో ఉన్న'} రంగానికి చెందినది. మల్టీ-వీక్ బేస్ నుండి పటిష్టమైన బ్రేక్‌అవుట్ వచ్చింది.`}
+          {title:'Sector Support',desc:`${r.Sector||'ముందంజలో ఉన్న'} రంగానికి చెందినది. మల్టీ-వీక్ బేస్ నుండి పటిష్టమైన బ్రేక్‌అవుట్ వచ్చింది.${mWarning}`}
         ];
       }else{
         lines=[
           {title:'Pivot Resistance Testing',desc:`రెసిస్టెన్స్ లెవెల్ (రూ. ${fmt(r.Level)}) కు కేవలం ${Math.abs(r.GainPct)}% సమీపంలో కన్సాలిడేట్ అవుతోంది.`},
           {title:'Volume Dry-Up (VCP)',desc:'వాల్యూమ్ బాగా డ్రై అయిపోయింది. సెల్లింగ్ ఒత్తిడి దాదాపు శూన్యమైంది.'},
-          {title:'Action Plan',desc:'తొందరపడి కొనకండి. బలమైన వాల్యూమ్‌తో బ్రేక్‌అవుట్ కన్ఫర్మ్ అయినప్పుడు ఎంట్రీ తీసుకోండి.'}
+          {title:'Action Plan',desc:`తొందరపడి కొనకండి. బలమైన వాల్యూమ్‌తో బ్రేక్‌అవుట్ కన్ఫర్మ్ అయినప్పుడు ఎంట్రీ తీసుకోండి.${mWarning}`}
         ];
       }
     }else{
@@ -794,21 +812,6 @@ function openRationale(sym, tabType){
       }
       
       lines=[
-        // మార్కెట్ హెల్త్ ఆధారిత ఆటో-గైడెన్స్ లెక్కించడం
-      let mWarning = '';
-      const mScore = (typeof DATA !== 'undefined' && DATA.market_health && DATA.market_health.score) 
-                     ? parseFloat(DATA.market_health.score) 
-                     : (window.MARKET_HEALTH_SCORE || 5.3);
-
-      if(mScore < 40) {
-        mWarning = ' ⚠️ Market Weak: Pullback risk ఉంది, position size 50% మాత్రమే తీసుకోండి.';
-      } else if(mScore >= 70) {
-        mWarning = ' ✅ Market Favorable: బ్రేక్‌అవుట్ మొమెంటమ్ బాగుంది, full size తీసుకోవచ్చు.';
-      } else {
-        mWarning = ' ⚖️ Market Neutral: నిబంధనల ప్రకారం stop-loss తప్పక పాటించండి.';
-      }
-
-      lines=[
         {title:'Setup & Pattern',desc:`${vcpText} Momentum Score ${r.Score}/100 తో బలంగా ఉంది.`},
         {title:'Risk Management',desc:`${stopSentence}. Reward:Risk ratio 1:${r.RR||'2.0'} తో ట్రేడింగ్‌కు అనుకూలంగా ఉంది.${mWarning}`},
         {title:'Target Projection',desc:`Chart structure & Resistance ఆధారంగా Target Rs ${fmt(r.Target||r.Level)} (+${r.TargetPct||''}%) లెక్కించబడింది.`},
@@ -824,27 +827,22 @@ function openRationale(sym, tabType){
     ctn.appendChild(el);
   });
   
-  $('dr_price').textContent='Rs '+fmt(r.Close || r.Entry);
-  $('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% రిస్క్)';
+  $('dr_price').textContent='Rs '+fmt(r.Close \vert{}\vert{} r.Entry);$('dr_stop').textContent='Rs '+fmt(r.Stop)+' ('+r.StopDistPct+'% రిస్క్)';
   
   if($('dr_stop_tight')){
     if(has(r.StopTight)){
-      $('dr_stop_tight').textContent = 'Rs ' + fmt(r.StopTight);
-      $('dr_stop_tight').className = 'neg';
+      $('dr_stop_tight').textContent = 'Rs ' + fmt(r.StopTight);$('dr_stop_tight').className = 'neg';
     } else {
-      $('dr_stop_tight').textContent = '-';
-      $('dr_stop_tight').className = 'na';
+      $('dr_stop_tight').textContent = '-';$('dr_stop_tight').className = 'na';
     }
   }
   
-  $('dr_target').textContent='Rs '+fmt(r.Target || r.Level)+' (+'+(r.TargetPct || '')+'%)';
-  $('dr_stage').textContent=meta.code;
+  $('dr_target').textContent='Rs '+fmt(r.Target \vert{}\vert{} r.Level)+' (+'+(r.TargetPct \vert{}\vert{} '')+'\%)';$('dr_stage').textContent=meta.code;
   $('dr_chart_link').href='https://in.tradingview.com/chart/?symbol=NSE:'+encodeURIComponent(r.Symbol);
   
   calcPositionSize();
   $('rationaleDrawer').style.display='flex';
 }
-
 function closeRationaleDrawer(){$('rationaleDrawer').style.display='none';}
 function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationaleDrawer();}
 
