@@ -25,7 +25,7 @@ CURRENT = {
 }
 SEEN = "data/first_seen.csv"
 SEEN_COLS = ["Scan", "Date", "Symbol", "Status", "Class", "Band", "Score",
-             "Entry", "Stop", "Target", "Close"]
+             "Entry", "Stop", "Target", "Close", "IsVCP", "VCPType"]
 
 
 def fnum(x):
@@ -65,6 +65,18 @@ def close_on(sym, ts):
     return float(h["Close"].iloc[-1])
 
 
+def detect_vcp_flag(row):
+    is_vcp = str(row.get("IsVCP", "")).strip().lower()
+    is_dry = str(row.get("IsDryUp", "")).strip().lower()
+    reasons = str(row.get("Reasons", "")) + " " + str(row.get("Setup", ""))
+    
+    if is_vcp in ("yes", "true", "1") or "coiling" in reasons.lower() or "vcp" in reasons.lower():
+        return "Yes", "VCP Tight"
+    elif is_dry in ("yes", "true", "1") or "dried up" in reasons.lower():
+        return "Yes", "Vol Dry-up"
+    return "No", "-"
+
+
 # ---------- ఇప్పుడు radar లో ఉన్న stocks ----------
 now_on = {}
 for scan, f in CURRENT.items():
@@ -90,6 +102,12 @@ for scan in ("ultra", "short", "early"):
         if s.empty or "Symbol" not in s.columns:
             continue
         s["Scan"] = scan
+        
+        # VCP గుర్తింపు
+        vcp_info = [detect_vcp_flag(r) for r in s.to_dict("records")]
+        s["IsVCP"] = [x[0] for x in vcp_info]
+        s["VCPType"] = [x[1] for x in vcp_info]
+        
         if scan == "early":
             early_snap_found = True
             name = os.path.basename(f)
@@ -123,6 +141,10 @@ if not early_snap_found and os.path.exists("data/early_movers.csv"):
         ed = pd.read_csv("data/early_movers.csv")
         if not ed.empty and "Symbol" in ed.columns:
             ed["Scan"] = "early"
+            vcp_info = [detect_vcp_flag(r) for r in ed.to_dict("records")]
+            ed["IsVCP"] = [x[0] for x in vcp_info]
+            ed["VCPType"] = [x[1] for x in vcp_info]
+            
             if "Date" not in ed.columns:
                 ed["Date"] = last_px
             if "Status" not in ed.columns:
@@ -155,7 +177,7 @@ if os.path.exists(SEEN):
         seen = pd.DataFrame(columns=SEEN_COLS)
 else:
     seen = pd.DataFrame(columns=SEEN_COLS)
-seen = seen.reindex(columns=SEEN_COLS)     # పాత Qty column ఉంటే తొలగిపోతుంది
+seen = seen.reindex(columns=SEEN_COLS)
 known = set(zip(seen["Scan"].astype(str), seen["Symbol"].astype(str)))
 
 add = []
@@ -178,9 +200,11 @@ for scan, f in LONG.items():
             continue
         dt = pd.to_datetime(r.get("Date"), errors="coerce")
         date = dt.strftime("%Y-%m-%d") if pd.notna(dt) else last_px
+        v_flag, v_type = detect_vcp_flag(r)
         add.append({"Scan": scan, "Date": date, "Symbol": sym, "Status": LABEL[scan],
                     "Class": "", "Band": r.get("Band", ""), "Score": fnum(r.get("Score")),
-                    "Entry": entry, "Stop": stop, "Target": target, "Close": entry})
+                    "Entry": entry, "Stop": stop, "Target": target, "Close": entry,
+                    "IsVCP": v_flag, "VCPType": v_type})
         known.add((scan, sym))
 if add:
     seen = pd.concat([seen, pd.DataFrame(add, columns=SEEN_COLS)], ignore_index=True)
@@ -190,7 +214,7 @@ seen.to_csv(SEEN, index=False)
 if len(seen):
     parts.append(seen.copy())
 
-# ---------- Excluded Scans (Ultra, Short, Early, New Listings) ట్రాకింగ్ ----------
+# ---------- Excluded Scans ----------
 EXCL_FILES = {
     "exul": "data/excluded_ultra.csv",
     "exsh": "data/excluded_short.csv",
@@ -214,6 +238,9 @@ for escan, ef in EXCL_FILES.items():
             continue
         
         ex_df["Scan"] = escan
+        v_flag, v_type = detect_vcp_flag(ex_df.iloc[0].to_dict()) if len(ex_df) else ("No", "-")
+        ex_df["IsVCP"] = v_flag
+        ex_df["VCPType"] = v_type
         
         if "Date" not in ex_df.columns and "SignalDate" in ex_df.columns:
             ex_df["Date"] = ex_df["SignalDate"]
@@ -222,10 +249,8 @@ for escan, ef in EXCL_FILES.items():
             
         if "Status" not in ex_df.columns:
             ex_df["Status"] = "Excluded"
-            
         if "Class" not in ex_df.columns:
             ex_df["Class"] = "Standard"
-            
         if "Band" not in ex_df.columns:
             ex_df["Band"] = ex_df["Score"].apply(band_of) if "Score" in ex_df.columns else "Good Setup"
             
@@ -235,25 +260,22 @@ for escan, ef in EXCL_FILES.items():
             ex_df[c] = pd.to_numeric(ex_df[c], errors="coerce")
             
         ex_df["Close"] = ex_df["Close"].fillna(ex_df["Entry"])
-        
-        # అసలైన ఒరిజినల్ Entry, Stop, Target విలువలు ఉన్న రికార్డులను తీసుకోవడం
         ex_df = ex_df.dropna(subset=["Entry", "Stop", "Target"])
-        
         if not ex_df.empty:
             parts.append(ex_df)
     except Exception as e:
         print(f"{target_file} చదవలేకపోయాం:", e)
+
 cols = ["Scan", "SignalDate", "Symbol", "SignalStatus", "Class", "Band", "Score", "Entry", "Stop",
         "Target", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct",
+        "PeakGainPct", "PeakPrice", "IsVCP", "VCPType",
         "AfterStopMaxPct", "AfterStopObsDays", "Whipsaw", "DaysToTargetAfterStop", "NowOnRadar"]
 
-# Paatha backfilled excluded records ni parts lo kalapadam
 perf_path = "data/performance.csv"
 if os.path.exists(perf_path):
     try:
         old_perf = pd.read_csv(perf_path)
         if not old_perf.empty and "SignalDate" in old_perf.columns:
-            # Excluded scans paatha records ni matrame theeskovadam
             old_excl = old_perf[old_perf["Scan"].astype(str).str.startswith("ex")].copy()
             if not old_excl.empty:
                 old_excl = old_excl.rename(columns={"SignalDate": "Date", "SignalStatus": "Status"})
@@ -278,7 +300,7 @@ sig["Date"] = pd.to_datetime(sig["Date"])
 sig = sig.sort_values(["Date", "Score"], ascending=[True, False])
 
 out = []
-last_idx = {}   # (scan, symbol) -> చివరి signal రోజు index
+last_idx = {}
 for r in sig.to_dict("records"):
     scan, sym = r["Scan"], r["Symbol"]
     win = WINDOW[scan]
@@ -286,12 +308,11 @@ for r in sig.to_dict("records"):
         win = EARLY_LONG_WINDOW
     ts = pd.Timestamp(r["Date"])
     if pd.isna(ts):
-        continue                        # తేదీ లేని వరుసలు వదిలేస్తాం
+        continue
     di = date_idx.get(ts)
     if di is None:
         di = bisect.bisect_right(all_dates, ts)
     key = (scan, sym)
-    # అదే stock ఇంకా track లో ఉంటే (window లోపు) మళ్ళీ లెక్కించం
     if key in last_idx and di - last_idx[key] < win:
         continue
     last_idx[key] = di
@@ -301,10 +322,14 @@ for r in sig.to_dict("records"):
         continue
     after = g[g["Date"] > ts].head(win)
     entry, stop, target, close = float(r["Entry"]), float(r["Stop"]), float(r["Target"]), float(r["Close"])
-    pending = entry > close * 1.001      # entry ధర పైన ఉంటే, అక్కడికి చేరాకే trade మొదలు
+    pending = entry > close * 1.001
     active = not pending
     result = "Pending" if pending else "Open"
     exit_price, res_date, days = None, None, 0
+
+    # VCP పోస్ట్-ర్యాలీ ట్రాకింగ్ (గరిష్ట ధర & పీక్ గెయిన్)
+    highest_price = entry
+    peak_gain_pct = 0.0
 
     for d in after.itertuples():
         days += 1
@@ -313,9 +338,13 @@ for r in sig.to_dict("records"):
                 active = True
             else:
                 continue
-        if d.Low <= stop:                       # ఒకే రోజు stop, target రెండూ తగిలితే stop అనుకుంటాం (జాగ్రత్త)
+                
+        if d.High > highest_price:
+            highest_price = float(d.High)
+            
+        if d.Low <= stop:
             result = "Stop hit"
-            exit_price = min(stop, d.Open)      # gap-down అయితే open ధర
+            exit_price = min(stop, d.Open)
             res_date = d.Date
             break
         if d.High >= target:
@@ -323,6 +352,9 @@ for r in sig.to_dict("records"):
             exit_price = target
             res_date = d.Date
             break
+
+    if entry > 0 and highest_price > entry:
+        peak_gain_pct = round(((highest_price - entry) / entry) * 100, 2)
 
     if result in ("Pending", "Open"):
         if len(after) >= win:
@@ -339,8 +371,6 @@ for r in sig.to_dict("records"):
     if exit_price is not None:
         pnl_pct = round((exit_price / entry - 1) * 100, 2)
 
-    # ---------- Stop hit తర్వాత ఏం జరిగింది (Whipsaw) ----------
-    # stop తర్వాతి రోజు నుంచి, అదే window రోజుల పాటు చూస్తాం
     as_max, as_obs, whip, whip_days = "", "", "", ""
     if result == "Stop hit":
         post = g[g["Date"] > pd.Timestamp(res_date)].head(win)
@@ -362,6 +392,10 @@ for r in sig.to_dict("records"):
         "ResultDate": pd.Timestamp(res_date).strftime("%Y-%m-%d") if res_date is not None else "",
         "ExitPrice": round(exit_price, 2) if exit_price is not None else "",
         "PnLPct": pnl_pct,
+        "PeakGainPct": peak_gain_pct if peak_gain_pct > 0 else (pnl_pct if pnl_pct != "" else 0.0),
+        "PeakPrice": round(highest_price, 2),
+        "IsVCP": r.get("IsVCP", "No"),
+        "VCPType": r.get("VCPType", "-"),
         "AfterStopMaxPct": as_max, "AfterStopObsDays": as_obs,
         "Whipsaw": whip, "DaysToTargetAfterStop": whip_days,
         "NowOnRadar": "Yes" if str(sym).strip() in now_on.get(scan, set()) else "No",
@@ -372,11 +406,5 @@ res.to_csv("data/performance.csv", index=False)
 print("మొత్తం signals:", len(res))
 if len(res):
     print(res.groupby(["Scan", "Result"]).size().to_string())
-    st = res[res["Result"] == "Stop hit"]
-    if len(st):
-        print("Stop hit తర్వాత Whipsaw (target తాకినవి):")
-        for scan in st["Scan"].unique():
-            s = st[st["Scan"] == scan]
-            print(" ", scan, "stop:", len(s), "| whipsaw Yes:", int((s["Whipsaw"] == "Yes").sum()),
-                  "| No:", int((s["Whipsaw"] == "No").sum()),
-                  "| ఇంకా తెలియదు:", int((s["Whipsaw"] == "").sum()))
+    vcp_signals = res[res["IsVCP"] == "Yes"]
+    print(f"VCP Setups లెక్కింపు: {len(vcp_signals)} signals ట్రాక్ చేయబడ్డాయి.")
