@@ -1,5 +1,5 @@
-TOTAL EVENTS: 593
-BY CATEGORY: {'Results date': 479, 'Acquisition/Merger': 43, 'Order win': 33, 'Default/Insolvency (warning)': 21, 'Bulk BUY': 7, 'Expansion/Production': 5, 'Auditor change (check)': 2, 'Fund raise (Rights/QIP)': 1, 'Buyback': 1, 'Disruption/Suspension (warning)': 1}
+TOTAL EVENTS: 664
+BY CATEGORY: {'Results date': 553, 'Acquisition/Merger': 41, 'Order win': 32, 'Default/Insolvency (warning)': 18, 'Expansion/Production': 8, 'Bulk BUY': 7, 'Buyback': 2, 'Fund raise (Rights/QIP)': 1, 'Auditor change (check)': 1, 'Disruption/Suspension (warning)': 1}
 
 KEPT BUYERS (deals | name)
 1 | MUGI CONSTRUCTIONS PRIVATE LIMITED
