@@ -794,8 +794,23 @@ function openRationale(sym, tabType){
       }
       
       lines=[
+        // మార్కెట్ హెల్త్ ఆధారిత ఆటో-గైడెన్స్ లెక్కించడం
+      let mWarning = '';
+      const mScore = (typeof DATA !== 'undefined' && DATA.market_health && DATA.market_health.score) 
+                     ? parseFloat(DATA.market_health.score) 
+                     : (window.MARKET_HEALTH_SCORE || 5.3);
+
+      if(mScore < 40) {
+        mWarning = ' ⚠️ Market Weak: Pullback risk ఉంది, position size 50% మాత్రమే తీసుకోండి.';
+      } else if(mScore >= 70) {
+        mWarning = ' ✅ Market Favorable: బ్రేక్‌అవుట్ మొమెంటమ్ బాగుంది, full size తీసుకోవచ్చు.';
+      } else {
+        mWarning = ' ⚖️ Market Neutral: నిబంధనల ప్రకారం stop-loss తప్పక పాటించండి.';
+      }
+
+      lines=[
         {title:'Setup & Pattern',desc:`${vcpText} Momentum Score ${r.Score}/100 తో బలంగా ఉంది.`},
-        {title:'Risk Management',desc:`${stopSentence}. Reward:Risk ratio 1:${r.RR||'2.0'} తో ట్రేడింగ్‌కు అనుకూలంగా ఉంది.`},
+        {title:'Risk Management',desc:`${stopSentence}. Reward:Risk ratio 1:${r.RR||'2.0'} తో ట్రేడింగ్‌కు అనుకూలంగా ఉంది.${mWarning}`},
         {title:'Target Projection',desc:`Chart structure & Resistance ఆధారంగా Target Rs ${fmt(r.Target||r.Level)} (+${r.TargetPct||''}%) లెక్కించబడింది.`},
         {title:'Trend & Moving Averages',desc:`Short-term trend Bullish గా ఉంది. కీలకమైన 20-DMA మరియు 50-DMA support పైన నిలకడగా ట్రేడ్ అవుతోంది.`}
       ];
