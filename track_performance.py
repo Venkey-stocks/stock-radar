@@ -15,13 +15,13 @@ LONG = {"multi": "data/multibagger.csv", "quality": "data/quality.csv",
         "newl": "data/newlistings.csv"}
 LABEL = {"multi": "Multibagger", "quality": "Quality", "newl": "New listing"}
 
-# ఇప్పుడు radar లో ఉన్నాయా తెలుసుకోవడానికి తాజా జాబితాలు
+# ఇప్పుడు radar లో ఉన్నాయా తెలుసుకోవడానికి తాజా జాబితాలు (కరెక్ట్ ఫైల్ పాత్‌లతో అప్‌డేట్ చేయబడింది)
 CURRENT = {
     "ultra": "data/ultra_short.csv", "short": "data/short_term.csv",
     "multi": "data/multibagger.csv", "quality": "data/quality.csv",
     "newl": "data/newlistings.csv", "early": "data/early_movers.csv",
-    "exul": "data/excluded_ultra.csv", "exsh": "data/excluded_short.csv",
-    "exea": "data/excluded_early.csv", "exnl": "data/excluded_newlistings.csv"
+    "exul": "data/ultra_rejected.csv", "exsh": "data/short_rejected.csv",
+    "exea": "data/early_rejected.csv", "exnl": "data/newlistings_rejected.csv"
 }
 SEEN = "data/first_seen.csv"
 SEEN_COLS = ["Scan", "Date", "Symbol", "Status", "Class", "Band", "Score",
@@ -241,33 +241,26 @@ seen.to_csv(SEEN, index=False)
 if len(seen):
     parts.append(seen.copy())
 
-# ---------- Excluded Scans ----------
+# ---------- Excluded Scans (కరెక్ట్ ఫైల్ పాత్‌లతో అలైన్ చేయబడింది) ----------
 EXCL_FILES = {
-    "exul": "data/excluded_ultra.csv",
-    "exsh": "data/excluded_short.csv",
-    "exea": "data/excluded_early.csv",
-    "exnl": "data/excluded_newlistings.csv"
+    "exul": "data/ultra_rejected.csv",
+    "exsh": "data/short_rejected.csv",
+    "exea": "data/early_rejected.csv",
+    "exnl": "data/newlistings_rejected.csv"
 }
 
 for escan, ef in EXCL_FILES.items():
-    alt_map = {
-        "exsh": "data/short_rejected.csv",
-        "exul": "data/ultra_rejected.csv",
-        "exea": "data/early_rejected.csv",
-        "exnl": "data/newlistings_rejected.csv"
-    }
-    target_file = ef if os.path.exists(ef) else alt_map.get(escan, ef)
-    if not os.path.exists(target_file):
+    if not os.path.exists(ef):
         continue
     try:
-        ex_df = pd.read_csv(target_file)
+        ex_df = pd.read_csv(ef)
         if ex_df.empty or "Symbol" not in ex_df.columns:
             continue
         
         ex_df["Scan"] = escan
-        v_flag, v_type = detect_vcp_flag(ex_df.iloc[0].to_dict()) if len(ex_df) else ("No", "-")
-        ex_df["IsVCP"] = v_flag
-        ex_df["VCPType"] = v_type
+        vcp_info = [detect_vcp_flag(r) for r in ex_df.to_dict("records")]
+        ex_df["IsVCP"] = [x[0] for x in vcp_info]
+        ex_df["VCPType"] = [x[1] for x in vcp_info]
         
         surv_data = [get_surv_info(r) for r in ex_df.to_dict("records")]
         ex_df["Surveillance"] = [x[0] for x in surv_data]
@@ -296,7 +289,7 @@ for escan, ef in EXCL_FILES.items():
         if not ex_df.empty:
             parts.append(ex_df)
     except Exception as e:
-        print(f"{target_file} చదవలేకపోయాం:", e)
+        print(f"{ef} చదవలేకపోయాం:", e)
 
 cols = ["Scan", "SignalDate", "Symbol", "SignalStatus", "Class", "Band", "Score", "Entry", "Stop",
         "Target", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct",
