@@ -7,6 +7,7 @@ MIN_PRICE = 50
 MIN_TRADED_VALUE = 10e7     # 20 రోజుల సగటు traded value కనీసం Rs 10 కోట్లు
 MIN_SCORE = 40
 MIN_ROWS = 210              # 200-రోజుల average కి కనీసం ఇన్ని రోజుల data
+MAX_STOP_PCT = 8.0          # ఫైన్-ట్యూన్డ్ గరిష్ట స్టాప్‌లాస్ పరిమితి (8.0%)
 
 # ---- Stop / Target (టెక్నికల్, అంచనా సంఖ్యలు) ----
 ATR_N = 14                  # ATR కాలం
@@ -17,7 +18,7 @@ NO_RES_ATR = 5.0            # resistance లేకపోతే target = Entry + 
 NO_RES_ATR_HP = 7.0         # High Potential కి
 MAX_TARGET_ATR = 10.0       # target గరిష్టం
 MIN_RR = 2.0                # కనీస Reward:Risk
-WIDE_STOP_PCT = 10.0        # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక (తొలగింపు కాదు)
+WIDE_STOP_PCT = 10.0        # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక
 
 # ---- Event score (అంచనా బరువులు) ----
 EV_BOOST_MAIN = 5           # Order win / Acquisition / Buyback
@@ -27,8 +28,8 @@ EV_PEN_DEFAULT = -10        # Default/Insolvency
 EV_PEN_DISRUPT = -5         # Disruption/Suspension
 EV_PEN_AUDITOR = -3         # Auditor change
 
-rejected = {"low_rr": 0}
-rej_rows = []               # RR వల్ల తొలగిన stocks (Excluded tab కోసం)
+rejected = {"low_rr": 0, "wide_stop": 0}
+rej_rows = []               # తిరస్కరించబడిన stocks (Excluded tab కోసం)
 
 
 def clip01(x):
@@ -86,7 +87,7 @@ def camarilla_r4(dates, h, l, c):
     w = w.resample("W").agg({"H": "max", "L": "min", "C": "last"}).dropna()
     if len(w) < 3:
         return None
-    p = w.iloc[-2]          # చివరి వారం = ఈ వారం (అసంపూర్ణం కావచ్చు), దానికి ముందు వారం = గత పూర్తి వారం
+    p = w.iloc[-2]          # గత పూర్తి వారం
     r4 = float(p["C"] + (p["H"] - p["L"]) * 1.1 / 2)
     return r4, float(p["H"]), float(p["L"]), float(p["C"])
 
@@ -349,6 +350,22 @@ def analyze(sym, g):
     clean_sym = sym.upper().replace(".NS", "").strip()
     surv_status = SURV_MAP.get(clean_sym, "")
 
+    # ఫైన్-ట్యూన్డ్: స్టాప్‌లాస్ 8.0% కంటే ఎక్కువ ఉంటే రిజెక్షన్
+    if stop_pct > MAX_STOP_PCT:
+        rejected["wide_stop"] += 1
+        rej_rows.append({
+            "Date": date_str, "Symbol": sym, "Status": status,
+            "Class": "High Potential" if is_hp else "Standard",
+            "Setup": setup_kind,
+            "Close": round(close, 2), "Entry": round(entry, 2),
+            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2), "Target": round(target, 2),
+            "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
+            "RR": round(rr, 2), "Reason": f"Stop-loss too far ({stop_pct:.1f}%, limit {MAX_STOP_PCT:.1f}%)",
+            "StopReason": stop_reason, "TargetReason": target_reason,
+            "Surveillance": surv_status
+        })
+        return None
+
     if rr < MIN_RR:
         rejected["low_rr"] += 1
         rej_rows.append({
@@ -525,12 +542,13 @@ rej_out.to_csv("data/short_rejected.csv", index=False)
 rej_out.to_csv("data/excluded_short.csv", index=False)
 
 print("data తేదీ:", date_str)
-print("Reward:Risk %.0f కంటే తక్కువ అని తొలగినవి:" % MIN_RR, rejected["low_rr"])
+print("Reward:Risk < 2.0 వల్ల తిరస్కరించినవి:", rejected["low_rr"])
+print(f"Stop-loss > {MAX_STOP_PCT}% వల్ల తిరస్కరించినవి:", rejected["wide_stop"])
 print("మొత్తం ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Status"].value_counts().to_string())
     print(out["Class"].value_counts().to_string())
     print(out.head(10)[["Symbol", "Status", "Class", "Score", "Entry", "Stop", "Target", "RR", "Warning"]].to_string(index=False))
 if len(rej_out) > 0:
-    print("RR తొలగినవి (టాప్ 5, RR ఎక్కువ నుంచి):")
-    print(rej_out.head(5)[["Symbol", "Status", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
+    print("తిరస్కరించబడిన టాప్ 5 (RR ఎక్కువ నుంచి):")
+    print(rej_out.head(5)[["Symbol", "Status", "Entry", "Stop", "Target", "RR", "Reason"]].to_string(index=False))
