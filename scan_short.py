@@ -125,19 +125,42 @@ if "NIFTY50" in idx:
     n50_ret = a[-1] / a[-64] - 1
 print("పోలిక index:", main_name, "| market 50-రోజుల average పైన:", market_ok)
 
-# ---------- Events (data/events.csv) ----------
+# ---------- Events & Surveillance ----------
 EV = {}
+SURV_MAP = {}
+
 if os.path.exists("data/events.csv"):
     try:
         evdf = pd.read_csv("data/events.csv")
         for _, e in evdf.iterrows():
             k = str(e.get("symbol", "")).upper().replace(".NS", "").strip()
-            EV.setdefault(k, set()).add(str(e.get("category", "")).strip())
+            cat = str(e.get("category", "")).strip()
+            EV.setdefault(k, set()).add(cat)
+            
+            cat_upper = cat.upper()
+            if "GSM" in cat_upper:
+                SURV_MAP[k] = "GSM"
+            elif "ASM" in cat_upper:
+                SURV_MAP[k] = "ASM"
         print("events చదివాం, symbols:", len(EV))
     except Exception as ex:
         print("హెచ్చరిక: events.csv చదవడం కుదరలేదు:", ex)
 else:
     print("హెచ్చరిక: data/events.csv లేదు, event score లేకుండా నడుస్తోంది.")
+
+if os.path.exists("data/surveillance.csv"):
+    try:
+        surv_df = pd.read_csv("data/surveillance.csv")
+        for _, row in surv_df.iterrows():
+            sym_clean = str(row.get("Symbol", "")).upper().replace(".NS", "").strip()
+            stype = str(row.get("Type", "ASM")).upper().strip()
+            if "GSM" in stype:
+                SURV_MAP[sym_clean] = "GSM"
+            else:
+                SURV_MAP[sym_clean] = "ASM"
+        print("ప్రత్యేక surveillance లిస్ట్ లోడ్ అయ్యింది, stocks:", len(SURV_MAP))
+    except Exception as e:
+        print("surveillance.csv చదవడం విఫలమైంది:", e)
 
 groups = {sym: g.sort_values("Date").reset_index(drop=True) for sym, g in df.groupby("Symbol")}
 
@@ -166,23 +189,22 @@ def analyze(sym, g):
     if (c[-20:] * v[-20:]).mean() < MIN_TRADED_VALUE:
         return None
 
-    # తప్పనిసరి Trend (సడలించిన రివర్సల్ & మొమెంటమ్ నిబంధనలు)
+    # తప్పనిసరి Trend
     sma20 = c[-20:].mean()
     sma50 = c[-50:].mean()
     sma200 = c[-200:].mean()
     sma50_prev = c[-60:-10].mean()
 
-    # ప్రాథమిక ట్రెండ్ లేదా వేగవంతమైన బౌన్స్ (ధర 50-DMA లేదా 200-DMA పైన ఉన్నా, లేదా 20-DMA పైన బలంగా ఉన్నా అనుమతింపు)
     trend_ok = (close > sma50 and sma50 > sma50_prev) or (close > sma200) or (close > sma20 * 1.02 and close > sma50)
     if not trend_ok:
         return None
 
     ext = (close / sma20 - 1) * 100
     if ext > 18:
-        return None                               # 20-రోజుల average నుంచి బాగా పైకి వెళ్ళినవి మాత్రమే నిరోధిస్తాం
+        return None
     r63 = c[-1] / c[-64] - 1
     if main_ret is not None and r63 <= (main_ret - 0.05):
-        return None                               # నిఫ్టీ కంటే మరీ బలహీనంగా ఉన్నవి మాత్రమే తిరస్కరణు
+        return None
 
     vol_avg20 = v[-21:-1].mean()
     if vol_avg20 <= 0:
@@ -215,7 +237,6 @@ def analyze(sym, g):
         if touched and ext <= 6 and close > c[-2] and close > o[-1] and v[-1] > v[-2] and dry < 1.0:
             status, setup_kind = "Pullback", "Pullback"
     if status is None:
-        # Camarilla R4 breakout (గత పూర్తి వారం పరిధి పైకి దాటడం)
         cam = camarilla_r4(g["Date"].values[-30:], h[-30:], l[-30:], c[-30:])
         if cam is not None:
             r4 = cam[0]
@@ -235,23 +256,21 @@ def analyze(sym, g):
     if atr <= 0:
         return None
 
-    # ---------- STOP: swing low కింద (ATR బఫర్ + 0.75% డైనమిక్ విప్‌సా బఫర్) ----------
+    # ---------- STOP: swing low కింద ----------
     seg_l = l[-SWING_LOOKBACK:]
     pivl = pd.Series(seg_l).rolling(5, center=True).min().values
     swing_lows = seg_l[(seg_l == pivl) & (seg_l < entry * 0.995)]
     if len(swing_lows) > 0:
-        sw = float(swing_lows.max())          # entry కి దగ్గరగా కింద ఉన్న swing low
+        sw = float(swing_lows.max())
         sw_name = "swing low Rs %.1f" % sw
     else:
         sw = float(l[-10:].min())
         sw_name = "10-day low Rs %.1f" % sw
 
-    # Tight stop (పాత లెవెల్)
     tight_swing_stop = sw - ATR_BUFFER * atr
     tight_atr_stop = entry - ATR_MIN_STOP * atr
     stop_tight = min(tight_swing_stop, tight_atr_stop)
 
-    # Dynamic Safe Stop (Swing low కింద 0.75% ప్రొటెక్షన్ బఫర్)
     whipsaw_buffer = sw * 0.0075
     safe_swing_stop = (sw - whipsaw_buffer) - (ATR_BUFFER * atr)
     safe_atr_stop = entry - (ATR_MIN_STOP + 0.25) * atr
@@ -273,9 +292,9 @@ def analyze(sym, g):
     high52 = h[-251:-1].max()
     hi250 = h[-251:]
     piv = pd.Series(hi250).rolling(11, center=True).max().values
-    all_lv = np.append(hi250[hi250 == piv], high52)      # swing highs + 52 వారాల high
+    all_lv = np.append(hi250[hi250 == piv], high52)
     up_lv = all_lv[all_lv > entry * 1.02]
-    levels = up_lv[(up_lv > entry * 1.03) & (up_lv <= entry * 1.15)]   # 15% లోపు (High Potential పరీక్షకు)
+    levels = up_lv[(up_lv > entry * 1.03) & (up_lv <= entry * 1.15)]
 
     # ---------- Indicators ----------
     rsi = rsi14(c)
@@ -287,7 +306,7 @@ def analyze(sym, g):
 
     # ---------- High Potential పరీక్ష ----------
     tight_base = False
-    for N in (30, 40, 60):                # 6-12 వారాలు
+    for N in (30, 40, 60):
         if (h[-N:].max() - l[-N:].min()) / h[-N:].max() <= 0.22:
             tight_base = True
     chg = np.diff(c[-21:])
@@ -326,6 +345,10 @@ def analyze(sym, g):
         target_reason = "No overhead resistance found; %.0f ATR projection (estimate)" % n_atr
     target_pct = (target / entry - 1) * 100
     rr = (target - entry) / risk
+    
+    clean_sym = sym.upper().replace(".NS", "").strip()
+    surv_status = SURV_MAP.get(clean_sym, "")
+
     if rr < MIN_RR:
         rejected["low_rr"] += 1
         rej_rows.append({
@@ -337,11 +360,12 @@ def analyze(sym, g):
             "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
             "RR": round(rr, 2), "Reason": "Reward:Risk below 1:2",
             "StopReason": stop_reason, "TargetReason": target_reason,
+            "Surveillance": surv_status
         })
         return None
 
-    # ---------- Events (Catalyst boost / penalty) ----------
-    cats = EV.get(sym.upper().replace(".NS", ""), set())
+    # ---------- Events ----------
+    cats = EV.get(clean_sym, set())
     boost = 0
     pen = 0
     ev_names = []
@@ -374,11 +398,13 @@ def analyze(sym, g):
         warns.append("20-రోజుల average కంటే %.1f%% పైన ఉంది" % ext)
     if not market_ok:
         warns.append("Nifty తన 50-రోజుల average కింద ఉంది")
+    if surv_status:
+        warns.append(f"Exchange {surv_status} Surveillance (100% Margin / Circuit risk)")
     if neg_names:
         warns.append("NSE event హెచ్చరిక: " + ", ".join(neg_names))
     warning = "; ".join(warns)
 
-    # ---------- Technical reasons (website లో చూపడానికి, English) ----------
+    # ---------- Technical reasons ----------
     rs_ = []
     if rsi >= 70:
         rs_.append("RSI %.0f: strong but stretched" % rsi)
@@ -411,7 +437,7 @@ def analyze(sym, g):
         rs_.append("NSE events (last 7 days): %s, score %+d" % (events_txt, ev_adj))
     reasons = " | ".join(rs_)
 
-    # ---------- Score (100 లో, నా అంచనా బరువులు) ----------
+    # ---------- Score ----------
     s = {"Breakout": 25, "Pullback": 20, "Near Miss": 12}[status]
     if status == "Pullback":
         s += clip01((1 - dry) / 0.4) * 10
@@ -466,6 +492,9 @@ def analyze(sym, g):
         "RSI": round(rsi, 1), "ADX": round(adx, 1), "Boosters": ", ".join(met),
         "High52": round(high52, 2), "Warning": warning, "Reasons": reasons,
         "Events": events_txt, "EventAdj": ev_adj,
+        "Surveillance": surv_status,
+        "ASM": "Yes" if surv_status == "ASM" else "",
+        "GSM": "Yes" if surv_status == "GSM" else ""
     }
 
 
@@ -480,19 +509,20 @@ for sym, g in groups.items():
 
 columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close", "Entry", "Stop", "StopTight",
            "Target", "StopDistPct", "RR", "StopReason", "TargetReason", "TargetPct", "VolRatio",
-           "RSI", "ADX", "Boosters", "High52", "Warning", "Reasons", "Events", "EventAdj"]
+           "RSI", "ADX", "Boosters", "High52", "Warning", "Reasons", "Events", "EventAdj",
+           "Surveillance", "ASM", "GSM"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
 rej_cols = ["Date", "Symbol", "Status", "Class", "Setup", "Close", "Entry", "Stop", "StopTight", "Target",
-            "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason"]
+            "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason", "Surveillance"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
 os.makedirs("data/history", exist_ok=True)
 out.to_csv("data/short_term.csv", index=False)
 out.to_csv("data/history/short_%s.csv" % date_str, index=False)
 rej_out.to_csv("data/short_rejected.csv", index=False)
-rej_out.to_csv("data/excluded_short.csv", index=False)               # Excluded tab & Performance tracking కోసం
+rej_out.to_csv("data/excluded_short.csv", index=False)
 
 print("data తేదీ:", date_str)
 print("Reward:Risk %.0f కంటే తక్కువ అని తొలగినవి:" % MIN_RR, rejected["low_rr"])
@@ -500,7 +530,7 @@ print("మొత్తం ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Status"].value_counts().to_string())
     print(out["Class"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Status", "Class", "Score", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Status", "Class", "Score", "Entry", "Stop", "Target", "RR", "Warning"]].to_string(index=False))
 if len(rej_out) > 0:
     print("RR తొలగినవి (టాప్ 5, RR ఎక్కువ నుంచి):")
     print(rej_out.head(5)[["Symbol", "Status", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
