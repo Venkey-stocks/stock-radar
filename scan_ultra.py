@@ -7,6 +7,7 @@ MIN_PRICE = 50             # కనీస ధర
 MIN_TRADED_VALUE = 10e7    # 20 రోజుల సగటు traded value కనీసం ₹10 కోట్లు
 MIN_SCORE = 40             # దీని కంటే తక్కువ score ఉంటే జాబితాలో చూపం
 MIN_ROWS = 70              # కనీసం ఇన్ని రోజుల data ఉండాలి
+MAX_STOP_PCT = 7.0         # ఫైన్-ట్యూన్డ్ గరిష్ట స్టాప్‌లాస్ పరిమితి (6.0% నుండి 7.0% కి పెంచబడింది)
 
 # ---- Stop / Target (టెక్నికల్, అంచనా సంఖ్యలు) ----
 ATR_N = 14                 # ATR కాలం
@@ -16,7 +17,7 @@ ATR_MIN_STOP = 1.0         # stop కనీసం ఇన్ని ATR దూర�
 NO_RES_ATR = 3.0           # resistance లేకపోతే target = Entry + ఇన్ని ATR
 MAX_TARGET_ATR = 6.0       # target గరిష్టం (1-5 రోజుల trade కి)
 MIN_RR = 2.0               # కనీస Reward:Risk
-WIDE_STOP_PCT = 8.0        # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక (తొలగింపు కాదు)
+WIDE_STOP_PCT = 8.0        # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక
 
 # ---- Event score (అంచనా బరువులు) ----
 EV_BOOST_MAIN = 5          # Order win / Acquisition / Buyback
@@ -26,8 +27,8 @@ EV_PEN_DEFAULT = -10       # Default/Insolvency
 EV_PEN_DISRUPT = -5        # Disruption/Suspension
 EV_PEN_AUDITOR = -3        # Auditor change
 
-rejected = {"low_rr": 0}
-rej_rows = []              # RR వల్ల తొలగిన stocks (Excluded tab కోసం)
+rejected = {"low_rr": 0, "wide_stop": 0}
+rej_rows = []              # తిరస్కరించబడిన stocks (Excluded tab కోసం)
 
 
 def clip01(x):
@@ -131,7 +132,7 @@ def analyze(sym, g):
     gap = bool(o[-1] > res and c[-2] <= res)
 
     above = close > res
-    dist_res = (res / close - 1) * 100   # + అంటే resistance పైన ఉంది
+    dist_res = (res / close - 1) * 100   # + అంటే resistance కంటే ఎంత కింద ఉంది
 
     # range contraction మరియు volume dry-up (ఈ రోజు మినహా)
     rng = (h - l) / c
@@ -150,12 +151,14 @@ def analyze(sym, g):
         else:
             return None
     else:
+        # ఫైన్-ట్యూన్డ్: రెసిస్టెన్స్ కింద 8.0% వరకు ఉన్న సెటప్‌లను పరిశీలిస్తుంది
         if 0 <= dist_res <= 1.5 and vol_ratio >= 1.8:
             status = "Near Miss"
-        elif 0 <= dist_res <= 10.0 and contr < 1.1 and dry < 1.15:
+        elif 0 <= dist_res <= 8.0 and contr < 1.15 and dry < 1.15:
             status = "Setup"
         else:
             return None
+
     # ---------- Entry ----------
     entry = res * 1.002 if status == "Setup" else close
 
@@ -177,12 +180,12 @@ def analyze(sym, g):
         sw = float(l[-10:].min())
         sw_name = "10-day low Rs %.1f" % sw
 
-    # Tight stop (పాత లెవెల్)
+    # Tight stop
     tight_swing_stop = sw - ATR_BUFFER * atr
     tight_atr_stop = entry - ATR_MIN_STOP * atr
     stop_tight = min(tight_swing_stop, tight_atr_stop)
 
-    # Dynamic Safe Stop (Swing low కింద 0.75% ప్రొటెక్షన్ బఫర్)
+    # Dynamic Safe Stop
     whipsaw_buffer = sw * 0.0075
     safe_swing_stop = (sw - whipsaw_buffer) - (ATR_BUFFER * atr)
     safe_atr_stop = entry - (ATR_MIN_STOP + 0.25) * atr
@@ -200,10 +203,13 @@ def analyze(sym, g):
     risk = entry - stop
     stop_pct = risk / entry * 100
 
+    clean_sym = sym.upper().replace(".NS", "").strip()
+    surv_status = SURV_MAP.get(clean_sym, "")
+
     # ---------- TARGET: పైన దగ్గరి నిజమైన resistance ----------
     hi250 = h[-251:]
     piv = pd.Series(hi250).rolling(11, center=True).max().values
-    levels = hi250[hi250 == piv]         # swing highs
+    levels = hi250[hi250 == piv]          # swing highs
     levels = np.append(levels, high52)
     levels = levels[levels > entry * 1.02]
     cap_price = entry + MAX_TARGET_ATR * atr
@@ -224,9 +230,20 @@ def analyze(sym, g):
         target_reason = "No overhead resistance found; %.0f ATR projection (estimate)" % NO_RES_ATR
     target_pct = (target / entry - 1) * 100
     rr = (target - entry) / risk
-    
-    clean_sym = sym.upper().replace(".NS", "").strip()
-    surv_status = SURV_MAP.get(clean_sym, "")
+
+    # స్టాప్‌లాస్ 7.0% కంటే ఎక్కువ దూరం ఉంటే రిజెక్షన్
+    if stop_pct > MAX_STOP_PCT:
+        rejected["wide_stop"] += 1
+        rej_rows.append({
+            "Date": date_str, "Symbol": sym, "Status": status,
+            "Close": round(close, 2), "Entry": round(entry, 2),
+            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2), "Target": round(target, 2),
+            "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
+            "RR": round(rr, 2), "Reason": f"Stop-loss too far ({stop_pct:.1f}%, limit {MAX_STOP_PCT:.1f}%)",
+            "StopReason": stop_reason, "TargetReason": target_reason,
+            "Surveillance": surv_status
+        })
+        return None
 
     if rr < MIN_RR:
         rejected["low_rr"] += 1
@@ -245,7 +262,7 @@ def analyze(sym, g):
     if stop_pct > WIDE_STOP_PCT:
         warns.append("Wide stop (%.1f%% away); position size should be small" % stop_pct)
 
-    # ASM/GSM హెచ్చరికను Warning కాలమ్‌లో స్పష్టంగా చేర్చడం
+    # ASM/GSM హెచ్చరికను Warning కాలమ్‌లో చేర్చడం
     if surv_status:
         warns.append(f"Exchange {surv_status} Surveillance (100% Margin / Circuit risk)")
 
@@ -374,14 +391,15 @@ rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=F
 os.makedirs("data/history", exist_ok=True)
 out.to_csv("data/ultra_short.csv", index=False)                       # తాజా ఫలితం
 out.to_csv("data/history/ultra_%s.csv" % date_str, index=False)       # రోజువారీ snapshot (Miss Report కి)
-rej_out.to_csv("data/ultra_rejected.csv", index=False)                # RR వల్ల తొలగినవి
+rej_out.to_csv("data/ultra_rejected.csv", index=False)                # తిరస్కరించబడినవి
 rej_out.to_csv("data/excluded_ultra.csv", index=False)                 # Performance tracking కోసం
 print("data తేదీ:", date_str)
-print("Reward:Risk %.0f కంటే తక్కువ అని తొలగినవి:" % MIN_RR, rejected["low_rr"])
+print("Reward:Risk < 2.0 వల్ల తిరస్కరించినవి:", rejected["low_rr"])
+print(f"Stop-loss > {MAX_STOP_PCT}% వల్ల తిరస్కరించినవి:", rejected["wide_stop"])
 print("మొత్తం ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Status"].value_counts().to_string())
     print(out.head(10)[["Symbol", "Status", "Score", "Entry", "Stop", "Target", "RR", "Warning"]].to_string(index=False))
 if len(rej_out) > 0:
-    print("RR తొలగినవి (టాప్ 5, RR ఎక్కువ నుంచి):")
-    print(rej_out.head(5)[["Symbol", "Status", "Entry", "Stop", "Target", "RR"]].to_string(index=False))
+    print("తిరస్కరించబడిన టాప్ 5 (RR ఎక్కువ నుంచి):")
+    print(rej_out.head(5)[["Symbol", "Status", "Entry", "Stop", "Target", "RR", "Reason"]].to_string(index=False))
