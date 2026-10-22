@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 
-# మనం స్టెప్ 1 లో క్రియేట్ చేసిన Stage 1B -> 2A ఇంజిన్ ఇంపోర్ట్
+# Stage 1B -> 2A ఇంజిన్ ఇంపోర్ట్
 try:
     from stage_engine import evaluate_stage_and_rationale
 except ImportError:
@@ -25,7 +25,6 @@ PARAMS = {
     "Short Term": dict(swing=40, buf=0.3, minatr=1.5, maxatr=10.0, nores=5.0, wide=10.0),
     "Long Term": dict(swing=120, buf=0.5, minatr=2.5, maxatr=25.0, nores=15.0, wide=25.0),
 }
-# Stage: breakout level నుండి పెరుగుదల % (అంచనా) -> (పరిమితి, పేరు, score తగ్గింపు, order)
 STAGES = [(3, "Fresh", 0, 0), (8, "Early", -4, 2), (15, "Extended", -10, 3), (9999, "Late", -15, 4)]
 
 rej_rows = []
@@ -127,12 +126,11 @@ def num(x):
         return np.nan
 
 
-# ---------- Fundamentals: fundamentals.csv + multibagger.csv + quality.csv ----------
+# ---------- Fundamentals ----------
 FUND = {}
 
 
 def load_csv(path, fields, tag):
-    """fields: {అంతర్గత పేరు: [సాధ్యమైన column పేర్లు]}"""
     if not os.path.exists(path):
         print("హెచ్చరిక:", path, "లేదు")
         return
@@ -176,7 +174,6 @@ for p in ("data/quality.csv", "data/multibagger.csv"):
 
 
 def fetch_yf_fund(sym):
-    """radar బయటి stocks కి yfinance తో ఫండమెంటల్స్ తేవడం"""
     k = norm(sym)
     e = FUND.setdefault(k, {})
     try:
@@ -271,6 +268,35 @@ if main_name:
     market_ok = bool(a[-1] > a[-50:].mean())
 print("పోలిక index:", main_name, "| market 50-రోజుల average పైన:", market_ok)
 
+# ---------- Surveillance (ASM / GSM) Mapping ----------
+SURV_MAP = {}
+if os.path.exists("data/surveillance.csv"):
+    try:
+        surv_df = pd.read_csv("data/surveillance.csv")
+        for _, row in surv_df.iterrows():
+            sym_clean = str(row.get("Symbol", "")).upper().replace(".NS", "").strip()
+            stype = str(row.get("Type", "ASM")).upper().strip()
+            if "GSM" in stype:
+                SURV_MAP[sym_clean] = "GSM"
+            else:
+                SURV_MAP[sym_clean] = "ASM"
+        print("Early Movers: surveillance లిస్ట్ లోడ్ అయ్యింది, stocks:", len(SURV_MAP))
+    except Exception as e:
+        print("surveillance.csv చదవడం విఫలమైంది:", e)
+
+if os.path.exists("data/events.csv"):
+    try:
+        evdf = pd.read_csv("data/events.csv")
+        for _, e in evdf.iterrows():
+            k = norm(e.get("symbol", ""))
+            cat = str(e.get("category", "")).upper()
+            if "GSM" in cat:
+                SURV_MAP[k] = "GSM"
+            elif "ASM" in cat and k not in SURV_MAP:
+                SURV_MAP[k] = "ASM"
+    except Exception as ex:
+        print("events.csv చదవడం కుదరలేదు:", ex)
+
 groups = {sym: g.sort_values("Date").reset_index(drop=True) for sym, g in df.groupby("Symbol")}
 ret63 = {}
 for sym, g in groups.items():
@@ -292,7 +318,6 @@ sec_rs_rank = pd.Series(sec_median).rank(pct=True) if sec_median else pd.Series(
 
 
 def find_breakout(h, l, c, v):
-    """గత 10 రోజుల్లో 100 లేదా 50-రోజుల high పైన మొదటి breakout (volume తో)"""
     n = len(c)
     for N in (100, 50):
         for d in range(LOOKBACK_DAYS - 1, -1, -1):
@@ -312,7 +337,6 @@ def find_breakout(h, l, c, v):
 
 
 def find_pre(h, l, c, v, dry):
-    """breakout కి 2% లోపు, ఇరుకు range, volume తగ్గుతోంది"""
     for N in (100, 50):
         level = h[-N - 1:-1].max()
         close = c[-1]
@@ -343,10 +367,8 @@ def analyze(sym, g):
     vol_ratio = v[-1] / vol_avg20
     dry = v[-6:-1].mean() / vol_avg20
 
-    # ---------- VCP & Volume Dry-Up Check ----------
     is_vcp, is_dryup, vcp_desc, dryup_pct = detect_vcp(h, l, c, v)
 
-    # ---------- Trigger ----------
     bo = find_breakout(h, l, c, v)
     if bo is not None:
         status = "Breakout"
@@ -373,7 +395,6 @@ def analyze(sym, g):
         entry = level * 1.002
         trig = "%.1f%% below %d-day high Rs %.1f; tight range, volume drying up (%.1fx)" % (-gain, N_used, level, dry)
 
-    # ---------- Fundamentals ----------
     k = norm(sym)
     if k not in FUND or "ROCE" not in FUND[k]:
         fetch_yf_fund(sym)
@@ -387,18 +408,14 @@ def analyze(sym, g):
     horizon = "Long Term" if (N_used == 100 and ffrac is not None and ffrac >= 0.5) else "Short Term"
     P = PARAMS[horizon]
 
-    # ---------- Sector Momentum & RS Rank ----------
     sec_pct = float(sec_rs_rank.get(sector, 0.50)) if sector != "n/a" else 0.50
     sec_score = int(round(sec_pct * 100))
     if sec_score >= 75:
         sec_status = "Leading Sector"
-        sec_label = f"🚀 Leading Sector ({sec_score}/100)"
     elif sec_score >= 45:
         sec_status = "Neutral Sector"
-        sec_label = f"⚖️ Neutral Sector ({sec_score}/100)"
     else:
         sec_status = "Lagging Sector"
-        sec_label = f"⚠️ Lagging Sector ({sec_score}/100)"
 
     # ---------- ATR, STOP ----------
     pc = c[:-1]
@@ -451,16 +468,19 @@ def analyze(sym, g):
         target_reason = "No overhead resistance found; %.0f ATR projection (estimate)" % P["nores"]
     target_pct = (target / entry - 1) * 100
     rr = (target - entry) / risk
+
+    surv_status = SURV_MAP.get(k, "")
+
     if rr < MIN_RR:
         rej_rows.append({
             "Date": date_str, "Symbol": sym, "Status": status, "Stage": stage, "Horizon": horizon,
             "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
             "Target": round(target, 2), "StopDistPct": round(stop_pct, 2),
             "TargetPct": round(target_pct, 1), "RR": round(rr, 2),
-            "Reason": "Reward:Risk below 1:2", "StopReason": stop_reason, "TargetReason": target_reason})
+            "Reason": "Reward:Risk below 1:2", "StopReason": stop_reason, "TargetReason": target_reason,
+            "Surveillance": surv_status})
         return None
 
-    # ---------- Indicators ----------
     rsi = rsi14(c)
     mh = macd_hist(c)
     adx, adx_prev = adx14(h, l, c)
@@ -488,6 +508,8 @@ def analyze(sym, g):
         warns.append("Nifty is below its 50-day average")
     if ffrac is None:
         warns.append("Fundamentals n/a")
+    if surv_status:
+        warns.append(f"Exchange {surv_status} Surveillance (100% Margin / Circuit risk)")
     pledge_pen = 0
     if not np.isnan(pled) and pled > 20:
         warns.append("High promoter pledge: %.1f%% of promoter shares" % pled)
@@ -517,7 +539,7 @@ def analyze(sym, g):
     else:
         rs_.append("No major resistance overhead")
 
-    # ---------- Score (అంచనా బరువులు) ----------
+    # ---------- Score ----------
     s = 25 if status == "Breakout" else 15
     if status == "Breakout":
         s += clip01((bvr - 1) / 1.5) * 10
@@ -558,9 +580,6 @@ def analyze(sym, g):
     s = round(max(min(s, 100), 0), 1)
     band = "High Conviction" if s >= 80 else ("Good Setup" if s >= 65 else "Early Watch")
 
-    # =========================================================================
-    # --- Stage 1B -> 2A విశ్లేషణ మరియు తెలుగు రీజనింగ్ + VCP + సెక్టార్ RS ---
-    # =========================================================================
     st_badge = "WATCH"
     st_color = "gold"
     st_code = "Stage 1"
@@ -599,13 +618,11 @@ def analyze(sym, g):
             st_badge, st_color, st_code = "EXTENDED", "red", "Stage 2B"
             st_reasons_list.append(f"Extended Move: Breakout level నుండి ఇప్పటికే {gain:.1f}% పెరిగిపోయింది.")
 
-    # VCP / Volume Dry-Up పాయింట్లు
     if is_vcp:
         st_reasons_list.insert(0, f"💎 VCP Contraction: {vcp_desc} తో ప్రైస్ రేంజ్ పూర్తిగా టైట్ అయింది.")
     if is_dryup:
         st_reasons_list.insert(1 if is_vcp else 0, f"💧 Volume Dry-Up: అమ్మకాల వాల్యూమ్ {dryup_pct}% తగ్గింది (సప్లై డ్రై అయింది).")
 
-    # Sector Relative Strength Confirmation పాయింట్
     if sector != "n/a":
         if sec_score >= 75:
             sec_txt = f"Sector Momentum: {sector} రంగం Nifty 500 కంటే బలంగా దూసుకుపోతోంది (RS ర్యాంక్: {sec_score}/100, లీడింగ్ సెక్టార్)."
@@ -614,6 +631,9 @@ def analyze(sym, g):
         else:
             sec_txt = f"Sector Momentum: {sector} రంగం Nifty కంటే వెనుకబడి ఉంది (RS ర్యాంక్: {sec_score}/100, జాగ్రత్త అవసరం)."
         st_reasons_list.append(sec_txt)
+
+    if surv_status:
+        st_reasons_list.append(f"⚠️ Exchange Surveillance: ఈ స్టాక్ {surv_status} పరిధిలో ఉంది. 100% మార్జిన్ మరియు సర్క్యూట్ లిమిట్ రిస్క్ ఉంటుంది.")
 
     st_reasons = " || ".join(st_reasons_list)
 
@@ -630,7 +650,10 @@ def analyze(sym, g):
         "Warning": "; ".join(warns), "Reasons": " | ".join(rs_),
         "StageBadge": st_badge, "StageColor": st_color, "StageCode": st_code, "SimpleReasons": st_reasons,
         "IsVCP": "Yes" if is_vcp else "No", "IsDryUp": "Yes" if is_dryup else "No", "VCPDesc": vcp_desc,
-        "SectorRS": sec_score, "SectorStatus": sec_status
+        "SectorRS": sec_score, "SectorStatus": sec_status,
+        "Surveillance": surv_status,
+        "ASM": "Yes" if surv_status == "ASM" else "",
+        "GSM": "Yes" if surv_status == "GSM" else ""
     }
 
 
@@ -647,18 +670,19 @@ columns = ["Date", "Symbol", "Sector", "Status", "Stage", "StageOrd", "Horizon",
            "DaysSince", "GainPct", "RunUpPct", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR",
            "StopReason", "TargetReason", "VolRatio", "RSI", "FundScore", "Fundamentals", "PromoterPct",
            "PledgePct", "Warning", "Reasons", "StageBadge", "StageColor", "StageCode", "SimpleReasons",
-           "IsVCP", "IsDryUp", "VCPDesc", "SectorRS", "SectorStatus"]
+           "IsVCP", "IsDryUp", "VCPDesc", "SectorRS", "SectorStatus",
+           "Surveillance", "ASM", "GSM"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values(["StageOrd", "Score"], ascending=[True, False])
 rej_cols = ["Date", "Symbol", "Status", "Stage", "Horizon", "Close", "Entry", "Stop", "Target",
-            "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason"]
+            "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason", "Surveillance"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
 os.makedirs("data/history", exist_ok=True)
 out.to_csv("data/early_movers.csv", index=False)
 out.to_csv("data/history/early_%s.csv" % date_str, index=False)
 rej_out.to_csv("data/early_rejected.csv", index=False)
-rej_out.to_csv("data/excluded_early.csv", index=False)                # Excluded Performance tracking కోసం
+rej_out.to_csv("data/excluded_early.csv", index=False)
 
 print("data తేదీ:", date_str)
 print("R:R తొలగినవి:", len(rej_out))
