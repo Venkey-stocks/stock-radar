@@ -345,7 +345,7 @@ th{color:var(--mut);font-weight:600}
         <option value="quality">Quality</option>
         <option value="newl">New Listings</option>
       </optgroup>
-      <optgroup label="Excluded (R:R < 1:2)">
+      <optgroup label="Excluded">
         <option value="exul">Excluded: Ultra Short</option>
         <option value="exsh">Excluded: Short Term</option>
         <option value="exea">Excluded: Early Movers</option>
@@ -390,6 +390,14 @@ th{color:var(--mut);font-weight:600}
     <select id="mres" onchange="drawMiss()">
       <option value="">All results</option><option>Missed</option><option>Caught</option><option>Unknown</option>
     </select>
+    <select id="mreason" onchange="drawMiss()" style="border-color:var(--b)">
+      <option value="">All miss reasons (అన్ని కారణాలు)</option>
+      <option value="below resistance">Too far below resistance</option>
+      <option value="stop-loss too far">Stop-loss too far (>7% / >8%)</option>
+      <option value="trend filter">Trend filter failed (below 50/200 DMA)</option>
+      <option value="no base">No base or pullback setup</option>
+      <option value="already rose">Already rose 10%+ in 2 days</option>
+    </select>
     <label>From</label><input type="date" id="mfrom" onchange="drawMiss()">
     <label>To</label><input type="date" id="mto" onchange="drawMiss()">
     <button onclick="resetMiss()">Reset</button>
@@ -400,7 +408,7 @@ th{color:var(--mut);font-weight:600}
 </div>
 
 <div id="excl" style="display:none">
-  <div class="note">Stocks dropped because Reward:Risk was below 1:2.</div>
+  <div class="note">Stocks excluded due to strict risk management (Low R:R below 1:2 or Stop-loss exceeded).</div>
   <div class="bar">
     <select id="escan" onchange="drawExcl()">
       <option value="">All scans</option><option value="ultra">Ultra Short</option><option value="short">Short Term</option><option value="early">Early Movers</option><option value="newl">New Listings</option>
@@ -408,12 +416,11 @@ th{color:var(--mut);font-weight:600}
     <select id="enear" onchange="drawExcl()">
       <option value="">All Reward:Risk</option><option value="near">Near (R:R 1.5 or more)</option>
     </select>
-    <select id="ereason" onchange="drawExcl()">
-      <option value="">All reasons</option>
-      <option value="Stop too far">Stop too far</option>
-      <option value="Target too close">Target too close</option>
-      <option value="Resistance">Resistance nearby</option>
-      <option value="Support">Support too low</option>
+    <select id="ereason" onchange="drawExcl()" style="border-color:var(--y)">
+      <option value="">All reasons (అన్ని కారణాలు)</option>
+      <option value="stop_wide">Stop-loss too far (>7% / >8%)</option>
+      <option value="low_rr">Reward:Risk below 1:2</option>
+      <option value="surv">⚠️ ASM / GSM Surveillance</option>
     </select>
     <input type="text" id="esearch" placeholder="Search symbol" oninput="drawExcl()">
     <button onclick="resetExcl()">Reset</button>
@@ -791,7 +798,6 @@ function openRationale(sym, tabType){
   const ctn=$('dr_reasons');
   ctn.innerHTML='';
   
-  // మార్కెట్ హెల్త్ మరియు సర్వైలెన్స్ ఆధారిత రిస్క్ నోట్
   let mWarning = '';
   const mScore = (typeof DATA !== 'undefined' && DATA.market_health && DATA.market_health.score) 
                  ? parseFloat(DATA.market_health.score) 
@@ -894,7 +900,6 @@ function rowCells(tab,r,ns){
   const al=(rs&&rs.n<=7)?'<span class="amb" title="Results in '+rs.n+' days">&#9888;</span>':'<span></span>';
   let info,extra;
   
-  // VCP & Surveillance Badge detection for rows
   let rowVcp = '';
   if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
     rowVcp = ' <span class="tag vcp">💎 VCP</span>';
@@ -2241,36 +2246,58 @@ function drawPerf(){
   $('meta').textContent='Performance tracking'+bandTxt+vcpLabel+survLabel+filterLabel+' | మొత్తం '+baseRows.length+' సిగ్నల్స్‌లో '+displayRows.length+' చూపిస్తున్నాం';
 }
 
-function resetMiss(){$('mscan').value='';$('mres').value='';$('mfrom').value='';$('mto').value='';drawMiss();}
+function resetMiss(){
+  $('mscan').value='';$('mres').value='';
+  if($('mreason')) $('mreason').value='';
+  $('mfrom').value='';$('mto').value='';
+  drawMiss();
+}
 
 function drawMiss(){
-  const sc=$('mscan').value, rs=$('mres').value, f=$('mfrom').value, t=$('pto').value;
-  const all=(DATA.miss||[]).filter(r=>(!sc||r.Scan==sc)&&(!f||r.Date>=f)&&(!t||r.Date<=t));
+  const sc=$('mscan').value, rs=$('mres').value, f=$('mfrom').value, t=$('mto').value;
+  const re = ($('mreason') ? $('mreason').value.trim().toLowerCase() : '');
+  
+  const all=(DATA.miss||[]).filter(r=>{
+    if(sc && r.Scan!=sc) return false;
+    if(f && r.Date<f) return false;
+    if(t && r.Date>t) return false;
+    if(re){
+      const reasonText = (r.Reason || '').toLowerCase();
+      if(reasonText.indexOf(re) < 0) return false;
+    }
+    return true;
+  });
+
   const rows=all.filter(r=>!rs||r.Result==rs).sort((a,b)=>b.Date.localeCompare(a.Date)||(+b.GainPct)-(+a.GainPct));
   const c=k=>all.filter(r=>r.Result==k).length;
   const caught=c('Caught'), missed=c('Missed');
   const rate=(caught+missed)?Math.round(caught*100/(caught+missed))+'%':'-';
   const box=(l,v,k)=>'<div class="st"><small>'+l+'</small><b class="'+(k||'')+'">'+v+'</b></div>';
   const btnExport='<button onclick="exportMissToCSV()" style="margin-left:auto;align-self:center;padding:7px 14px;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;">📥 Export to Excel</button>';
+  
   $('mstats').innerHTML=box('Big movers (15%+)',all.length)+box('Caught',caught,'pos')+box('Missed',missed,'neg')+box('Catch rate',rate)+btnExport;
   window._lastMissFiltered = rows;
+
   $('mtable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Close</th><th>Peak close</th><th>Gain %</th><th>Days</th><th>Result</th><th>Reason</th></tr>'
    +(rows.length?rows.map(r=>{
      const k=r.Result=='Caught'?'pos':(r.Result=='Missed'?'neg':'amb');
-     return '<tr><td>'+r.Date+'</td><td>'+(r.Scan=='ultra'?'Ultra':'Short')+'</td><td><b>'+r.Symbol+'</b></td><td>'+fmt(r.Close)+'</td><td>'+fmt(r.PeakClose)+'</td><td class="pos">+'+r.GainPct+'%</td><td>'+r.Days+'</td><td class="'+k+'">'+r.Result+'</td><td>'+(r.Reason||'-')+'</td></tr>';
-   }).join(''):'<tr><td colspan="9">No big movers found.</td></tr>');
+     const sm = getSurvMeta(r);
+     const survTag = sm ? ` ${sm.tag}` : '';
+     return '<tr><td>'+r.Date+'</td><td>'+(r.Scan=='ultra'?'Ultra':(r.Scan=='short'?'Short':'Early'))+'</td><td><b>'+r.Symbol+'</b>'+survTag+'</td><td>'+fmt(r.Close)+'</td><td>'+fmt(r.PeakClose)+'</td><td class="pos">+'+r.GainPct+'%</td><td>'+r.Days+'</td><td class="'+k+'">'+r.Result+'</td><td>'+(r.Reason||'-')+'</td></tr>';
+   }).join(''):'<tr><td colspan="9">No big movers found for this selection.</td></tr>');
   $('meta').textContent='Miss Report | '+rows.length+' shown';
 }
 
 function resetExcl(){
   $('escan').value='';$('enear').value='';
-  if($('ereason')) $('ereason').value='';$('esearch').value='';
+  if($('ereason')) $('ereason').value='';
+  $('esearch').value='';
   drawExcl();
 }
 
 function drawExcl(){
   const sc=$('escan').value, nr=$('enear').value, q=$('esearch').value.trim().toUpperCase();
-  const re=($('ereason')?$('ereason').value.trim().toLowerCase():'');
+  const re=($('ereason')?$('ereason').value.trim():'');
   let all=[];
   EX_SRC.forEach(a=>{
     (DATA[a[1]]||[]).forEach(r=>{all.push(Object.assign({_s:a[0],_l:a[2]},r));});
@@ -2280,8 +2307,15 @@ function drawExcl(){
     if(sc && r._s!==sc) return false;
     if(q && String(r.Symbol).toUpperCase().indexOf(q)<0) return false;
     if(re){
-      const reasonCombined = ((r.StopReason||'') + ' ' + (r.TargetReason||'') + ' ' + (r.Reason||'')).toLowerCase();
-      if(reasonCombined.indexOf(re)<0) return false;
+      const reasonCombined = ((r.Reason||'') + ' ' + (r.StopReason||'') + ' ' + (r.TargetReason||'')).toLowerCase();
+      const isSurv = !!getSurvMeta(r);
+      if(re === 'stop_wide'){
+        if(!reasonCombined.includes('stop-loss too far') && !reasonCombined.includes('stop too far')) return false;
+      } else if(re === 'low_rr'){
+        if(!reasonCombined.includes('reward:risk below') && !reasonCombined.includes('r:r')) return false;
+      } else if(re === 'surv'){
+        if(!isSurv) return false;
+      }
     }
     return true;
   });
@@ -2293,16 +2327,24 @@ function drawExcl(){
   const cnt=k=>all.filter(r=>r._s==k).length;
   const btnExport = '<button onclick="exportExcludedToCSV()" style="margin-left:auto;align-self:center;padding:7px 14px;background:#238636;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;">📥 Export to Excel</button>';
 
-  if($('estats')) {$('estats').innerHTML=box('Excluded',all.length)+box('Ultra Short',cnt('ultra'))+box('Short Term',cnt('short'))+box('Early Movers',cnt('early'))+btnExport;
+  if($('estats')) {
+    $('estats').innerHTML=box('Total Excluded',all.length)+box('Ultra Short',cnt('ultra'))+box('Short Term',cnt('short'))+box('Early Movers',cnt('early'))+btnExport;
   }
 
-  if($('etable')) {$('etable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Entry</th><th>Stop</th><th>Target</th><th>R:R</th><th>Why stop</th><th>Why target</th></tr>'
+  if($('etable')) {
+    $('etable').innerHTML='<tr><th>Date</th><th>Scan</th><th>Stock</th><th>Entry</th><th>Stop</th><th>Target</th><th>R:R</th><th>Primary Reason</th><th>Why stop</th><th>Why target</th></tr>'
       +(rows.length?rows.map(r=>{
-        return '<tr><td>'+esc(r.Date||'-')+'</td><td>'+esc(r._l)+'</td><td><b>'+esc(r.Symbol)+'</b></td><td>'+fmt(r.Entry)+'</td><td class="neg">'+fmt(r.Stop)+'</td><td class="pos">'+fmt(r.Target)+'</td><td>1:'+esc(r.RR)+'</td><td>'+esc(r.StopReason||'-')+'</td><td>'+esc(r.TargetReason||'-')+'</td></tr>';
-      }).join(''):'<tr><td colspan="9">Nothing excluded for this selection.</td></tr>');
+        const sm = getSurvMeta(r);
+        const survBadge = sm ? ` ${sm.tag}` : '';
+        const mainReason = r.Reason || (has(r.RR) && +r.RR < 2.0 ? 'Reward:Risk below 1:2' : 'Risk rule exceeded');
+        const isWideStop = mainReason.toLowerCase().includes('stop-loss too far');
+        const reasonCls = isWideStop ? 'neg' : 'amb';
+        
+        return '<tr><td>'+esc(r.Date||'-')+'</td><td>'+esc(r._l)+'</td><td><b>'+esc(r.Symbol)+'</b>'+survBadge+'</td><td>'+fmt(r.Entry)+'</td><td class="neg">'+fmt(r.Stop)+'</td><td class="pos">'+fmt(r.Target)+'</td><td>1:'+esc(r.RR)+'</td><td class="'+reasonCls+'"><b>'+esc(mainReason)+'</b></td><td>'+esc(r.StopReason||'-')+'</td><td>'+esc(r.TargetReason||'-')+'</td></tr>';
+      }).join(''):'<tr><td colspan="10">Nothing excluded for this selection.</td></tr>');
   }
 
-  $('meta').textContent='Excluded (R:R below 1:2) | '+rows.length+' shown';
+  $('meta').textContent='Excluded Stocks | '+rows.length+' shown';
 }
 
 function drawSect(){
@@ -2449,7 +2491,7 @@ function exportMissToCSV() {
   data.forEach(r => {
     const row = [
       r.Date || "",
-      r.Scan == 'ultra' ? 'Ultra' : 'Short',
+      r.Scan == 'ultra' ? 'Ultra' : (r.Scan == 'short' ? 'Short' : 'Early'),
       r.Symbol || "",
       r.Close || "",
       r.PeakClose || "",
@@ -2476,9 +2518,10 @@ function exportExcludedToCSV() {
     alert("Export cheyadaniki Excluded tab lo data ledu!");
     return;
   }
-  const headers = ["Date", "Scan", "Stock", "Entry", "Stop", "Target", "RR", "Why stop", "Why target"];
+  const headers = ["Date", "Scan", "Stock", "Entry", "Stop", "Target", "RR", "Primary Reason", "Why stop", "Why target"];
   const csvRows = [headers.join(",")];
   data.forEach(r => {
+    const mainReason = r.Reason || (has(r.RR) && +r.RR < 2.0 ? 'Reward:Risk below 1:2' : 'Risk rule exceeded');
     const row = [
       r.Date || "",
       r._l || r._s || "",
@@ -2487,6 +2530,7 @@ function exportExcludedToCSV() {
       r.Stop || "",
       r.Target || "",
       r.RR || "",
+      '"' + mainReason.replace(/"/g, '""') + '"',
       '"' + (r.StopReason || "").replace(/"/g, '""') + '"',
       '"' + (r.TargetReason || "").replace(/"/g, '""') + '"'
     ];
