@@ -25,7 +25,8 @@ CURRENT = {
 }
 SEEN = "data/first_seen.csv"
 SEEN_COLS = ["Scan", "Date", "Symbol", "Status", "Class", "Band", "Score",
-             "Entry", "Stop", "Target", "Close", "IsVCP", "VCPType"]
+             "Entry", "Stop", "Target", "Close", "IsVCP", "VCPType",
+             "Surveillance", "ASM", "GSM"]
 
 
 def fnum(x):
@@ -77,6 +78,19 @@ def detect_vcp_flag(row):
     return "No", "-"
 
 
+def get_surv_info(row):
+    surv = str(row.get("Surveillance", "")).strip().upper()
+    asm = str(row.get("ASM", "")).strip().upper()
+    gsm = str(row.get("GSM", "")).strip().upper()
+    warn = str(row.get("Warning", "")).strip().upper()
+
+    if "GSM" in surv or gsm == "YES" or "GSM" in warn:
+        return "GSM", "", "Yes"
+    if "ASM" in surv or asm == "YES" or "ASM" in warn:
+        return "ASM", "Yes", ""
+    return "", "", ""
+
+
 # ---------- ఇప్పుడు radar లో ఉన్న stocks ----------
 now_on = {}
 for scan, f in CURRENT.items():
@@ -107,6 +121,12 @@ for scan in ("ultra", "short", "early"):
         vcp_info = [detect_vcp_flag(r) for r in s.to_dict("records")]
         s["IsVCP"] = [x[0] for x in vcp_info]
         s["VCPType"] = [x[1] for x in vcp_info]
+
+        # Surveillance గుర్తింపు
+        surv_data = [get_surv_info(r) for r in s.to_dict("records")]
+        s["Surveillance"] = [x[0] for x in surv_data]
+        s["ASM"] = [x[1] for x in surv_data]
+        s["GSM"] = [x[2] for x in surv_data]
         
         if scan == "early":
             early_snap_found = True
@@ -144,6 +164,11 @@ if not early_snap_found and os.path.exists("data/early_movers.csv"):
             vcp_info = [detect_vcp_flag(r) for r in ed.to_dict("records")]
             ed["IsVCP"] = [x[0] for x in vcp_info]
             ed["VCPType"] = [x[1] for x in vcp_info]
+
+            surv_data = [get_surv_info(r) for r in ed.to_dict("records")]
+            ed["Surveillance"] = [x[0] for x in surv_data]
+            ed["ASM"] = [x[1] for x in surv_data]
+            ed["GSM"] = [x[2] for x in surv_data]
             
             if "Date" not in ed.columns:
                 ed["Date"] = last_px
@@ -201,10 +226,12 @@ for scan, f in LONG.items():
         dt = pd.to_datetime(r.get("Date"), errors="coerce")
         date = dt.strftime("%Y-%m-%d") if pd.notna(dt) else last_px
         v_flag, v_type = detect_vcp_flag(r)
+        s_type, s_asm, s_gsm = get_surv_info(r)
         add.append({"Scan": scan, "Date": date, "Symbol": sym, "Status": LABEL[scan],
                     "Class": "", "Band": r.get("Band", ""), "Score": fnum(r.get("Score")),
                     "Entry": entry, "Stop": stop, "Target": target, "Close": entry,
-                    "IsVCP": v_flag, "VCPType": v_type})
+                    "IsVCP": v_flag, "VCPType": v_type,
+                    "Surveillance": s_type, "ASM": s_asm, "GSM": s_gsm})
         known.add((scan, sym))
 if add:
     seen = pd.concat([seen, pd.DataFrame(add, columns=SEEN_COLS)], ignore_index=True)
@@ -242,6 +269,11 @@ for escan, ef in EXCL_FILES.items():
         ex_df["IsVCP"] = v_flag
         ex_df["VCPType"] = v_type
         
+        surv_data = [get_surv_info(r) for r in ex_df.to_dict("records")]
+        ex_df["Surveillance"] = [x[0] for x in surv_data]
+        ex_df["ASM"] = [x[1] for x in surv_data]
+        ex_df["GSM"] = [x[2] for x in surv_data]
+        
         if "Date" not in ex_df.columns and "SignalDate" in ex_df.columns:
             ex_df["Date"] = ex_df["SignalDate"]
         elif "Date" not in ex_df.columns:
@@ -269,6 +301,7 @@ for escan, ef in EXCL_FILES.items():
 cols = ["Scan", "SignalDate", "Symbol", "SignalStatus", "Class", "Band", "Score", "Entry", "Stop",
         "Target", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct",
         "PeakGainPct", "PeakPrice", "IsVCP", "VCPType",
+        "Surveillance", "ASM", "GSM",
         "AfterStopMaxPct", "AfterStopObsDays", "Whipsaw", "DaysToTargetAfterStop", "NowOnRadar"]
 
 perf_path = "data/performance.csv"
@@ -284,7 +317,7 @@ if os.path.exists(perf_path):
                         old_excl[req_c] = old_excl[req_c]
                 parts.append(old_excl)
     except Exception as e:
-        print("Paatha performance data merge cheyadam lo error:", e)
+        print("పాత performance data కలపడంలో లోపం:", e)
 
 if not parts:
     pd.DataFrame(columns=cols).to_csv("data/performance.csv", index=False)
@@ -327,7 +360,6 @@ for r in sig.to_dict("records"):
     result = "Pending" if pending else "Open"
     exit_price, res_date, days = None, None, 0
 
-    # VCP పోస్ట్-ర్యాలీ ట్రాకింగ్ (గరిష్ట ధర & పీక్ గెయిన్)
     highest_price = entry
     peak_gain_pct = 0.0
 
@@ -384,6 +416,8 @@ for r in sig.to_dict("records"):
                     whip_days = j
                     break
 
+    s_type, s_asm, s_gsm = get_surv_info(r)
+
     out.append({
         "Scan": scan, "SignalDate": ts.strftime("%Y-%m-%d"), "Symbol": sym,
         "SignalStatus": r["Status"], "Class": r["Class"], "Band": r["Band"], "Score": r["Score"],
@@ -396,6 +430,9 @@ for r in sig.to_dict("records"):
         "PeakPrice": round(highest_price, 2),
         "IsVCP": r.get("IsVCP", "No"),
         "VCPType": r.get("VCPType", "-"),
+        "Surveillance": s_type,
+        "ASM": s_asm,
+        "GSM": s_gsm,
         "AfterStopMaxPct": as_max, "AfterStopObsDays": as_obs,
         "Whipsaw": whip, "DaysToTargetAfterStop": whip_days,
         "NowOnRadar": "Yes" if str(sym).strip() in now_on.get(scan, set()) else "No",
