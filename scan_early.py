@@ -16,17 +16,19 @@ MIN_SCORE = 40
 MIN_ROWS = 210
 ATR_N = 14
 MIN_RR = 2.0
+MAX_STOP_SHORT = 8.0        # Short Term Early Movers కి గరిష్ట స్టాప్‌లాస్ పరిమితి (8.0%)
 BREAKOUT_VOL = 1.3          # breakout రోజు volume కనీసం ఇంత రెట్లు (అంచనా)
 LOOKBACK_DAYS = 10          # గత ఇన్ని రోజుల్లో breakout అయితే "early"
 RUNUP_WARN = 100            # 6 నెలల్లో ఇంత % పైగా పెరిగితే "Big run-up" హెచ్చరిక (అంచనా)
 RUNUP_PEN = -6              # దానికి score తగ్గింపు (అంచనా)
 
 PARAMS = {
-    "Short Term": dict(swing=40, buf=0.3, minatr=1.5, maxatr=10.0, nores=5.0, wide=10.0),
-    "Long Term": dict(swing=120, buf=0.5, minatr=2.5, maxatr=25.0, nores=15.0, wide=25.0),
+    "Short Term": dict(swing=40, buf=0.3, minatr=1.5, maxatr=10.0, nores=5.0, wide=8.0),
+    "Long Term": dict(swing=120, buf=0.5, minatr=2.5, maxatr=25.0, nores=15.0, wide=20.0),
 }
 STAGES = [(3, "Fresh", 0, 0), (8, "Early", -4, 2), (15, "Extended", -10, 3), (9999, "Late", -15, 4)]
 
+rejected = {"low_rr": 0, "wide_stop": 0}
 rej_rows = []
 
 
@@ -471,7 +473,21 @@ def analyze(sym, g):
 
     surv_status = SURV_MAP.get(k, "")
 
+    # ఫైన్-ట్యూన్డ్: Short Term లో స్టాప్‌లాస్ 8.0% దాటితే తిరస్కరణ
+    if horizon == "Short Term" and stop_pct > MAX_STOP_SHORT:
+        rejected["wide_stop"] += 1
+        rej_rows.append({
+            "Date": date_str, "Symbol": sym, "Status": status, "Stage": stage, "Horizon": horizon,
+            "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
+            "Target": round(target, 2), "StopDistPct": round(stop_pct, 2),
+            "TargetPct": round(target_pct, 1), "RR": round(rr, 2),
+            "Reason": f"Stop-loss too far ({stop_pct:.1f}%, limit {MAX_STOP_SHORT:.1f}%)",
+            "StopReason": stop_reason, "TargetReason": target_reason,
+            "Surveillance": surv_status})
+        return None
+
     if rr < MIN_RR:
+        rejected["low_rr"] += 1
         rej_rows.append({
             "Date": date_str, "Symbol": sym, "Status": status, "Stage": stage, "Horizon": horizon,
             "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
@@ -685,9 +701,13 @@ rej_out.to_csv("data/early_rejected.csv", index=False)
 rej_out.to_csv("data/excluded_early.csv", index=False)
 
 print("data తేదీ:", date_str)
-print("R:R తొలగినవి:", len(rej_out))
+print("Reward:Risk < 2.0 వల్ల తిరస్కరించినవి:", rejected["low_rr"])
+print(f"Stop-loss > {MAX_STOP_SHORT}% వల్ల తిరస్కరించినవి (Short Term):", rejected["wide_stop"])
 print("మొత్తం ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Stage"].value_counts().to_string())
     print(out["Horizon"].value_counts().to_string())
     print(out.head(10)[["Symbol", "Stage", "StageBadge", "Score", "Sector", "SectorRS", "SectorStatus"]].to_string(index=False))
+if len(rej_out) > 0:
+    print("తిరస్కరించబడిన టాప్ 5 (RR ఎక్కువ నుంచి):")
+    print(rej_out.head(5)[["Symbol", "Status", "Horizon", "Entry", "Stop", "Target", "RR", "Reason"]].to_string(index=False))
