@@ -83,3 +83,63 @@ for name, tk in INDEXES.items():
         print("Index failed:", name, tk, e)
 if idx_frames:
     pd.concat(idx_frames, ignore_index=True).to_csv("data/index.csv", index=False)
+
+
+# =====================================================================
+# NSE SURVEILLANCE (ASM / GSM) AUTO-FETCH
+# =====================================================================
+def fetch_nse_surveillance():
+    """
+    NSE నుండి అధికారిక ASM మరియు GSM లిస్ట్‌లను డౌన్‌లోడ్ చేసి data/surveillance.csv గా భద్రపరుస్తుంది.
+    """
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+    }
+    
+    surv_records = []
+    endpoints = [
+        {"url": "https://nsearchives.nseindia.com/content/equities/sec_list.csv", "type": "ASM", "desc": "Short-term/Long-term ASM"},
+        {"url": "https://nsearchives.nseindia.com/content/equities/gsm_list.csv", "type": "GSM", "desc": "Graded Surveillance Measure"}
+    ]
+    
+    session = requests.Session()
+    try:
+        session.get("https://www.nseindia.com", headers=headers, timeout=10)
+    except Exception:
+        pass
+
+    for ep in endpoints:
+        try:
+            res = session.get(ep["url"], headers=headers, timeout=15)
+            if res.status_code == 200 and len(res.text.strip()) > 20:
+                lines = res.text.strip().splitlines()
+                for line in lines[1:]:
+                    parts = [p.strip().replace('"', '') for p in line.split(",")]
+                    if len(parts) >= 2:
+                        sym = parts[1].upper().replace(".NS", "").strip() if len(parts) > 1 else parts[0].upper().strip()
+                        if sym and not sym.startswith("SYMBOL"):
+                            surv_records.append({
+                                "Symbol": sym,
+                                "Type": ep["type"],
+                                "Category": ep["desc"]
+                            })
+                print(f"NSE {ep['type']} లిస్ట్ విజయవంతంగా ఫెచ్ అయ్యింది.")
+            else:
+                print(f"హెచ్చరిక: {ep['type']} డేటా అందుబాటులో లేదు (Status: {res.status_code})")
+        except Exception as e:
+            print(f"{ep['type']} ఫెచ్ చేయడంలో లోపం: {e}")
+
+    if surv_records:
+        df_surv = pd.DataFrame(surv_records).drop_duplicates(subset=["Symbol"])
+        df_surv.to_csv("data/surveillance.csv", index=False)
+        print(f"మొత్తం {len(df_surv)} సర్వైలెన్స్ స్టాక్స్ 'data/surveillance.csv' లో సేవ్ అయ్యాయి.")
+    else:
+        pd.DataFrame(columns=["Symbol", "Type", "Category"]).to_csv("data/surveillance.csv", index=False)
+        print("సర్వైలెన్స్ రికార్డ్స్ లభించలేదు, ఖాళీ ఫైల్ సిద్ధం చేయబడింది.")
+
+try:
+    fetch_nse_surveillance()
+except Exception as _e:
+    print("Surveillance fetch error:", _e)
