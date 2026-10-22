@@ -92,7 +92,7 @@ for sym, g in px.groupby("Symbol"):
     pivl = pd.Series(seg_l).rolling(11, center=True).min().values
     swing_lows = seg_l[(seg_l == pivl) & (seg_l < close * 0.98)]
     if len(swing_lows) > 0:
-        sw = float(swing_lows.max())          # ధరకు దగ్గరగా కింద ఉన్న swing low
+        sw = float(swing_lows.max())
         sw_name = "swing low Rs %.1f" % sw
     else:
         sw = float(l[-60:].min())
@@ -115,7 +115,7 @@ for sym, g in px.groupby("Symbol"):
     hi250 = h[-250:]
     high52 = float(hi250.max())
     piv = pd.Series(hi250).rolling(11, center=True).max().values
-    levels = np.append(hi250[hi250 == piv], high52)    # swing highs + 52 వారాల high
+    levels = np.append(hi250[hi250 == piv], high52)
     levels = levels[levels > close * 1.02]
     cap_price = close + MAX_TARGET_ATR * atr
     if len(levels) > 0:
@@ -145,7 +145,23 @@ if QUICK:
     stage1 = stage1[:QUICK_LIMIT]
     print("QUICK: మొదటి", len(stage1), "stocks మాత్రమే")
 
-# ---------- NSE: ISIN map, ASM/GSM ----------
+# ---------- Surveillance (ASM / GSM) Mapping ----------
+SURV_MAP = {}
+if os.path.exists("data/surveillance.csv"):
+    try:
+        surv_df = pd.read_csv("data/surveillance.csv")
+        for _, row in surv_df.iterrows():
+            sym_clean = str(row.get("Symbol", "")).upper().replace(".NS", "").strip()
+            stype = str(row.get("Type", "ASM")).upper().strip()
+            if "GSM" in stype:
+                SURV_MAP[sym_clean] = "GSM"
+            else:
+                SURV_MAP[sym_clean] = "ASM"
+        print("Multibagger: data/surveillance.csv లోడ్ అయ్యింది, stocks:", len(SURV_MAP))
+    except Exception as e:
+        print("surveillance.csv చదవడం విఫలమైంది:", e)
+
+# NSE ఆర్కైవ్ / API నుండి అదనపు చెక్ (ఫాల్‌బ్యాక్)
 UA = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
@@ -155,20 +171,20 @@ UA = {
 sess = requests.Session()
 sess.headers.update(UA)
 try:
-    sess.get("https://www.nseindia.com", timeout=30)
-except Exception as e:
-    print("NSE home:", e)
+    sess.get("https://www.nseindia.com", timeout=15)
+except Exception:
+    pass
 
 
 def nse(url):
     for _ in range(2):
         try:
-            r = sess.get(url, timeout=30)
+            r = sess.get(url, timeout=15)
             if r.status_code == 200:
                 return r.json()
         except Exception:
             pass
-        time.sleep(1.5)
+        time.sleep(1.0)
     return None
 
 
@@ -198,32 +214,20 @@ def flag_sets(url):
     return isins, syms
 
 
-isin_of = {}
-for u in ("https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv",
-          "https://archives.nseindia.com/content/equities/EQUITY_L.csv"):
-    try:
-        r = requests.get(u, headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
-        if r.status_code == 200:
-            lst = pd.read_csv(io.StringIO(r.text))
-            lst.columns = [c.strip() for c in lst.columns]
-            col = [c for c in lst.columns if "ISIN" in c.upper()][0]
-            isin_of = dict(zip(lst["SYMBOL"].str.strip(), lst[col].astype(str).str.strip()))
-            break
-    except Exception as e:
-        print("ISIN list:", e)
-
 asm_i, asm_s = flag_sets("https://www.nseindia.com/api/reportASM")
 gsm_i, gsm_s = flag_sets("https://www.nseindia.com/api/reportGSM")
-lists_ok = asm_i is not None and gsm_i is not None
-print("ASM/GSM lists:", "OK" if lists_ok else "అందలేదు")
+lists_ok = (len(SURV_MAP) > 0) or (asm_i is not None and gsm_i is not None)
+print("Surveillance వ్యవస్థ స్థితి:", "OK" if lists_ok else "అందలేదు")
 
 
-def flagged(sym):
-    isin = isin_of.get(sym)
-    if asm_i is not None and (isin in asm_i or sym in asm_s):
-        return "ASM list"
-    if gsm_i is not None and (isin in gsm_i or sym in gsm_s):
-        return "GSM list"
+def get_surv(sym):
+    s_clean = sym.upper().replace(".NS", "").strip()
+    if s_clean in SURV_MAP:
+        return SURV_MAP[s_clean]
+    if asm_s and s_clean in asm_s:
+        return "ASM"
+    if gsm_s and s_clean in gsm_s:
+        return "GSM"
     return ""
 
 
@@ -305,14 +309,13 @@ def evaluate(sym):
         conv = float(ocf[c3].sum()) / float(ni[c3].sum())
     m["OCFConv"] = conv
 
-    # ---- Free Cash Flow (హెచ్చరిక కోసం మాత్రమే, తొలగింపు కాదు) ----
     fcf = sr(cf, ["Free Cash Flow"])
     if fcf is None:
         capex = sr(cf, ["Capital Expenditure", "Purchase Of PPE"])
         if capex is not None:
             both = (ocf + capex).dropna().sort_index()
             fcf = both if len(both) else None
-    m["FCFLast"] = None if fcf is None else float(fcf.iloc[-1]) / 1e7      # Rs కోట్లు
+    m["FCFLast"] = None if fcf is None else float(fcf.iloc[-1]) / 1e7
     m["FCF3Sum"] = None
     if fcf is not None and len(fcf) >= 3:
         m["FCF3Sum"] = float(fcf.iloc[-3:].sum()) / 1e7
@@ -347,7 +350,9 @@ def evaluate(sym):
         pass
     m["QSalesYoY"], m["QProfitYoY"] = qs, qn
     return m, ""
-    # ---------- దశ 2: market cap ----------
+
+
+# ---------- దశ 2: market cap ----------
 rejected = []
 pool = []
 n_nomcap = 0
@@ -356,10 +361,6 @@ for s1 in stage1:
         print("సమయ పరిమితి చేరింది, దశ 2 ఆపేశాం")
         break
     sym = s1["Symbol"]
-    why = flagged(sym)
-    if why:
-        rejected.append({"Symbol": sym, "Reason": why})
-        continue
     try:
         info = yf.Ticker(sym + ".NS").info or {}
     except Exception:
@@ -376,7 +377,7 @@ print("దశ 2 తర్వాత (market cap Rs 500-15,000 కోట్లు)
 
 # ---------- దశ 3: Reward:Risk, తర్వాత financials ----------
 passed = []
-for s1, info, mcr in pool:
+for s1, info, mcr, m in pool:
     if not time_ok():
         print("సమయ పరిమితి చేరింది, దశ 3 ఆపేశాం")
         break
@@ -386,7 +387,7 @@ for s1, info, mcr in pool:
         continue
     try:
         m, why = evaluate(sym)
-    except Exception as e:
+    except Exception:
         m, why = None, "Financial data error"
     if m is None:
         rejected.append({"Symbol": sym, "Reason": why})
@@ -399,6 +400,8 @@ print("దశ 3 తర్వాత (Reward:Risk + financials తప్పని�
 rows = []
 for s1, info, mcr, m in passed:
     sym = s1["Symbol"]
+    surv_val = get_surv(sym)
+    
     promoter, pledge_of_promoter = None, None
     sh = nse("https://www.nseindia.com/api/corporate-share-holdings-master?index=equities&symbol=" + sym)
     try:
@@ -447,7 +450,6 @@ for s1, info, mcr, m in passed:
     elif m["OCFConv"] is not None:
         warn.append("Cash flow is weak compared with profit")
 
-    # ---- Free Cash Flow హెచ్చరికలు (score మారదు) ----
     if m["FCFLast"] is None:
         warn.append("Free cash flow: n/a (not available)")
     elif m["FCF3Sum"] is not None and m["FCF3Sum"] < 0:
@@ -514,8 +516,10 @@ for s1, info, mcr, m in passed:
         warn.append("Receivables growing faster than sales")
     if s1["StopDistPct"] > WIDE_STOP_PCT:
         warn.append("Wide stop (%.1f%% away); position size should be small" % s1["StopDistPct"])
-    if not lists_ok:
-        warn.append("ASM/GSM list could not be checked")
+    
+    if surv_val:
+        warn.append(f"Exchange {surv_val} Surveillance (100% Margin / Circuit risk)")
+
     score = round(max(min(score, 100), 0), 1)
     if score < MIN_SCORE:
         rejected.append({"Symbol": sym, "Reason": "Score below %d" % MIN_SCORE})
@@ -539,12 +543,16 @@ for s1, info, mcr, m in passed:
         "InstPct": "" if inst is None else inst, "Analysts": "" if ana is None else int(ana),
         "PEG": "" if peg is None else round(peg, 2), "Ret1Y": round(s1["Ret1Y"], 1), "Trend": s1["Trend"],
         "Positives": "; ".join(pos), "Warning": "; ".join(warn),
+        "Surveillance": surv_val,
+        "ASM": "Yes" if surv_val == "ASM" else "",
+        "GSM": "Yes" if surv_val == "GSM" else ""
     })
 
 cols = ["Date", "Symbol", "Score", "Band", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct",
         "RR", "StopReason", "TargetReason",
         "MarketCapCr", "Sector", "ROCE", "SalesCAGR3", "ProfitCAGR3", "DebtEquity", "QSalesYoY", "QProfitYoY",
-        "PromoterPct", "PledgeOfPromoterPct", "InstPct", "Analysts", "PEG", "Ret1Y", "Trend", "Positives", "Warning"]
+        "PromoterPct", "PledgeOfPromoterPct", "InstPct", "Analysts", "PEG", "Ret1Y", "Trend", "Positives", "Warning",
+        "Surveillance", "ASM", "GSM"]
 out = pd.DataFrame(rows, columns=cols)
 if len(out):
     out = out.sort_values("Score", ascending=False)
@@ -560,5 +568,5 @@ if len(rj):
     print("తిరస్కరణ కారణాలు:")
     print(rj["Reason"].value_counts().to_string())
 if len(out):
-    print(out.head(10)[["Symbol", "Score", "ROCE", "SalesCAGR3", "ProfitCAGR3", "MarketCapCr", "RR"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Score", "ROCE", "SalesCAGR3", "ProfitCAGR3", "MarketCapCr", "RR", "Surveillance"]].to_string(index=False))
 print("సమయం: %.1f నిమిషాలు" % ((time.time() - START) / 60.0))
