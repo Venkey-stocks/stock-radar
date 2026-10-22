@@ -108,9 +108,9 @@ th{color:var(--mut);font-weight:600}
 .btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .btns button{padding:4px 12px;font-size:13px}
 .bar input[type=text],.bar input[type=number]{width:118px;padding:6px 8px}
-#chmodal,#popmodal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.72);z-index:50;align-items:center;justify-content:center;padding:12px}
-.chbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%;max-width:820px;max-height:95vh;overflow:auto}
-.chhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+#chmodal,#popmodal,#historyModal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;align-items:center;justify-content:center;padding:12px;backdrop-filter:blur(4px)}
+.chbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;width:100%;max-width:860px;max-height:95vh;overflow:auto;box-shadow:0 12px 36px rgba(0,0,0,.6)}
+.chhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:10px}
 .chleg{font-size:12px;color:var(--mut);margin-top:6px}
 .stale{background:rgba(248,81,73,.15);border:1px solid var(--r);color:var(--r);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13.5px;font-weight:600}
 .stale.amb{background:rgba(210,153,34,.15);border-color:var(--y);color:var(--y)}
@@ -132,14 +132,14 @@ th{color:var(--mut);font-weight:600}
 .calc-box input{width:110px;padding:5px 8px;font-size:13px;text-align:right}
 
 /* Universal Search Styling */
-.search-wrapper{position:relative;flex:1;max-width:320px}
+.search-wrapper{position:relative;flex:1;max-width:340px}
 .search-wrapper input{width:100%;padding:8px 12px 8px 34px;background:#161b22;border:1px solid var(--b);border-radius:20px;color:var(--tx);font-size:13.5px}
 .search-wrapper .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--b);font-size:14px;pointer-events:none}
-.search-results-dropdown{position:absolute;top:100%;left:0;right:0;background:#161b22;border:1px solid var(--line);border-radius:8px;margin-top:4px;max-height:300px;overflow-y:auto;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none}
-.search-item{padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.search-results-dropdown{position:absolute;top:100%;left:0;right:0;background:#161b22;border:1px solid var(--line);border-radius:8px;margin-top:4px;max-height:360px;overflow-y:auto;z-index:9999;box-shadow:0 12px 30px rgba(0,0,0,.6);display:none}
+.search-item{padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
 .search-item:hover{background:#1f2633}
-.search-item .sym-name{font-weight:700;color:var(--tx)}
-.search-item .tab-name{font-size:11px;color:var(--mut);margin-top:2px}
+.search-item .sym-name{font-weight:700;color:var(--tx);display:flex;align-items:center;gap:6px}
+.search-item .tab-name{font-size:11.5px;color:var(--mut);margin-top:2px}
 </style>
 </head>
 <body>
@@ -164,10 +164,10 @@ th{color:var(--mut);font-weight:600}
   <a class="mh" id="mh" href="/health" style="margin-bottom:0"><span class="dot"></span><span id="mh_txt">Market Health</span></a>
   <a class="mh" href="/events" style="margin-bottom:0">Events</a>
   
-  <!-- Universal Search Bar -->
+  <!-- Universal Stock Lifetime Archive Search Bar -->
   <div class="search-wrapper">
     <span class="search-icon">&#128269;</span>
-    <input type="text" id="global_search" placeholder="Search stock in radar..." oninput="handleGlobalSearch(this.value)">
+    <input type="text" id="global_search" placeholder="Search any stock (Active or Past)..." oninput="handleGlobalSearch(this.value)">
     <div class="search-results-dropdown" id="search_results"></div>
   </div>
 </div>
@@ -194,7 +194,6 @@ th{color:var(--mut);font-weight:600}
   <button id="v_list" onclick="setView('list')">List</button>
   <button id="v_cards" onclick="setView('cards')">Cards</button>
   
-  <!-- Universal ASM/GSM Surveillance Filter -->
   <label style="margin-left:6px">Surveillance</label>
   <select id="surv_filter" onchange="redrawCur()" style="padding:6px 10px;font-size:13px;border-color:var(--y)">
     <option value="">All Stocks (అన్ని స్టాక్స్)</option>
@@ -457,6 +456,31 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
   </div>
 </div>
 
+<!-- Lifetime Stock Lifecycle Audit Modal -->
+<div id="historyModal" onclick="if(event.target===this)closeHistoryModal()">
+  <div class="chbox" style="max-width:920px">
+    <div class="chhead">
+      <div>
+        <b id="hist_title" style="font-size:18px;display:flex;align-items:center;gap:8px">Stock Audit History</b>
+        <div id="hist_sub" style="font-size:12.5px;color:var(--mut);margin-top:2px">రాడార్ లైఫ్‌సైకిల్ ట్రాకింగ్ రికార్డ్</div>
+      </div>
+      <button onclick="closeHistoryModal()">Close</button>
+    </div>
+    
+    <div class="stats" id="hist_stats_summary" style="margin-bottom:14px"></div>
+    <div id="hist_active_banner" style="margin-bottom:12px"></div>
+    
+    <div style="font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:700">&#128337; Signal History &amp; Post-Trade Performance</div>
+    <div class="wrap" style="max-height:360px;overflow-y:auto">
+      <table id="hist_table"></table>
+    </div>
+
+    <div class="drawer-actions" style="margin-top:14px;flex-direction:row;justify-content:flex-end">
+      <a id="hist_tv_link" href="#" target="_blank" rel="noopener" class="chart-link-btn" style="padding:6px 16px">&#128200; Open in TradingView</a>
+    </div>
+  </div>
+</div>
+
 <div id="rationaleDrawer" class="drawer-overlay" onclick="handleDrawerOverlay(event)">
   <div class="drawer-content">
     <div class="drawer-header">
@@ -528,7 +552,19 @@ const HDR_N=['Stock','Score','Listed','Entry','Stop','Target','Since listing',''
 const HDR_MINE=['Stock','Status','Price','Entry','Stop','Target','Performance',''];
 const HDR_SMART=['Stock','Investor','Type','Action','Holding','Market Cap','Conviction / Radar',''];
 
-// ===== Robust Surveillance (ASM / GSM) Detection Helper =====
+const SCAN_LBL = {
+  ultra: 'Ultra Short',
+  short: 'Short Term',
+  early: 'Early Movers',
+  multi: 'Multibagger',
+  quality: 'Quality',
+  newl: 'New Listings',
+  exul: 'Excl: Ultra',
+  exsh: 'Excl: Short',
+  exea: 'Excl: Early',
+  exnl: 'Excl: New Listings'
+};
+
 function getSurvMeta(r){
   if(!r) return null;
   const str = ((r.Symbol||'') + ' ' + (r.Warning||'') + ' ' + (r.Reasons||'') + ' ' + (r.Surveillance||'') + ' ' + (r.ASM||'') + ' ' + (r.GSM||'') + ' ' + (r.SignalStatus||'')).toUpperCase();
@@ -557,7 +593,7 @@ function togRow(h){
   ROWOPEN[k]=o;
 }
 
-// ===== Universal Stock Search Bar Logic =====
+// ===== Lifetime Global Search (Active + Closed Archive) =====
 function handleGlobalSearch(q){
   q = (q||'').trim().toUpperCase();
   const drop = $('search_results');
@@ -567,8 +603,7 @@ function handleGlobalSearch(q){
     return;
   }
   
-  const matches = [];
-  const tabNames = {
+  const activeTabs = {
     early: 'Early Movers',
     ultra: 'Ultra Short',
     short: 'Short Term',
@@ -577,70 +612,208 @@ function handleGlobalSearch(q){
     newl: 'New Listings',
     smart: 'Smart Money'
   };
-  
-  const checked = new Set();
-  
-  Object.keys(tabNames).forEach(tabKey => {
+
+  const resultsMap = {};
+
+  // 1. Check Active Radar
+  Object.keys(activeTabs).forEach(tabKey => {
     (DATA[tabKey]||[]).forEach(r => {
       const sym = (r.Symbol || r.sym || '').toUpperCase();
       if(sym && sym.includes(q)){
-        const dedupeKey = sym + '_' + tabKey;
-        if(!checked.has(dedupeKey)){
-          checked.add(dedupeKey);
-          matches.push({
+        if(!resultsMap[sym]){
+          resultsMap[sym] = {
             sym: sym,
-            tabKey: tabKey,
-            tabTitle: tabNames[tabKey],
-            date: r.Date || '-',
-            entry: r.Entry || r.Close || 0,
-            close: r.Close || r.Entry || 0,
+            isActive: true,
+            activeTab: tabKey,
+            activeTitle: activeTabs[tabKey],
+            activeRow: r,
             score: r.Score || '-',
-            row: r
-          });
+            perfCount: 0,
+            lastResult: 'Active',
+            close: r.Close || r.Entry || 0
+          };
+        } else {
+          resultsMap[sym].isActive = true;
+          resultsMap[sym].activeTab = tabKey;
+          resultsMap[sym].activeTitle = activeTabs[tabKey];
         }
       }
     });
   });
-  
+
+  // 2. Check Lifetime Performance Archive
+  (DATA.perf||[]).forEach(r => {
+    const sym = (r.Symbol || '').toUpperCase();
+    if(sym && sym.includes(q)){
+      if(!resultsMap[sym]){
+        resultsMap[sym] = {
+          sym: sym,
+          isActive: false,
+          activeTab: null,
+          activeTitle: null,
+          activeRow: null,
+          score: r.Score || '-',
+          perfCount: 1,
+          lastResult: r.Result || 'Closed',
+          close: r.ExitPrice || r.Entry || 0
+        };
+      } else {
+        resultsMap[sym].perfCount = (resultsMap[sym].perfCount || 0) + 1;
+        if(!resultsMap[sym].isActive){
+          resultsMap[sym].lastResult = r.Result || 'Closed';
+        }
+      }
+    }
+  });
+
+  const matches = Object.values(resultsMap);
+
   if(!matches.length){
-    drop.innerHTML = '<div style="padding:12px;color:var(--mut);font-size:13px;text-align:center;">ఈ స్టాక్ ఇంకా మన రాడార్ నిబంధనలలో నమోదు కాలేదు.</div>';
+    drop.innerHTML = '<div style="padding:14px;color:var(--mut);font-size:13px;text-align:center;">ఈ స్టాక్ మన రాడార్ హిస్టరీలో ఎప్పుడూ నమోదు కాలేదు.</div>';
     drop.style.display='block';
     return;
   }
-  
+
   drop.innerHTML = matches.slice(0, 10).map(m => {
     const cp = curPrice({sym: m.sym});
     const nowPrice = cp ? cp.p : m.close;
-    const entryP = +m.entry || nowPrice;
-    const diff = entryP > 0 ? (((nowPrice - entryP) / entryP) * 100) : 0;
-    const diffCls = diff >= 0 ? 'pos' : 'neg';
-    const diffTxt = (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%';
-    const sm = getSurvMeta(m.row);
+    const sm = getSurvMeta(m.activeRow);
     const survTag = sm ? ` ${sm.tag}` : '';
-    
-    return `<div class="search-item" onclick="selectSearchedStock('${m.sym}','${m.tabKey}')">
+
+    let statusBadge = '';
+    let subInfo = '';
+    if(m.isActive){
+      statusBadge = '<span class="status-pill status-green" style="font-size:10px;padding:1px 7px;">🟢 Active on Radar</span>';
+      subInfo = `<span style="color:var(--g)">${m.activeTitle}</span> &middot; Score: ${m.score}/100`;
+    } else {
+      statusBadge = '<span class="status-pill status-gold" style="font-size:10px;padding:1px 7px;">⚪ Past Signal</span>';
+      subInfo = `హిస్టారికల్ రికార్డ్స్: ${m.perfCount} ట్రేడ్స్ &middot; Result: ${m.lastResult}`;
+    }
+
+    return `<div class="search-item" onclick="openStockLifetimeAudit('${m.sym}')">
       <div>
-        <div class="sym-name">${m.sym} <span class="tag smart" style="font-size:10px;padding:1px 6px">${m.score}/100</span>${survTag}</div>
-        <div class="tab-name">${m.tabTitle} &middot; సిగ్నల్ తేది: ${m.date}</div>
+        <div class="sym-name">${m.sym} ${statusBadge}${survTag}</div>
+        <div class="tab-name">${subInfo}</div>
       </div>
       <div style="text-align:right">
         <b style="font-size:13px">Rs ${fmt(nowPrice)}</b>
-        <div class="${diffCls}" style="font-size:11px;font-weight:700">${diffTxt}</div>
+        <div style="font-size:11px;color:var(--b);font-weight:600;margin-top:2px">&#128337; Inspect History &#8594;</div>
       </div>
     </div>`;
   }).join('');
-  
+
   drop.style.display='block';
 }
 
-function selectSearchedStock(sym, tabKey){
+function openStockLifetimeAudit(sym){
   $('search_results').style.display='none';
-  $('global_search').value = sym;
-  show(tabKey);
-  setTimeout(()=>{
-    openRationale(sym, tabKey);
-  }, 200);
+  sym = sym.toUpperCase();
+  
+  const perfRows = (DATA.perf||[]).filter(r => (r.Symbol||'').toUpperCase() === sym).sort((a,b)=>String(b.SignalDate).localeCompare(String(a.SignalDate)));
+  
+  let activeTab = null;
+  let activeRow = null;
+  const tabNames = {early:'Early Movers', ultra:'Ultra Short', short:'Short Term', multi:'Multibagger', quality:'Quality', newl:'New Listings', smart:'Smart Money'};
+  for(let tk of Object.keys(tabNames)){
+    const r = (DATA[tk]||[]).find(x => (x.Symbol||x.sym||'').toUpperCase() === sym);
+    if(r){
+      activeTab = tabNames[tk];
+      activeRow = r;
+      break;
+    }
+  }
+
+  const cp = curPrice({sym: sym});
+  const currentPrice = cp ? cp.p : (activeRow ? (activeRow.Close || activeRow.Entry) : (perfRows.length ? (perfRows[0].ExitPrice || perfRows[0].Entry) : 0));
+  
+  $('hist_title').innerHTML = `${sym} &mdash; <span style="color:var(--tx);font-size:16px">Rs ${fmt(currentPrice)}</span>`;
+  $('hist_tv_link').href = 'https://in.tradingview.com/chart/?symbol=NSE:' + encodeURIComponent(sym);
+
+  // Active status banner
+  const ab = $('hist_active_banner');
+  if(activeRow){
+    const entryP = +(activeRow.Close || activeRow.Entry);
+    const stopP = +(activeRow.Stop || 0);
+    const tgtP = +(activeRow.Target || 0);
+    let distTgt = tgtP > 0 ? (((tgtP - currentPrice)/currentPrice)*100).toFixed(1) : '-';
+    let distStop = stopP > 0 ? (((currentPrice - stopP)/currentPrice)*100).toFixed(1) : '-';
+    ab.innerHTML = `<div class="status-banner banner-green" style="margin-bottom:12px;padding:10px 14px;">
+      <div>
+        <div class="banner-title" style="font-size:14px">🟢 ప్రస్తుతం రాడార్‌లో యాక్టివ్‌గా ఉంది (${activeTab})</div>
+        <div class="banner-sub" style="font-size:12px">Entry: Rs ${fmt(entryP)} | Stop: Rs ${fmt(stopP)} (-${distStop}%) | Target: Rs ${fmt(tgtP)} (+${distTgt}%)</div>
+      </div>
+    </div>`;
+  } else {
+    ab.innerHTML = `<div class="status-banner banner-gold" style="margin-bottom:12px;padding:8px 14px;">
+      <div class="banner-sub" style="font-size:12.5px;color:#e3b341;">⚪ ప్రస్తుతం ఈ స్టాక్ ఏ రాడార్ ట్యాబ్‌లోనూ లైవ్‌లో లేదు (గత సిగ్నల్స్ రికార్డ్ క్రింద చూడండి).</div>
+    </div>`;
+  }
+
+  // Summary box
+  const totalSignals = perfRows.length;
+  const targetHits = perfRows.filter(r => r.Result === 'Target hit').length;
+  const stopHits = perfRows.filter(r => r.Result === 'Stop hit').length;
+  const openCount = perfRows.filter(r => r.Result === 'Open' || r.Result === 'Pending').length;
+  const hitRate = (targetHits + stopHits) > 0 ? Math.round((targetHits / (targetHits + stopHits)) * 100) + '%' : '-';
+
+  const box = (lbl, val, cls) => `<div class="st"><small>${lbl}</small><b class="${cls||''}">${val}</b></div>`;
+  $('hist_stats_summary').innerHTML = box('మొత్తం సిగ్నల్స్', totalSignals || (activeRow ? '1 (Active)' : '0'))
+    + box('Target Hit 🎯', targetHits, 'pos')
+    + box('Stop Hit 🛑', stopHits, 'neg')
+    + box('Open / Active', openCount + (activeRow && !openCount ? 1 : 0), 'amb')
+    + box('చారిత్రక విన్-రేట్', hitRate, 'pos');
+
+  // Table rows
+  if(!perfRows.length){
+    if(activeRow){
+      $('hist_table').innerHTML = `<tr><th>సిగ్నల్ తేదీ</th><th>ట్యాబ్ (Scan)</th><th>ఎంట్రీ</th><th>స్టాప్‌లాస్</th><th>టార్గెట్</th><th>ముగింపు తేదీ</th><th>ఫలితం</th><th>పీక్ ర్యాలీ</th><th>P/L %</th></tr>
+      <tr>
+        <td>${activeRow.Date || '-'}</td>
+        <td><b>${activeTab}</b></td>
+        <td>Rs ${fmt(activeRow.Entry || activeRow.Close)}</td>
+        <td class="neg">Rs ${fmt(activeRow.Stop)}</td>
+        <td class="pos">Rs ${fmt(activeRow.Target)}</td>
+        <td>-</td>
+        <td><span class="status-pill status-green">Open (Active)</span></td>
+        <td class="pos">+${activeRow.GainPct || '0.0'}%</td>
+        <td>-</td>
+      </tr>`;
+    } else {
+      $('hist_table').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:16px;color:var(--mut);">ఈ స్టాక్‌కు సంబంధించి ఎలాంటి గత సిగ్నల్స్ నమోదు కాలేదు.</td></tr>';
+    }
+  } else {
+    $('hist_table').innerHTML = `<tr><th>సిగ్నల్ తేదీ</th><th>ట్యాబ్ (Scan)</th><th>ఎంట్రీ</th><th>స్టాప్‌లాస్</th><th>టార్గెట్</th><th>ముగింపు తేదీ</th><th>ఫలితం</th><th>పీక్ ర్యాలీ</th><th>నికర లాభనష్టం</th></tr>`
+      + perfRows.map(r => {
+        let resBadge = r.Result;
+        if(r.Result === 'Target hit') resBadge = '<b class="pos">Target hit 🎯</b>';
+        else if(r.Result === 'Stop hit') resBadge = '<b class="neg">Stop hit 🛑</b>';
+        else if(r.Result === 'Open' || r.Result === 'Pending') resBadge = '<span class="status-pill status-green">Open ⏳</span>';
+
+        const pnl = r.PnLPct !== '' ? (parseFloat(r.PnLPct) >= 0 ? '+' : '') + r.PnLPct + '%' : '-';
+        const pnlCls = r.PnLPct !== '' ? (parseFloat(r.PnLPct) >= 0 ? 'pos' : 'neg') : '';
+
+        const peak = parseFloat(r.PeakGainPct);
+        const peakTxt = (!isNaN(peak) && peak > 0) ? `+${peak.toFixed(1)}%` : '-';
+        const scanName = SCAN_LBL[r.Scan] || r.Scan;
+
+        return `<tr>
+          <td>${r.SignalDate || '-'}</td>
+          <td><b>${scanName}</b></td>
+          <td>Rs ${fmt(r.Entry)}</td>
+          <td class="neg">Rs ${fmt(r.Stop)}</td>
+          <td class="pos">Rs ${fmt(r.Target)}</td>
+          <td>${r.ResultDate || (r.Result==='Open'?'నడుస్తోంది':'-')}</td>
+          <td>${resBadge}</td>
+          <td class="pos" style="font-weight:700">${peakTxt}</td>
+          <td class="${pnlCls}" style="font-weight:700">${pnl}</td>
+        </tr>`;
+      }).join('');
+  }
+
+  $('historyModal').style.display = 'flex';
 }
+
+function closeHistoryModal(){$('historyModal').style.display='none';}
 
 document.addEventListener('click', e => {
   if(!e.target.closest('.search-wrapper')){
@@ -770,7 +943,6 @@ function getStageMeta(r){
   return {badge,color,code};
 }
 
-// ===== Clean Telugu Investment Scrutiny Drawer =====
 function openRationale(sym, tabType){
   const tab = tabType || cur;
   const rows = (DATA[tab]||[]);
@@ -1306,7 +1478,7 @@ function openChart(btn){
     .catch(()=>{$('chbody').innerHTML='<div class="exp">Chart data file (data/charts.json) not found yet. It is created by the daily run.</div>';});
 }
 function closeChart(){$('chmodal').style.display='none';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeChart();closeDigestPop();closeRationaleDrawer();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeChart();closeDigestPop();closeRationaleDrawer();closeHistoryModal();}});
 
 function drawChart(d,lv){
   const n=d.c.length;
@@ -1443,7 +1615,6 @@ function updateTrailingStopAlerts(){
 }
 setInterval(updateTrailingStopAlerts, 1500);
 
-// ===== Enhanced Draw Function (VCP Badges & Dual Stops & ASM/GSM) =====
 function draw(){
   const rows=(DATA[cur]||[]);
   const sel=$('status');
@@ -2106,19 +2277,6 @@ function resetPerf(){
   $('pfrom').value='';$('pto').value='';
   drawPerf();
 }
-
-const SCAN_LBL = {
-  ultra: 'Ultra Short',
-  short: 'Short Term',
-  early: 'Early Movers',
-  multi: 'Multibagger',
-  quality: 'Quality',
-  newl: 'New Listings',
-  exul: 'Excl: Ultra',
-  exsh: 'Excl: Short',
-  exea: 'Excl: Early',
-  exnl: 'Excl: New Listings'
-};
 
 function wsStat(rr){
   const st=rr.filter(r=>r.Result=='Stop hit');
