@@ -1,5 +1,5 @@
-TOTAL EVENTS: 712
-BY CATEGORY: {'Results date': 601, 'Acquisition/Merger': 37, 'Order win': 28, 'Default/Insolvency (warning)': 16, 'Bulk BUY': 11, 'Expansion/Production': 9, 'Block BUY': 5, 'Buyback': 2, 'Fund raise (Rights/QIP)': 1, 'Auditor change (check)': 1, 'Disruption/Suspension (warning)': 1}
+TOTAL EVENTS: 756
+BY CATEGORY: {'Results date': 641, 'Acquisition/Merger': 39, 'Order win': 29, 'Default/Insolvency (warning)': 16, 'Bulk BUY': 11, 'Expansion/Production': 9, 'Block BUY': 5, 'Auditor change (check)': 2, 'Buyback': 2, 'Fund raise (Rights/QIP)': 1, 'Disruption/Suspension (warning)': 1}
 
 KEPT BUYERS (deals | name)
 6 | PI OPPORTUNITIES AIF V LLP
