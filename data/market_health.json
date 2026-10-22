@@ -4,7 +4,7 @@
  "Status": "Weak",
  "Advice": "Market is weak. Most breakouts tend to fail in such conditions. Fewer or no new trades, and keep stops tight to your plan.",
  "Index": "NIFTY500",
- "LiquidStocks": 924,
+ "LiquidStocks": 917,
  "ChecksMax": 100,
  "Checks": [
   {
@@ -37,28 +37,28 @@
   },
   {
    "name": "Stocks above 50-day average",
-   "text": "20% of 924 liquid stocks are above their 50-day average",
+   "text": "20% of 917 liquid stocks are above their 50-day average",
    "points": 0.0,
    "max": 20,
    "good": false
   },
   {
    "name": "Stocks above 200-day average",
-   "text": "46% are above their 200-day average",
+   "text": "47% are above their 200-day average",
    "points": 4.1,
    "max": 10,
    "good": false
   },
   {
    "name": "Advancers vs decliners today",
-   "text": "245 stocks rose, 677 fell",
+   "text": "245 stocks rose, 670 fell",
    "points": 0.0,
    "max": 10,
    "good": false
   },
   {
    "name": "Near 52-week highs vs lows",
-   "text": "11 stocks are near a 52-week high, 148 near a 52-week low",
+   "text": "11 stocks are near a 52-week high, 142 near a 52-week low",
    "points": 0.7,
    "max": 10,
    "good": false
