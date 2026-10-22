@@ -1,216 +1,139 @@
 Symbol,Reason
-PCJEWELLER,ASM list
-RAYMOND,ASM list
-MOBIKWIK,ASM list
-DELTACORP,ASM list
-SHRINGARMS,ASM list
-SMCGLOBAL,ASM list
-OPTIEMUS,ASM list
-AVALON,ASM list
-BLUESTONE,ASM list
-ANTELOPUS,ASM list
-WSTCSTPAPR,ASM list
-IBULLSLTD,ASM list
-GNA,ASM list
-DPABHUSHAN,ASM list
-CENTUM,ASM list
-STLNETWORK,ASM list
-FILATEX,ASM list
-JAYKAY,ASM list
+TCS,Market cap not available (Yahoo)
+MCX,Market cap not available (Yahoo)
+TVSMOTOR,Market cap not available (Yahoo)
+BOSCHLTD,Market cap not available (Yahoo)
 ARTEMISMED,Market cap not available (Yahoo)
-ONEPOINT,ASM list
-SUNFLAG,ASM list
 PRICOLLTD,Market cap not available (Yahoo)
-UTTAMSUGAR,ASM list
-ADVANCE,ASM list
-JINDWORLD,ASM list
-INDORAMA,ASM list
-ASTEC,ASM list
-TATVA,ASM list
 CHALET,Market cap not available (Yahoo)
-MVGJL,ASM list
-DHANBANK,ASM list
-PVP,ASM list
-BETA,ASM list
-SEJALLTD,ASM list
-ALLCARGO,ASM list
-OCCLLTD,ASM list
-CORONA,Market cap not available (Yahoo)
-BSE,Reward:Risk below 1:2
-BHARTIARTL,Reward:Risk below 1:2
 ICICIBANK,Reward:Risk below 1:2
-TCS,Reward:Risk below 1:2
-KOTAKBANK,Profit growth below 15% a year
-AXISBANK,Reward:Risk below 1:2
-BAJFINANCE,Reward:Risk below 1:2
-PAYTM,Reward:Risk below 1:2
+BHARTIARTL,Reward:Risk below 1:2
+KOTAKBANK,Reward:Risk below 1:2
 ETERNAL,Reward:Risk below 1:2
-MEESHO,Reward:Risk below 1:2
-MCX,Reward:Risk below 1:2
-HCLTECH,Reward:Risk below 1:2
+PCJEWELLER,Reward:Risk below 1:2
+PAYTM,Reward:Risk below 1:2
 TECHM,Sales growth below 12% a year
-GROWW,Reward:Risk below 1:2
+HCLTECH,Reward:Risk below 1:2
 NETWEB,Reward:Risk below 1:2
-LENSKART,Reward:Risk below 1:2
-ADANIPORTS,Reward:Risk below 1:2
 BHEL,Reward:Risk below 1:2
+ADANIPORTS,Reward:Risk below 1:2
+GROWW,Reward:Risk below 1:2
+MEESHO,Reward:Risk below 1:2
 DIVISLAB,Reward:Risk below 1:2
-IDEA,Reward:Risk below 1:2
-ADANIENT,Reward:Risk below 1:2
-ADANIPOWER,Reward:Risk below 1:2
-TITAN,Reward:Risk below 1:2
+ATHERENERG,Reward:Risk below 1:2
+CHENNPETRO,Reward:Risk below 1:2
 COFORGE,Reward:Risk below 1:2
-POWERINDIA,Reward:Risk below 1:2
-SOLARINDS,Reward:Risk below 1:2
-KALYANKJIL,Reward:Risk below 1:2
-DIXON,Reward:Risk below 1:2
 PERSISTENT,Reward:Risk below 1:2
-HAL,Reward:Risk below 1:2
-TRENT,Reward:Risk below 1:2
-BAJAJ-AUTO,Reward:Risk below 1:2
+KALYANKJIL,Reward:Risk below 1:2
 AZAD,Reward:Risk below 1:2
-APOLLO,Reward:Risk below 1:2
-SAIL,Reward:Risk below 1:2
-ADANIGREEN,Reward:Risk below 1:2
-TVSMOTOR,Reward:Risk below 1:2
+SOLARINDS,Reward:Risk below 1:2
+HAL,Reward:Risk below 1:2
+LENSKART,Reward:Risk below 1:2
 HBLENGINE,Reward:Risk below 1:2
-ADANIENSOL,Reward:Risk below 1:2
+ADANIGREEN,Reward:Risk below 1:2
 FEDERALBNK,Reward:Risk below 1:2
-OFSS,Reward:Risk below 1:2
+ADANIENSOL,Reward:Risk below 1:2
 RBLBANK,Reward:Risk below 1:2
-MRPL,Reward:Risk below 1:2
-DLF,Reward:Risk below 1:2
-APARINDS,Reward:Risk below 1:2
+UNIONBANK,Reward:Risk below 1:2
+OFSS,Reward:Risk below 1:2
 CGPOWER,Reward:Risk below 1:2
-ENGINERSIN,Reward:Risk below 1:2
-SUNTV,Reward:Risk below 1:2
-WOCKPHARMA,Reward:Risk below 1:2
-SONACOMS,Reward:Risk below 1:2
-LODHA,Reward:Risk below 1:2
-ZYDUSLIFE,Reward:Risk below 1:2
-NAUKRI,Reward:Risk below 1:2
-MOTHERSON,Reward:Risk below 1:2
-IDFCFIRSTB,Reward:Risk below 1:2
-ANGELONE,Reward:Risk below 1:2
-JSWINFRA,Reward:Risk below 1:2
-REDINGTON,Reward:Risk below 1:2
+DLF,Reward:Risk below 1:2
 PNB,Reward:Risk below 1:2
-PFOCUS,Reward:Risk below 1:2
-TORNTPHARM,Reward:Risk below 1:2
-AEGISLOG,Reward:Risk below 1:2
+APARINDS,Reward:Risk below 1:2
+SYRMA,Reward:Risk below 1:2
+SUNTV,Reward:Risk below 1:2
+LTTS,Reward:Risk below 1:2
+SONACOMS,Reward:Risk below 1:2
+MOTHERSON,Reward:Risk below 1:2
+NAUKRI,Reward:Risk below 1:2
+ANGELONE,Reward:Risk below 1:2
+WOCKPHARMA,Reward:Risk below 1:2
+ZYDUSLIFE,Reward:Risk below 1:2
 AEQUS,Reward:Risk below 1:2
-NIACL,Reward:Risk below 1:2
-UNITDSPR,Reward:Risk below 1:2
-GLENMARK,Reward:Risk below 1:2
-AUROPHARMA,Reward:Risk below 1:2
-ABB,Reward:Risk below 1:2
-PWL,Reward:Risk below 1:2
-POONAWALLA,Reward:Risk below 1:2
-RADICO,Reward:Risk below 1:2
-GESHIP,Reward:Risk below 1:2
-GAIL,Reward:Risk below 1:2
-MPHASIS,Reward:Risk below 1:2
-MANAPPURAM,Reward:Risk below 1:2
-DATAPATTNS,Reward:Risk below 1:2
-ABCAPITAL,Reward:Risk below 1:2
-JYOTICNC,Reward:Risk below 1:2
-APLAPOLLO,Reward:Risk below 1:2
-IIFL,Reward:Risk below 1:2
-LGEINDIA,Reward:Risk below 1:2
+NYKAA,Reward:Risk below 1:2
+REDINGTON,Reward:Risk below 1:2
 KARURVYSYA,Reward:Risk below 1:2
-ANANDRATHI,Reward:Risk below 1:2
-WELSPUNLIV,Reward:Risk below 1:2
-INDIANB,Reward:Risk below 1:2
+MPHASIS,Reward:Risk below 1:2
+NIACL,Reward:Risk below 1:2
+TORNTPHARM,Reward:Risk below 1:2
+AUROPHARMA,Reward:Risk below 1:2
+GESHIP,Reward:Risk below 1:2
+AEGISLOG,Reward:Risk below 1:2
+RADICO,Reward:Risk below 1:2
+PWL,Reward:Risk below 1:2
+GAIL,Reward:Risk below 1:2
+DATAPATTNS,Reward:Risk below 1:2
+IIFL,Reward:Risk below 1:2
+GABRIEL,Reward:Risk below 1:2
+HEXT,Reward:Risk below 1:2
+ACUTAAS,Reward:Risk below 1:2
 MAHABANK,Reward:Risk below 1:2
 BBOX,Reward:Risk below 1:2
+ANANDRATHI,Reward:Risk below 1:2
+WELSPUNLIV,Reward:Risk below 1:2
+APLAPOLLO,Reward:Risk below 1:2
 GLAND,Reward:Risk below 1:2
-PIDILITIND,Reward:Risk below 1:2
-GRAPHITE,Reward:Risk below 1:2
-PNBHOUSING,Reward:Risk below 1:2
-NEULANDLAB,Reward:Risk below 1:2
-BOSCHLTD,Reward:Risk below 1:2
-HSCL,Reward:Risk below 1:2
-HEXT,Reward:Risk below 1:2
 MOTILALOFS,Reward:Risk below 1:2
-NUVAMA,Reward:Risk below 1:2
-GABRIEL,Reward:Risk below 1:2
-BALRAMCHIN,Reward:Risk below 1:2
-PHOENIXLTD,Reward:Risk below 1:2
+LGEINDIA,Reward:Risk below 1:2
+JSWINFRA,Reward:Risk below 1:2
+PNBHOUSING,Reward:Risk below 1:2
 RRKABEL,Reward:Risk below 1:2
-TATATECH,Reward:Risk below 1:2
-EMMVEE,Reward:Risk below 1:2
-ACMESOLAR,Reward:Risk below 1:2
-ABDL,Reward:Risk below 1:2
+NUVAMA,Reward:Risk below 1:2
+PHOENIXLTD,Reward:Risk below 1:2
+NEULANDLAB,Reward:Risk below 1:2
 URBANCO,Reward:Risk below 1:2
-NAVINFLUOR,Reward:Risk below 1:2
-TATACOMM,Reward:Risk below 1:2
-SIEMENS,Reward:Risk below 1:2
+ABDL,Reward:Risk below 1:2
 FSL,Reward:Risk below 1:2
-PRESTIGE,Reward:Risk below 1:2
-FINCABLES,Reward:Risk below 1:2
-NAM-INDIA,Reward:Risk below 1:2
+TATATECH,Reward:Risk below 1:2
 LLOYDSME,Reward:Risk below 1:2
-CARBORUNIV,Reward:Risk below 1:2
-OBEROIRLTY,Reward:Risk below 1:2
-PIRAMALFIN,Reward:Risk below 1:2
-NAZARA,ROCE below 15%
-SAILIFE,Reward:Risk below 1:2
-CASTROLIND,Reward:Risk below 1:2
-SHYAMMETL,Reward:Risk below 1:2
-BELRISE,Reward:Risk below 1:2
+CGCL,Reward:Risk below 1:2
+NAVINFLUOR,Reward:Risk below 1:2
+FINCABLES,Reward:Risk below 1:2
+AETHER,Reward:Risk below 1:2
+NAZARA,Reward:Risk below 1:2
+JYOTICNC,Reward:Risk below 1:2
 KAJARIACER,Reward:Risk below 1:2
-SUPREMEIND,Reward:Risk below 1:2
+SAILIFE,Reward:Risk below 1:2
 PETRONET,Reward:Risk below 1:2
 PTCIL,Reward:Risk below 1:2
-ANTHEM,Reward:Risk below 1:2
-CGCL,Reward:Risk below 1:2
-STARHEALTH,Reward:Risk below 1:2
+CASTROLIND,Reward:Risk below 1:2
 GRANULES,Reward:Risk below 1:2
 LALPATHLAB,Reward:Risk below 1:2
-CRAFTSMAN,Reward:Risk below 1:2
-SAGILITY,Reward:Risk below 1:2
-COHANCE,Reward:Risk below 1:2
 CUB,Reward:Risk below 1:2
+STARHEALTH,Reward:Risk below 1:2
+SHYAMMETL,Reward:Risk below 1:2
+SAGILITY,Reward:Risk below 1:2
+CARBORUNIV,Reward:Risk below 1:2
 PPLPHARMA,Reward:Risk below 1:2
-CAPLIPOINT,Reward:Risk below 1:2
-BEML,Reward:Risk below 1:2
-INOXINDIA,Reward:Risk below 1:2
-CEMPRO,Reward:Risk below 1:2
-BAJAJHLDNG,Reward:Risk below 1:2
-IPCALAB,Reward:Risk below 1:2
-TBOTEK,Reward:Risk below 1:2
-FLUOROCHEM,Reward:Risk below 1:2
-ASTRAMICRO,Reward:Risk below 1:2
 JINDALSAW,Reward:Risk below 1:2
-IKS,Reward:Risk below 1:2
-SHRIPISTON,Reward:Risk below 1:2
-AEGISVOPAK,Reward:Risk below 1:2
-DEEPAKFERT,Reward:Risk below 1:2
+ACMESOLAR,Reward:Risk below 1:2
+CEMPRO,Reward:Risk below 1:2
+CAPLIPOINT,Reward:Risk below 1:2
+CRAFTSMAN,Reward:Risk below 1:2
+INOXINDIA,Reward:Risk below 1:2
+BAJAJHLDNG,Reward:Risk below 1:2
+TBOTEK,Reward:Risk below 1:2
+IPCALAB,Reward:Risk below 1:2
 THELEELA,Reward:Risk below 1:2
+SHRIPISTON,Reward:Risk below 1:2
+FLUOROCHEM,Reward:Risk below 1:2
+ANTHEM,Reward:Risk below 1:2
+GRWRHITECH,Reward:Risk below 1:2
+BEML,Reward:Risk below 1:2
+COHANCE,Reward:Risk below 1:2
 BHARTIHEXA,Reward:Risk below 1:2
-AJANTPHARM,Reward:Risk below 1:2
-EMCURE,Reward:Risk below 1:2
 ECLERX,Reward:Risk below 1:2
+AEGISVOPAK,Reward:Risk below 1:2
+AJANTPHARM,Reward:Risk below 1:2
 SCHNEIDER,Reward:Risk below 1:2
-AARTIIND,Reward:Risk below 1:2
-PARADEEP,Reward:Risk below 1:2
-LTTS,Reward:Risk below 1:2
+IGIL,Reward:Risk below 1:2
 KPIL,Reward:Risk below 1:2
-GLAXO,Reward:Risk below 1:2
 HAPPYFORGE,Reward:Risk below 1:2
-APLLTD,Reward:Risk below 1:2
-BRIGADE,Reward:Risk below 1:2
+EMCURE,Reward:Risk below 1:2
 SUNDRMFAST,Reward:Risk below 1:2
+APLLTD,Reward:Risk below 1:2
 KPRMILL,Reward:Risk below 1:2
 CRISIL,Reward:Risk below 1:2
-ALIVUS,Reward:Risk below 1:2
-POLYMED,Reward:Risk below 1:2
-ELGIEQUIP,Reward:Risk below 1:2
 FINEORG,Reward:Risk below 1:2
-MINDACORP,Reward:Risk below 1:2
-AIIL,Reward:Risk below 1:2
-ASAHIINDIA,Reward:Risk below 1:2
+ALIVUS,Reward:Risk below 1:2
 GRINDWELL,Reward:Risk below 1:2
-RATNAMANI,Reward:Risk below 1:2
-ZYDUSWELL,Reward:Risk below 1:2
-LMW,Reward:Risk below 1:2
