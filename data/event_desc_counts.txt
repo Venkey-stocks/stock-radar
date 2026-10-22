@@ -1,5 +1,5 @@
-TOTAL EVENTS: 791
-BY CATEGORY: {'Results date': 673, 'Acquisition/Merger': 41, 'Order win': 31, 'Default/Insolvency (warning)': 16, 'Expansion/Production': 9, 'Bulk BUY': 9, 'Disruption/Suspension (warning)': 4, 'Auditor change (check)': 3, 'Buyback': 2, 'Block BUY': 2, 'Fund raise (Rights/QIP)': 1}
+TOTAL EVENTS: 792
+BY CATEGORY: {'Results date': 674, 'Acquisition/Merger': 41, 'Order win': 31, 'Default/Insolvency (warning)': 16, 'Expansion/Production': 9, 'Bulk BUY': 9, 'Disruption/Suspension (warning)': 4, 'Auditor change (check)': 3, 'Buyback': 2, 'Block BUY': 2, 'Fund raise (Rights/QIP)': 1}
 
 KEPT BUYERS (deals | name)
 2 | LARSEN & TOUBRO LIMITED
