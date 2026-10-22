@@ -161,7 +161,6 @@ if os.path.exists("data/surveillance.csv"):
     except Exception as e:
         print("surveillance.csv చదవడం విఫలమైంది:", e)
 
-# NSE ఆర్కైవ్ / API నుండి అదనపు చెక్ (ఫాల్‌బ్యాక్)
 UA = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
@@ -377,7 +376,7 @@ print("దశ 2 తర్వాత (market cap Rs 500-15,000 కోట్లు)
 
 # ---------- దశ 3: Reward:Risk, తర్వాత financials ----------
 passed = []
-for s1, info, mcr, m in pool:
+for s1, info, mcr in pool:
     if not time_ok():
         print("సమయ పరిమితి చేరింది, దశ 3 ఆపేశాం")
         break
