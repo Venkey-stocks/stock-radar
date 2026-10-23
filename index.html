@@ -33,6 +33,7 @@ label{color:var(--mut);font-size:13px}
 .tag.dryup{border-color:#a371f7;color:#d2a8ff;background:rgba(163,113,247,0.15);font-weight:700}
 .tag.asm{border-color:#d29922;color:#e3b341;background:rgba(210,153,34,0.15);font-weight:700}
 .tag.gsm{border-color:#f85149;color:#ff7b72;background:rgba(248,81,73,0.15);font-weight:700}
+.tag.trend{border-color:#10b981;color:#10b981;background:rgba(16,185,129,0.15);font-weight:700}
 .status-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.4px;display:inline-flex;align-items:center;gap:4px}
 .status-green{background:rgba(46,160,67,.2);color:#3fb950;border:1px solid rgba(46,160,67,.4)}
 .status-gold{background:rgba(210,153,34,.2);color:#d29922;border:1px solid rgba(210,153,34,.4)}
@@ -573,6 +574,22 @@ function getSurvMeta(r){
   if(!isGsm && !isAsm) return null;
   if(isGsm) return { type: 'GSM', tag: '<span class="tag gsm">⚠️ GSM</span>', label: 'GSM ఫ్రేమ్‌వర్క్' };
   return { type: 'ASM', tag: '<span class="tag asm">⚠️ ASM</span>', label: 'ASM సర్వైలెన్స్' };
+}
+
+function getTrendDaysMeta(sym, scanType){
+  if(!sym) return '';
+  sym = sym.toUpperCase();
+  const perfRows = (DATA.perf || []).filter(r => (r.Symbol || '').toUpperCase() === sym && (r.Result === 'Open' || r.Result === 'Pending'));
+  const isNew = NEWSET[scanType] && NEWSET[scanType].has(sym);
+  let days = 1;
+  if(perfRows.length > 0 && !isNew){
+    const sigDate = parseD(perfRows[0].SignalDate);
+    if(sigDate){
+      const today = new Date(); today.setHours(0,0,0,0);
+      days = Math.max(1, Math.round((today - sigDate) / 86400000) + 1);
+    }
+  }
+  return `<span class="tag trend">🔄 ${days} trend day${days > 1 ? 's' : ''}</span>`;
 }
 
 function syncView(){
@@ -1125,7 +1142,8 @@ function rowCells(tab,r,ns){
   }
   if(tab=='ultra'||tab=='short'||tab=='early'){
     const meta=getStageMeta(r);
-    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>' + rowVcp + rowSurv;
+    const trendBadge = getTrendDaysMeta(r.Symbol, tab);
+    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span> ' + trendBadge + rowVcp + rowSurv;
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
   } else if(tab=='newl'){
     info=esc(r.ListedOn||'n/a') + rowSurv;
@@ -1659,9 +1677,11 @@ function draw(){
 
     const sm = getSurvMeta(r);
     const survBadge = sm ? sm.tag : '';
+    const trendBadge = getTrendDaysMeta(r.Symbol, cur);
 
     const tagList=[...new Set([
       '<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>',
+      trendBadge,
       vcpTag,
       survBadge,
       ns.has(r.Symbol)?'NEW today':'',
