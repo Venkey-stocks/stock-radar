@@ -1,5 +1,5 @@
-TOTAL EVENTS: 965
-BY CATEGORY: {'Results date': 853, 'Acquisition/Merger': 33, 'Order win': 30, 'Expansion/Production': 15, 'Default/Insolvency (warning)': 13, 'Auditor change (check)': 8, 'Buyback': 4, 'Bulk BUY': 4, 'Disruption/Suspension (warning)': 3, 'Fund raise (Rights/QIP)': 2}
+TOTAL EVENTS: 1032
+BY CATEGORY: {'Results date': 913, 'Order win': 34, 'Acquisition/Merger': 32, 'Default/Insolvency (warning)': 16, 'Expansion/Production': 16, 'Auditor change (check)': 8, 'Buyback': 5, 'Bulk BUY': 4, 'Disruption/Suspension (warning)': 3, 'Fund raise (Rights/QIP)': 1}
 
 KEPT BUYERS (deals | name)
 1 | D3 STOCK VISION LLP
