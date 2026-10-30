@@ -485,7 +485,6 @@ exsh,2026-10-22,EBGNG,Pullback,High Potential,Good Setup,,704.9,637.1,730.0,Targ
 early,2026-10-23,IGIL,Breakout,Long Term,High Conviction,83.7,381.15,344.12,577.22,Open,5,,397.75,4.36,10.35,420.6,No,-,,,,,,,,No
 exea,2026-10-23,IGIL,Excluded,Standard,High Conviction,83.7,381.15,344.12,577.22,Open,5,,397.75,4.36,10.35,420.6,,,,,,,,,,Yes
 quality,2026-10-23,IGIL,Quality,,High Conviction,82.7,381.15,344.12,538.01,Open,5,,397.75,4.36,10.35,420.6,No,-,,,,,,,,Yes
-exul,2026-10-23,IGL,Setup,Standard,Good Setup,,148.2,143.4,155.12,Stop hit,1,2026-10-26,140.8,-4.99,-4.99,148.2,No,-,,,,1.98,4,No,,Yes
 exul,2026-10-23,ECLERX,Setup,Standard,Good Setup,,2026.65,1815.22,2308.72,Stop hit,4,2026-10-29,1815.22,-10.43,-10.43,2026.65,No,-,,,,-8.56,1,No,,No
 exul,2026-10-23,ANANDRATHI,Near Miss,Standard,Good Setup,,2235.0,2117.45,2383.76,Expired,5,2026-10-30,2252.0,0.76,2.46,2290.0,No,-,,,,,,,,Yes
 exul,2026-10-23,CASTROLIND,Setup,Standard,Good Setup,,203.81,194.12,214.72,Stop hit,1,2026-10-26,190.55,-6.51,-6.51,203.81,No,-,,,,0.38,4,No,,No
@@ -718,7 +717,6 @@ exul,2026-10-30,LOTUSDEV,Setup,Standard,Good Setup,,250.2,222.3,287.93,Pending,0
 exul,2026-10-30,COFORGE,Breakout,Standard,Good Setup,,2045.0,1867.72,2268.52,Open,0,,2045.0,0.0,0.0,2045.0,No,-,,,,,,,,Yes
 exul,2026-10-30,FORTIS,Setup,Standard,Good Setup,,822.64,742.36,908.8,Pending,0,,,,0.0,822.64,No,-,,,,,,,,Yes
 exul,2026-10-30,TATAELXSI,Setup,Standard,Good Setup,,3922.83,3582.17,4270.81,Pending,0,,,,0.0,3922.83,No,-,,,,,,,,Yes
-exul,2026-10-30,IGL,Setup,Standard,Good Setup,,148.2,138.22,155.12,Pending,0,,,,0.0,148.2,No,-,,,,,,,,Yes
 exul,2026-10-30,ATHERENERG,Breakout,Standard,Good Setup,,1756.0,1415.95,1987.6,Open,0,,1756.0,0.0,0.0,1756.0,No,-,,,,,,,,Yes
 exul,2026-10-30,TORNTPOWER,Setup,Standard,Good Setup,,1262.52,1193.28,1306.88,Pending,0,,,,0.0,1262.52,No,-,,,,,,,,Yes
 exul,2026-10-30,ANANDRATHI,Setup,Standard,Good Setup,,2294.58,2042.66,2413.58,Pending,0,,,,0.0,2294.58,No,-,,,,,,,,Yes
