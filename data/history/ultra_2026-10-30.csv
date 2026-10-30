@@ -1,2 +1,1 @@
-Symbol,Status,Score,Band
-LLOYDSME,Setup,18.5,Early Watch
+Date,Symbol,Status,Score,Band,Close,Entry,Stop,StopTight,Target,StopDistPct,RR,StopReason,TargetReason,VolRatio,TargetPct,Resistance,High52,Gap,Warning,Reasons,Events,EventAdj,Surveillance,ASM,GSM,RS,IsLeader,MarketCapCr,DebtEquity,PledgeOfPromoterPct,PromoterPct,Sector,NextResults,FundChecked
