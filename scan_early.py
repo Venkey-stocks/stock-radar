@@ -12,10 +12,10 @@ except ImportError:
 
 MIN_PRICE = 50
 MIN_TRADED_VALUE = 10e7
-MIN_SCORE = 40
+MIN_SCORE = 25              # మార్కెట్ కన్సాలిడేషన్ సర్దుబాటు స్కోర్
 MIN_ROWS = 210
 ATR_N = 14
-MIN_RR = 2.0
+MIN_RR = 1.4                # క్వాలిటీ గేట్ రివార్డ్:రిస్క్ (కనీసం 1.4)
 MAX_STOP_SHORT = 8.0        # Short Term Early Movers కి గరిష్ట స్టాప్‌లాస్ పరిమితి (8.0%)
 BREAKOUT_VOL = 1.3          # breakout రోజు volume కనీసం ఇంత రెట్లు (అంచనా)
 LOOKBACK_DAYS = 10          # గత ఇన్ని రోజుల్లో breakout అయితే "early"
@@ -305,7 +305,22 @@ for sym, g in groups.items():
     if len(g) > 64 and g["Date"].iloc[-1] == last_date:
         cc = g["Close"].values
         ret63[sym] = cc[-1] / cc[-64] - 1
-rs_rank = pd.Series(ret63).rank(pct=True)
+
+# ---------- Pass 1: మాన్స్‌ఫీల్డ్ RS & లీడర్‌షిప్ డేటా లోడ్ చేయడం ----------
+rs_data = {}
+if os.path.exists("data/rs_rank.csv"):
+    try:
+        df_rs = pd.read_csv("data/rs_rank.csv")
+        for _, r in df_rs.iterrows():
+            sym_clean = str(r["Symbol"]).strip()
+            rs_data[sym_clean] = {
+                "RS": float(r.get("RS", 50.0)),
+                "Mansfield_RS": float(r.get("Mansfield_RS", 50.0)),
+                "Is_Leader": bool(r.get("Is_Leader", False))
+            }
+        print("Early Movers: మాన్స్‌ఫీల్డ్ RS ర్యాంకులు విజయవంతంగా అనుసంధానించబడ్డాయి:", len(rs_data))
+    except Exception as e:
+        print("rs_rank.csv లోడింగ్ లోపం:", e)
 
 # ---------- Sector Relative Strength (RS) Ranking ----------
 sec_returns = {}
@@ -493,7 +508,7 @@ def analyze(sym, g):
             "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
             "Target": round(target, 2), "StopDistPct": round(stop_pct, 2),
             "TargetPct": round(target_pct, 1), "RR": round(rr, 2),
-            "Reason": "Reward:Risk below 1:2", "StopReason": stop_reason, "TargetReason": target_reason,
+            "Reason": f"Reward:Risk below 1:{MIN_RR}", "StopReason": stop_reason, "TargetReason": target_reason,
             "Surveillance": surv_status})
         return None
 
@@ -501,7 +516,11 @@ def analyze(sym, g):
     mh = macd_hist(c)
     adx, adx_prev = adx14(h, l, c)
     wk = weekly_bullish(g["Date"].values, c)
-    rsr = float(rs_rank.get(sym, 0.0))
+    
+    stock_rs_info = rs_data.get(k, {"RS": 50.0, "Mansfield_RS": 50.0, "Is_Leader": False})
+    stock_rs = stock_rs_info["RS"]
+    is_true_leader = stock_rs_info["Is_Leader"]
+
     d52 = (high52 / close - 1) * 100
 
     low126 = float(l[-126:].min())
@@ -545,6 +564,8 @@ def analyze(sym, g):
         rs_.append("Above 200-DMA")
     if wk:
         rs_.append("Weekly trend is up")
+    if is_true_leader:
+        rs_.append("True Market Leader (Mansfield RS > 0 & RS >= 80)")
     if adx >= 20:
         rs_.append("ADX %.0f" % adx)
     if main_ret is not None:
@@ -561,7 +582,12 @@ def analyze(sym, g):
         s += clip01((bvr - 1) / 1.5) * 10
     else:
         s += clip01((1 - dry) / 0.4) * 10
-    s += rsr * 15
+
+    # మాన్స్‌ఫీల్డ్ RS స్కోర్ (గరిష్టంగా 18 పాయింట్లు)
+    s += (stock_rs / 100.0) * 15
+    if is_true_leader:
+        s += 3
+
     s += (ffrac * 20) if ffrac is not None else 8
     if 50 <= rsi <= 70:
         s += 6
@@ -669,7 +695,9 @@ def analyze(sym, g):
         "SectorRS": sec_score, "SectorStatus": sec_status,
         "Surveillance": surv_status,
         "ASM": "Yes" if surv_status == "ASM" else "",
-        "GSM": "Yes" if surv_status == "GSM" else ""
+        "GSM": "Yes" if surv_status == "GSM" else "",
+        "RS": stock_rs,
+        "IsLeader": "Yes" if is_true_leader else ""
     }
 
 
@@ -687,7 +715,7 @@ columns = ["Date", "Symbol", "Sector", "Status", "Stage", "StageOrd", "Horizon",
            "StopReason", "TargetReason", "VolRatio", "RSI", "FundScore", "Fundamentals", "PromoterPct",
            "PledgePct", "Warning", "Reasons", "StageBadge", "StageColor", "StageCode", "SimpleReasons",
            "IsVCP", "IsDryUp", "VCPDesc", "SectorRS", "SectorStatus",
-           "Surveillance", "ASM", "GSM"]
+           "Surveillance", "ASM", "GSM", "RS", "IsLeader"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values(["StageOrd", "Score"], ascending=[True, False])
 rej_cols = ["Date", "Symbol", "Status", "Stage", "Horizon", "Close", "Entry", "Stop", "Target",
@@ -701,13 +729,13 @@ rej_out.to_csv("data/early_rejected.csv", index=False)
 rej_out.to_csv("data/excluded_early.csv", index=False)
 
 print("data తేదీ:", date_str)
-print("Reward:Risk < 2.0 వల్ల తిరస్కరించినవి:", rejected["low_rr"])
+print(f"Reward:Risk < {MIN_RR} వల్ల తిరస్కరించినవి:", rejected["low_rr"])
 print(f"Stop-loss > {MAX_STOP_SHORT}% వల్ల తిరస్కరించినవి (Short Term):", rejected["wide_stop"])
-print("మొత్తం ఫలితాలు:", len(out))
+print("మొత్తం ఎర్లీ మూవర్స్ ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Stage"].value_counts().to_string())
     print(out["Horizon"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Stage", "StageBadge", "Score", "Sector", "SectorRS", "SectorStatus"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Stage", "StageBadge", "Score", "Sector", "SectorRS", "RS", "IsLeader"]].to_string(index=False))
 if len(rej_out) > 0:
     print("తిరస్కరించబడిన టాప్ 5 (RR ఎక్కువ నుంచి):")
     print(rej_out.head(5)[["Symbol", "Status", "Horizon", "Entry", "Stop", "Target", "RR", "Reason"]].to_string(index=False))
