@@ -5,7 +5,7 @@ import pandas as pd
 
 MIN_PRICE = 50              # కనీస ధర
 MIN_TRADED_VALUE = 10e7     # 20 రోజుల సగటు traded value కనీసం ₹10 కోట్లు
-MIN_SCORE = 40              # దీని కంటే తక్కువ score ఉంటే జాబితాలో చూపం
+MIN_SCORE = 20              # దీని కంటే తక్కువ score ఉంటే జాబితాలో చూపం
 MIN_ROWS = 70               # కనీసం ఇన్ని రోజుల data ఉండాలి
 MAX_STOP_PCT = 8.0          # ఫైన్-ట్యూన్డ్ గరిష్ట స్టాప్‌లాస్ పరిమితి
 
@@ -398,7 +398,7 @@ out.to_csv("data/history/ultra_%s.csv" % date_str, index=False)
 rej_out.to_csv("data/ultra_rejected.csv", index=False)
 rej_out.to_csv("data/excluded_ultra.csv", index=False)
 print("data తేదీ:", date_str)
-print("Reward:Risk < 2.0 వల్ల తిరస్కరించినవి:", rejected["low_rr"])
+print(f"Reward:Risk < {MIN_RR} వల్ల తిరస్కరించినవి:", rejected["low_rr"])
 print(f"Stop-loss > {MAX_STOP_PCT}% వల్ల తిరస్కరించినవి:", rejected["wide_stop"])
 print("మొత్తం అల్ట్రా స్కాన్ ఫలితాలు:", len(out))
 if len(out) > 0:
