@@ -2,7 +2,7 @@ import os
 import math
 import pandas as pd
 
-MCAP_MIN_ULTRA = 2000     # Rs కోట్లు
+MCAP_MIN_ULTRA = 1000     # Rs కోట్లు (మరీ చిన్న కంపెనీలను మాత్రమే ఆపడానికి)
 
 if not os.path.exists("data/fundamentals.csv"):
     print("fundamentals.csv లేదు, ఏమీ మార్చలేదు")
@@ -23,7 +23,7 @@ def fl(x):
 
 
 def band_of(s):
-    return "High Conviction" if s >= 80 else ("Good Setup" if s >= 65 else "Early Watch")
+    return "High Conviction" if s >= 75 else ("Good Setup" if s >= 55 else "Early Watch")
 
 
 excluded = []
@@ -51,17 +51,22 @@ def process(path, scan, hist_prefix):
                 "Sector": "", "NextResults": ""}
         if sym in fund.index:
             fr = fund.loc[sym]
+            
+            # ASM / GSM కఠినమైన నిషేధం
             if str(fr["ASM"]) == "Yes" or str(fr["GSM"]) == "Yes":
                 why = "ASM list" if str(fr["ASM"]) == "Yes" else "GSM list"
                 excluded.append({"Date": date, "Scan": scan, "Symbol": sym, "Score": score, "Reason": why})
                 continue
+                
             mcap = fl(fr["MarketCapCr"])
+            # మార్కెట్ క్యాప్ మరీ చిన్నది (< 1,000 కోట్లు) ఉంటేనే తీసేస్తాం, డేటా లేకపోతే వార్నింగ్ మాత్రమే ఇస్తాం
             if scan == "ultra" and mcap is not None and mcap < MCAP_MIN_ULTRA:
                 excluded.append({"Date": date, "Scan": scan, "Symbol": sym, "Score": score,
-                                 "Reason": "Market cap Rs %d crore (below 2,000)" % mcap})
+                                 "Reason": "Market cap Rs %d crore (below 1,000)" % mcap})
                 continue
             if scan == "ultra" and mcap is None:
-                warns.append("Market cap unknown (Rs 2,000 crore minimum not verified)")
+                warns.append("Market cap unknown (Rs 1,000 crore minimum not verified)")
+                
             if str(fr["ASM"]) == "Unknown" or str(fr["GSM"]) == "Unknown":
                 warns.append("ASM/GSM list could not be checked today")
 
@@ -69,38 +74,37 @@ def process(path, scan, hist_prefix):
             de = fl(fr["DebtEquity"])
             if de is not None and sector != "Financial Services":
                 if de > 2.0:
-                    score -= 10
+                    score -= 5
                     warns.append("High debt: debt/equity %.2f" % de)
                 elif de > 1.0:
-                    score -= 5
+                    score -= 2
                     warns.append("Debt is on the high side: debt/equity %.2f" % de)
 
             pl, pr = fl(fr["PledgePct"]), fl(fr["PromoterPct"])
-            # Promoter % 0 లేదా అంతకంటే తక్కువ అంటే తెలియనిదిగా భావిస్తాం (n/a, 0 కాదు)
             if pr is not None and pr <= 0:
                 pr = None
             pp = None
             if pl is not None and pr is not None and pr > 0:
                 pp = round(pl / pr * 100, 1)
                 if pp >= 25:
-                    score -= 10
+                    score -= 5
                     warns.append("High promoter pledge: %.1f%% of promoter shares" % pp)
                 elif pp >= 10:
-                    score -= 5
+                    score -= 2
                     warns.append("Promoter pledge %.1f%% of promoter shares" % pp)
 
             d = fl(fr["DaysToResults"])
             if d is not None and d < 999:
                 if scan == "ultra":
                     if d <= 2:
-                        score -= 15
+                        score -= 8
                         warns.append("Results in %d day(s), too close for a 1-5 day trade" % d)
                     elif d <= 5:
-                        score -= 5
+                        score -= 4
                         warns.append("Results in %d days" % d)
-                elif d <= 10:
-                    score -= 8
-                    warns.append("Results in %d days (gap risk)" % d)
+                    elif d <= 10:
+                        score -= 3
+                        warns.append("Results in %d days (gap risk)" % d)
 
             info = {"MarketCapCr": "" if mcap is None else int(mcap),
                     "DebtEquity": "" if de is None else de,
@@ -111,7 +115,9 @@ def process(path, scan, hist_prefix):
 
         if score != float(r["Score"]):
             n_pen += 1
-        score = round(max(score, 0), 1)
+            
+        # స్కోర్ కనీసం 10 పాయింట్లు ఉండేలా బౌండరీ
+        score = round(max(score, 10.0), 1)
         r["Score"] = score
         r["Band"] = band_of(score)
         r["Warning"] = "; ".join(dict.fromkeys(warns))
@@ -119,8 +125,11 @@ def process(path, scan, hist_prefix):
         r["FundChecked"] = "Yes"
         keep.append(r)
 
-    cols = list(df.columns) + ["MarketCapCr", "DebtEquity", "PledgeOfPromoterPct", "PromoterPct",
-                               "Sector", "NextResults", "FundChecked"]
+    cols = list(df.columns)
+    for c in ["MarketCapCr", "DebtEquity", "PledgeOfPromoterPct", "PromoterPct", "Sector", "NextResults", "FundChecked"]:
+        if c not in cols:
+            cols.append(c)
+            
     out = pd.DataFrame(keep, columns=cols)
     if len(out):
         out = out.sort_values("Score", ascending=False)
