@@ -174,7 +174,7 @@ exea,2026-10-16,SHYAMMETL,Excluded,Standard,High Conviction,81.3,1198.5,1034.74,
 early,2026-10-16,NYKAA,Pre-Breakout,Long Term,High Conviction,80.5,350.25,325.29,499.98,Pending,9,,349.35,-0.26,1.21,354.5,Yes,VCP Tight,,,,,,,,Yes
 exea,2026-10-16,NYKAA,Excluded,Standard,High Conviction,80.5,350.25,325.29,499.98,Stop hit,2,2026-10-21,325.29,-7.13,-7.13,350.25,,,,,,8.98,7,No,,No
 exsh,2026-10-16,KMEW,Excluded,Standard,Early Watch,56.3,3327.7,3092.36,3955.27,Stop hit,2,2026-10-21,3092.36,-7.07,1.47,3376.6,,,,,,10.24,7,No,,Yes
-exsh,2026-10-16,NYKAA,Excluded,Standard,Early Watch,52.3,345.0,330.03,384.93,Stop hit,2,2026-10-21,330.03,-4.34,0.99,348.4,,,,,,7.41,7,No,,Yes
+exsh,2026-10-16,NYKAA,Excluded,Standard,Early Watch,52.3,345.0,330.03,384.93,Stop hit,2,2026-10-21,330.03,-4.34,0.99,348.4,,,,,,7.41,7,No,,No
 exnl,2026-10-16,VEDPOWER,Excluded,Standard,Early Watch,50.0,32.38,29.97,34.8,Stop hit,3,2026-10-22,29.97,-7.44,0.49,32.54,,,,,,15.62,6,No,,No
 exul,2026-10-16,GOLDIAM,Setup,Standard,Good Setup,,335.87,313.27,380.59,Stop hit,2,2026-10-21,313.27,-6.73,-6.73,335.87,,,,,,0.06,5,No,,No
 exul,2026-10-16,GESHIP,Setup,Standard,Good Setup,,1586.17,1493.88,1766.73,Stop hit,1,2026-10-19,1493.88,-5.82,-5.82,1586.17,,,,,,5.62,5,No,,No
@@ -418,7 +418,7 @@ exul,2026-10-19,NUVOCO,Setup,Standard,Good Setup,,349.45,311.31,357.6,Expired,5,
 exul,2026-10-19,JUSTDIAL,Near Miss,Standard,Good Setup,,731.75,635.3,748.8,Target hit,1,2026-10-21,748.8,2.33,7.96,790.0,,,,,,,,,,No
 exsh,2026-10-19,IIFLCAPS,Near Miss,Standard,Good Setup,,350.65,338.3,368.4,Stop hit,3,2026-10-23,338.3,-3.52,-3.52,350.65,,,,,,3.28,5,No,,No
 exsh,2026-10-19,FLUOROCHEM,Pullback,Standard,Good Setup,,4454.1,4197.03,4646.9,Stop hit,3,2026-10-23,4197.03,-5.77,0.25,4465.4,,,,,,3.64,5,No,,No
-exsh,2026-10-19,ANANDRATHI,Near Miss,Standard,Good Setup,,2179.13,2084.37,2225.79,Target hit,2,2026-10-22,2225.79,2.14,2.85,2241.2,,,,,,,,,,Yes
+exsh,2026-10-19,ANANDRATHI,Near Miss,Standard,Good Setup,,2179.13,2084.37,2225.79,Target hit,2,2026-10-22,2225.79,2.14,2.85,2241.2,,,,,,,,,,No
 exsh,2026-10-19,KIRLOSBROS,Pullback,Standard,Good Setup,,1713.9,1612.41,1750.34,Stop hit,3,2026-10-23,1612.41,-5.92,0.43,1721.3,,,,,,2.33,5,No,,No
 exsh,2026-10-19,MTARTECH,Pullback,Standard,Good Setup,,7178.0,6537.88,7388.0,Stop hit,3,2026-10-23,6537.88,-8.92,0.53,7216.0,,,,,,11.33,5,No,,No
 exsh,2026-10-19,NUVOCO,Near Miss,Standard,Good Setup,,344.74,310.75,354.8,Open,8,,320.4,-7.06,0.23,345.55,,,,,,,,,,No
@@ -703,14 +703,14 @@ exea,2026-10-29,SAREGAMA,Breakout,Standard,Good Setup,,536.0,484.11,574.5,Open,1
 exea,2026-10-29,ZENSARTECH,Breakout,Standard,Good Setup,,537.3,482.91,553.1,Target hit,1,2026-10-30,553.1,2.94,3.07,553.8,No,-,,,,,,,,Yes
 exea,2026-10-29,BSOFT,Breakout,Standard,Good Setup,,342.5,299.47,351.61,Open,1,,323.0,-5.69,-5.69,342.5,No,-,,,,,,,,Yes
 exea,2026-10-29,BLUESTARCO,Breakout,Standard,Good Setup,,1673.0,1486.2,1709.32,Open,1,,1627.9,-2.7,-2.7,1673.0,No,-,,,,,,,,Yes
+early,2026-10-30,COFORGE,Breakout,Long Term,High Conviction,98.8,2045.0,1858.73,3162.61,Open,0,,2045.0,0.0,0.0,2045.0,No,-,,,,,,,,Yes
 exea,2026-10-30,COFORGE,Excluded,Standard,High Conviction,95.6,2045.0,1858.73,3162.61,Open,0,,,,,2045.0,,,,,,,,,,No
-early,2026-10-30,COFORGE,Breakout,Long Term,High Conviction,95.5,2045.0,1858.73,3162.61,Open,0,,2045.0,0.0,0.0,2045.0,No,-,,,,,,,,Yes
+early,2026-10-30,ATHERENERG,Breakout,Long Term,High Conviction,91.8,1756.0,1522.3,2914.0,Open,0,,1756.0,0.0,0.0,1756.0,No,-,,,,,,,,Yes
+early,2026-10-30,MBAPL,Breakout,Long Term,High Conviction,91.2,177.11,157.32,274.45,Open,0,,177.11,0.0,0.0,177.11,No,-,,,,,,,,Yes
 exea,2026-10-30,ANANDRATHI,Excluded,Standard,High Conviction,89.3,2294.58,2158.04,2889.56,Open,0,,,,,2294.58,,,,,,,,,,No
-early,2026-10-30,ATHERENERG,Breakout,Long Term,High Conviction,88.9,1756.0,1522.3,2914.0,Open,0,,1756.0,0.0,0.0,1756.0,No,-,,,,,,,,Yes
 exea,2026-10-30,ATHERENERG,Excluded,Standard,High Conviction,88.8,1756.0,1522.3,2914.0,Open,0,,,,,1756.0,,,,,,,,,,No
+early,2026-10-30,ANANDRATHI,Pre-Breakout,Long Term,High Conviction,87.7,2294.58,2158.04,2889.56,Pending,0,,,,0.0,2294.58,Yes,VCP Tight,,,,,,,,Yes
 exea,2026-10-30,MBAPL,Excluded,Standard,High Conviction,87.6,177.11,157.32,274.45,Open,0,,,,,177.11,,,,,,,,,,No
-early,2026-10-30,MBAPL,Breakout,Long Term,High Conviction,87.3,177.11,157.32,274.45,Open,0,,177.11,0.0,0.0,177.11,No,-,,,,,,,,Yes
-early,2026-10-30,ANANDRATHI,Pre-Breakout,Long Term,High Conviction,85.0,2294.58,2158.04,2889.56,Pending,0,,,,0.0,2294.58,Yes,VCP Tight,,,,,,,,Yes
 exul,2026-10-30,LOTUSDEV,Setup,Standard,Good Setup,,250.2,222.3,287.93,Pending,0,,,,0.0,250.2,No,-,,,,,,,,Yes
 exul,2026-10-30,COFORGE,Breakout,Standard,Good Setup,,2045.0,1867.72,2268.52,Open,0,,2045.0,0.0,0.0,2045.0,No,-,,,,,,,,Yes
 exul,2026-10-30,FORTIS,Setup,Standard,Good Setup,,822.64,742.36,908.8,Pending,0,,,,0.0,822.64,No,-,,,,,,,,Yes
