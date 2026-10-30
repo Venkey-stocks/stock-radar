@@ -21,6 +21,9 @@ jobs:
       - name: Results calendar
         run: python fetch_results_calendar.py
         continue-on-error: true
+      - name: RS rank
+        run: python compute_rs.py
+        continue-on-error: true
       - name: Ultra scan
         run: python scan_ultra.py
         continue-on-error: true
@@ -56,9 +59,6 @@ jobs:
         continue-on-error: true
       - name: Make charts
         run: python make_charts.py
-        continue-on-error: true
-      - name: RS rank
-        run: python compute_rs.py
         continue-on-error: true
       - name: Save data
         run: |
