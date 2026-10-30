@@ -4,33 +4,93 @@ import pandas as pd
 import yfinance as yf
 
 TEST_LIMIT = None
-BATCH = 100
+BATCH = 80
 
-URLS = [
-    "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv",
-    "https://archives.nseindia.com/content/equities/EQUITY_L.csv",
-]
-text = None
-for u in URLS:
+def get_hybrid_momentum_universe():
+    """
+    1. Nifty 100 Large caps ni filter chesthundi.
+    2. Nifty 101-750 Mid/Small cap base universe ni lock chesthundi.
+    3. Beyond 750 unna micro-caps lo strong volume/turnover unna vatini dynamic ga capture chesthundi.
+    """
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+    
+    # 1. Nifty 100 (Large Caps) List Download - Elimination kosam
+    nifty100_symbols = set()
+    n100_urls = [
+        "https://archives.nseindia.com/content/indices/ind_nifty100list.csv",
+        "https://nsearchives.nseindia.com/content/indices/ind_nifty100list.csv"
+    ]
+    for u in n100_urls:
+        try:
+            r = requests.get(u, headers=headers, timeout=20)
+            if r.status_code == 200:
+                df_100 = pd.read_csv(io.StringIO(r.text))
+                df_100.columns = [c.strip() for c in df_100.columns]
+                col = "Symbol" if "Symbol" in df_100.columns else "SYMBOL"
+                nifty100_symbols = set(df_100[col].str.strip().tolist())
+                print(f"Nifty 100 large caps identified: {len(nifty100_symbols)}")
+                break
+        except Exception as e:
+            print("Nifty 100 download failed:", e)
+
+    # 2. Nifty Total Market (Nifty 750) Universe
+    total_urls = [
+        "https://archives.nseindia.com/content/indices/ind_niftytotalmarket_list.csv",
+        "https://nsearchives.nseindia.com/content/indices/ind_niftytotalmarket_list.csv"
+    ]
+    nifty_total_symbols = []
+    for u in total_urls:
+        try:
+            r = requests.get(u, headers=headers, timeout=30)
+            if r.status_code == 200:
+                df_total = pd.read_csv(io.StringIO(r.text))
+                df_total.columns = [c.strip() for c in df_total.columns]
+                col = "Symbol" if "Symbol" in df_total.columns else "SYMBOL"
+                nifty_total_symbols = df_total[col].str.strip().tolist()
+                print(f"Nifty Total Market symbols: {len(nifty_total_symbols)}")
+                break
+        except Exception as e:
+            print("Total market download failed:", e)
+
+    # 3. Base Universe Setup (Nifty 101 to 750)
+    seen = set()
+    base_universe = []
+    for sym in nifty_total_symbols:
+        clean_sym = sym.strip()
+        if clean_sym and (clean_sym not in seen) and (clean_sym not in nifty100_symbols):
+            seen.add(clean_sym)
+            base_universe.append(clean_sym)
+
+    # 4. Micro-cap Safety Net (NSE EQ Master List check)
+    # Total Market lo leni any sudden breakout micro-caps ni catch cheyadaniki
+    micro_candidates = []
     try:
-        r = requests.get(u, headers={"User-Agent": "Mozilla/5.0"}, timeout=60)
-        print("Tried:", u, "status:", r.status_code)
-        if r.status_code == 200:
-            text = r.text
-            break
+        eq_url = "https://archives.nseindia.com/content/equities/EQUITY_L.csv"
+        r_eq = requests.get(eq_url, headers=headers, timeout=30)
+        if r_eq.status_code == 200:
+            df_eq = pd.read_csv(io.StringIO(r_eq.text))
+            df_eq.columns = [c.strip() for c in df_eq.columns]
+            df_eq = df_eq[df_eq["SERIES"].str.strip() == "EQ"]
+            all_nse = df_eq["SYMBOL"].str.strip().tolist()
+            
+            # Base universe mariyu large caps lo leni stocks
+            remaining = [s for s in all_nse if s not in seen and s not in nifty100_symbols]
+            micro_candidates = remaining[:150] # Top liquid buffer candidates
     except Exception as e:
-        print("Failed:", u, e)
-if text is None:
-    raise SystemExit("Could not download NSE stock list")
+        print("Micro buffer fetch error:", e)
 
-lst = pd.read_csv(io.StringIO(text))
-lst.columns = [c.strip() for c in lst.columns]
-lst = lst[lst["SERIES"].str.strip() == "EQ"]
-symbols = lst["SYMBOL"].str.strip().tolist()
+    final_universe = base_universe + micro_candidates
+    # De-duplicate
+    final_universe = list(dict.fromkeys(final_universe))
+    
+    print(f"Total Hybrid Universe locked: {len(final_universe)} stocks (Base: {len(base_universe)}, Micro buffer: {len(micro_candidates)})")
+    return final_universe
+
+symbols = get_hybrid_momentum_universe()
 if TEST_LIMIT:
     symbols = symbols[:TEST_LIMIT]
-print("Total stocks:", len(symbols))
 
+# Batch Download with Retry Mechanism
 frames, failed = [], []
 for i in range(0, len(symbols), BATCH):
     batch = symbols[i:i + BATCH]
@@ -40,70 +100,75 @@ for i in range(0, len(symbols), BATCH):
                          group_by="ticker", auto_adjust=True,
                          progress=False, threads=True)
     except Exception as e:
-        print("Batch failed:", i, e)
+        print("Batch download failed:", i, e)
         failed += batch
         continue
+
     for s in batch:
         try:
             d = df[s + ".NS"].dropna(how="all").reset_index()
-            if d.empty:
+            if d.empty or len(d) < 30: # Minimum 30 trading days history
                 failed.append(s)
                 continue
+            
+            # Dynamic Liquidity Gate:
+            # Micro-caps ayithe minimum 20-day avg turnover > 75 Lakhs undali (illiquid trap avoidance)
+            avg_volume_20 = d["Volume"].tail(20).mean()
+            last_close = d["Close"].iloc[-1]
+            turnover_cr = (avg_volume_20 * last_close) / 10000000.0
+
+            if s not in symbols[:650] and turnover_cr < 0.75:
+                # Active volume leni micro-cap ni drop chesthundi
+                continue
+
             d["Symbol"] = s
             frames.append(d[["Symbol", "Date", "Open", "High", "Low", "Close", "Volume"]])
         except Exception:
             failed.append(s)
-    time.sleep(2)
+    time.sleep(1.5)
 
 os.makedirs("data", exist_ok=True)
 if frames:
     out = pd.concat(frames, ignore_index=True)
     out.to_csv("data/prices.csv.gz", index=False, compression="gzip")
-    print("Saved rows:", len(out), "stocks:", out["Symbol"].nunique())
+    print(f"Data saved successfully. Total rows: {len(out)}, Unique stocks active: {out['Symbol'].nunique()}")
+
 with open("data/failed.txt", "w") as f:
     f.write("\n".join(failed))
-print("Failed:", len(failed))
+print(f"Failed or illiquid dropped count: {len(failed)}")
 
-# ---------- Index data (Nifty 50 మరియు Nifty 500) ----------
-# ఇది విఫలమైనా stocks data పై ప్రభావం ఉండదు
+# ---------- Benchmark Index Data (Nifty 50 & Nifty 500) ----------
 INDEXES = {"NIFTY50": "^NSEI", "NIFTY500": "^CRSLDX"}
 idx_frames = []
 for name, tk in INDEXES.items():
     try:
         d = yf.Ticker(tk).history(period="1y", interval="1d", auto_adjust=True)
         if d is None or d.empty:
-            print("Index no data:", name, tk)
             continue
         d.index = d.index.tz_localize(None).normalize()
         d = d.reset_index().rename(columns={d.index.name or "Date": "Date"})
         d["Symbol"] = name
         idx_frames.append(d[["Symbol", "Date", "Open", "High", "Low", "Close", "Volume"]])
-        print("Index saved:", name, len(d), "rows")
+        print(f"Index data saved: {name}")
     except Exception as e:
-        print("Index failed:", name, tk, e)
+        print(f"Index fetch failed for {name}:", e)
+
 if idx_frames:
     pd.concat(idx_frames, ignore_index=True).to_csv("data/index.csv", index=False)
-
 
 # =====================================================================
 # NSE SURVEILLANCE (ASM / GSM) AUTO-FETCH
 # =====================================================================
 def fetch_nse_surveillance():
-    """
-    NSE నుండి అధికారిక ASM మరియు GSM లిస్ట్‌లను డౌన్‌లోడ్ చేసి data/surveillance.csv గా భద్రపరుస్తుంది.
-    """
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     }
-    
     surv_records = []
     endpoints = [
         {"url": "https://nsearchives.nseindia.com/content/equities/sec_list.csv", "type": "ASM", "desc": "Short-term/Long-term ASM"},
         {"url": "https://nsearchives.nseindia.com/content/equities/gsm_list.csv", "type": "GSM", "desc": "Graded Surveillance Measure"}
     ]
-    
     session = requests.Session()
     try:
         session.get("https://www.nseindia.com", headers=headers, timeout=10)
@@ -125,21 +190,18 @@ def fetch_nse_surveillance():
                                 "Type": ep["type"],
                                 "Category": ep["desc"]
                             })
-                print(f"NSE {ep['type']} లిస్ట్ విజయవంతంగా ఫెచ్ అయ్యింది.")
-            else:
-                print(f"హెచ్చరిక: {ep['type']} డేటా అందుబాటులో లేదు (Status: {res.status_code})")
+                print(f"NSE {ep['type']} fetched successfully.")
         except Exception as e:
-            print(f"{ep['type']} ఫెచ్ చేయడంలో లోపం: {e}")
+            print(f"Surveillance fetch error for {ep['type']}:", e)
 
     if surv_records:
         df_surv = pd.DataFrame(surv_records).drop_duplicates(subset=["Symbol"])
         df_surv.to_csv("data/surveillance.csv", index=False)
-        print(f"మొత్తం {len(df_surv)} సర్వైలెన్స్ స్టాక్స్ 'data/surveillance.csv' లో సేవ్ అయ్యాయి.")
+        print(f"Surveillance stocks saved: {len(df_surv)}")
     else:
         pd.DataFrame(columns=["Symbol", "Type", "Category"]).to_csv("data/surveillance.csv", index=False)
-        print("సర్వైలెన్స్ రికార్డ్స్ లభించలేదు, ఖాళీ ఫైల్ సిద్ధం చేయబడింది.")
 
 try:
     fetch_nse_surveillance()
 except Exception as _e:
-    print("Surveillance fetch error:", _e)
+    print("Surveillance routine error:", _e)
