@@ -5,7 +5,7 @@ import pandas as pd
 
 MIN_PRICE = 50
 MIN_TRADED_VALUE = 10e7     # 20 రోజుల సగటు traded value కనీసం Rs 10 కోట్లు
-MIN_SCORE = 40
+MIN_SCORE = 25              # మార్కెట్ కన్సాలిడేషన్ సర్దుబాటు స్కోర్
 MIN_ROWS = 210              # 200-రోజుల average కి కనీసం ఇన్ని రోజుల data
 MAX_STOP_PCT = 8.0          # ఫైన్-ట్యూన్డ్ గరిష్ట స్టాప్‌లాస్ పరిమితి (8.0%)
 
@@ -17,7 +17,7 @@ ATR_MIN_STOP = 1.5          # stop కనీసం ఇన్ని ATR దూర
 NO_RES_ATR = 5.0            # resistance లేకపోతే target = Entry + ఇన్ని ATR
 NO_RES_ATR_HP = 7.0         # High Potential కి
 MAX_TARGET_ATR = 10.0       # target గరిష్టం
-MIN_RR = 2.0                # కనీస Reward:Risk
+MIN_RR = 1.4                # కనీస Reward:Risk (క్వాలిటీ గేట్)
 WIDE_STOP_PCT = 10.0        # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక
 
 # ---- Event score (అంచనా బరువులు) ----
@@ -82,12 +82,11 @@ def weekly_bullish(dates, c):
 
 
 def camarilla_r4(dates, h, l, c):
-    """గత పూర్తి వారం High/Low/Close నుంచి R4 = Close + (High-Low)*1.1/2"""
     w = pd.DataFrame({"H": h, "L": l, "C": c}, index=pd.DatetimeIndex(dates))
     w = w.resample("W").agg({"H": "max", "L": "min", "C": "last"}).dropna()
     if len(w) < 3:
         return None
-    p = w.iloc[-2]          # గత పూర్తి వారం
+    p = w.iloc[-2]
     r4 = float(p["C"] + (p["H"] - p["L"]) * 1.1 / 2)
     return r4, float(p["H"]), float(p["L"]), float(p["C"])
 
@@ -137,7 +136,6 @@ if os.path.exists("data/events.csv"):
             k = str(e.get("symbol", "")).upper().replace(".NS", "").strip()
             cat = str(e.get("category", "")).strip()
             EV.setdefault(k, set()).add(cat)
-            
             cat_upper = cat.upper()
             if "GSM" in cat_upper:
                 SURV_MAP[k] = "GSM"
@@ -146,8 +144,6 @@ if os.path.exists("data/events.csv"):
         print("events చదివాం, symbols:", len(EV))
     except Exception as ex:
         print("హెచ్చరిక: events.csv చదవడం కుదరలేదు:", ex)
-else:
-    print("హెచ్చరిక: data/events.csv లేదు, event score లేకుండా నడుస్తోంది.")
 
 if os.path.exists("data/surveillance.csv"):
     try:
@@ -165,13 +161,21 @@ if os.path.exists("data/surveillance.csv"):
 
 groups = {sym: g.sort_values("Date").reset_index(drop=True) for sym, g in df.groupby("Symbol")}
 
-# ---------- Pass 1: 63 రోజుల relative strength ర్యాంక్ ----------
-ret63 = {}
-for sym, g in groups.items():
-    if len(g) > 64 and g["Date"].iloc[-1] == last_date:
-        cc = g["Close"].values
-        ret63[sym] = cc[-1] / cc[-64] - 1
-rs_rank = pd.Series(ret63).rank(pct=True)
+# ---------- Pass 1: మాన్స్‌ఫీల్డ్ RS & లీడర్‌షిప్ డేటా లోడ్ చేయడం ----------
+rs_data = {}
+if os.path.exists("data/rs_rank.csv"):
+    try:
+        df_rs = pd.read_csv("data/rs_rank.csv")
+        for _, r in df_rs.iterrows():
+            sym_clean = str(r["Symbol"]).strip()
+            rs_data[sym_clean] = {
+                "RS": float(r.get("RS", 50.0)),
+                "Mansfield_RS": float(r.get("Mansfield_RS", 50.0)),
+                "Is_Leader": bool(r.get("Is_Leader", False))
+            }
+        print("మాన్స్‌ఫీల్డ్ RS ర్యాంకులు విజయవంతంగా అనుసంధానించబడ్డాయి:", len(rs_data))
+    except Exception as e:
+        print("rs_rank.csv లోడింగ్ లోపం:", e)
 
 
 def analyze(sym, g):
@@ -190,9 +194,10 @@ def analyze(sym, g):
     if (c[-20:] * v[-20:]).mean() < MIN_TRADED_VALUE:
         return None
 
-    # తప్పనిసరి Trend
+    # Trend Checks
     sma20 = c[-20:].mean()
     sma50 = c[-50:].mean()
+    sma150 = c[-150:].mean() if len(c) >= 150 else sma50
     sma200 = c[-200:].mean()
     sma50_prev = c[-60:-10].mean()
 
@@ -213,7 +218,7 @@ def analyze(sym, g):
     vol_ratio = v[-1] / vol_avg20
     dry = v[-6:-1].mean() / vol_avg20
 
-    # ---------- Setup (ఒకటి) ----------
+    # ---------- Setup ----------
     status = None
     level = None
     setup_kind = ""
@@ -250,14 +255,14 @@ def analyze(sym, g):
     # ---------- Entry ----------
     entry = close if status in ("Breakout", "Pullback") else level * 1.002
 
-    # ---------- ATR (14 రోజులు) ----------
+    # ---------- ATR ----------
     pc = c[:-1]
     tr = np.maximum.reduce([h[1:] - l[1:], np.abs(h[1:] - pc), np.abs(l[1:] - pc)])
     atr = float(tr[-ATR_N:].mean())
     if atr <= 0:
         return None
 
-    # ---------- STOP: swing low కింద ----------
+    # ---------- STOP ----------
     seg_l = l[-SWING_LOOKBACK:]
     pivl = pd.Series(seg_l).rolling(5, center=True).min().values
     swing_lows = seg_l[(seg_l == pivl) & (seg_l < entry * 0.995)]
@@ -289,7 +294,7 @@ def analyze(sym, g):
     risk = entry - stop
     stop_pct = risk / entry * 100
 
-    # ---------- పైన resistance స్థాయిలు ----------
+    # ---------- Resistance Levels ----------
     high52 = h[-251:-1].max()
     hi250 = h[-251:]
     piv = pd.Series(hi250).rolling(11, center=True).max().values
@@ -297,15 +302,19 @@ def analyze(sym, g):
     up_lv = all_lv[all_lv > entry * 1.02]
     levels = up_lv[(up_lv > entry * 1.03) & (up_lv <= entry * 1.15)]
 
-    # ---------- Indicators ----------
+    # ---------- Indicators & RS Data ----------
     rsi = rsi14(c)
     mh = macd_hist(c)
     adx, adx_prev = adx14(h, l, c)
     wk = weekly_bullish(g["Date"].values, c)
-    rsr = float(rs_rank.get(sym, 0.0))
     d52 = (high52 / close - 1) * 100
 
-    # ---------- High Potential పరీక్ష ----------
+    clean_sym = sym.upper().replace(".NS", "").strip()
+    stock_rs_info = rs_data.get(clean_sym, {"RS": 50.0, "Mansfield_RS": 50.0, "Is_Leader": False})
+    stock_rs = stock_rs_info["RS"]
+    is_true_leader = stock_rs_info["Is_Leader"]
+
+    # ---------- High Potential Check ----------
     tight_base = False
     for N in (30, 40, 60):
         if (h[-N:].max() - l[-N:].min()) / h[-N:].max() <= 0.22:
@@ -324,9 +333,9 @@ def analyze(sym, g):
         met.append("Accumulation volume")
     if no_res:
         met.append("పైన resistance లేదు")
-    is_hp = bool(rsr >= 0.85 and tight_base and len(met) >= 2)
+    is_hp = bool((stock_rs >= 80 or is_true_leader) and tight_base and len(met) >= 2)
 
-    # ---------- TARGET: పైన దగ్గరి నిజమైన resistance ----------
+    # ---------- TARGET ----------
     cap_price = entry + MAX_TARGET_ATR * atr
     next_res = None
     if len(up_lv) > 0:
@@ -347,10 +356,8 @@ def analyze(sym, g):
     target_pct = (target / entry - 1) * 100
     rr = (target - entry) / risk
     
-    clean_sym = sym.upper().replace(".NS", "").strip()
     surv_status = SURV_MAP.get(clean_sym, "")
 
-    # ఫైన్-ట్యూన్డ్: స్టాప్‌లాస్ 8.0% కంటే ఎక్కువ ఉంటే రిజెక్షన్
     if stop_pct > MAX_STOP_PCT:
         rejected["wide_stop"] += 1
         rej_rows.append({
@@ -375,7 +382,7 @@ def analyze(sym, g):
             "Close": round(close, 2), "Entry": round(entry, 2),
             "Stop": round(stop, 2), "StopTight": round(stop_tight, 2), "Target": round(target, 2),
             "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
-            "RR": round(rr, 2), "Reason": "Reward:Risk below 1:2",
+            "RR": round(rr, 2), "Reason": f"Reward:Risk below 1:{MIN_RR}",
             "StopReason": stop_reason, "TargetReason": target_reason,
             "Surveillance": surv_status
         })
@@ -433,13 +440,14 @@ def analyze(sym, g):
     rs_.append("Price above 50-DMA and 200-DMA")
     if wk:
         rs_.append("Weekly trend is up")
+    if is_true_leader:
+        rs_.append("True Market Leader (Mansfield RS > 0 & RS >= 80)")
     if adx >= 20:
         rs_.append("ADX %.0f: %s" % (adx, "trend strengthening" if adx > adx_prev else "trend present"))
     if main_ret is not None:
         rs_.append("3-month return %.0f%% vs index %.0f%%" % (r63 * 100, main_ret * 100))
     if status == "Breakout" and cam_info is not None:
-        rs_.append("Closed above last week's Camarilla R4 Rs %.1f (last week high %.1f, low %.1f, close %.1f) on volume %.1fx average"
-                   % (cam_info[0], cam_info[1], cam_info[2], cam_info[3], vol_ratio))
+        rs_.append("Closed above last week's Camarilla R4 Rs %.1f on volume %.1fx average" % (cam_info[0], vol_ratio))
     elif status == "Breakout":
         rs_.append("Broke above %d-week base high Rs %.1f on volume %.1fx average" % (base_w, level, vol_ratio))
     elif status == "Near Miss":
@@ -460,7 +468,12 @@ def analyze(sym, g):
         s += clip01((1 - dry) / 0.4) * 10
     else:
         s += clip01((vol_ratio - 1) / 1.5) * 10
-    s += rsr * 15
+
+    # మాన్స్‌ఫీల్డ్ RS స్కోర్ (గరిష్టంగా 18 పాయింట్లు)
+    s += (stock_rs / 100.0) * 15
+    if is_true_leader:
+        s += 3
+
     if 50 <= rsi <= 70:
         s += 6
     elif 45 <= rsi < 50 or 70 < rsi <= 75:
@@ -511,7 +524,9 @@ def analyze(sym, g):
         "Events": events_txt, "EventAdj": ev_adj,
         "Surveillance": surv_status,
         "ASM": "Yes" if surv_status == "ASM" else "",
-        "GSM": "Yes" if surv_status == "GSM" else ""
+        "GSM": "Yes" if surv_status == "GSM" else "",
+        "RS": stock_rs,
+        "IsLeader": "Yes" if is_true_leader else ""
     }
 
 
@@ -527,7 +542,7 @@ for sym, g in groups.items():
 columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close", "Entry", "Stop", "StopTight",
            "Target", "StopDistPct", "RR", "StopReason", "TargetReason", "TargetPct", "VolRatio",
            "RSI", "ADX", "Boosters", "High52", "Warning", "Reasons", "Events", "EventAdj",
-           "Surveillance", "ASM", "GSM"]
+           "Surveillance", "ASM", "GSM", "RS", "IsLeader"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
@@ -542,13 +557,13 @@ rej_out.to_csv("data/short_rejected.csv", index=False)
 rej_out.to_csv("data/excluded_short.csv", index=False)
 
 print("data తేదీ:", date_str)
-print("Reward:Risk < 2.0 వల్ల తిరస్కరించినవి:", rejected["low_rr"])
+print(f"Reward:Risk < {MIN_RR} వల్ల తిరస్కరించినవి:", rejected["low_rr"])
 print(f"Stop-loss > {MAX_STOP_PCT}% వల్ల తిరస్కరించినవి:", rejected["wide_stop"])
-print("మొత్తం ఫలితాలు:", len(out))
+print("మొత్తం షార్ట్-టర్మ్ ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Status"].value_counts().to_string())
     print(out["Class"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Status", "Class", "Score", "Entry", "Stop", "Target", "RR", "Warning"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Status", "Class", "Score", "Band", "Entry", "Stop", "Target", "RR", "RS", "IsLeader"]].to_string(index=False))
 if len(rej_out) > 0:
     print("తిరస్కరించబడిన టాప్ 5 (RR ఎక్కువ నుంచి):")
     print(rej_out.head(5)[["Symbol", "Status", "Entry", "Stop", "Target", "RR", "Reason"]].to_string(index=False))
