@@ -16,7 +16,7 @@ ATR_BUFFER = 0.25           # swing low కింద ATR బఫర్
 ATR_MIN_STOP = 1.0          # stop కనీసం ఇన్ని ATR దూరం
 NO_RES_ATR = 3.0            # resistance లేకపోతే target = Entry + ఇన్ని ATR
 MAX_TARGET_ATR = 6.0        # target గరిష్టం (1-5 రోజుల trade కి)
-MIN_RR = 1.8                # కనీస Reward:Risk
+MIN_RR = 1.4                # కనీస Reward:Risk
 WIDE_STOP_PCT = 8.0         # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక
 
 # ---- Event score (అంచనా బరువులు) ----
