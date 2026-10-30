@@ -7,7 +7,7 @@ MIN_PRICE = 50              # కనీస ధర
 MIN_TRADED_VALUE = 10e7     # 20 రోజుల సగటు traded value కనీసం ₹10 కోట్లు
 MIN_SCORE = 40              # దీని కంటే తక్కువ score ఉంటే జాబితాలో చూపం
 MIN_ROWS = 70               # కనీసం ఇన్ని రోజుల data ఉండాలి
-MAX_STOP_PCT = 7.0          # ఫైన్-ట్యూన్డ్ గరిష్ట స్టాప్‌లాస్ పరిమితి
+MAX_STOP_PCT = 8.0          # ఫైన్-ట్యూన్డ్ గరిష్ట స్టాప్‌లాస్ పరిమితి
 
 # ---- Stop / Target (టెక్నికల్, అంచనా సంఖ్యలు) ----
 ATR_N = 14                  # ATR కాలం
@@ -16,7 +16,7 @@ ATR_BUFFER = 0.25           # swing low కింద ATR బఫర్
 ATR_MIN_STOP = 1.0          # stop కనీసం ఇన్ని ATR దూరం
 NO_RES_ATR = 3.0            # resistance లేకపోతే target = Entry + ఇన్ని ATR
 MAX_TARGET_ATR = 6.0        # target గరిష్టం (1-5 రోజుల trade కి)
-MIN_RR = 2.0                # కనీస Reward:Risk
+MIN_RR = 1.8                # కనీస Reward:Risk
 WIDE_STOP_PCT = 8.0         # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక
 
 # ---- Event score (అంచనా బరువులు) ----
