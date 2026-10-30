@@ -1,14 +1,19 @@
-TOTAL EVENTS: 1210
-BY CATEGORY: {'Results date': 1025, 'Acquisition/Merger': 49, 'Order win': 45, 'Default/Insolvency (warning)': 30, 'Expansion/Production': 28, 'Auditor change (check)': 14, 'Buyback': 8, 'Bulk BUY': 7, 'Fund raise (Rights/QIP)': 2, 'Preferential issue': 1, 'Disruption/Suspension (warning)': 1}
+TOTAL EVENTS: 1229
+BY CATEGORY: {'Results date': 1036, 'Acquisition/Merger': 50, 'Order win': 45, 'Default/Insolvency (warning)': 30, 'Expansion/Production': 28, 'Auditor change (check)': 14, 'Buyback': 8, 'Bulk BUY': 7, 'Block BUY': 7, 'Fund raise (Rights/QIP)': 2, 'Preferential issue': 1, 'Disruption/Suspension (warning)': 1}
 
 KEPT BUYERS (deals | name)
+2 | SOCIETE GENERALE
+2 | ADITYA BIRLA SUN LIFE MUTUAL FUND
 1 | GOLDENDUNES BUILDHOME PRIVATE LIMITED
-1 | SOCIETE GENERALE
 1 | MUGI CONSTRUCTIONS PRIVATE LIMITED
 1 | AAKANKSHA SATYEN MAMTORA
 1 | MATRUCHHAYA MERCANTILE PRIVATE LIMITED
 1 | RAMDOOT REALTORS PVT LTD
 1 | GOVIND JI GUPTA
+1 | NIPPON INDIA MUTUAL FUND
+1 | GHISALLO MASTER FUND LP
+1 | GOLDMAN SACHS BANK EUROPE SE
+1 | MORGAN STANLEY ASIA SINGAPORE PTE
 
 DROPPED BUYERS (deals | name)
 4 | ALPHAGREP SECURITIES PRIVATE LIMITED
@@ -21,3 +26,4 @@ DROPPED BUYERS (deals | name)
 1 | ARIHANT CAPITAL MARKETS LIMITED
 1 | PLUTUS WEALTH MANAGEMENT LLP
 1 | JUMP TRADING FINANCIAL INDIA PRIVATE LIMITED
+1 | BOFA SECURITIES EUROPE SA
