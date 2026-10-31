@@ -359,6 +359,12 @@ for r in sig.to_dict("records"):
     if g is None:
         continue
     after = g[g["Date"] > ts].head(win)
+    
+    entry = float(r["Entry"])
+    stop = float(r["Stop"])
+    target = float(r["Target"])
+    close = float(r["Close"]) if "Close" in r and pd.notna(r["Close"]) else entry
+
     risk = max(0.1, entry - stop)
     t1 = fnum(r.get("Target1")) if fnum(r.get("Target1")) else round(entry + 1.2 * risk, 2)
     t2 = fnum(r.get("Target2")) if fnum(r.get("Target2")) else round(target, 2)
@@ -366,10 +372,6 @@ for r in sig.to_dict("records"):
     t3 = fnum(r.get("Target3")) if fnum(r.get("Target3")) else calc_t3
     if t3 <= t2:
         t3 = round(t2 + 1.5 * risk, 2)
-    risk = max(0.1, entry - stop)
-    t1 = fnum(r.get("Target1")) or round(entry + 1.2 * risk, 2)
-    t2 = fnum(r.get("Target2")) or round(target, 2)
-    t3 = fnum(r.get("Target3")) or round(entry + 4.5 * risk, 2)
 
     pending = entry > close * 1.001
     active = not pending
