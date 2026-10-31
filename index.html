@@ -2986,55 +2986,69 @@ function drawTurnaround(){
   const flt = $('t_filter') ? $('t_filter').value : '';
   
   const list = rows.filter(r => {
-    const isT = String(r.Turnaround || r.is_turnaround || '').toLowerCase() === 'yes';
+    const tVal = (r['టర్నరౌండ్'] || r.Turnaround || r.is_turnaround || '').toString().toLowerCase();
+    const isT = tVal === 'yes' || tVal === 'అవును' || tVal === 'true';
     if(flt === 'turnaround' && !isT) return false;
     if(flt === 'growth' && isT) return false;
     return true;
-  }).sort((a,b) => (+b.Score || 0) - (+a.Score || 0));
+  }).sort((a,b) => (+b.Score || +b['స్కోర్'] || 0) - (+a.Score || +a['స్కోర్'] || 0));
 
-  const tCount = rows.filter(r => String(r.Turnaround || r.is_turnaround || '').toLowerCase() === 'yes').length;
+  const tCount = rows.filter(r => {
+    const tVal = (r['టర్నరౌండ్'] || r.Turnaround || r.is_turnaround || '').toString().toLowerCase();
+    return tVal === 'yes' || tVal === 'అవును' || tVal === 'true';
+  }).length;
   const gCount = rows.length - tCount;
   
   const box = (lbl, val, cls) => `<div class="st"><small>${lbl}</small><b class="${cls||''}">${val}</b></div>`;
   if($('t_stats')){
-    $('t_stats').innerHTML = box('మొత్తం ఫలితాలు', rows.length)
+    $('t_stats').innerHTML = box('మొత్తం స్టాక్స్', rows.length)
       + box('Turnaround Champions 🟢', tCount, 'pos')
       + box('Growth Leaders 🚀', gCount, 'pur')
       + box('చూపిస్తున్నవి', list.length);
   }
 
   if($('ttable')){
-    $('ttable').innerHTML = '<tr><th>సింబల్</th><th>రకం</th><th>స్కోర్</th><th>ధర</th><th>సేల్స్ YoY</th><th>ప్రాఫిట్ YoY</th><th>వాల్యూమ్</th><th>విశ్లేషణ / కారణం</th></tr>'
+    $('ttable').innerHTML = '<thead><tr><th>సింబల్</th><th>రకం</th><th>స్కోర్</th><th>ధర</th><th>సేల్స్ YoY</th><th>ప్రాఫిట్ YoY</th><th>వాల్యూమ్</th><th>విశ్లేషణ / కారణం</th></tr></thead><tbody>'
       + (list.length ? list.map(r => {
-          const isT = String(r.Turnaround || r.is_turnaround || '').toLowerCase() === 'yes';
+          const tVal = (r['టర్నరౌండ్'] || r.Turnaround || r.is_turnaround || '').toString().toLowerCase();
+          const isT = tVal === 'yes' || tVal === 'అవును' || tVal === 'true';
           const badge = isT 
             ? '<span class="status-pill status-green">🟢 Turnaround</span>' 
             : '<span class="status-pill status-purple">🚀 Growth Leader</span>';
           
-          const screener = getScreenerLink(r.Symbol);
-          const score = r.Score || '-';
-          const px = r.Close ? 'Rs ' + fmt(r.Close) : '-';
-          const sYoY = has(r.SalesYoY) ? (parseFloat(r.SalesYoY) >= 0 ? '+' : '') + r.SalesYoY + '%' : '-';
-          const pYoY = has(r.ProfitYoY) ? (parseFloat(r.ProfitYoY) >= 0 ? '+' : '') + r.ProfitYoY + '%' : '-';
-          const vol = r.VolRatio ? r.VolRatio + 'x' : '-';
-          const reason = r.Reason || r.Reasons || 'Strong quarterly results';
+          const sym = r.Symbol || r.symbol || r['సింబల్'] || '';
+          const screener = typeof getScreenerLink === 'function' ? getScreenerLink(sym) : '';
+          const score = r.Score || r['స్కోర్'] || '-';
+          const closeVal = r.Close || r.Price || r.Entry || r['ధర'] || '';
+          const px = closeVal ? 'Rs ' + fmt(closeVal) : '-';
+          
+          const sVal = r.SalesYoY || r.QSalesYoY || r.SalesGrowth || r['సేల్స్'];
+          const sYoY = has(sVal) ? (parseFloat(sVal) >= 0 ? '+' : '') + sVal + '%' : '-';
+          
+          const pVal = r.ProfitYoY || r.QProfitYoY || r.ProfitGrowth || r['ప్రాఫిట్'];
+          const pYoY = has(pVal) ? (parseFloat(pVal) >= 0 ? '+' : '') + pVal + '%' : '-';
+          
+          const volVal = r.VolRatio || r.VolumeRatio || r['వాల్యూమ్'];
+          const vol = volVal ? volVal + 'x' : '-';
+          
+          const reason = r.Reason || r.Reasons || r['కారణం'] || 'Strong quarterly performance';
 
           return `<tr>
-            <td><b>${esc(r.Symbol)}</b>${screener}</td>
+            <td><b>${esc(sym)}</b>${screener}</td>
             <td>${badge}</td>
             <td><b>${score}</b></td>
             <td>${px}</td>
-            <td class="${parseFloat(r.SalesYoY)>=0?'pos':'neg'}"><b>${sYoY}</b></td>
-            <td class="${parseFloat(r.ProfitYoY)>=0?'pos':'neg'}"><b>${pYoY}</b></td>
+            <td class="${parseFloat(sVal)>=0?'pos':'neg'}"><b>${sYoY}</b></td>
+            <td class="${parseFloat(pVal)>=0?'pos':'neg'}"><b>${pYoY}</b></td>
             <td>${vol}</td>
             <td style="color:var(--mut);font-size:12px;">${esc(reason)}</td>
           </tr>`;
-        }).join('') : '<tr><td colspan="8">ఎటువంటి రికార్డులు లభించలేదు.</td></tr>');
+        }).join('') : '<tr><td colspan="8" style="text-align:center;padding:16px;">ఎటువంటి రికార్డులు లభించలేదు.</td></tr>')
+      + '</tbody>';
   }
 
   $('meta').textContent = 'Quarterly Turnaround & Growth | మొత్తం ' + rows.length + ' లో ' + list.length + ' స్టాక్స్ చూపిస్తున్నాం';
 }
-
 function exportTurnaroundToCSV(){
   const rows = DATA.turnaround || [];
   if(!rows.length){
