@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Venkey's Stock Radar</title>
 <style>
-:root{--bg:#0e1117;--card:#161b22;--line:#262d38;--tx:#e6edf3;--mut:#8b96a5;--g:#2ea043;--y:#d29922;--b:#388bfd;--r:#f85149}
+:root{--bg:#0e1117;--card:#161b22;--line:#262d38;--tx:#e6edf3;--mut:#8b96a5;--g:#2ea043;--y:#d29922;--b:#388bfd;--r:#f85149;--p:#a371f7}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,Arial,sans-serif;padding:16px;max-width:1100px;margin:auto}
 h1{margin:0 0 4px;font-size:22px}
@@ -42,8 +42,9 @@ label{color:var(--mut);font-size:13px}
 .status-green{background:rgba(46,160,67,.2);color:#3fb950;border:1px solid rgba(46,160,67,.4)}
 .status-gold{background:rgba(210,153,34,.2);color:#d29922;border:1px solid rgba(210,153,34,.4)}
 .status-red{background:rgba(248,81,73,.2);color:#f85149;border:1px solid rgba(248,81,73,.4)}
+.status-purple{background:rgba(163,113,247,.2);color:#a371f7;border:1px solid rgba(163,113,247,.4)}
 .drawer-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:9999;display:none;justify-content:flex-end}
-.drawer-content{width:100%;max-width:440px;background:#161b22;border-left:1px solid var(--line);height:100%;padding:22px;box-sizing:border-box;display:flex;flex-direction:column;overflow-y:auto}
+.drawer-content{width:100%;max-width:460px;background:#161b22;border-left:1px solid var(--line);height:100%;padding:22px;box-sizing:border-box;display:flex;flex-direction:column;overflow-y:auto}
 .drawer-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)}
 .drawer-header h3{margin:0;font-size:17px;color:var(--tx)}
 .close-btn{background:transparent;border:none;color:var(--mut);font-size:20px;cursor:pointer}
@@ -63,10 +64,11 @@ label{color:var(--mut);font-size:13px}
 .chart-link-btn{display:block;text-align:center;background:var(--b);color:#fff;text-decoration:none;padding:9px;border-radius:8px;font-size:13px;font-weight:600}
 .chart-link-btn:hover{opacity:.9}
 .nums{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+.targets-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
 .n{background:#0e1117;border-radius:8px;padding:6px 8px}
 .n small{display:block;color:var(--mut);font-size:11px}
-.n b{font-size:15px}
-.stop b{color:var(--r)}.tgt b{color:var(--g)}
+.n b{font-size:14px}
+.stop b{color:var(--r)}.tgt b{color:var(--g)}.tgt-run b{color:var(--p)}
 .exp{color:var(--mut);font-size:13px;margin-top:4px}
 .warn{margin-top:8px;color:var(--y);font-size:12.5px}
 .goodl{margin-top:8px;color:var(--g);font-size:12.5px}
@@ -78,8 +80,8 @@ label{color:var(--mut);font-size:13px}
 .st.clickable:hover{border-color:var(--b)}
 .st.active-filter{border-color:var(--b);background:rgba(56,139,253,0.18)}
 .st small{display:block;color:var(--mut);font-size:11px}
-.st b{font-size:18px}
-.pos{color:var(--g)}.neg{color:var(--r)}.amb{color:var(--y)}
+.st b{font-size:17px}
+.pos{color:var(--g)}.neg{color:var(--r)}.amb{color:var(--y)}.pur{color:var(--p)}
 .wrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}
@@ -120,7 +122,7 @@ th{color:var(--mut);font-weight:600}
 .stale{background:rgba(248,81,73,.15);border:1px solid var(--r);color:var(--r);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13.5px;font-weight:600}
 .stale.amb{background:rgba(210,153,34,.15);border-color:var(--y);color:var(--y)}
 .lst{display:grid;grid-template-columns:1fr;gap:6px}
-.lhdr,.lhead{display:grid;grid-template-columns:2fr .7fr 1.5fr .8fr .8fr .8fr 2fr 24px;gap:8px;align-items:center}
+.lhdr,.lhead{display:grid;grid-template-columns:2fr .7fr 1.5fr .8fr .8fr 1.2fr 1.8fr 24px;gap:8px;align-items:center}
 .lhdr{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:0 12px}
 .lrow{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .lhead{padding:9px 12px;cursor:pointer;font-size:13.5px}
@@ -385,6 +387,7 @@ th{color:var(--mut);font-weight:600}
 </div>
 
 <div id="miss" style="display:none">
+  <div class="note">Big movers (15%+ rally) missed by scans with diagnostic reasons.</div>
   <div class="bar">
     <select id="mscan" onchange="drawMiss()">
       <option value="">Both scans</option><option value="ultra">Ultra Short (15% in 5 days)</option><option value="short">Short Term (15% in 20 days)</option>
@@ -504,11 +507,13 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
       </div>
 
       <div class="fund" id="dr_levels_box" style="margin-top:14px">
-        <div class="ft">Key Decision Levels</div>
+        <div class="ft">Key Decision &amp; Multi-Target Levels</div>
         <div class="row"><span>Current Price</span><b id="dr_price">-</b></div>
         <div class="row"><span>Safe Stop-Loss</span><b class="neg" id="dr_stop">-</b></div>
         <div class="row"><span>Tight Stop-Loss</span><b id="dr_stop_tight" class="na">-</b></div>
-        <div class="row"><span>Target / Pivot Level</span><b class="pos" id="dr_target">-</b></div>
+        <div class="row"><span>Target 1 (Safe 1.2R / BE)</span><b class="pos" id="dr_t1">-</b></div>
+        <div class="row"><span>Target 2 (Core 2.5R)</span><b class="pos" id="dr_t2">-</b></div>
+        <div class="row"><span>Target 3 (Runner 4.5R+)</span><b class="pur" id="dr_t3">-</b></div>
         <div class="row"><span>Decision Band</span><b id="dr_stage">-</b></div>
       </div>
 
@@ -521,7 +526,8 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
         <div class="fund" style="margin-top:8px;padding-top:6px;border-top:1px dashed var(--line)">
           <div class="row"><span>కొనాల్సిన షేర్లు (Quantity)</span><b class="pos" id="dr_calc_qty" style="font-size:15px">0</b></div>
           <div class="row"><span>అవసరమైన పెట్టుబడి (Capital)</span><b id="dr_calc_cap">Rs 0</b></div>
-          <div class="row"><span>టార్గెట్ లాభం (Projected Profit)</span><b class="pos" id="dr_calc_profit">Rs 0</b></div>
+          <div class="row"><span>T1 లాభం (Book 40% &amp; Cost SL)</span><b class="pos" id="dr_calc_profit_t1">Rs 0</b></div>
+          <div class="row"><span>T2 లాభం (Core Target)</span><b class="pos" id="dr_calc_profit_t2">Rs 0</b></div>
         </div>
       </div>
 
@@ -531,7 +537,6 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
     </div>
   </div>
 </div>
-
 <script>
 const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv'};
 const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['early','exea','Early Movers'],['newl','exnl','New Listing']];
@@ -547,8 +552,9 @@ let VIEW='list';
 try{VIEW=localStorage.getItem('view')||'list';}catch(e){}
 if(VIEW!='cards') VIEW='list';
 const ROWOPEN={};
-const HDR_SCAN=['Stock','Score','Decision Status','Entry','Stop','Target','Risk / target',''];
-const HDR_E=['Stock','Score','Decision Status','Entry','Stop','Target','Risk / target',''];
+
+const HDR_SCAN=['Stock','Score','Decision Status','Entry','Stop','Targets (T1 / T2 / T3)','Risk / Target',''];
+const HDR_E=['Stock','Score','Decision Status','Entry','Stop','Targets (T1 / T2 / T3)','Risk / Target',''];
 const HDR_Q=['Stock','Score','Sector','Entry','Stop','Target','Quality',''];
 const HDR_N=['Stock','Score','Listed','Entry','Stop','Target','Since listing',''];
 const HDR_MINE=['Stock','Status','Price','Entry','Stop','Target','Performance',''];
@@ -611,6 +617,47 @@ function togRow(h){
   ROWOPEN[k]=o;
 }
 
+function getScreenerLink(sym){
+  if(!sym) return '';
+  const clean = String(sym).replace('.NS','').replace('.BO','').trim();
+  return `<a href="https://www.screener.in/company/${encodeURIComponent(clean)}/consolidated/" target="_blank" rel="noopener" class="screener-link" onclick="event.stopPropagation()">📊 Screener</a>`;
+}
+
+function getRSBadge(r){
+  if(!r) return '';
+  const rsVal = r.RS !== undefined && r.RS !== '' ? parseFloat(r.RS) : null;
+  const isLeader = r.IsLeader === 'Yes' || String(r.IsLeader).toLowerCase() === 'true';
+  let badges = '';
+  if(isLeader){
+    badges += '<span class="tag leader">👑 True Leader</span> ';
+  }
+  if(rsVal !== null && !isNaN(rsVal)){
+    badges += `<span class="tag rs">RS ${rsVal.toFixed(0)}</span>`;
+  }
+  return badges;
+}
+
+function getMultiTargets(r){
+  const en = parseFloat(r.Close || r.Entry) || 0;
+  const st = parseFloat(r.Stop) || 0;
+  const risk = Math.max(0.1, en - st);
+  const fallbackTgt = parseFloat(r.Target || r.Level) || (en + 2.0 * risk);
+
+  let t1 = r.Target1 ? parseFloat(r.Target1) : (en + 1.2 * risk);
+  let t2 = r.Target2 ? parseFloat(r.Target2) : fallbackTgt;
+  let t3 = r.Target3 ? parseFloat(r.Target3) : (en + 4.5 * risk);
+
+  let t1Pct = r.Target1Pct ? parseFloat(r.Target1Pct) : (en > 0 ? ((t1 - en) / en) * 100 : 0);
+  let t2Pct = r.Target2Pct ? parseFloat(r.Target2Pct) : (en > 0 ? ((t2 - en) / en) * 100 : 0);
+  let t3Pct = r.Target3Pct ? parseFloat(r.Target3Pct) : (en > 0 ? ((t3 - en) / en) * 100 : 0);
+
+  return {
+    t1: t1, t1Pct: t1Pct.toFixed(1),
+    t2: t2, t2Pct: t2Pct.toFixed(1),
+    t3: t3, t3Pct: t3Pct.toFixed(1)
+  };
+}
+
 function handleGlobalSearch(q){
   q = (q||'').trim().toUpperCase();
   const drop = $('search_results');
@@ -669,13 +716,13 @@ function handleGlobalSearch(q){
           activeRow: null,
           score: r.Score || '-',
           perfCount: 1,
-          lastResult: r.Result || 'Closed',
+          lastResult: r.StageResult || r.Result || 'Closed',
           close: r.ExitPrice || r.Entry || 0
         };
       } else {
         resultsMap[sym].perfCount = (resultsMap[sym].perfCount || 0) + 1;
         if(!resultsMap[sym].isActive){
-          resultsMap[sym].lastResult = r.Result || 'Closed';
+          resultsMap[sym].lastResult = r.StageResult || r.Result || 'Closed';
         }
       }
     }
@@ -748,13 +795,12 @@ function openStockLifetimeAudit(sym){
   if(activeRow){
     const entryP = +(activeRow.Close || activeRow.Entry);
     const stopP = +(activeRow.Stop || 0);
-    const tgtP = +(activeRow.Target || 0);
-    let distTgt = tgtP > 0 ? (((tgtP - currentPrice)/currentPrice)*100).toFixed(1) : '-';
+    const mt = getMultiTargets(activeRow);
     let distStop = stopP > 0 ? (((currentPrice - stopP)/currentPrice)*100).toFixed(1) : '-';
     ab.innerHTML = `<div class="status-banner banner-green" style="margin-bottom:12px;padding:10px 14px;">
       <div>
         <div class="banner-title" style="font-size:14px">🟢 ప్రస్తుతం రాడార్‌లో యాక్టివ్‌గా ఉంది (${activeTab})</div>
-        <div class="banner-sub" style="font-size:12px">Entry: Rs ${fmt(entryP)} | Stop: Rs ${fmt(stopP)} (-${distStop}%) | Target: Rs ${fmt(tgtP)} (+${distTgt}%)</div>
+        <div class="banner-sub" style="font-size:12px">Entry: Rs ${fmt(entryP)} | Stop: Rs ${fmt(stopP)} (-${distStop}%) | T1: Rs ${fmt(mt.t1)} (+${mt.t1Pct}%) | T2: Rs ${fmt(mt.t2)} (+${mt.t2Pct}%)</div>
       </div>
     </div>`;
   } else {
@@ -764,27 +810,28 @@ function openStockLifetimeAudit(sym){
   }
 
   const totalSignals = perfRows.length;
-  const targetHits = perfRows.filter(r => r.Result === 'Target hit').length;
-  const stopHits = perfRows.filter(r => r.Result === 'Stop hit').length;
-  const openCount = perfRows.filter(r => r.Result === 'Open' || r.Result === 'Pending').length;
+  const targetHits = perfRows.filter(r => r.Result === 'Target hit' || (r.StageResult && r.StageResult.includes('T1')) || (r.StageResult && r.StageResult.includes('T2'))).length;
+  const stopHits = perfRows.filter(r => r.Result === 'Stop hit' && (!r.StageResult || !r.StageResult.includes('Trailed'))).length;
+  const trailedCount = perfRows.filter(r => r.Result === 'Trailed SL' || (r.StageResult && r.StageResult.includes('Trailed'))).length;
   const hitRate = (targetHits + stopHits) > 0 ? Math.round((targetHits / (targetHits + stopHits)) * 100) + '%' : '-';
 
   const box = (lbl, val, cls) => `<div class="st"><small>${lbl}</small><b class="${cls||''}">${val}</b></div>`;
   $('hist_stats_summary').innerHTML = box('మొత్తం సిగ్నల్స్', totalSignals || (activeRow ? '1 (Active)' : '0'))
-    + box('Target Hit 🎯', targetHits, 'pos')
+    + box('Target Reached 🎯', targetHits, 'pos')
+    + box('Trailed SL (No-Loss) 🛡️', trailedCount, 'amb')
     + box('Stop Hit 🛑', stopHits, 'neg')
-    + box('Open / Active', openCount + (activeRow && !openCount ? 1 : 0), 'amb')
     + box('చారిత్రక విన్-రేట్', hitRate, 'pos');
 
   if(!perfRows.length){
     if(activeRow){
-      $('hist_table').innerHTML = `<tr><th>సిగ్నల్ తేదీ</th><th>ట్యాబ్ (Scan)</th><th>ఎంట్రీ</th><th>స్టాప్‌లాస్</th><th>టార్గెట్</th><th>ముగింపు తేదీ</th><th>ఫలితం</th><th>పీక్ ర్యాలీ</th><th>P/L %</th></tr>
+      const mt = getMultiTargets(activeRow);
+      $('hist_table').innerHTML = `<tr><th>సిగ్నల్ తేదీ</th><th>ట్యాబ్ (Scan)</th><th>ఎంట్రీ</th><th>స్టాప్‌లాస్</th><th>T1 / T2 టార్గెట్స్</th><th>ముగింపు తేదీ</th><th>ఫలితం</th><th>పీక్ ర్యాలీ</th><th>P/L %</th></tr>
       <tr>
         <td>${activeRow.Date || '-'}</td>
         <td><b>${activeTab}</b></td>
         <td>Rs ${fmt(activeRow.Entry || activeRow.Close)}</td>
         <td class="neg">Rs ${fmt(activeRow.Stop)}</td>
-        <td class="pos">Rs ${fmt(activeRow.Target)}</td>
+        <td class="pos">T1: Rs ${fmt(mt.t1)}<br>T2: Rs ${fmt(mt.t2)}</td>
         <td>-</td>
         <td><span class="status-pill status-green">Open (Active)</span></td>
         <td class="pos">+${activeRow.GainPct || '0.0'}%</td>
@@ -794,12 +841,15 @@ function openStockLifetimeAudit(sym){
       $('hist_table').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:16px;color:var(--mut);">ఈ స్టాక్‌కు సంబంధించి ఎలాంటి గత సిగ్నల్స్ నమోదు కాలేదు.</td></tr>';
     }
   } else {
-    $('hist_table').innerHTML = `<tr><th>సిగ్నల్ తేదీ</th><th>ట్యాబ్ (Scan)</th><th>ఎంట్రీ</th><th>స్టాప్‌లాస్</th><th>టార్గెట్</th><th>ముగింపు తేదీ</th><th>ఫలితం</th><th>పీక్ ర్యాలీ</th><th>నికర లాభనష్టం</th></tr>`
+    $('hist_table').innerHTML = `<tr><th>సిగ్నల్ తేదీ</th><th>ట్యాబ్ (Scan)</th><th>ఎంట్రీ</th><th>స్టాప్‌లాస్</th><th>T1 / T2 టార్గెట్స్</th><th>ముగింపు తేదీ</th><th>స్టేజ్ ఫలితం</th><th>పీక్ ర్యాలీ</th><th>నికర లాభనష్టం</th></tr>`
       + perfRows.map(r => {
-        let resBadge = r.Result;
-        if(r.Result === 'Target hit') resBadge = '<b class="pos">Target hit 🎯</b>';
-        else if(r.Result === 'Stop hit') resBadge = '<b class="neg">Stop hit 🛑</b>';
-        else if(r.Result === 'Open' || r.Result === 'Pending') resBadge = '<span class="status-pill status-green">Open ⏳</span>';
+        let resBadge = r.StageResult || r.Result;
+        if(resBadge.includes('T3')) resBadge = '<b class="pur">T3 Hit 🚀</b>';
+        else if(resBadge.includes('T2')) resBadge = '<b class="pos">T2 Hit 🎯🎯</b>';
+        else if(resBadge.includes('T1')) resBadge = '<b class="pos">T1 Hit 🎯</b>';
+        else if(resBadge.includes('Trailed')) resBadge = '<b class="amb">Trailed SL 🛡️</b>';
+        else if(resBadge.includes('Stop')) resBadge = '<b class="neg">Stop hit 🛑</b>';
+        else if(resBadge === 'Open' || resBadge === 'Pending' || resBadge === 'Active') resBadge = '<span class="status-pill status-green">Open ⏳</span>';
 
         const pnl = r.PnLPct !== '' ? (parseFloat(r.PnLPct) >= 0 ? '+' : '') + r.PnLPct + '%' : '-';
         const pnlCls = r.PnLPct !== '' ? (parseFloat(r.PnLPct) >= 0 ? 'pos' : 'neg') : '';
@@ -808,12 +858,15 @@ function openStockLifetimeAudit(sym){
         const peakTxt = (!isNaN(peak) && peak > 0) ? `+${peak.toFixed(1)}%` : '-';
         const scanName = SCAN_LBL[r.Scan] || r.Scan;
 
+        const t1Display = r.Target1 ? `T1: Rs ${fmt(r.Target1)}` : `Tgt: Rs ${fmt(r.Target)}`;
+        const t2Display = r.Target2 ? `<br><small style="color:var(--mut)">T2: Rs ${fmt(r.Target2)}</small>` : '';
+
         return `<tr>
           <td>${r.SignalDate || '-'}</td>
           <td><b>${scanName}</b></td>
           <td>Rs ${fmt(r.Entry)}</td>
           <td class="neg">Rs ${fmt(r.Stop)}</td>
-          <td class="pos">Rs ${fmt(r.Target)}</td>
+          <td class="pos">${t1Display}${t2Display}</td>
           <td>${r.ResultDate || (r.Result==='Open'?'నడుస్తోంది':'-')}</td>
           <td>${resBadge}</td>
           <td class="pos" style="font-weight:700">${peakTxt}</td>
@@ -833,97 +886,6 @@ document.addEventListener('click', e => {
     if(drop) drop.style.display='none';
   }
 });
-  function getScreenerLink(sym){
-  if(!sym) return '';
-  const clean = String(sym).replace('.NS','').replace('.BO','').trim();
-  return `<a href="https://www.screener.in/company/${encodeURIComponent(clean)}/consolidated/" target="_blank" rel="noopener" class="screener-link" onclick="event.stopPropagation()">📊 Screener</a>`;
-}
-
-function getRSBadge(r){
-  if(!r) return '';
-  const rsVal = r.RS !== undefined && r.RS !== '' ? parseFloat(r.RS) : null;
-  const isLeader = r.IsLeader === 'Yes' || String(r.IsLeader).toLowerCase() === 'true';
-  let badges = '';
-  if(isLeader){
-    badges += '<span class="tag leader">👑 True Leader</span> ';
-  }
-  if(rsVal !== null && !isNaN(rsVal)){
-    badges += `<span class="tag rs">RS ${rsVal.toFixed(0)}</span>`;
-  }
-  return badges;
-}
-
-function exportToExcel(){
-  const tab = cur;
-  let filename = (tab || 'stocks') + '_export.csv';
-
-  if(tab === 'mine'){
-    const mine = loadMine();
-    if(!mine || !mine.length){
-      alert('My Stocks lo export cheyadaniki data ledu!');
-      return;
-    }
-    filename = 'my_stocks_portfolio.csv';
-    let csv = 'Symbol,Status,Buy Price,Current Price,Entry,Stop Loss,Target,Return %,Trailing Alert,Trailing Stop Level\n';
-    mine.forEach(r => {
-      const c = curPrice({sym: r.sym});
-      const curP = c ? c.p : (r.lastPrice || r.buyPrice || 0);
-      const buyP = r.buyPrice || r.entry || curP;
-      const pct = buyP > 0 ? (((curP - buyP) / buyP) * 100).toFixed(2) : '0.00';
-      const tr = typeof getTrailingAdvice === 'function' ? getTrailingAdvice(r, curP) : null;
-      const trailAlert = tr ? tr.level : 'No Alert';
-      const trailStop = (tr && tr.suggestedStop) ? tr.suggestedStop : (r.stop || 'n/a');
-      csv += [r.sym, r.status || 'Watching', buyP, curP, r.entry || 'n/a', r.stop || 'n/a', r.target || 'n/a', pct + '%', '"' + trailAlert + '"', trailStop].join(',') + '\n';
-    });
-    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    return;
-  }
-
-  const rows = DATA[tab] || [];
-  if(!rows.length){
-    alert('Download cheyadaniki ee tab lo data ledu!');
-    return;
-  }
-
-  let exportRows = [];
-  if(tab == 'early'){
-    const b = $('yband').value, sg = $('ystage').value, hz = $('yhor').value;
-    exportRows = rows.filter(r => (!b || r.Band == b) && (!sg || r.Stage == sg) && (!hz || r.Horizon == hz));
-  } else if(tab == 'multi'){
-    const b = $('mband2').value, mc = $('mcap').value, sc = $('msector').value;
-    exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc) && (!mc || (+r.MarketCapCr) <= (+mc)));
-  } else if(tab == 'quality'){
-    const b = $('qband_sel').value, sc = $('qsector').value;
-    exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc));
-  } else {
-    exportRows = rows;
-  }
-
-  if(!exportRows.length){
-    alert('Filters ki taggattu data ledu!');
-    return;
-  }
-
-  const headers = Object.keys(exportRows[0]);
-  let csv = headers.join(',') + '\n';
-  exportRows.forEach(r => {
-    csv += headers.map(h => '"' + (r[h] !== undefined ? String(r[h]).replace(/"/g, '""') : '') + '"').join(',') + '\n';
-  });
-
-  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.setAttribute('download', filename);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
 
 function calcPositionSize(){
   if(!ACTIVE_ROW) return;
@@ -931,10 +893,9 @@ function calcPositionSize(){
   const userRisk = parseFloat($('dr_user_risk').value) || 0;
   const entry = parseFloat(r.Close || r.Entry) || 0;
   const stop = parseFloat(r.Stop) || 0;
-  const target = parseFloat(r.Target || r.Level) || 0;
+  const mt = getMultiTargets(r);
   
   const riskPerShare = Math.max(0.1, entry - stop);
-  const rewardPerShare = Math.max(0, target - entry);
   
   let qty = 0;
   if(riskPerShare > 0 && userRisk > 0){
@@ -942,36 +903,13 @@ function calcPositionSize(){
   }
   
   const totalCap = qty * entry;
-  const totalProfit = qty * rewardPerShare;
+  const profitT1 = (qty * 0.40) * Math.max(0, mt.t1 - entry);
+  const profitT2 = qty * Math.max(0, mt.t2 - entry);
   
   $('dr_calc_qty').textContent = qty.toLocaleString('en-IN') + ' shares';
   $('dr_calc_cap').textContent = 'Rs ' + totalCap.toLocaleString('en-IN', {maximumFractionDigits: 0});
-  $('dr_calc_profit').textContent = '+Rs ' + totalProfit.toLocaleString('en-IN', {maximumFractionDigits: 0});
-}
-
-let EARLY_MAP={};
-
-function getStageMeta(r){
-  let badge=r.StageBadge;
-  let color=r.StageColor;
-  let code=r.StageCode;
-
-  if(!badge||badge==='WATCH'||badge==='-'){
-    if(r.Stage==='Fresh'||r.Band==='High Conviction'){
-      badge='PRIME ENTRY';
-      color='green';
-      code=r.Stage?'Stage 2A':'High Conviction';
-    }else if(r.Stage==='Ready'||r.Band==='Good Setup'){
-      badge='WATCHLIST';
-      color='gold';
-      code=r.Stage?'Stage 1B':'Good Setup';
-    }else{
-      badge='AVOID';
-      color='red';
-      code=r.Stage?'Stage 2B':'Early Watch';
-    }
-  }
-  return {badge,color,code};
+  $('dr_calc_profit_t1').textContent = '+Rs ' + profitT1.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  $('dr_calc_profit_t2').textContent = '+Rs ' + profitT2.toLocaleString('en-IN', {maximumFractionDigits: 0});
 }
 
 function openRationale(sym, tabType){
@@ -1029,41 +967,12 @@ function openRationale(sym, tabType){
       lines[lines.length - 1].desc += mWarning;
     }
   } else {
-    if(tab === 'early'){
-      if(r.Stage === 'Fresh'){
-        lines = [
-          {title: 'Early Breakout Zone', desc: `బ్రేక్‌అవుట్ లెవెల్ నుండి ధర కేవలం ${r.GainPct}% మాత్రమే పెరిగింది.`},
-          {title: 'Volume Confirmation', desc: `సాధారణ యావరేజ్ కంటే ${r.VolRatio||'2.0'}x రెట్లు అధిక వాల్యూమ్‌తో బ్రేక్‌అవుట్ నమోదైంది.`},
-          {title: 'Defined Risk:Reward', desc: `స్టాప్-లాస్ కేవలం ${r.StopDistPct}% దూరంలో ఉంది (రూ. ${fmt(r.Stop)}). రివార్డ్:రిస్క్ నిష్పత్తి 1:${r.RR} తో అనుకూలంగా ఉంది.`},
-          {title: 'Sector Support', desc: `${r.Sector||'ముందంజలో ఉన్న'} రంగానికి చెందినది. మల్టీ-వీక్ బేస్ నుండి పటిష్టమైన బ్రేక్‌అవుట్ వచ్చింది.${mWarning}`}
-        ];
-      } else {
-        lines = [
-          {title: 'Pivot Resistance Testing', desc: `రెసిస్టెన్స్ లెవెల్ (రూ. ${fmt(r.Level)}) కు కేవలం ${Math.abs(r.GainPct)}% సమీపంలో కన్సాలిడేట్ అవుతోంది.`},
-          {title: 'Volume Dry-Up (VCP)', desc: 'వాల్యూమ్ బాగా డ్రై అయిపోయింది. సెల్లింగ్ ఒత్తిడి దాదాపు శూన్యమైంది.'},
-          {title: 'Action Plan', desc: `తొందరపడి కొనకండి. బలమైన వాల్యూమ్‌తో బ్రేక్‌అవుట్ కన్ఫర్మ్ అయినప్పుడు ఎంట్రీ తీసుకోండి.${mWarning}`}
-        ];
-      }
-    } else {
-      const isVcp = (r.Reasons && r.Reasons.includes('coiling')) || (r.Setup && r.Setup.includes('Base'));
-      const isDry = (r.Reasons && r.Reasons.includes('dried up')) || (+r.VolRatio < 1.0);
-      
-      let vcpText = 'Technical Breakout setup గుర్తించబడింది.';
-      if(isVcp && isDry) vcpText = '💎 VCP Price Contraction మరియు Volume Dry-up setup చాలా బలంగా నమోదైంది.';
-      else if(isVcp) vcpText = '💎 VCP Price Contraction తో రేంజ్ టైట్ అయ్యి Breakout కి సిద్ధంగా ఉంది.';
-      
-      let stopSentence = 'Safe Stop Rs ' + fmt(r.Stop) + ' (' + r.StopDistPct + '% risk)';
-      if(has(r.StopTight)){
-        stopSentence += ', Tight Stop Rs ' + fmt(r.StopTight);
-      }
-      
-      lines = [
-        {title: 'Setup & Pattern', desc: `${vcpText} Momentum Score ${r.Score}/100 తో బలంగా ఉంది.`},
-        {title: 'Risk Management', desc: `${stopSentence}. Reward:Risk ratio 1:${r.RR||'2.0'} తో ట్రేడింగ్‌కు అనుకూలంగా ఉంది.${mWarning}`},
-        {title: 'Target Projection', desc: `Chart structure & Resistance ఆధారంగా Target Rs ${fmt(r.Target||r.Level)} (+${r.TargetPct||''}%) లెక్కించబడింది.`},
-        {title: 'Trend & Moving Averages', desc: `Short-term trend Bullish గా ఉంది. కీలకమైన 20-DMA మరియు 50-DMA support పైన నిలకడగా ట్రేడ్ అవుతోంది.`}
-      ];
-    }
+    const mt = getMultiTargets(r);
+    lines = [
+      {title: 'Multi-Target Strategy', desc: `T1 Rs ${fmt(mt.t1)} (+${mt.t1Pct}%) వద్ద 40% ప్రాఫిట్ బుక్ చేసి, SL ను కొన్న ధరకు మార్చండి. T2 Rs ${fmt(mt.t2)} (+${mt.t2Pct}%) కోర్ టార్గెట్.`},
+      {title: 'Risk Management', desc: `Safe Stop Rs ${fmt(r.Stop)} (${r.StopDistPct}% రిస్క్). Reward:Risk 1:${r.RR||'2.0'} తో ట్రేడింగ్‌కు అనుకూలంగా ఉంది.${mWarning}`},
+      {title: 'Runner Potential', desc: `T3 Extended Target Rs ${fmt(mt.t3)} (+${mt.t3Pct}%) వద్ద భారీ ర్యాలీ కోసం రన్నర్ క్వాంటిటీని రైడ్ చేయవచ్చు.`}
+    ];
   }
   
   lines.forEach((item, idx)=>{
@@ -1073,6 +982,7 @@ function openRationale(sym, tabType){
     ctn.appendChild(el);
   });
   
+  const mt = getMultiTargets(r);
   $('dr_price').textContent = 'Rs ' + fmt(r.Close || r.Entry);
   $('dr_stop').textContent = 'Rs ' + fmt(r.Stop) + ' (' + r.StopDistPct + '% రిస్క్)';
   
@@ -1086,7 +996,9 @@ function openRationale(sym, tabType){
     }
   }
   
-  $('dr_target').textContent = 'Rs ' + fmt(r.Target || r.Level) + ' (+' + (r.TargetPct || '') + '%)';
+  $('dr_t1').textContent = 'Rs ' + fmt(mt.t1) + ' (+' + mt.t1Pct + '%)';
+  $('dr_t2').textContent = 'Rs ' + fmt(mt.t2) + ' (+' + mt.t2Pct + '%)';
+  $('dr_t3').textContent = 'Rs ' + fmt(mt.t3) + ' (+' + mt.t3Pct + '%)';
   $('dr_stage').textContent = meta.code;
   $('dr_chart_link').href = 'https://in.tradingview.com/chart/?symbol=NSE:' + encodeURIComponent(r.Symbol);
   
@@ -1159,8 +1071,20 @@ function rowCells(tab,r,ns){
   if(tab=='ultra'||tab=='short'||tab=='early'){
     const meta=getStageMeta(r);
     const trendBadge = getTrendDaysMeta(r.Symbol, tab);
+    const mt = getMultiTargets(r);
     info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span> ' + trendBadge + rowVcp + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
-    extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
+    extra='Risk '+r.StopDistPct+'% &middot; T1 +'+mt.t1Pct+'% &middot; T2 +'+mt.t2Pct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
+
+    const tgCell = `<span><b class="g">T1: ${fmt(mt.t1)}</b><br><small style="color:var(--mut)">T2: ${fmt(mt.t2)}</small></span>`;
+
+    return '<span><b>'+esc(r.Symbol)+'</b>'+screenerBtn+rowSurv+'</span>'
+      +'<span><span class="score '+cls+'">'+r.Score+'</span></span>'
+      +'<span class="hm">'+info+'</span>'
+      +'<span>'+fmt(r.Entry)+'</span>'
+      +'<span class="r">'+fmt(r.Stop)+'</span>'
+      +tgCell
+      +'<span class="hm">'+extra+'</span>'
+      +al;
   } else if(tab=='newl'){
     info=esc(r.ListedOn||'n/a') + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
     extra='Since listing '+r['ChangeSinceListing%']+'% &middot; '+r.DataDays+' days of data';
@@ -1177,8 +1101,7 @@ function rowCells(tab,r,ns){
     +'<span class="hm">'+extra+'</span>'
     +al;
 }
-
-let PROF={};
+  let PROF={};
 function profHtml(sym){
   const p=PROF[sym];
   if(!p) return '';
@@ -1221,7 +1144,8 @@ function renderItems(id,tab,items,hdr,emptyMsg){
         +'<div class="lbody" style="display:'+(o?'block':'none')+'">'+i.card+'</div></div>';
     }).join('');
 }
-  function parseCSV(t){
+
+function parseCSV(t){
   const rows=[];let r=[],f='',q=false;
   for(let i=0;i<t.length;i++){
     const c=t[i];
@@ -1261,11 +1185,13 @@ function has(v){return v!==undefined&&v!==null&&String(v).trim()!=='';}
 function roeLbl(r){return (r&&r.Sector=='Financial Services')?'ROE':'ROCE';}
 
 function lvlHtml(r){
-  if(!has(r.StopReason)&&!has(r.TargetReason)&&!has(r.RR)) return '';
-  return '<div class="why"><div class="ft">Why these levels?</div>'
+  const mt = getMultiTargets(r);
+  return '<div class="why"><div class="ft">Multi-Target Blueprint &amp; Trailing Levels</div>'
+    +'<div>&#8226; <b>Target 1:</b> Rs '+fmt(mt.t1)+' (+'+mt.t1Pct+'%) &rarr; <i>Book 40% &amp; Trail SL to Cost (Zero Risk)</i></div>'
+    +'<div>&#8226; <b>Target 2:</b> Rs '+fmt(mt.t2)+' (+'+mt.t2Pct+'%) &rarr; <i>Core Swing Target (Lock Gains)</i></div>'
+    +'<div>&#8226; <b>Target 3:</b> Rs '+fmt(mt.t3)+' (+'+mt.t3Pct+'%) &rarr; <i>Runner Extension</i></div>'
     +(has(r.RR)?'<div>&#8226; Reward:Risk 1:'+esc(r.RR)+'</div>':'')
-    +(has(r.StopReason)?'<div>&#8226; Stop: '+esc(r.StopReason)+'</div>':'')
-    +(has(r.TargetReason)?'<div>&#8226; Target: '+esc(r.TargetReason)+'</div>':'')
+    +(has(r.StopReason)?'<div>&#8226; Stop Basis: '+esc(r.StopReason)+'</div>':'')
     +'</div>';
 }
 
@@ -1682,6 +1608,7 @@ function draw(){
   const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
     const meta=getStageMeta(r);
+    const mt = getMultiTargets(r);
     
     let vcpTag = '';
     if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
@@ -1722,10 +1649,15 @@ function draw(){
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Safe Stop ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b>'+(has(r.StopTight)?'<small style="font-size:10px;color:var(--mut)">Tight: Rs '+fmt(r.StopTight)+'</small>':'')+'</div>'
-    +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
+    +'<div class="n tgt"><small>T1 Safe (+'+mt.t1Pct+'%)</small><b>'+fmt(mt.t1)+'</b></div></div>'
+    +'<div class="targets-grid">'
+    +'<div class="n tgt"><small>T1 (+'+mt.t1Pct+'%) [Book 40%]</small><b>Rs '+fmt(mt.t1)+'</b></div>'
+    +'<div class="n tgt"><small>T2 (+'+mt.t2Pct+'%) [Core]</small><b>Rs '+fmt(mt.t2)+'</b></div>'
+    +'<div class="n tgt-run"><small>T3 (+'+mt.t3Pct+'%) [Runner]</small><b>Rs '+fmt(mt.t3)+'</b></div>'
+    +'</div>'
     +'<div class="exp">'+explain(r)+' Last close: '+fmt(r.Close)+'.</div>'
     +chartBtn(r)
-    +'<div style="font-size:11.5px;color:var(--b);margin-top:8px">&#9432; Tap card to inspect deep rationale &amp; position sizer</div>'
+    +'<div style="font-size:11.5px;color:var(--b);margin-top:8px">&#9432; Tap card to inspect multi-targets, rationale &amp; position sizer</div>'
     +(r.Boosters?'<div class="exp">Boosters: '+tr(r.Boosters)+'</div>':'')
     +lvlHtml(r)
     +why
@@ -1751,8 +1683,7 @@ function draw(){
   }
   $('chg').innerHTML='<div class="note"><b>Changes since yesterday:</b> '+newLine+'<br>'+remLine+'</div>';
 }
-
-function drawMulti(){
+  function drawMulti(){
   const rows=DATA.multi||[];
   const sel=$('msector');
   const secs=[...new Set(rows.map(r=>r.Sector).filter(Boolean))].sort();
@@ -1938,6 +1869,7 @@ function drawEarly(){
   const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
     const meta=getStageMeta(r);
+    const mt = getMultiTargets(r);
 
     let vcpTag = '';
     if(r.IsVCP === 'Yes'){
@@ -1974,11 +1906,16 @@ function drawEarly(){
     +'<div class="tags">'+tags+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
-    +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
-    +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
+    +'<div class="n stop"><small>Safe Stop ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
+    +'<div class="n tgt"><small>T1 Safe (+'+mt.t1Pct+'%)</small><b>'+fmt(mt.t1)+'</b></div></div>'
+    +'<div class="targets-grid">'
+    +'<div class="n tgt"><small>T1 (+'+mt.t1Pct+'%) [Book 40%]</small><b>Rs '+fmt(mt.t1)+'</b></div>'
+    +'<div class="n tgt"><small>T2 (+'+mt.t2Pct+'%) [Core]</small><b>Rs '+fmt(mt.t2)+'</b></div>'
+    +'<div class="n tgt-run"><small>T3 (+'+mt.t3Pct+'%) [Runner]</small><b>Rs '+fmt(mt.t3)+'</b></div>'
+    +'</div>'
     +'<div class="exp">'+ex+' Last close: '+fmt(r.Close)+'.</div>'
     +chartBtn(r)
-    +'<div style="font-size:11.5px;color:var(--b);margin-top:8px">&#9432; Tap card to inspect deep rationale &amp; position sizer</div>'
+    +'<div style="font-size:11.5px;color:var(--b);margin-top:8px">&#9432; Tap card to inspect multi-targets, rationale &amp; position sizer</div>'
     +lvlHtml(r)
     +why
     +'<div class="fund"><div class="ft">Fundamentals check</div>'
@@ -2327,17 +2264,6 @@ function resetPerf(){
   drawPerf();
 }
 
-function wsStat(rr){
-  const st=rr.filter(r=>r.Result=='Stop hit');
-  const y=st.filter(r=>r.Whipsaw=='Yes').length;
-  const n=st.filter(r=>r.Whipsaw=='No').length;
-  return {y:y,n:n,u:st.length-y-n,pct:(y+n)?Math.round(y*100/(y+n)):null};
-}
-function wsTxt(w){
-  if(w.pct===null) return 'n/a';
-  return w.pct+'% ('+w.y+' of '+(w.y+w.n)+')';
-}
-
 function drawPerf(){
   const sc=$('pscan').value, bd=$('pband').value, cl=$('pclass').value, f=$('pfrom').value, t=$('pto').value, rd=$('prad').value;
   const vcpFilter = $('pvcp') ? $('pvcp').value : '';
@@ -2372,65 +2298,58 @@ function drawPerf(){
     return true;
   }).sort((a,b)=>b.SignalDate.localeCompare(a.SignalDate)||b.Score-a.Score);
 
-  const cnt=k=>baseRows.filter(r=>r.Result==k).length;
-  const win=cnt('Target hit'), loss=cnt('Stop hit');
-  const openPendingCnt = cnt('Open') + cnt('Pending');
-  const withPnl=baseRows.filter(r=>r.PnLPct!=='');
-  const avg=withPnl.length?withPnl.reduce((a,r)=>a+(+r.PnLPct),0)/withPnl.length:0;
-  const rate=(win+loss)?Math.round(win*100/(win+loss))+'%':'-';
-  
-  const isWhipsawCandidate = (r) => {
-    if(r.Result !== 'Stop hit') return false;
-    if(r.Whipsaw === 'Yes' || (r.DaysToTargetAfterStop && r.DaysToTargetAfterStop !== '')) return true;
-    const maxBounce = parseFloat(r.AfterStopMaxPct);
-    return (!isNaN(maxBounce) && maxBounce >= 5.0);
-  };
+  const t1Hits = baseRows.filter(r => (r.StageResult && r.StageResult.includes('T1')) || (r.T1Date && r.T1Date !== '')).length;
+  const t2Hits = baseRows.filter(r => (r.StageResult && r.StageResult.includes('T2')) || (r.T2Date && r.T2Date !== '') || r.Result === 'Target hit').length;
+  const t3Hits = baseRows.filter(r => (r.StageResult && r.StageResult.includes('T3')) || (r.T3Date && r.T3Date !== '')).length;
+  const trailedHits = baseRows.filter(r => r.Result === 'Trailed SL' || (r.StageResult && r.StageResult.includes('Trailed'))).length;
+  const realStopHits = baseRows.filter(r => r.Result === 'Stop hit' && (!r.StageResult || !r.StageResult.includes('Trailed'))).length;
+  const openPendingCnt = baseRows.filter(r => r.Result === 'Open' || r.Result === 'Pending').length;
 
-  const wsRows = baseRows.filter(isWhipsawCandidate);
-  const wsCount = wsRows.length;
-  const wsPct = loss > 0 ? Math.round((wsCount / loss) * 100) + '%' : '0%';
-  const survCount = baseRows.filter(r=>getSurvMeta(r)).length;
+  const withPnl = baseRows.filter(r=>r.PnLPct!=='');
+  const avg = withPnl.length ? withPnl.reduce((a,r)=>a+(+r.PnLPct),0)/withPnl.length : 0;
+  
+  const closedSignals = t1Hits + realStopHits;
+  const t1WinRate = closedSignals > 0 ? Math.round((t1Hits / closedSignals) * 100) + '%' : '-';
 
   const cardBox=(label, val, cls, filterKey)=>{
     const isAct = (PERF_RESULT_FILTER === filterKey);
     const actCls = isAct ? ' active-filter' : '';
     const clickAttr = filterKey !== null ? ` onclick="filterPerfByResult('${filterKey}')"` : '';
     const cursorCls = filterKey !== null ? ' clickable' : '';
-    return `<div class="st${cursorCls}${actCls}"${clickAttr} title="క్లిక్ చేసి ${label} స్టాక్స్ మాత్రమే చూడండి"><small>${label}</small><b class="${cls||''}">${val}</b></div>`;
+    return `<div class="st${cursorCls}${actCls}"${clickAttr} title="క్లిక్ చేసి ${label} మాత్రమే చూడండి"><small>${label}</small><b class="${cls||''}">${val}</b></div>`;
   };
 
-  $('pstats').innerHTML = cardBox('Signals', baseRows.length, '', '')
-    + cardBox('Target hit', win, 'pos', 'Target hit')
-    + cardBox('Stop hit', loss, 'neg', 'Stop hit')
-    + cardBox('Whipsaw (Fake Stop 5%+)', `${wsCount} (${wsPct})`, 'amb', 'Whipsaw')
-    + cardBox('⚠️ ASM/GSM', survCount, 'amb', 'Surveillance')
-    + cardBox('Open / Pending', openPendingCnt, '', 'OpenPending')
-    + cardBox('Hit rate', rate, '', null)
+  $('pstats').innerHTML = cardBox('Total Signals', baseRows.length, '', '')
+    + cardBox('T1 Hit (Safe Win) 🎯', t1Hits, 'pos', 'T1 Hit')
+    + cardBox('T2 Hit (Core Target) 🎯🎯', t2Hits, 'pos', 'T2 Hit')
+    + cardBox('T3 Hit (Mega Runner) 🚀', t3Hits, 'pur', 'T3 Hit')
+    + cardBox('Trailed SL (Cost SL) 🛡️', trailedHits, 'amb', 'Trailed SL')
+    + cardBox('Stop hit (Full Risk) 🛑', realStopHits, 'neg', 'Stop hit')
+    + cardBox('T1 Safe Win-Rate', t1WinRate, 'pos', null)
     + cardBox('Avg return %', avg.toFixed(2)+'%', avg>=0?'pos':'neg', null);
 
   const displayRows = baseRows.filter(r=>{
     if(!PERF_RESULT_FILTER) return true;
-    if(PERF_RESULT_FILTER === 'OpenPending') return (r.Result === 'Open' || r.Result === 'Pending');
-    if(PERF_RESULT_FILTER === 'Whipsaw') return isWhipsawCandidate(r);
-    if(PERF_RESULT_FILTER === 'Surveillance') return !!getSurvMeta(r);
+    if(PERF_RESULT_FILTER === 'T1 Hit') return (r.StageResult && r.StageResult.includes('T1')) || (r.T1Date && r.T1Date !== '');
+    if(PERF_RESULT_FILTER === 'T2 Hit') return (r.StageResult && r.StageResult.includes('T2')) || (r.T2Date && r.T2Date !== '') || r.Result === 'Target hit';
+    if(PERF_RESULT_FILTER === 'T3 Hit') return (r.StageResult && r.StageResult.includes('T3')) || (r.T3Date && r.T3Date !== '');
+    if(PERF_RESULT_FILTER === 'Trailed SL') return r.Result === 'Trailed SL' || (r.StageResult && r.StageResult.includes('Trailed'));
+    if(PERF_RESULT_FILTER === 'Stop hit') return r.Result === 'Stop hit' && (!r.StageResult || !r.StageResult.includes('Trailed'));
     return r.Result === PERF_RESULT_FILTER;
   });
 
   window._lastPerfFiltered = displayRows;
     
-  $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Setup</th><th>Score</th><th>Entry</th><th>Stop</th><th>Target</th><th>Result</th><th>Exit/Last</th><th>P/L %</th><th>Peak Gain % (పీక్ ర్యాలీ)</th><th>Whipsaw?</th></tr>'
+  $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Setup</th><th>Score</th><th>Entry</th><th>Stop</th><th>T1 / T2 / T3</th><th>Stage Result</th><th>Exit/Last</th><th>P/L %</th><th>Peak Gain %</th></tr>'
    +(displayRows.length?displayRows.map(r=>{
      const c=r.PnLPct===''?'':(+r.PnLPct>=0?'pos':'neg');
-     const isFullWs = r.Whipsaw === 'Yes' || (r.DaysToTargetAfterStop && r.DaysToTargetAfterStop !== '');
-     const maxBounce = parseFloat(r.AfterStopMaxPct);
-     const isBounce5 = !isNaN(maxBounce) && maxBounce >= 5.0;
-     
-     let wsBadge = '-';
-     if(r.Result === 'Stop hit'){
-       if(isFullWs) wsBadge = '<span class="pos" style="font-weight:700">Hit Target</span>';
-       else if(isBounce5) wsBadge = '<span class="amb" style="font-weight:700">Bounce 5%+</span>';
-       else wsBadge = '<span style="color:var(--mut)">No</span>';
-     }
+     let stBadge = r.StageResult || r.Result;
+     if(stBadge.includes('T3')) stBadge = '<span class="status-pill status-purple">T3 Hit 🚀</span>';
+     else if(stBadge.includes('T2')) stBadge = '<span class="status-pill status-green">T2 Hit 🎯🎯</span>';
+     else if(stBadge.includes('T1')) stBadge = '<span class="status-pill status-green">T1 Hit 🎯</span>';
+     else if(stBadge.includes('Trailed')) stBadge = '<span class="status-pill status-gold">Trailed SL 🛡️</span>';
+     else if(stBadge.includes('Stop')) stBadge = '<span class="status-pill status-red">Stop hit 🛑</span>';
+     else if(stBadge === 'Open' || stBadge === 'Pending' || stBadge === 'Active') stBadge = '<span class="status-pill status-green">Open ⏳</span>';
 
      const peakGainVal = parseFloat(r.PeakGainPct);
      const hasPeak = !isNaN(peakGainVal) && peakGainVal > 0;
@@ -2444,14 +2363,18 @@ function drawPerf(){
      const survBadge = sm ? ` ${sm.tag}` : '';
      const screenerBtn = getScreenerLink(r.Symbol);
 
-     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b>'+screenerBtn+vcpBadge+survBadge+'</td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td><td class="'+peakCls+'" style="font-weight:700">'+peakGainTxt+'</td><td>'+wsBadge+'</td></tr>';
-   }).join(''):'<tr><td colspan="13">ఈ ఫిల్టర్‌కు సరిపోయే సిగ్నల్స్ లేవు.</td></tr>');
+     const t1Txt = r.Target1 ? `T1: ${fmt(r.Target1)}` : `Tgt: ${fmt(r.Target)}`;
+     const t2Txt = r.Target2 ? `<br><small style="color:var(--g)">T2: ${fmt(r.Target2)}</small>` : '';
+     const t3Txt = r.Target3 ? `<br><small style="color:var(--p)">T3: ${fmt(r.Target3)}</small>` : '';
+
+     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b>'+screenerBtn+vcpBadge+survBadge+'</td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td><b>'+t1Txt+'</b>'+t2Txt+t3Txt+'</td><td>'+stBadge+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td><td class="'+peakCls+'" style="font-weight:700">'+peakGainTxt+'</td></tr>';
+   }).join(''):'<tr><td colspan="12">ఈ ఫిల్టర్‌కు సరిపోయే సిగ్నల్స్ లేవు.</td></tr>');
    
   const filterLabel = PERF_RESULT_FILTER ? ` [ఫిల్టర్: ${PERF_RESULT_FILTER}]` : '';
   const vcpLabel = vcpFilter === 'vcp' ? ' [💎 VCP Setups Only]' : '';
   const survLabel = survFilter === 'surv' ? ' [⚠️ ASM/GSM Only]' : (survFilter === 'safe' ? ' [🛡️ Safe Only]' : '');
   const bandTxt = bd == 'high' ? ' [High Conviction 80+]' : (bd == 'good' ? ' [Good Setup 65-79]' : (bd == 'early' ? ' [Early Watch <65]' : ''));
-  $('meta').textContent='Performance tracking'+bandTxt+vcpLabel+survLabel+filterLabel+' | మొత్తం '+baseRows.length+' సిగ్నల్స్‌లో '+displayRows.length+' చూపిస్తున్నాం';
+  $('meta').textContent='Performance Tracking'+bandTxt+vcpLabel+survLabel+filterLabel+' | మొత్తం '+baseRows.length+' సిగ్నల్స్‌లో '+displayRows.length+' చూపిస్తున్నాం';
 }
 
 function resetMiss(){
@@ -2764,8 +2687,8 @@ function exportPerfToCSV() {
   }
   const headers = [
     "Signal Date", "Scan", "Stock", "Type", "Score", 
-    "Entry", "Stop", "Target", "Result", "Exit/Last", 
-    "P/L %", "Whipsaw (Fake SL)", "After Stop Max %", "Days to Target After Stop"
+    "Entry", "Stop", "Target 1", "Target 2", "Target 3", "Result", "Stage Result", "Exit/Last", 
+    "P/L %", "Peak Gain %", "Whipsaw (Fake SL)", "After Stop Max %", "Days to Target After Stop"
   ];
   const csvRows = [headers.join(",")];
   data.forEach(r => {
@@ -2784,10 +2707,14 @@ function exportPerfToCSV() {
       r.Score || "",
       r.Entry || "",
       r.Stop || "",
-      r.Target || "",
+      r.Target1 || "",
+      r.Target2 || r.Target || "",
+      r.Target3 || "",
       r.Result || "",
+      r.StageResult || "",
       r.ExitPrice === "" ? "-" : r.ExitPrice,
       (r.PnLPct === "" ? "-" : r.PnLPct + "%"),
+      (r.PeakGainPct !== undefined && r.PeakGainPct !== "" ? r.PeakGainPct + "%" : "-"),
       wsText,
       afterMax,
       daysToTgt
