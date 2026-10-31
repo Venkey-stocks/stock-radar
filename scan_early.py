@@ -462,7 +462,7 @@ def analyze(sym, g):
     risk = entry - stop
     stop_pct = risk / entry * 100
 
-    # ---------- TARGET ----------
+    # ---------- MULTI-LEVEL TARGETS (T1, T2, T3) ----------
     high52 = h[-251:-1].max()
     hi250 = h[-251:]
     piv = pd.Series(hi250).rolling(11, center=True).max().values
@@ -475,15 +475,31 @@ def analyze(sym, g):
         next_res = lvl
         lvl_name = "52-week high" if abs(lvl - high52) < 1e-9 else "swing high"
         if lvl > cap_price:
-            target = cap_price
+            target2 = cap_price
             target_reason = "Nearest resistance (%s Rs %.1f) is far; capped at %.0f ATR" % (lvl_name, lvl, P["maxatr"])
         else:
-            target = lvl
+            target2 = lvl
             target_reason = "Nearest resistance: %s Rs %.1f (+%.1f%%)" % (lvl_name, lvl, (lvl / entry - 1) * 100)
     else:
-        target = entry + P["nores"] * atr
+        target2 = entry + P["nores"] * atr
         target_reason = "No overhead resistance found; %.0f ATR projection (estimate)" % P["nores"]
+
+    # Horizon ఆధారంగా టార్గెట్స్ లెక్కింపు
+    if horizon == "Short Term":
+        target1 = entry + (1.2 * risk)
+        target2 = max(target2, entry + (2.0 * risk))
+        target3 = entry + (4.5 * risk)
+    else:
+        target1 = entry + (1.5 * risk)
+        target2 = max(target2, entry + (3.0 * risk))
+        target3 = entry + (6.0 * risk)
+
+    target = target2
     target_pct = (target / entry - 1) * 100
+    t1_pct = (target1 / entry - 1) * 100
+    t2_pct = (target2 / entry - 1) * 100
+    t3_pct = (target3 / entry - 1) * 100
+
     rr = (target - entry) / risk
 
     surv_status = SURV_MAP.get(k, "")
@@ -494,8 +510,11 @@ def analyze(sym, g):
         rej_rows.append({
             "Date": date_str, "Symbol": sym, "Status": status, "Stage": stage, "Horizon": horizon,
             "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
-            "Target": round(target, 2), "StopDistPct": round(stop_pct, 2),
-            "TargetPct": round(target_pct, 1), "RR": round(rr, 2),
+            "Target": round(target, 2), "Target1": round(target1, 2),
+            "Target2": round(target2, 2), "Target3": round(target3, 2),
+            "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
+            "Target1Pct": round(t1_pct, 1), "Target2Pct": round(t2_pct, 1), "Target3Pct": round(t3_pct, 1),
+            "RR": round(rr, 2),
             "Reason": f"Stop-loss too far ({stop_pct:.1f}%, limit {MAX_STOP_SHORT:.1f}%)",
             "StopReason": stop_reason, "TargetReason": target_reason,
             "Surveillance": surv_status})
@@ -506,8 +525,11 @@ def analyze(sym, g):
         rej_rows.append({
             "Date": date_str, "Symbol": sym, "Status": status, "Stage": stage, "Horizon": horizon,
             "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
-            "Target": round(target, 2), "StopDistPct": round(stop_pct, 2),
-            "TargetPct": round(target_pct, 1), "RR": round(rr, 2),
+            "Target": round(target, 2), "Target1": round(target1, 2),
+            "Target2": round(target2, 2), "Target3": round(target3, 2),
+            "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
+            "Target1Pct": round(t1_pct, 1), "Target2Pct": round(t2_pct, 1), "Target3Pct": round(t3_pct, 1),
+            "RR": round(rr, 2),
             "Reason": f"Reward:Risk below 1:{MIN_RR}", "StopReason": stop_reason, "TargetReason": target_reason,
             "Surveillance": surv_status})
         return None
@@ -684,6 +706,9 @@ def analyze(sym, g):
         "StageOrd": stage_ord, "Horizon": horizon, "Score": s, "Band": band, "Level": round(level, 2),
         "DaysSince": days_ago, "GainPct": round(gain, 1), "RunUpPct": round(runup, 0), "Close": round(close, 2),
         "Entry": round(entry, 2), "Stop": round(stop, 2), "Target": round(target, 2),
+        "Target1": round(target1, 2), "Target1Pct": round(t1_pct, 1),
+        "Target2": round(target2, 2), "Target2Pct": round(t2_pct, 1),
+        "Target3": round(target3, 2), "Target3Pct": round(t3_pct, 1),
         "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1), "RR": round(rr, 2),
         "StopReason": stop_reason, "TargetReason": target_reason, "VolRatio": round(vol_ratio, 2),
         "RSI": round(rsi, 1), "FundScore": ("n/a" if ffrac is None else round(ffrac * 100)),
@@ -711,14 +736,18 @@ for sym, g in groups.items():
         print("దాటవేసాం", sym, e)
 
 columns = ["Date", "Symbol", "Sector", "Status", "Stage", "StageOrd", "Horizon", "Score", "Band", "Level",
-           "DaysSince", "GainPct", "RunUpPct", "Close", "Entry", "Stop", "Target", "StopDistPct", "TargetPct", "RR",
+           "DaysSince", "GainPct", "RunUpPct", "Close", "Entry", "Stop", "Target",
+           "Target1", "Target1Pct", "Target2", "Target2Pct", "Target3", "Target3Pct",
+           "StopDistPct", "TargetPct", "RR",
            "StopReason", "TargetReason", "VolRatio", "RSI", "FundScore", "Fundamentals", "PromoterPct",
            "PledgePct", "Warning", "Reasons", "StageBadge", "StageColor", "StageCode", "SimpleReasons",
            "IsVCP", "IsDryUp", "VCPDesc", "SectorRS", "SectorStatus",
            "Surveillance", "ASM", "GSM", "RS", "IsLeader"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values(["StageOrd", "Score"], ascending=[True, False])
+
 rej_cols = ["Date", "Symbol", "Status", "Stage", "Horizon", "Close", "Entry", "Stop", "Target",
+            "Target1", "Target1Pct", "Target2", "Target2Pct", "Target3", "Target3Pct",
             "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason", "Surveillance"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
@@ -735,7 +764,7 @@ print("మొత్తం ఎర్లీ మూవర్స్ ఫలితా�
 if len(out) > 0:
     print(out["Stage"].value_counts().to_string())
     print(out["Horizon"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Stage", "StageBadge", "Score", "Sector", "SectorRS", "RS", "IsLeader"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Stage", "StageBadge", "Score", "Target1", "Target2", "Target3", "SectorRS", "RS", "IsLeader"]].to_string(index=False))
 if len(rej_out) > 0:
     print("తిరస్కరించబడిన టాప్ 5 (RR ఎక్కువ నుంచి):")
-    print(rej_out.head(5)[["Symbol", "Status", "Horizon", "Entry", "Stop", "Target", "RR", "Reason"]].to_string(index=False))
+    print(rej_out.head(5)[["Symbol", "Status", "Horizon", "Entry", "Stop", "Target2", "RR", "Reason"]].to_string(index=False))
