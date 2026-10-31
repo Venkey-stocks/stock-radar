@@ -335,7 +335,7 @@ def analyze(sym, g):
         met.append("పైన resistance లేదు")
     is_hp = bool((stock_rs >= 80 or is_true_leader) and tight_base and len(met) >= 2)
 
-    # ---------- TARGET ----------
+    # ---------- MULTI-LEVEL TARGETS (T1, T2, T3) & TRAILING SL ----------
     cap_price = entry + MAX_TARGET_ATR * atr
     next_res = None
     if len(up_lv) > 0:
@@ -343,17 +343,31 @@ def analyze(sym, g):
         next_res = lvl
         lvl_name = "52-week high" if abs(lvl - high52) < 1e-9 else "swing high"
         if lvl > cap_price:
-            target = cap_price
+            target2 = cap_price
             target_reason = "Nearest resistance (%s Rs %.1f) is far; capped at %.0f ATR" % (
                 lvl_name, lvl, MAX_TARGET_ATR)
         else:
-            target = lvl
+            target2 = lvl
             target_reason = "Nearest resistance: %s Rs %.1f (+%.1f%%)" % (lvl_name, lvl, (lvl / entry - 1) * 100)
     else:
         n_atr = NO_RES_ATR_HP if is_hp else NO_RES_ATR
-        target = entry + n_atr * atr
+        target2 = entry + n_atr * atr
         target_reason = "No overhead resistance found; %.0f ATR projection (estimate)" % n_atr
+
+    # T1: 1.2R (Safe Target, 6-10% లాభం వద్ద 40% క్వాంటిటీ బుక్ చేసి, SL ను కొన్న ధరకు ట్రైల్ చేయడానికి)
+    target1 = entry + (1.2 * risk)
+    # T2: కనీసం 2.0R లేదా రెసిస్టెన్స్ లెవెల్ (ప్రధాన టార్గెట్)
+    target2 = max(target2, entry + (2.0 * risk))
+    # T3: 4.5R లేదా హై-పొటెన్షియల్ ఎక్స్‌టెండెడ్ టార్గెట్ (రన్నర్ కోసం 30%+ ర్యాలీ)
+    target3 = entry + ((6.0 * risk) if is_hp else (4.5 * risk))
+
+    # ప్రధాన డిస్‌ప్లే టార్గెట్‌గా T2 ని కొనసాగిస్తూనే, మూడింటినీ లెక్కించాం
+    target = target2
     target_pct = (target / entry - 1) * 100
+    t1_pct = (target1 / entry - 1) * 100
+    t2_pct = (target2 / entry - 1) * 100
+    t3_pct = (target3 / entry - 1) * 100
+
     rr = (target - entry) / risk
     
     surv_status = SURV_MAP.get(clean_sym, "")
@@ -365,8 +379,11 @@ def analyze(sym, g):
             "Class": "High Potential" if is_hp else "Standard",
             "Setup": setup_kind,
             "Close": round(close, 2), "Entry": round(entry, 2),
-            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2), "Target": round(target, 2),
+            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2),
+            "Target": round(target, 2), "Target1": round(target1, 2),
+            "Target2": round(target2, 2), "Target3": round(target3, 2),
             "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
+            "Target1Pct": round(t1_pct, 1), "Target2Pct": round(t2_pct, 1), "Target3Pct": round(t3_pct, 1),
             "RR": round(rr, 2), "Reason": f"Stop-loss too far ({stop_pct:.1f}%, limit {MAX_STOP_PCT:.1f}%)",
             "StopReason": stop_reason, "TargetReason": target_reason,
             "Surveillance": surv_status
@@ -380,8 +397,11 @@ def analyze(sym, g):
             "Class": "High Potential" if is_hp else "Standard",
             "Setup": setup_kind,
             "Close": round(close, 2), "Entry": round(entry, 2),
-            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2), "Target": round(target, 2),
+            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2),
+            "Target": round(target, 2), "Target1": round(target1, 2),
+            "Target2": round(target2, 2), "Target3": round(target3, 2),
             "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
+            "Target1Pct": round(t1_pct, 1), "Target2Pct": round(t2_pct, 1), "Target3Pct": round(t3_pct, 1),
             "RR": round(rr, 2), "Reason": f"Reward:Risk below 1:{MIN_RR}",
             "StopReason": stop_reason, "TargetReason": target_reason,
             "Surveillance": surv_status
@@ -516,7 +536,11 @@ def analyze(sym, g):
         "Score": s, "Band": band, "Setup": setup_kind,
         "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
         "StopTight": round(stop_tight, 2),
-        "Target": round(target, 2), "StopDistPct": round(stop_pct, 2),
+        "Target": round(target, 2),
+        "Target1": round(target1, 2), "Target1Pct": round(t1_pct, 1),
+        "Target2": round(target2, 2), "Target2Pct": round(t2_pct, 1),
+        "Target3": round(target3, 2), "Target3Pct": round(t3_pct, 1),
+        "StopDistPct": round(stop_pct, 2),
         "RR": round(rr, 2), "StopReason": stop_reason, "TargetReason": target_reason,
         "TargetPct": round(target_pct, 1), "VolRatio": round(vol_ratio, 2),
         "RSI": round(rsi, 1), "ADX": round(adx, 1), "Boosters": ", ".join(met),
@@ -540,13 +564,15 @@ for sym, g in groups.items():
         print("దాటవేసాం", sym, e)
 
 columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close", "Entry", "Stop", "StopTight",
-           "Target", "StopDistPct", "RR", "StopReason", "TargetReason", "TargetPct", "VolRatio",
+           "Target", "Target1", "Target1Pct", "Target2", "Target2Pct", "Target3", "Target3Pct",
+           "StopDistPct", "RR", "StopReason", "TargetReason", "TargetPct", "VolRatio",
            "RSI", "ADX", "Boosters", "High52", "Warning", "Reasons", "Events", "EventAdj",
            "Surveillance", "ASM", "GSM", "RS", "IsLeader"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
-rej_cols = ["Date", "Symbol", "Status", "Class", "Setup", "Close", "Entry", "Stop", "StopTight", "Target",
+rej_cols = ["Date", "Symbol", "Status", "Class", "Setup", "Close", "Entry", "Stop", "StopTight",
+            "Target", "Target1", "Target1Pct", "Target2", "Target2Pct", "Target3", "Target3Pct",
             "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason", "Surveillance"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
@@ -563,7 +589,7 @@ print("మొత్తం షార్ట్-టర్మ్ ఫలితాల�
 if len(out) > 0:
     print(out["Status"].value_counts().to_string())
     print(out["Class"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Status", "Class", "Score", "Band", "Entry", "Stop", "Target", "RR", "RS", "IsLeader"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Status", "Class", "Score", "Band", "Entry", "Stop", "Target1", "Target2", "Target3", "RR", "RS", "IsLeader"]].to_string(index=False))
 if len(rej_out) > 0:
     print("తిరస్కరించబడిన టాప్ 5 (RR ఎక్కువ నుంచి):")
-    print(rej_out.head(5)[["Symbol", "Status", "Entry", "Stop", "Target", "RR", "Reason"]].to_string(index=False))
+    print(rej_out.head(5)[["Symbol", "Status", "Entry", "Stop", "Target2", "RR", "Reason"]].to_string(index=False))
