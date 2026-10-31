@@ -2881,7 +2881,7 @@ function exportPerfToCSV() {
   }
   const headers = [
     "Signal Date", "Scan", "Stock", "Type", "Score", 
-    "Entry", "Stop", "Target 1", "Target 2", "Target 3", "Result", "Stage Result", "Exit/Last", 
+    "Entry", "Stop", "Target 1 (1.2R)", "Target 2 (Core)", "Target 3 (Runner)", "Result", "Stage Result", "Exit/Last", 
     "P/L %", "Peak Gain %", "Whipsaw (Fake SL)", "After Stop Max %", "Days to Target After Stop"
   ];
   const csvRows = [headers.join(",")];
@@ -2893,6 +2893,12 @@ function exportPerfToCSV() {
       : "-";
     const daysToTgt = (r.DaysToTargetAfterStop && r.DaysToTargetAfterStop !== "") ? r.DaysToTargetAfterStop : "-";
 
+    // మల్టీ-టార్గెట్స్ బ్యాకప్ గణన
+    const mt = typeof getMultiTargets === 'function' ? getMultiTargets(r) : {t1: r.Target1, t2: r.Target2 || r.Target, t3: r.Target3};
+    const t1Val = r.Target1 ? r.Target1 : (mt.t1 ? mt.t1.toFixed(2) : "");
+    const t2Val = r.Target2 ? r.Target2 : (r.Target ? r.Target : (mt.t2 ? mt.t2.toFixed(2) : ""));
+    const t3Val = r.Target3 ? r.Target3 : (mt.t3 ? mt.t3.toFixed(2) : "");
+
     const row = [
       r.SignalDate || "",
       SCAN_LBL[r.Scan] || r.Scan || "",
@@ -2901,9 +2907,9 @@ function exportPerfToCSV() {
       r.Score || "",
       r.Entry || "",
       r.Stop || "",
-      r.Target1 || "",
-      r.Target2 || r.Target || "",
-      r.Target3 || "",
+      t1Val,
+      t2Val,
+      t3Val,
       r.Result || "",
       r.StageResult || "",
       r.ExitPrice === "" ? "-" : r.ExitPrice,
@@ -2925,7 +2931,6 @@ function exportPerfToCSV() {
   a.click();
   document.body.removeChild(a);
 }
-
 function exportToExcel(){
   const tab = cur;
   let filename = (tab || 'stocks') + '_export.csv';
@@ -2937,7 +2942,7 @@ function exportToExcel(){
       return;
     }
     filename = 'my_stocks_portfolio.csv';
-    let csv = 'Symbol,Status,Buy Price,Current Price,Entry,Stop Loss,Target,Return %,Trailing Alert,Trailing Stop Level\n';
+    let csv = 'Symbol,Status,Buy Price,Current Price,Entry,Stop Loss,Target 1,Target 2,Target 3,Return %,Trailing Alert,Trailing Stop Level\n';
     mine.forEach(r => {
       const c = curPrice({sym: r.sym});
       const curP = c ? c.p : (r.lastPrice || r.buyPrice || 0);
@@ -2946,7 +2951,8 @@ function exportToExcel(){
       const tr = typeof getTrailingAdvice === 'function' ? getTrailingAdvice(r, curP) : null;
       const trailAlert = tr ? tr.level : 'No Alert';
       const trailStop = (tr && tr.suggestedStop) ? tr.suggestedStop : (r.stop || 'n/a');
-      csv += [r.sym, r.status || 'Watching', buyP, curP, r.entry || 'n/a', r.stop || 'n/a', r.target || 'n/a', pct + '%', '"' + trailAlert + '"', trailStop].join(',') + '\n';
+      const mt = typeof getMultiTargets === 'function' ? getMultiTargets(r) : {t1: r.target, t2: r.target, t3: r.target};
+      csv += [r.sym, r.status || 'Watching', buyP, curP, r.entry || 'n/a', r.stop || 'n/a', (mt.t1?mt.t1.toFixed(2):'n/a'), (mt.t2?mt.t2.toFixed(2):'n/a'), (mt.t3?mt.t3.toFixed(2):'n/a'), pct + '%', '"' + trailAlert + '"', trailStop].join(',') + '\n';
     });
     const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
     const link = document.createElement('a');
@@ -2983,10 +2989,23 @@ function exportToExcel(){
     return;
   }
 
-  const headers = Object.keys(exportRows[0]);
+  // కాలమ్స్ లో T1, T2, T3 ఉండేలా చేయడం
+  const rawHeaders = Object.keys(exportRows[0]);
+  const headers = [...rawHeaders];
+  if(!headers.includes('Target1')) headers.push('Target1');
+  if(!headers.includes('Target2')) headers.push('Target2');
+  if(!headers.includes('Target3')) headers.push('Target3');
+
   let csv = headers.join(',') + '\n';
   exportRows.forEach(r => {
-    csv += headers.map(h => '"' + (r[h] !== undefined ? String(r[h]).replace(/"/g, '""') : '') + '"').join(',') + '\n';
+    const mt = typeof getMultiTargets === 'function' ? getMultiTargets(r) : null;
+    csv += headers.map(h => {
+      let val = r[h];
+      if(h === 'Target1' && (!val || val === '')) val = mt ? mt.t1.toFixed(2) : '';
+      if(h === 'Target2' && (!val || val === '')) val = mt ? mt.t2.toFixed(2) : (r.Target || '');
+      if(h === 'Target3' && (!val || val === '')) val = mt ? mt.t3.toFixed(2) : '';
+      return '"' + (val !== undefined ? String(val).replace(/"/g, '""') : '') + '"';
+    }).join(',') + '\n';
   });
 
   const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
