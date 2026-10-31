@@ -54,6 +54,9 @@ jobs:
       - name: Performance tracker
         run: python track_performance.py
         continue-on-error: true
+      - name: Q2 Earnings & Turnaround scan
+        run: python scan_q2_earnings.py
+        continue-on-error: true
       - name: Miss report
         run: python miss_report.py
         continue-on-error: true
