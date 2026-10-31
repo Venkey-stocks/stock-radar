@@ -691,7 +691,7 @@ function getMultiTargets(r){
   let t2 = r.Target2 ? parseFloat(r.Target2) : fallbackTgt;
   let t3 = r.Target3 ? parseFloat(r.Target3) : (en + 4.5 * risk);
 
-  // T3 > T2 ఖచ్చితమైన నియమం (Auropharma లాంటి లోపాలు రాకుండా రక్షణ)
+  // T3 ఎల్లప్పుడూ T2 కంటే ఎక్కువగా ఉండేలా స్పష్టమైన నియమం
   t3 = Math.max(t3, t2 + (1.5 * risk));
 
   let t1Pct = r.Target1Pct ? parseFloat(r.Target1Pct) : (en > 0 ? ((t1 - en) / en) * 100 : 0);
@@ -894,8 +894,7 @@ function openRationale(sym, tabType){
 
 function closeRationaleDrawer(){$('rationaleDrawer').style.display='none';}
 function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationaleDrawer();}
-
-function loadHist(){
+  function loadHist(){
   return fetch('data/history/index.json?v='+Date.now())
     .then(r=>r.ok?r.json():{})
     .catch(()=>({}))
@@ -911,7 +910,8 @@ function loadHist(){
         .catch(()=>{HIST[k]=null;});
     })));
 }
-  function handleGlobalSearch(q){
+
+function handleGlobalSearch(q){
   q = (q||'').trim().toUpperCase();
   const drop = $('search_results');
   if(!q){
@@ -1133,7 +1133,7 @@ function rowCells(tab,r,ns){
   if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
     rowVcp = ' <span class="tag vcp">💎 VCP</span>';
   } else if(r.IsDryUp === 'Yes' || (r.Reasons && r.Reasons.includes('dried up'))){
-    rowVcp = ' <span class="tag dryup">💧 Vol Dry-up</span>';
+    rowVcp = ' <span class="tag dryup">💧 Dry-up</span>';
   }
 
   const sm = getSurvMeta(r);
@@ -1248,226 +1248,415 @@ function renderItems(id,tab,items,hdr,emptyMsg){
         +'<div class="lbody" style="display:'+(o?'block':'none')+'">'+i.card+'</div></div>';
     }).join('');
 }
-  function drawMulti(){
-  const rows=DATA.multi||[];
-  const sel=$('msector');
-  const secs=[...new Set(rows.map(r=>r.Sector).filter(Boolean))].sort();
-  if(sel.options.length-1!=secs.length){
-    const v=sel.value;
-    sel.innerHTML='<option value="">All sectors</option>'+secs.map(s=>'<option>'+s+'</option>').join('');
-    sel.value=secs.includes(v)?v:'';
+  let RES={};
+function daysTo(iso){
+  const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||''));
+  if(!m) return null;
+  const d=new Date(+m[1],+m[2]-1,+m[3]);
+  const t=new Date();t.setHours(0,0,0,0);
+  return Math.round((d-t)/86400000);
+}
+function whenTxt(n){return n==0?'today':(n==1?'tomorrow':'in '+n+' days');}
+
+function buildRes(){
+  RES={};
+  (DATA.results||[]).forEach(r=>{
+    const n=daysTo(r.Date);
+    if(n===null||n<0) return;
+    if(!RES[r.Symbol]||n<RES[r.Symbol].n) RES[r.Symbol]={n:n,date:r.Date};
+  });
+}
+
+function resLine(sym){
+  const r=RES[sym];
+  if(!r||r.n>30) return '';
+  return '<div class="'+(r.n<=7?'warn':'exp')+'">'+(r.n<=7?'&#9888; ':'')+'Results '+whenTxt(r.n)+', on '+esc(r.date)+'.</div>';
+}
+
+function buildEv(){
+  EV={};
+  (DATA.events||[]).forEach(e=>{
+    if(!e.symbol) return;
+    (EV[e.symbol]=EV[e.symbol]||[]).push(e);
+  });
+}
+
+function evHtml(sym){
+  const list=EV[sym]||[];
+  if(!list.length) return '';
+  const bad=['Default/Insolvency (warning)','Disruption/Suspension (warning)','Auditor change (check)'];
+  const seen={},lines=[];
+  const today=new Date();today.setHours(0,0,0,0);
+  list.forEach(e=>{
+    const k=e.category+'|'+e.date;
+    if(seen[k]) return;
+    seen[k]=1;
+    let cls='pos',txt=esc(e.category)+', '+esc(e.date);
+    if(bad.indexOf(e.category)>=0) cls='neg';
+    if(e.category=='Results date'){
+      cls='amb';
+      const dd=parseD(e.date);
+      if(dd){
+        const n=Math.round((dd-today)/86400000);
+        txt='Results (board meeting) on '+esc(e.date)+(n>=0?' (in '+n+' days)':'');
+      }
+    }
+    if(/BUY$/.test(e.category)) txt+=' | '+esc(e.detail);
+    if(e.link&&e.link.indexOf('https://')==0) txt+=' <a href="'+esc(e.link)+'" target="_blank" rel="noopener">details</a>';
+    lines.push({cls:cls,txt:txt});
+  });
+  const order={neg:0,amb:1,pos:2};
+  lines.sort((a,b)=>order[a.cls]-order[b.cls]);
+  return '<div class="fund"><div class="ft">Recent events (NSE)</div>'
+    +lines.slice(0,5).map(l=>'<div class="evl '+l.cls+'">&#8226; '+l.txt+'</div>').join('')+'</div>';
+}
+
+function buildNew(){
+  NEWSET={ultra:new Set(),short:new Set()};
+  NEWOK=(DATA.perf||[]).length>0;
+  ['ultra','short'].forEach(k=>{
+    const first=(DATA[k]||[])[0];
+    const d=first?first.Date:'';
+    if(!d) return;
+    (DATA.perf||[]).forEach(r=>{
+      if(r.Scan==k&&r.SignalDate==d) NEWSET[k].add(r.Symbol);
+    });
+  });
+}
+
+function syncMinePrices(){
+  const arr = loadMine();
+  if(!arr || !arr.length) return;
+  let updated = false;
+  
+  arr.forEach(item => {
+    const cur = curPrice({sym: item.sym});
+    if(cur && cur.p && item.lastPrice !== cur.p){
+      item.lastPrice = cur.p;
+      item.lastPriceDate = cur.d || todayISO();
+      updated = true;
+    }
+  });
+  
+  if(updated){
+    saveMine(arr);
+    if(typeof curTab !== 'undefined' && curTab === 'mine'){
+      drawMine();
+    }
   }
-  const b=$('mband2').value, mc=$('mcap').value, sc=sel.value;
+}
+
+function updateDigest(){
+  const ds=[];
+  ['ultra','short','early','smart'].forEach(k=>{(DATA[k]||[]).forEach(r=>{if(r.Date&&r.Date!='Quarterly Filing') ds.push(r.Date);});});
+  ds.sort();
+  const d=ds.length?ds[ds.length-1]:'-';
+  $('d_date').textContent=d;
+
+  let freshCnt=0;
+  (DATA.early||[]).forEach(r=>{if(r.Stage=='Fresh'||r.Stage=='Ready') freshCnt++;});
+  const uNew=NEWSET['ultra']?NEWSET['ultra'].size:0;
+  $('d_new').textContent=(freshCnt+uNew)+' stocks (Early/Ultra)';
+
+  const dConv=(DATA.smart||[]).filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar').length;
+  $('d_smart').textContent=dConv+' stocks on radar';
+
+  const sCounts={};
+  ['ultra','short','early','multi','quality'].forEach(k=>{
+    (DATA[k]||[]).forEach(r=>{
+      const s=r.Sector;
+      if(s&&s!='n/a') sCounts[s]=(sCounts[s]||0)+1;
+    });
+  });
+  let topSec='-',topN=0;
+  Object.keys(sCounts).forEach(s=>{if(sCounts[s]>topN){topN=sCounts[s];topSec=s;}});
+  $('d_sector').textContent=topSec!='-'?(topSec+' ('+topN+' setups)'):'Diverse';
+}
+
+function openDigestPop(type){
+  const t=$('poptitle');
+  const b=$('popbody');
+  if(type=='fresh'){
+    t.textContent='⚡ Fresh Breakouts & Ready Setups Today';
+    const items=[];
+    (DATA.early||[]).forEach(r=>{
+      if(r.Stage=='Fresh'||r.Stage=='Ready') items.push({s:r.Symbol,lbl:r.Stage+' ('+r.Horizon+')',sub:'Score: '+r.Score+' | Close: Rs '+fmt(r.Close),tab:'early'});
+    });
+    const uRows=DATA.ultra||[];
+    const ns=NEWSET['ultra']||new Set();
+    uRows.filter(r=>ns.has(r.Symbol)).forEach(r=>{
+      items.push({s:r.Symbol,lbl:'Ultra Short (NEW)',sub:'Score: '+r.Score+' | Entry: Rs '+fmt(r.Entry),tab:'ultra'});
+    });
+    if(!items.length) b.innerHTML='<div class="exp">No fresh breakouts found for today.</div>';
+    else b.innerHTML='<div class="wrap"><table><tr><th>Stock</th><th>Setup Type</th><th>Details</th><th>Action</th></tr>'
+      +items.map(x=>'<tr><td><b>'+esc(x.s)+'</b></td><td><span class="tag new">'+esc(x.lbl)+'</span></td><td>'+esc(x.sub)+'</td><td><button class="chbtn" onclick="closeDigestPop();show(\''+x.tab+'\');">View</button></td></tr>').join('')
+      +'</table></div>';
+  } else if(type=='smart'){
+    t.textContent='🔥 Double Conviction (Smart Money + Radar)';
+    const rows=(DATA.smart||[]).filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar');
+    if(!rows.length) b.innerHTML='<div class="exp">No Smart Money stocks currently on radar.</div>';
+    else b.innerHTML='<div class="wrap"><table><tr><th>Stock</th><th>Investor</th><th>Holding</th><th>Technical Radar</th><th>Action</th></tr>'
+      +rows.map(r=>'<tr><td><b>'+esc(r.Symbol)+'</b></td><td>'+esc(r.Investor)+'</td><td>'+esc(r.HoldingPct)+'</td><td class="pos"><b>'+esc(r.RadarSetup)+'</b></td><td><button class="chbtn" onclick="closeDigestPop();show(\'smart\');">Inspect</button></td></tr>').join('')
+      +'</table></div>';
+  } else if(type=='sector'){
+    t.textContent='🏢 Top Sector Distribution Across Radar';
+    const sCounts={};
+    const src=[['ultra','Ultra Short'],['short','Short Term'],['early','Early Movers'],['multi','Multibagger'],['quality','Quality']];
+    src.forEach(a=>{
+      (DATA[a[0]]||[]).forEach(r=>{
+        const s=r.Sector||'n/a';
+        if(s!='n/a'){
+          sCounts[s]=sCounts[s]||{name:s,cnt:0,stocks:[]};
+          sCounts[s].cnt++;
+          if(sCounts[s].stocks.indexOf(r.Symbol)<0) sCounts[s].stocks.push(r.Symbol);
+        }
+      });
+    });
+    const list=Object.values(sCounts).sort((x,y)=>y.cnt-x.cnt);
+    if(!list.length) b.innerHTML='<div class="exp">No sector data available.</div>';
+    else b.innerHTML='<div class="wrap"><table><tr><th>Sector</th><th>Total Setups</th><th>Representative Stocks</th><th>Action</th></tr>'
+      +list.slice(0,8).map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td class="amb"><b>'+x.cnt+'</b></td><td class="exp">'+esc(x.stocks.slice(0,4).join(', '))+(x.stocks.length>4?'...':'')+'</td><td><button class="chbtn" onclick="closeDigestPop();show(\'sect\');">Heatmap</button></td></tr>').join('')
+      +'</table></div>';
+  } else if(type=='health'){
+    t.textContent='🩺 Market Health Overview';
+    const hTxt=$('mh_txt').textContent||'Market Health';
+    b.innerHTML='<div class="card" style="border:none">'
+      +'<div class="top"><span class="sym">'+esc(hTxt)+'</span></div>'
+      +'<div class="exp" style="margin:10px 0">Daily market health measures whether Nifty 50 and Nifty 500 are trading comfortably above their 50-day and 200-day moving averages, and tracks breadth across broader indices.</div>'
+      +'<div class="btns"><a href="/health" style="text-decoration:none"><button>Open Full Market Health Page</button></a></div>'
+      +'</div>';
+  }
+  $('popmodal').style.display='flex';
+}
+function closeDigestPop(){$('popmodal').style.display='none';}
+
+let CH=null;
+function chartOnly(r){
+  return '<button class="chbtn" data-s="'+esc(r.Symbol)+'" data-e="'+esc(r.Entry)+'" data-st="'+esc(r.Stop)+'" data-t="'+esc(r.Target)+'" onclick="event.stopPropagation();openChart(this)">Chart</button>';
+}
+function watchBtn(r){
+  if(loadMine().some(x=>x.sym==r.Symbol)) return '<button class="chbtn" style="margin-left:6px" disabled>&#9733; In My Stocks</button>';
+  return '<button class="chbtn" style="margin-left:6px" data-s="'+esc(r.Symbol)+'" onclick="event.stopPropagation();addFromCard(this)">&#9734; Watch</button>';
+}
+function chartBtn(r){return chartOnly(r)+watchBtn(r);}
+
+function openChart(btn){
+  const sym=btn.getAttribute('data-s');
+  const lv={e:btn.getAttribute('data-e'),s:btn.getAttribute('data-st'),t:btn.getAttribute('data-t')};
+  $('chtitle').textContent=sym;
+  $('chbody').innerHTML='<div class="exp">Loading chart...</div>';
+  $('chmodal').style.display='flex';
+  const go=()=>{
+    const d=CH[sym];
+    if(!d||!d.c||d.c.length<2){$('chbody').innerHTML='<div class="exp">Chart data not available for this stock yet (n/a).</div>';return;}
+    $('chbody').innerHTML=drawChart(d,lv);
+  };
+  if(CH){go();return;}
+  fetch('data/charts.json?v='+Date.now())
+    .then(r=>{if(!r.ok)throw new Error('nf');return r.json();})
+    .then(j=>{CH=j;go();})
+    .catch(()=>{$('chbody').innerHTML='<div class="exp">Chart data file (data/charts.json) not found yet. It is created by the daily run.</div>';});
+}
+function closeChart(){$('chmodal').style.display='none';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeChart();closeDigestPop();closeRationaleDrawer();closeHistoryModal();}});
+
+function drawChart(d,lv){
+  const n=d.c.length;
+  const W=720,H=360,L=8,R=64,T=14,B=24;
+  const vals=d.h.concat(d.l);
+  ['e','s','t'].forEach(k=>{if(has(lv[k])&&isFinite(+lv[k])) vals.push(+lv[k]);});
+  let mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals);
+  const pad=(mx-mn)*0.04||1;
+  mn-=pad; mx+=pad;
+  const y=v=>T+(mx-v)/(mx-mn)*(H-T-B);
+  const step=(W-L-R)/n, bw=Math.max(1,step*0.6);
+  let s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;background:#0e1117;border-radius:8px">';
+  for(let i=0;i<=4;i++){
+    const v=mn+(mx-mn)*i/4, yy=y(v);
+    s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="#262d38" stroke-width="1"/>'
+      +'<text x="'+(W-R+4)+'" y="'+(yy+4)+'" fill="#8b96a5" font-size="11">'+v.toFixed(1)+'</text>';
+  }
+  for(let i=0;i<n;i++){
+    const x=L+step*i+step/2;
+    const up=d.c[i]>=d.o[i];
+    const col=up?'#2ea043':'#f85149';
+    s+='<line x1="'+x+'" x2="'+x+'" y1="'+y(d.h[i])+'" y2="'+y(d.l[i])+'" stroke="'+col+'" stroke-width="1"/>';
+    const yt=y(Math.max(d.o[i],d.c[i])), yb=y(Math.min(d.o[i],d.c[i]));
+    s+='<rect x="'+(x-bw/2)+'" y="'+yt+'" width="'+bw+'" height="'+Math.max(1,yb-yt)+'" fill="'+col+'"/>';
+  }
+  const lines=[['e','Entry','#388bfd'],['s','Stop','#f85149'],['t','Target','#2ea043']];
+  for(let j=0;j<lines.length;j++){
+    const item=lines[j];
+    const val=lv[item[0]];
+    if(has(val)&&isFinite(+val)){
+      const yy=y(+val);
+      s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+item[2]+'" stroke-width="1.5" stroke-dasharray="6 4"/>';
+      s+='<text x="'+(L+4)+'" y="'+(yy-4)+'" fill="' + item[2] + '" font-size="12" font-weight="700">' + item[1] + ' ' + (+val).toFixed(2) + '</text>';
+    }
+  }
+  s+='<text x="'+L+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11">'+d.d[0]+'</text>'
+    +'<text x="'+(W-R)+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11" text-anchor="end">'+d.d[n-1]+'</text>';
+  s+='</svg>';
+  s+='<div class="chleg">Daily candles, last '+n+' trading days. Dashed lines: Entry (blue), Stop-loss (red), Target (green).</div>';
+  return s;
+}
+
+function getTrailingAdvice(m, curP){
+  if(m.status !== 'Holding' || !m.buyPrice || !curP) return null;
+  const buy = +m.buyPrice;
+  const stop = +m.stop || 0;
+  const gainPct = ((curP - buy) / buy) * 100;
+
+  if(stop > 0){
+    if(curP <= stop){
+      return {
+        level: '🚨 Stop-Loss Hit!',
+        trailStop: stop,
+        msg: 'ప్రమాదం! ప్రస్తుత ధర (Rs '+curP+') మీ స్టాప్-లాస్ (Rs '+stop+') కంటే క్రిందకు పడిపోయింది. ఎగ్జిట్ అవ్వండి.',
+        cls: 'neg'
+      };
+    } else if(curP <= stop * 1.015){
+      return {
+        level: '⚠️ Near Stop-Loss',
+        trailStop: stop,
+        msg: 'హెచ్చరిక! ప్రస్తుత ధర స్టాప్-లాస్‌కు సమీపంలో ఉంది (ప్రస్తుత ధర: Rs '+curP+' | SL: Rs '+stop+').',
+        cls: 'amb'
+      };
+    }
+  }
+
+  if(gainPct >= 15){
+    const trailPrice = Math.round(curP * 0.93 * 100) / 100;
+    return {
+      level: 'Trend Lock (7% Trail)',
+      trailStop: trailPrice,
+      msg: '+'+gainPct.toFixed(1)+'% లాభంలో ఉంది. లాభాలు పోకుండా స్టాప్-లాస్‌ను Rs '+trailPrice+' కు ట్రైల్ చేయండి.',
+      cls: 'pos'
+    };
+  } else if(gainPct >= 10){
+    const lockPrice = Math.round(buy * 1.05 * 100) / 100;
+    return {
+      level: 'Lock +5% Profit',
+      trailStop: lockPrice,
+      msg: '+'+gainPct.toFixed(1)+'% పెరిగింది. 5% లాభం లాక్ చేయడానికి స్టాప్-లాస్‌ను Rs '+lockPrice+' కు పెంచండి.',
+      cls: 'pos'
+    };
+  } else if(gainPct >= 5){
+    return {
+      level: 'Breakeven Guard (Zero Risk)',
+      trailStop: buy,
+      msg: '+'+gainPct.toFixed(1)+'% లాభం వచ్చింది. స్టాప్-లాస్‌ను కొన్న ధరకు (Rs '+buy+') మార్చండి.',
+      cls: 'amb'
+    };
+  }
+  return null;
+}
+
+function updateTrailingStopAlerts(){
+  const mineRows = loadMine();
+  if(!mineRows.length) return;
+
+  mineRows.forEach(m => {
+    if(m.status === 'Holding' && m.buyPrice){
+      const c = curPrice(m);
+      const p = c ? c.p : (m.lastPrice || null);
+      if(p){
+        const tr = getTrailingAdvice(m, p);
+        if(tr){
+          const cards = document.querySelectorAll('#list_mine .card');
+          cards.forEach(el => {
+            if(el.textContent.includes(m.sym) && !el.querySelector('.trail-alert-box')){
+              const box = document.createElement('div');
+              box.className = 'trail-alert-box';
+              const isDanger = tr.cls === 'neg';
+              const isWarn = tr.cls === 'amb';
+              const boxBg = isDanger ? 'rgba(239,68,68,0.15)' : (isWarn ? 'rgba(245,158,11,0.15)' : 'rgba(46,160,67,0.12)');
+              const boxBorder = isDanger ? '#ef4444' : (isWarn ? '#f59e0b' : '#2ea043');
+              const txtColor = isDanger ? '#fca5a5' : (isWarn ? '#fcd34d' : '#7ee787');
+              const icon = isDanger ? '🚨' : (isWarn ? '⚠️' : '&#128640;');
+              box.style.cssText = 'margin-top:8px;padding:8px 12px;border-radius:6px;border-left:4px solid '+boxBorder+';background:'+boxBg+';color:'+txtColor+';font-size:12px;line-height:1.4;';
+              box.innerHTML = '<b>'+icon+' '+esc(tr.level)+'</b><br>'+esc(tr.msg);
+              el.appendChild(box);
+            }
+          });
+        }
+      }
+    }
+  });
+}
+setInterval(updateTrailingStopAlerts, 1500);
+
+function draw(){
+  const rows=(DATA[cur]||[]);
+  const sel=$('status');
+  const sts=[...new Set(rows.map(r=>r.Status))];
+  if(sel.options.length-1!=sts.length){
+    const v=sel.value;
+    sel.innerHTML='<option value="">All status</option>'+sts.map(s=>'<option>'+s+'</option>').join('');
+    sel.value=sts.includes(v)?v:'';
+  }
+  const b=$('band').value, st=sel.value;
   const sv = $('surv_filter') ? $('surv_filter').value : '';
   
   const list=rows.filter(r=>{
     if(b && r.Band!=b) return false;
-    if(sc && r.Sector!=sc) return false;
-    if(mc && (+r.MarketCapCr) > (+mc)) return false;
+    if(st && r.Status!=st) return false;
     const isSurv = !!getSurvMeta(r);
     if(sv === 'safe' && isSurv) return false;
     if(sv === 'surv' && !isSurv) return false;
     return true;
   }).sort((a,c)=>c.Score-a.Score);
 
-  const na='<b class="na">n/a</b>';
-  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
-  const cards=list.map(r=>{
-    const cls=r.Band.split(' ')[0];
-    const pos=has(r.Positives)?r.Positives.split('; '):[];
-    let warn=has(r.Warning)?r.Warning.split('; '):[];
-    const pl=pledgeHtml(r.PledgeOfPromoterPct,na);
-    const de=has(r.DebtEquity)?'<b class="'+(+r.DebtEquity>1?'amb':'')+'">'+r.DebtEquity+'</b>':na;
-    const sm = getSurvMeta(r);
-    const survBadge = sm ? sm.tag : '';
-    const screenerBtn = getScreenerLink(r.Symbol);
-    const rsBadge = getRSBadge(r);
-
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'multi\')"><div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+(rsBadge?' '+rsBadge:'')+survBadge+'</div>'
-    +resLine(r.Symbol)
-    +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
-    +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
-    +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
-    +'<div class="exp">Quality growth company for a 1-3 year hold.</div>'
-    +chartBtn(r)
-    +lvlHtml(r)
-    +'<div class="fund"><div class="ft">Quality and growth</div>'
-    +row(roeLbl(r),'<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr)','<b>'+r.SalesCAGR3+'%</b>')
-    +row('Profit growth (3-yr)','<b>'+r.ProfitCAGR3+'%</b>')
-    +row('Debt / Equity',de)+'</div>'
-    +evHtml(r.Symbol)
-    +(pos.length?'<div class="goodl">'+pos.map(p=>'&#10003; '+p).join('<br>')+'</div>':'')
-    +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+p).join('<br>')+'</div>':'')
-    +'</div>';
-  });
-  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('multi',r,null),card:cards[i]}));
-  renderItems('list_multi','multi',items,HDR_Q,'No stocks match.');
-  const d=rows[0]?rows[0].Date:'-';
-  $('meta').textContent='Multibagger scan (weekly) | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
-}
-
-function drawQuality(){
-  const rows=DATA.quality||[];
-  const sel=$('qsector');
-  const secs=[...new Set(rows.map(r=>r.Sector).filter(Boolean))].sort();
-  if(sel.options.length-1!=secs.length){
-    const v=sel.value;
-    sel.innerHTML='<option value="">All sectors</option>'+secs.map(s=>'<option>'+s+'</option>').join('');
-    sel.value=secs.includes(v)?v:'';
+  const H=HIST[cur];
+  const curSyms=new Set(rows.map(r=>r.Symbol));
+  let ns;
+  if(H){
+    const ps=new Set(H.rows.map(x=>x.Symbol));
+    ns=new Set(rows.filter(r=>!ps.has(r.Symbol)).map(r=>r.Symbol));
+  } else {
+    ns=NEWSET[cur]||new Set();
   }
-  const b=$('qband_sel').value, mc=$('qcap').value, sc=sel.value;
-  const sv = $('surv_filter') ? $('surv_filter').value : '';
 
-  const list=rows.filter(r=>{
-    if(b && r.Band!=b) return false;
-    if(sc && r.Sector!=sc) return false;
-    if(mc && (mc=='mid'?(+r.MarketCapCr)>50000:(+r.MarketCapCr)<=50000)) return false;
-    const isSurv = !!getSurvMeta(r);
-    if(sv === 'safe' && isSurv) return false;
-    if(sv === 'surv' && !isSurv) return false;
-    return true;
-  }).sort((a,c)=>c.Score-a.Score);
-
-  const na='<b class="na">n/a</b>';
-  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
-  const cards=list.map(r=>{
-    const cls=r.Band.split(' ')[0];
-    const pos=has(r.Positives)?r.Positives.split('; '):[];
-    let warn=has(r.Warning)?r.Warning.split('; '):[];
-    const pl=pledgeHtml(r.PledgeOfPromoterPct,na);
-    const de=has(r.DebtEquity)?'<b class="'+(+r.DebtEquity>1?'amb':'')+'">'+r.DebtEquity+'</b>':na;
-    const sm = getSurvMeta(r);
-    const survBadge = sm ? sm.tag : '';
-    const screenerBtn = getScreenerLink(r.Symbol);
-    const rsBadge = getRSBadge(r);
-
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'quality\')"><div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+(rsBadge?' '+rsBadge:'')+survBadge+'</div>'
-    +resLine(r.Symbol)
-    +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
-    +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
-    +'<div class="n tgt"><small>Target (+'+r.TargetPct+'%)</small><b>'+fmt(r.Target)+'</b></div></div>'
-    +'<div class="exp">Large, steadily growing company for a 1-3 year hold.</div>'
-    +chartBtn(r)
-    +lvlHtml(r)
-    +'<div class="fund"><div class="ft">Quality and growth</div>'
-    +row(roeLbl(r),'<b>'+r.ROCE+'%</b>')+row('Sales growth (3-yr)','<b>'+r.SalesCAGR3+'%</b>')
-    +row('Profit growth (3-yr)','<b>'+r.ProfitCAGR3+'%</b>')
-    +row('Debt / Equity',de)+'</div>'
-    +evHtml(r.Symbol)
-    +(pos.length?'<div class="goodl">'+pos.map(p=>'&#10003; '+p).join('<br>')+'</div>':'')
-    +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+p).join('<br>')+'</div>':'')
-    +'</div>';
-  });
-  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('quality',r,null),card:cards[i]}));
-  renderItems('list_quality','quality',items,HDR_Q,'No stocks match.');
-  const d=rows[0]?rows[0].Date:'-';
-  $('meta').textContent='Quality Compounders | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
-}
-
-function drawNewl(){
-  const rows=DATA.newl||[];
-  const b=$('nband').value;
-  const sv = $('surv_filter') ? $('surv_filter').value : '';
-
-  const list=rows.filter(r=>{
-    if(b && r.Band!=b) return false;
-    const isSurv = !!getSurvMeta(r);
-    if(sv === 'safe' && isSurv) return false;
-    if(sv === 'surv' && !isSurv) return false;
-    return true;
-  }).sort((a,c)=>c.Score-a.Score);
-
-  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
-  const cards=list.map(r=>{
-    const cls=r.Band.split(' ')[0];
-    const warn=has(r.Warning)?r.Warning.split('; '):[];
-    const ch=+r['ChangeSinceListing%'], r20=+r['Return20d%'];
-    const sm = getSurvMeta(r);
-    const survBadge = sm ? sm.tag : '';
-    const screenerBtn = getScreenerLink(r.Symbol);
-    const rsBadge = getRSBadge(r);
-
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'newl\')"><div class="top"><span class="sym">'+esc(r.Symbol)+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">Listed '+esc(r.ListedOn)+'</span><span class="tag">'+esc(r.DataDays)+' days of data</span>'+(rsBadge?' '+rsBadge:'')+survBadge+'</div>'
-    +resLine(r.Symbol)
-    +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
-    +'<div class="n stop"><small>Stop-loss ('+r.RiskPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
-    +'<div class="n tgt"><small>Target</small><b>'+fmt(r.Target)+'</b></div></div>'
-    +'<div class="exp">Recently listed stock (price-only scan, short history).</div>'
-    +chartBtn(r)
-    +lvlHtml(r)
-    +'<div class="fund"><div class="ft">Price since listing</div>'
-    +row('Change since listing','<b class="'+(ch>=0?'pos':'neg')+'">'+(ch>=0?'+':'')+r['ChangeSinceListing%']+'%</b>')
-    +row('Last 20 days','<b class="'+(r20>=0?'pos':'neg')+'">'+(r20>=0?'+':'')+r['Return20d%']+'%</b>')+'</div>'
-    +evHtml(r.Symbol)
-    +(warn.length?'<div class="warn">'+warn.map(p=>'&#9888; '+esc(p)).join('<br>&#9888; ')+'</div>':'')
-    +'</div>';
-  });
-  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('newl',r,null),card:cards[i]}));
-  renderItems('list_newl','newl',items,HDR_N,'No new listings match.');
-  $('meta').textContent='New Listings | Showing '+list.length+' of '+rows.length+' stocks';
-}
-
-function drawEarly(){
-  const rows=DATA.early||[];
-  EARLY_MAP={};
-  rows.forEach(r=>{EARLY_MAP[r.Symbol]=r;});
-
-  const b=$('yband').value, sg=$('ystage').value, hz=$('yhor').value;
-  const sv = $('surv_filter') ? $('surv_filter').value : '';
-
-  const list=rows.filter(r=>{
-    if(b && r.Band!=b) return false;
-    if(sg && r.Stage!=sg) return false;
-    if(hz && r.Horizon!=hz) return false;
-    const isSurv = !!getSurvMeta(r);
-    if(sv === 'safe' && isSurv) return false;
-    if(sv === 'surv' && !isSurv) return false;
-    return true;
-  }).sort((a,c)=>((+a.StageOrd)-(+c.StageOrd))||((+c.Score)-(+a.Score)));
-
-  const na='<b class="na">n/a</b>';
-  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
-  
   const cards=list.map(r=>{
     const cls=r.Band.split(' ')[0];
     const meta=getStageMeta(r);
     const mt = getMultiTargets(r);
-
+    
     let vcpTag = '';
-    if(r.IsVCP === 'Yes'){
-      vcpTag = '<span class="tag vcp">💎 VCP '+esc(r.VCPDesc ? '('+r.VCPDesc+')' : 'Tight')+'</span>';
-    } else if(r.IsDryUp === 'Yes'){
+    if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
+      vcpTag = '<span class="tag vcp">💎 VCP Tight</span>';
+    } else if(r.IsDryUp === 'Yes' || (r.Reasons && r.Reasons.includes('dried up'))){
       vcpTag = '<span class="tag dryup">💧 Vol Dry-up</span>';
     }
 
     const sm = getSurvMeta(r);
     const survBadge = sm ? sm.tag : '';
+    const trendBadge = getTrendDaysMeta(r.Symbol, cur);
     const screenerBtn = getScreenerLink(r.Symbol);
     const rsBadge = getRSBadge(r);
 
-    const tags='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>'
-      +vcpTag
-      +(rsBadge?' '+rsBadge:'')
-      +survBadge
-      +'<span class="tag">'+esc(meta.code)+'</span>'
-      +'<span class="tag">'+esc(r.Horizon)+'</span>'
-      +'<span class="tag">'+esc(has(r.Sector)?r.Sector:'Sector n/a')+'</span>';
-      
-    let ex;
-    if(r.Status=='Breakout') ex='Broke above recent high '+esc(r.DaysSince)+' day(s) ago on strong volume; now '+esc(r.GainPct)+'% from breakout level (Rs '+fmt(r.Level)+').';
-    else ex='Tight range consolidation just below recent high (Rs '+fmt(r.Level)+') with drying volume.';
-      
-    const why=has(r.Reasons)?'<div class="why"><div class="ft">Why is it early?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+esc(x)+'</div>').join('')+'</div>':'';
-    const fs=(has(r.FundScore)&&r.FundScore!=='n/a')?'<b class="'+(+r.FundScore>=60?'pos':(+r.FundScore>=40?'amb':'neg'))+'">'+esc(r.FundScore)+' / 100</b>':na;
-    const fparts=has(r.Fundamentals)?r.Fundamentals.split(' | '):[];
-    const pl=has(r.PledgePct)&&r.PledgePct!=='n/a'?pledgeHtml(r.PledgePct,na):na;
-    const wl=has(r.Warning)?r.Warning.split('; '):[];
-      
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'early\')">'
-    +'<div class="top"><span class="sym">'+esc(r.Symbol)+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    const tagList=[...new Set([
+      '<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>',
+      trendBadge,
+      vcpTag,
+      rsBadge,
+      survBadge,
+      ns.has(r.Symbol)?'NEW today':'',
+      r.Status,
+      r.Class,
+      tr(r.Setup),
+      r.Gap=='Yes'?'Gap-up':''
+    ].filter(Boolean))];
+
+    const tags=tagList.map(t=>t.startsWith('<span')?t:'<span class="tag'+(t=='NEW today'?' new':'')+'">'+t+'</span>').join('');
+    const why=has(r.Reasons)?'<div class="why"><div class="ft">Why this setup?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+x+'</div>').join('')+'</div>':'';
+    let wl=has(r.Warning)?fixWarn(tr(r.Warning).split('; ')):[];
+    if(has(r.PledgeOfPromoterPct)&&(+r.PledgeOfPromoterPct)>100){
+      wl=wl.filter(x=>x.toLowerCase().indexOf('pledge')<0);
+      wl.push('Promoter pledge shows '+r.PledgeOfPromoterPct+'% (over 100%), which cannot be right.');
+    }
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\')">'
+    +'<div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
     +'<div class="tags">'+tags+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
@@ -1478,313 +1667,35 @@ function drawEarly(){
     +'<div class="n tgt"><small>T2 (+'+mt.t2Pct+'%) [Core]</small><b>Rs '+fmt(mt.t2)+'</b></div>'
     +'<div class="n tgt-run"><small>T3 (+'+mt.t3Pct+'%) [Runner]</small><b>Rs '+fmt(mt.t3)+'</b></div>'
     +'</div>'
-    +'<div class="exp">'+ex+' Last close: '+fmt(r.Close)+'.</div>'
+    +'<div class="exp">'+explain(r)+' Last close: '+fmt(r.Close)+'.</div>'
     +chartBtn(r)
     +'<div style="font-size:11.5px;color:var(--b);margin-top:8px">&#9432; Tap card to inspect multi-targets, rationale &amp; position sizer</div>'
+    +(r.Boosters?'<div class="exp">Boosters: '+tr(r.Boosters)+'</div>':'')
     +lvlHtml(r)
     +why
-    +'<div class="fund"><div class="ft">Fundamentals check</div>'
-    +row('Fundamental score',fs)
-    +fparts.map(x=>'<div class="exp" style="margin:0">&#8226; '+esc(x)+'</div>').join('')
-    +row('Promoter holding',has(r.PromoterPct)&&r.PromoterPct!=='n/a'?'<b>'+esc(r.PromoterPct)+'%</b>':na)
-    +row('Promoter pledge',pl)+'</div>'
+    +fundBox(r)
     +evHtml(r.Symbol)
-    +(wl.length?'<div class="warn">&#9888; '+wl.map(esc).join('<br>&#9888; ')+'</div>':'')
+    +(wl.length?'<div class="warn">&#9888; '+wl.join('<br>&#9888; ')+'</div>':'')
     +'</div>';
   });
-  
-  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('early',r,null),card:cards[i]}));
-  renderItems('list_early','early',items,HDR_E,'No Early Movers match.');
+  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells(cur,r,ns),card:cards[i]}));
+  renderItems('list',cur,items,HDR_SCAN,'No stocks match today.');
   const d=rows[0]?rows[0].Date:'-';
-  $('meta').textContent='Early Movers | Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
-}
-
-function drawSmart(){
-  const rows=DATA.smart||[];
-  const t=$('sm_type').value, c=$('sm_cap').value, rad=$('sm_rad').value, ov=$('sm_overlap').value, q=$('sm_search').value.trim().toUpperCase();
-  const list=rows.filter(r=>{
-    if(t&&r.Type!=t) return false;
-    if(c&&r.Category!=c) return false;
-    if(ov=='overlap'&&(+r.OverlapCount)<2) return false;
-    if(rad=='radar'&&(r.RadarSetup=='Not on radar'||!r.RadarSetup)) return false;
-    if(q&&r.Symbol.toUpperCase().indexOf(q)<0&&r.Investor.toUpperCase().indexOf(q)<0&&String(r.Sector).toUpperCase().indexOf(q)<0) return false;
-    return true;
-  });
-
-  const cards=list.map(r=>{
-    const isRadar=r.RadarSetup&&r.RadarSetup!='Not on radar';
-    const isOverlap=(+r.OverlapCount)>=2;
-    const radBadge=isRadar?'<div class="goodl" style="margin:6px 0">&#128293; <b>On Technical Radar: '+esc(r.RadarSetup)+'</b></div>':'';
-    const overlapBadge=isOverlap?'<div class="warn" style="margin:6px 0">&#128101; <b>Clustered Conviction: '+(+r.OverlapCount)+' Top Investors</b></div>':'';
-    const px=(r.ClosePrice&&r.ClosePrice!='n/a')?'<b>Rs '+fmt(r.ClosePrice)+'</b>':'n/a';
-    const mc=(r.MarketCapCr&&r.MarketCapCr!='n/a')?'<b>Rs '+fmt(r.MarketCapCr)+' cr</b> ('+esc(r.Category)+')':'n/a';
-    const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
-    const mockR={Symbol:r.Symbol,Entry:r.ClosePrice,Stop:'',Target:''};
-    const screenerBtn = getScreenerLink(r.Symbol);
-
-    return '<div class="card"><div class="top"><span class="sym">'+esc(r.Symbol)+screenerBtn+'</span><span class="tag smart">'+esc(r.Type)+'</span></div>'
-      +'<div class="tags"><span class="tag">'+esc(r.Category)+'</span><span class="tag">'+esc(r.Sector||'Sector n/a')+'</span><span class="tag hold">'+esc(r.Action)+'</span>'
-      +(isOverlap?'<span class="tag overlap">&#128101; '+(+r.OverlapCount)+' Investors</span>':'')+'</div>'
-      +resLine(r.Symbol)
-      +'<div class="exp"><b>'+esc(r.Investor)+'</b> holds <b>'+esc(r.HoldingPct)+'</b> ('+esc(r.Source)+')</div>'
-      +radBadge
-      +overlapBadge
-      +'<div class="fund"><div class="ft">Snapshot</div>'
-      +row('Latest Close',px)
-      +row('Market Cap',mc)
-      +row('Sector',esc(r.Sector||'n/a'))
-      +(isOverlap?row('Co-Holders',esc(r.CoInvestors)):'')
-      +'</div>'
-      +chartBtn(mockR)
-      +profHtml(r.Symbol)
-      +evHtml(r.Symbol)
-      +'</div>';
-  });
-
-  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells('smart',r,null),card:cards[i]}));
-  renderItems('list_smart','smart',items,HDR_SMART,'No Smart Money stocks match this filter.');
-
-  const totalInv=new Set(rows.map(r=>r.Investor)).size;
-  const onRad=rows.filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar').length;
-  const overlaps=new Set(rows.filter(r=>(+r.OverlapCount)>=2).map(r=>r.Symbol)).size;
-  const smalls=rows.filter(r=>r.Category=='Small Cap'||r.Category=='Micro Cap').length;
-  const box=(l,v,cls)=>'<div class="st"><small>'+l+'</small><b class="'+(cls||'')+'">'+v+'</b></div>';
-  $('sm_stats').innerHTML=box('Total Tracked',rows.length)
-    +box('Super Investors & Funds',totalInv)
-    +box('Small & Micro Cap',smalls,'pos')
-    +box('Overlap (2+ Investors)',overlaps,'amb')
-    +box('Double Conviction (On Radar)',onRad,'pos');
-
-  $('meta').textContent='Smart Money tracking | Showing '+list.length+' of '+rows.length+' tracked entries';
-}
-
-function loadMine(){try{return JSON.parse(localStorage.getItem('mystocks')||'[]')||[];}catch(e){return [];}}
-function saveMine(a){try{localStorage.setItem('mystocks',JSON.stringify(a));}catch(e){alert('Could not save in this browser.');}}
-function updTab(){const n=loadMine().length;$('t_mine').textContent='My Stocks'+(n?' ('+n+')':'');}
-function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='quality')drawQuality();else if(cur=='newl')drawNewl();else if(cur=='early')drawEarly();else if(cur=='mine')drawMine();else if(cur=='smart')drawSmart();else draw();}
-
-function findRow(sym){
-  const order=['short','ultra','early','multi','quality','newl'];
-  for(let i=0;i<order.length;i++){
-    const r=(DATA[order[i]]||[]).find(x=>x.Symbol==sym);
-    if(r) return r;
-  }
-  return null;
-}
-
-function ensureCH(){
-  if(CH) return Promise.resolve();
-  return fetch('data/charts.json?v='+Date.now())
-    .then(r=>r.ok?r.json():{})
-    .then(j=>{CH=j;})
-    .catch(()=>{});
-}
-
-function curPrice(m){
-  const d=CH&&CH[m.sym];
-  if(d&&d.c&&d.c.length) return {p:+d.c[d.c.length-1],d:d.d[d.d.length-1]};
-  const r=findRow(m.sym);
-  if(r&&has(r.Close)) return {p:+r.Close,d:r.Date};
-  if(m.lastPrice) return {p:+m.lastPrice,d:(m.lastDate||'entered by you')+' (entered by you)'};
-  if(m.src=='manual'&&m.addPrice) return {p:+m.addPrice,d:m.addDate+' (price you entered)'};
-  return null;
-}
-
-function hitInfo(m){
-  const d=CH&&CH[m.sym];
-  if(!d||!d.d||!d.d.length||!/^\d{4}-\d{2}-\d{2}/.test(String(d.d[0]))) return null;
-  const from=(m.status=='Holding'&&m.holdDate)?m.holdDate:m.addDate;
-  if(!/^\d{4}-\d{2}-\d{2}/.test(String(from))) return null;
-  for(let i=0;i<d.d.length;i++){
-    if(String(d.d[i])<=String(from)) continue;
-    const st=m.stop!=null&&d.l[i]<=m.stop;
-    const tg=m.target!=null&&d.h[i]>=m.target;
-    if(st) return {t:'Stop-loss level touched on '+d.d[i],c:'neg'};
-    if(tg) return {t:'Target level touched on '+d.d[i],c:'pos'};
-  }
-  return {t:'Stop-loss and target not touched since '+from,c:'na'};
-}
-
-function mineDetails(m){
-  const r=findRow(m.sym);
-  let h='';
-  if(!r){
-    h+='<div class="exp">This stock is not on today\'s radar lists. Check screener.in.</div>';
+  $('meta').textContent='Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
+  const nl=rows.filter(r=>ns.has(r.Symbol)).map(r=>r.Symbol);
+  const okNew=H||NEWOK;
+  const newLine='New today'+(okNew?' ('+nl.length+')':'')+': '+(okNew?(nl.length?nl.join(', '):'none'):'n/a')+'.';
+  let remLine;
+  if(H){
+    const openSet=new Set((DATA.perf||[]).filter(r=>r.Scan==cur&&(r.Result=='Open'||r.Result=='Pending')).map(r=>r.Symbol));
+    const rm=H.rows.filter(x=>!curSyms.has(x.Symbol)).map(x=>x.Symbol+(openSet.has(x.Symbol)?' (open trade)':''));
+    remLine='Removed ('+rm.length+'): '+(rm.length?rm.join(', '):'none')+'. Compared with '+H.date+'.';
   } else {
-    let wl=has(r.Warning)?fixWarn(tr(r.Warning).split('; ')):[];
-    h+=(wl.length?'<div class="warn">&#9888; '+wl.join('<br>&#9888; ')+'</div>':'<div class="exp">No warnings in today\'s radar data.</div>');
-    h+=fundBox(r);
+    remLine='Removed: n/a.';
   }
-  if(PROF[m.sym]) h+=profHtml(m.sym);
-  h+=evHtml(m.sym);
-  return h;
+  $('chg').innerHTML='<div class="note"><b>Changes since yesterday:</b> '+newLine+'<br>'+remLine+'</div>';
 }
-
-function drawMine(){if(typeof syncMinePrices==='function')syncMinePrices();ensureCH().then(drawMine2);}
-
-function drawMine2(){
-  if(cur!='mine') return;
-  const arr=loadMine();
-  updTab();
-  const rows=arr.slice().sort((a,b)=>(a.status==b.status?0:(a.status=='Holding'?-1:1))||String(b.addDate).localeCompare(String(a.addDate)));
-  const pcts=[];
-  const items=rows.map(m=>{
-    const c=curPrice(m);
-    const base=m.status=='Holding'?+m.buyPrice:+m.addPrice;
-    const pct=(c&&base>0)?(c.p-base)/base*100:null;
-    if(pct!==null) pcts.push(pct);
-    const hit=hitInfo(m);
-    const k=pct===null?'':(pct>=0?'pos':'neg');
-    const since=m.status=='Holding'?('You bought at '+fmt(m.buyPrice)+(m.holdDate?' on '+m.holdDate:'')):('Added on '+m.addDate+' at '+fmt(m.addPrice));
-    let pl='';
-    if(m.status=='Holding'&&m.qty&&c) pl=' | P/L Rs '+fmt((c.p-m.buyPrice)*m.qty)+' ('+m.qty+' shares)';
-    let below='';
-    if(c&&m.stop!=null&&c.p<=m.stop&&!(hit&&hit.c=='neg')) below='<div class="warn">&#9888; Last close is at or below your stop-loss level.</div>';
-    const s=esc(m.sym);
-    const btn=(a,l)=>'<button data-s="'+s+'" onclick="mineAct(this,\''+a+'\')">'+l+'</button>';
-    const lv={Symbol:m.sym,Entry:m.entry==null?'':m.entry,Stop:m.stop==null?'':m.stop,Target:m.target==null?'':m.target};
-    const screenerBtn = getScreenerLink(m.sym);
-    
-    m._cur=c; m._pct=pct; m._hit=hit;
-
-    const card='<div class="card"><div class="top"><span class="sym">'+s+screenerBtn+'</span><span class="'+(k||'exp')+'" style="font-weight:700;font-size:16px">'+(pct===null?'n/a':(pct>=0?'+':'')+pct.toFixed(2)+'%')+'</span></div>'
-    +'<div class="tags"><span class="tag'+(m.status=='Holding'?' hold':'')+'">'+m.status+'</span><span class="tag">'+(m.src=='manual'?'Added manually':'From radar')+'</span></div>'
-    +resLine(m.sym)
-    +'<div class="exp">'+since+'.<br>Latest price: <b>'+(c?fmt(c.p):'n/a')+'</b>'+(c?' ('+esc(c.d)+')':'')+pl+'</div>'
-    +'<div class="nums"><div class="n"><small>Entry</small><b>'+nz(m.entry)+'</b></div>'
-    +'<div class="n stop"><small>Stop-loss</small><b>'+nz(m.stop)+'</b></div>'
-    +'<div class="n tgt"><small>Target</small><b>'+nz(m.target)+'</b></div></div>'
-    +below
-    +'<div class="btns">'+btn('det',OPEN[m.sym]?'Hide details':'Red flags &amp; events')
-    +btn('edit','Edit levels')
-    +(m.status=='Watching'?btn('hold','Mark as Holding'):btn('watch','Back to Watching'))
-    +btn('price','Update price')+btn('rm','Remove')+'</div>'
-    +(OPEN[m.sym]?mineDetails(m):'')
-    +(c&&CH&&CH[m.sym]?chartOnly(lv):'')
-    +'</div>';
-
-    return {sym:m.sym, cells:rowCells('mine',m,null), card:card};
-  });
-
-  renderItems('list_mine','mine',items,HDR_MINE,'Nothing here yet. Tap "&#9734; Watch" on a radar card.');
-  const hold=arr.filter(m=>m.status=='Holding').length, watch=arr.length-hold;
-  const avg=pcts.length?pcts.reduce((a,b)=>a+b,0)/pcts.length:null;
-  const box=(l,v,c)=>'<div class="st"><small>'+l+'</small><b class="'+(c||'')+'">'+v+'</b></div>';
-  $('nstats').innerHTML=box('Holding',hold)+box('Watching',watch)+box('Average change',avg===null?'n/a':(avg>=0?'+':'')+avg.toFixed(2)+'%',avg===null?'':(avg>=0?'pos':'neg'));
-  $('meta').textContent='My Stocks | saved in this browser only | '+arr.length+' stocks';
-}
-
-function addFromCard(btn){
-  const sym=btn.getAttribute('data-s');
-  const r=(DATA[cur]||[]).find(x=>x.Symbol==sym);
-  if(!r) return;
-  const arr=loadMine();
-  if(arr.some(x=>x.sym==sym)){alert(sym+' is already in My Stocks.');return;}
-  const price=has(r.Close)?+r.Close:+r.Entry;
-  arr.push({sym:sym,status:'Watching',src:cur,addDate:r.Date||todayISO(),addPrice:price,
-    entry:has(r.Entry)?+r.Entry:null,stop:has(r.Stop)?+r.Stop:null,target:has(r.Target)?+r.Target:null});
-  saveMine(arr);
-  updTab();
-  redrawCur();
-}
-
-function addManual(){
-  const sym=$('nsym').value.trim().toUpperCase();
-  if(!sym){alert('Enter an NSE symbol first.');return;}
-  const arr=loadMine();
-  if(arr.some(x=>x.sym==sym)){alert(sym+' is already in My Stocks.');return;}
-  const num=s=>{s=String(s).trim();if(s==='')return null;const v=+s;return(isFinite(v)&&v>0)?v:NaN;};
-  let price=num($('nprice').value),en=num($('nentry').value),st=num($('nstop').value),tg=num($('ntarget').value);
-  const r=findRow(sym);
-  const c=curPrice({sym:sym});
-  if(r){
-    if(en===null&&has(r.Entry)) en=+r.Entry;
-    if(st===null&&has(r.Stop)) st=+r.Stop;
-    if(tg===null&&has(r.Target)) tg=+r.Target;
-  }
-  let date=todayISO();
-  if(price===null&&c){price=c.p;date=c.d;}
-  if(price===null){alert('Please enter current price.');return;}
-  const stat=$('nstat').value;
-  const effectiveBuy = (en !== null && en > 0) ? en : price;
-  const m={sym:sym,status:stat,src:'manual',addDate:date,addPrice:effectiveBuy,entry:en,stop:st,target:tg};
-  if(stat=='Holding'){m.buyPrice=effectiveBuy;m.holdDate=todayISO();m.qty=null;}
-  arr.push(m);
-  saveMine(arr);
-  ['nsym','nprice','nentry','nstop','ntarget'].forEach(i=>{$(i).value='';});
-  drawMine();
-}
-
-function mineAct(btn,act){
-  const sym=btn.getAttribute('data-s');
-  let arr=loadMine();
-  const m=arr.find(x=>x.sym==sym);
-  if(!m) return;
-  const ask=(label,v)=>{
-    const s=prompt(label+' (leave empty to keep)',v==null?'':v);
-    if(s===null||String(s).trim()==='') return v;
-    const x=+s;
-    return(isFinite(x)&&x>0)?x:v;
-  };
-  if(act=='det'){OPEN[sym]=!OPEN[sym];}
-  else if(act=='rm'){
-    if(!confirm('Remove '+sym+' from My Stocks?')) return;
-    arr=arr.filter(x=>x.sym!=sym);
-  }
-  else if(act=='edit'){
-    m.entry=ask('Entry price',m.entry);
-    m.stop=ask('Stop-loss price',m.stop);
-    m.target=ask('Target price',m.target);
-  }
-  else if(act=='hold'){
-    const c=curPrice(m);
-    const def=c?c.p:m.addPrice;
-    const b=prompt('Your actual buy price for '+sym+'?',def);
-    if(b===null) return;
-    const bv=+b;
-    if(!isFinite(bv)||bv<=0){alert('Enter a valid price.');return;}
-    const q=prompt('Quantity bought (optional)','');
-    m.status='Holding';m.buyPrice=bv;m.holdDate=todayISO();
-    m.qty=(q&&isFinite(+q)&&+q>0)?+q:null;
-  }
-  else if(act=='watch'){
-    m.status='Watching';delete m.buyPrice;delete m.holdDate;delete m.qty;
-  }
-  else if(act=='price'){
-    const c=curPrice(m);
-    const p=prompt('Latest price for '+sym,c?c.p:'');
-    if(p===null) return;
-    const pv=+p;
-    if(!isFinite(pv)||pv<=0){alert('Enter a valid price.');return;}
-    m.lastPrice=pv;m.lastDate=todayISO();
-  }
-  saveMine(arr);
-  drawMine();
-}
-
-let RES={};
-function daysTo(iso){
-  const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||''));
-  if(!m) return null;
-  const d=new Date(+m[1],+m[2]-1,+m[3]);
-  const t=new Date();t.setHours(0,0,0,0);
-  return Math.round((d-t)/86400000);
-}
-function whenTxt(n){return n==0?'today':(n==1?'tomorrow':'in '+n+' days');}
-function buildRes(){
-  RES={};
-  (DATA.results||[]).forEach(r=>{
-    const n=daysTo(r.Date);
-    if(n===null||n<0) return;
-    if(!RES[r.Symbol]||n<RES[r.Symbol].n) RES[r.Symbol]={n:n,date:r.Date};
-  });
-}
-function resLine(sym){
-  const r=RES[sym];
-  if(!r||r.n>30) return '';
-  return '<div class="'+(r.n<=7?'warn':'exp')+'">'+(r.n<=7?'&#9888; ':'')+'Results '+whenTxt(r.n)+', on '+esc(r.date)+'.</div>';
-}
-function drawResults(){
+  function drawResults(){
   const q=$('rsearch').value.trim().toUpperCase(), f=$('rfilter').value;
   const tag={};
   [['ultra','Ultra'],['short','Short'],['early','Early Movers'],['multi','Multibagger'],['quality','Quality'],['newl','New Listing']].forEach(a=>{
