@@ -15,7 +15,7 @@ LONG = {"multi": "data/multibagger.csv", "quality": "data/quality.csv",
         "newl": "data/newlistings.csv"}
 LABEL = {"multi": "Multibagger", "quality": "Quality", "newl": "New listing"}
 
-# ఇప్పుడు radar లో ఉన్నాయా తెలుసుకోవడానికి తాజా జాబితాలు (కరెక్ట్ ఫైల్ పాత్‌లతో అప్‌డేట్ చేయబడింది)
+# ఇప్పుడు radar లో ఉన్నాయా తెలుసుకోవడానికి తాజా జాబితాలు
 CURRENT = {
     "ultra": "data/ultra_short.csv", "short": "data/short_term.csv",
     "multi": "data/multibagger.csv", "quality": "data/quality.csv",
@@ -25,8 +25,8 @@ CURRENT = {
 }
 SEEN = "data/first_seen.csv"
 SEEN_COLS = ["Scan", "Date", "Symbol", "Status", "Class", "Band", "Score",
-             "Entry", "Stop", "Target", "Close", "IsVCP", "VCPType",
-             "Surveillance", "ASM", "GSM"]
+             "Entry", "Stop", "Target", "Target1", "Target2", "Target3", "Close",
+             "IsVCP", "VCPType", "Surveillance", "ASM", "GSM"]
 
 
 def fnum(x):
@@ -227,9 +227,17 @@ for scan, f in LONG.items():
         date = dt.strftime("%Y-%m-%d") if pd.notna(dt) else last_px
         v_flag, v_type = detect_vcp_flag(r)
         s_type, s_asm, s_gsm = get_surv_info(r)
+
+        risk = max(0.1, entry - stop)
+        t1 = fnum(r.get("Target1")) or round(entry + 1.2 * risk, 2)
+        t2 = fnum(r.get("Target2")) or round(target, 2)
+        t3 = fnum(r.get("Target3")) or round(entry + 4.5 * risk, 2)
+
         add.append({"Scan": scan, "Date": date, "Symbol": sym, "Status": LABEL[scan],
                     "Class": "", "Band": r.get("Band", ""), "Score": fnum(r.get("Score")),
-                    "Entry": entry, "Stop": stop, "Target": target, "Close": entry,
+                    "Entry": entry, "Stop": stop, "Target": target,
+                    "Target1": t1, "Target2": t2, "Target3": t3,
+                    "Close": entry,
                     "IsVCP": v_flag, "VCPType": v_type,
                     "Surveillance": s_type, "ASM": s_asm, "GSM": s_gsm})
         known.add((scan, sym))
@@ -241,7 +249,7 @@ seen.to_csv(SEEN, index=False)
 if len(seen):
     parts.append(seen.copy())
 
-# ---------- Excluded Scans (కరెక్ట్ ఫైల్ పాత్‌లతో అలైన్ చేయబడింది) ----------
+# ---------- Excluded Scans ----------
 EXCL_FILES = {
     "exul": "data/ultra_rejected.csv",
     "exsh": "data/short_rejected.csv",
@@ -279,7 +287,7 @@ for escan, ef in EXCL_FILES.items():
         if "Band" not in ex_df.columns:
             ex_df["Band"] = ex_df["Score"].apply(band_of) if "Score" in ex_df.columns else "Good Setup"
             
-        for c in ("Entry", "Stop", "Target", "Close"):
+        for c in ("Entry", "Stop", "Target", "Target1", "Target2", "Target3", "Close"):
             if c not in ex_df.columns:
                 ex_df[c] = None
             ex_df[c] = pd.to_numeric(ex_df[c], errors="coerce")
@@ -292,7 +300,8 @@ for escan, ef in EXCL_FILES.items():
         print(f"{ef} చదవలేకపోయాం:", e)
 
 cols = ["Scan", "SignalDate", "Symbol", "SignalStatus", "Class", "Band", "Score", "Entry", "Stop",
-        "Target", "Result", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct",
+        "Target", "Target1", "Target2", "Target3", "Result", "StageResult", "DaysHeld", "ResultDate", "ExitPrice", "PnLPct",
+        "T1Date", "T2Date", "T3Date",
         "PeakGainPct", "PeakPrice", "IsVCP", "VCPType",
         "Surveillance", "ASM", "GSM",
         "AfterStopMaxPct", "AfterStopObsDays", "Whipsaw", "DaysToTargetAfterStop", "NowOnRadar"]
@@ -347,31 +356,78 @@ for r in sig.to_dict("records"):
     if g is None:
         continue
     after = g[g["Date"] > ts].head(win)
-    entry, stop, target, close = float(r["Entry"]), float(r["Stop"]), float(r["Target"]), float(r["Close"])
+    entry = float(r["Entry"])
+    stop = float(r["Stop"])
+    target = float(r["Target"])
+    close = float(r["Close"]) if "Close" in r and pd.notna(r["Close"]) else entry
+
+    risk = max(0.1, entry - stop)
+    t1 = fnum(r.get("Target1")) or round(entry + 1.2 * risk, 2)
+    t2 = fnum(r.get("Target2")) or round(target, 2)
+    t3 = fnum(r.get("Target3")) or round(entry + 4.5 * risk, 2)
+
     pending = entry > close * 1.001
     active = not pending
     result = "Pending" if pending else "Open"
+    stage_result = "Pending" if pending else "Active"
     exit_price, res_date, days = None, None, 0
 
     highest_price = entry
     peak_gain_pct = 0.0
+
+    t1_hit = False
+    t2_hit = False
+    t3_hit = False
+    t1_date, t2_date, t3_date = "", "", ""
+    effective_stop = stop
 
     for d in after.itertuples():
         days += 1
         if not active:
             if d.High >= entry:
                 active = True
+                stage_result = "Active"
             else:
                 continue
                 
         if d.High > highest_price:
             highest_price = float(d.High)
-            
-        if d.Low <= stop:
-            result = "Stop hit"
-            exit_price = min(stop, d.Open)
+
+        # Check T1
+        if not t1_hit and d.High >= t1:
+            t1_hit = True
+            t1_date = pd.Timestamp(d.Date).strftime("%Y-%m-%d")
+            stage_result = "T1 Hit 🎯"
+            effective_stop = max(effective_stop, entry)  # Breakeven Trail
+
+        # Check T2
+        if not t2_hit and d.High >= t2:
+            t2_hit = True
+            t2_date = pd.Timestamp(d.Date).strftime("%Y-%m-%d")
+            stage_result = "T2 Hit 🎯🎯"
+            effective_stop = max(effective_stop, t1)     # Trail to T1
+
+        # Check T3
+        if not t3_hit and d.High >= t3:
+            t3_hit = True
+            t3_date = pd.Timestamp(d.Date).strftime("%Y-%m-%d")
+            stage_result = "T3 Hit 🚀"
+            effective_stop = max(effective_stop, t2)     # Trail to T2
+
+        # Check Stop Loss (Initial or Trailed)
+        if d.Low <= effective_stop:
+            if t1_hit:
+                result = "Trailed SL"
+                stage_result = "Trailed SL 🛡️"
+                exit_price = max(effective_stop, d.Open) if d.Open > effective_stop else effective_stop
+            else:
+                result = "Stop hit"
+                stage_result = "Stop hit 🛑"
+                exit_price = min(stop, d.Open)
             res_date = d.Date
             break
+
+        # Final Target Check for Legacy compatibility
         if d.High >= target:
             result = "Target hit"
             exit_price = target
@@ -385,10 +441,12 @@ for r in sig.to_dict("records"):
         if len(after) >= win:
             if active:
                 result = "Expired"
+                stage_result = "Expired"
                 exit_price = float(after["Close"].iloc[-1])
                 res_date = after["Date"].iloc[-1]
             else:
                 result = "No entry"
+                stage_result = "No entry"
         elif active:
             exit_price = float(after["Close"].iloc[-1]) if len(after) else close
 
@@ -414,11 +472,20 @@ for r in sig.to_dict("records"):
     out.append({
         "Scan": scan, "SignalDate": ts.strftime("%Y-%m-%d"), "Symbol": sym,
         "SignalStatus": r["Status"], "Class": r["Class"], "Band": r["Band"], "Score": r["Score"],
-        "Entry": round(entry, 2), "Stop": round(stop, 2), "Target": round(target, 2),
-        "Result": result, "DaysHeld": days,
+        "Entry": round(entry, 2), "Stop": round(stop, 2),
+        "Target": round(target, 2),
+        "Target1": round(t1, 2),
+        "Target2": round(t2, 2),
+        "Target3": round(t3, 2),
+        "Result": result,
+        "StageResult": stage_result,
+        "DaysHeld": days,
         "ResultDate": pd.Timestamp(res_date).strftime("%Y-%m-%d") if res_date is not None else "",
         "ExitPrice": round(exit_price, 2) if exit_price is not None else "",
         "PnLPct": pnl_pct,
+        "T1Date": t1_date,
+        "T2Date": t2_date,
+        "T3Date": t3_date,
         "PeakGainPct": peak_gain_pct if peak_gain_pct > 0 else (pnl_pct if pnl_pct != "" else 0.0),
         "PeakPrice": round(highest_price, 2),
         "IsVCP": r.get("IsVCP", "No"),
@@ -435,6 +502,6 @@ res = pd.DataFrame(out, columns=cols)
 res.to_csv("data/performance.csv", index=False)
 print("మొత్తం signals:", len(res))
 if len(res):
-    print(res.groupby(["Scan", "Result"]).size().to_string())
+    print(res.groupby(["Scan", "StageResult"]).size().to_string())
     vcp_signals = res[res["IsVCP"] == "Yes"]
     print(f"VCP Setups లెక్కింపు: {len(vcp_signals)} signals ట్రాక్ చేయబడ్డాయి.")
