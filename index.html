@@ -691,7 +691,7 @@ function getMultiTargets(r){
   let t2 = r.Target2 ? parseFloat(r.Target2) : fallbackTgt;
   let t3 = r.Target3 ? parseFloat(r.Target3) : (en + 4.5 * risk);
 
-  // Guard: T3 ఎల్లప్పుడూ T2 కంటే ఎక్కువగా ఉండేలా చూడడం
+  // T3 > T2 ఖచ్చితమైన నియమం (Auropharma లాంటి లోపాలు రాకుండా రక్షణ)
   t3 = Math.max(t3, t2 + (1.5 * risk));
 
   let t1Pct = r.Target1Pct ? parseFloat(r.Target1Pct) : (en > 0 ? ((t1 - en) / en) * 100 : 0);
@@ -709,6 +709,192 @@ function getMultiTargets(r){
   };
 }
 
+function pledgeHtml(v,na){
+  if(!has(v)) return na;
+  const p=+v;
+  if(p>100) return '<b class="amb">data error ('+p+'%)</b>';
+  return '<b class="'+(p>=25?'neg':(p>=10?'amb':''))+'">'+p+'% of promoter shares</b>';
+}
+
+function fundBox(r){
+  if(r.FundChecked!=='Yes') return '';
+  const na='<b class="na">n/a</b>';
+  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
+  const mc=has(r.MarketCapCr)?'<b>Rs '+fmt(r.MarketCapCr)+' crore</b>':na;
+  const sec=has(r.Sector)?'<b>'+r.Sector+'</b>':na;
+  const pro=has(r.PromoterPct)?'<b>'+r.PromoterPct+'%</b>':na;
+  const pl=pledgeHtml(r.PledgeOfPromoterPct,na);
+  let de=na;
+  if(has(r.DebtEquity)){
+    const d=+r.DebtEquity;
+    de='<b class="'+(d>2?'neg':(d>1?'amb':''))+'">'+d+'</b>';
+  }
+  const nr=has(r.NextResults)?row('Next results','<b>'+r.NextResults+'</b>'):'';
+  return '<div class="fund"><div class="ft">Company snapshot</div>'
+    +row('Market cap',mc)+row('Sector',sec)+row('Promoter holding',pro)
+    +row('Promoter pledge',pl)+row('Debt / Equity',de)+nr+'</div>';
+}
+
+function lvlHtml(r){
+  const mt = getMultiTargets(r);
+  return '<div class="why"><div class="ft">Multi-Target Blueprint &amp; Trailing Levels</div>'
+    +'<div>&#8226; <b>Target 1:</b> Rs '+fmt(mt.t1)+' (+'+mt.t1Pct+'%) &rarr; <i>Book 40% &amp; Trail SL to Cost (Zero Risk)</i></div>'
+    +'<div>&#8226; <b>Target 2:</b> Rs '+fmt(mt.t2)+' (+'+mt.t2Pct+'%) &rarr; <i>Core Swing Target (Lock Gains)</i></div>'
+    +'<div>&#8226; <b>Target 3:</b> Rs '+fmt(mt.t3)+' (+'+mt.t3Pct+'%) &rarr; <i>Runner Extension</i></div>'
+    +(has(r.RR)?'<div>&#8226; Reward:Risk 1:'+esc(r.RR)+'</div>':'')
+    +(has(r.StopReason)?'<div>&#8226; Stop Basis: '+esc(r.StopReason)+'</div>':'')
+    +'</div>';
+}
+
+function fixWarn(w){
+  const out=[];
+  w.forEach(x=>{
+    if(/^it may block/i.test(x.trim())&&out.length) out[out.length-1]+='; '+x.trim();
+    else out.push(x);
+  });
+  return out;
+}
+
+let EARLY_MAP={};
+
+function getStageMeta(r){
+  let badge=r.StageBadge;
+  let color=r.StageColor;
+  let code=r.StageCode;
+
+  if(!badge||badge==='WATCH'||badge==='-'){
+    if(r.Stage==='Fresh'||r.Band==='High Conviction'){
+      badge='PRIME ENTRY'; color='green'; code=r.Stage?'Stage 2A':'High Conviction';
+    }else if(r.Stage==='Ready'||r.Band==='Good Setup'){
+      badge='WATCHLIST'; color='gold'; code=r.Stage?'Stage 1B':'Good Setup';
+    }else{
+      badge='AVOID'; color='red'; code=r.Stage?'Stage 2B':'Early Watch';
+    }
+  }
+  return {badge,color,code};
+}
+
+function calcPositionSize(){
+  if(!ACTIVE_ROW) return;
+  const r = ACTIVE_ROW;
+  const userRisk = parseFloat($('dr_user_risk').value) || 0;
+  const entry = parseFloat(r.Close || r.Entry) || 0;
+  const stop = parseFloat(r.Stop) || 0;
+  const mt = getMultiTargets(r);
+  
+  const riskPerShare = Math.max(0.1, entry - stop);
+  let qty = 0;
+  if(riskPerShare > 0 && userRisk > 0){
+    qty = Math.floor(userRisk / riskPerShare);
+  }
+  
+  const totalCap = qty * entry;
+  const profitT1 = (qty * 0.40) * Math.max(0, mt.t1 - entry);
+  const profitT2 = qty * Math.max(0, mt.t2 - entry);
+  
+  $('dr_calc_qty').textContent = qty.toLocaleString('en-IN') + ' shares';
+  $('dr_calc_cap').textContent = 'Rs ' + totalCap.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  $('dr_calc_profit_t1').textContent = '+Rs ' + profitT1.toLocaleString('en-IN', {maximumFractionDigits: 0});
+  $('dr_calc_profit_t2').textContent = '+Rs ' + profitT2.toLocaleString('en-IN', {maximumFractionDigits: 0});
+}
+
+function openRationale(sym, tabType){
+  const tab = tabType || cur;
+  const rows = (DATA[tab]||[]);
+  const r = rows.find(x=>x.Symbol===sym) || EARLY_MAP[sym];
+  if(!r) return;
+  
+  ACTIVE_ROW = r;
+  $('dr_title').textContent=r.Symbol+' — Investment Scrutiny';
+  const meta=getStageMeta(r);
+  
+  $('dr_badge').textContent=meta.badge;
+  $('dr_icon').textContent=meta.color==='green'?'🟢':(meta.color==='gold'?'🟡':'🔴');
+  
+  const bnr=$('dr_banner');
+  bnr.className='status-banner banner-'+meta.color;
+  
+  if(meta.badge==='PRIME ENTRY'){
+    $('dr_sub').textContent='High Conviction Setup: అనుకూలమైన Risk:Reward తో Fresh Momentum.';
+  }else if(meta.badge==='WATCHLIST'){
+    $('dr_sub').textContent='Consolidation Watch: Price tightening తో Volume Dry-up Setup.';
+  }else{
+    $('dr_sub').textContent='Extended Run-up: Pullback risk ఉంది, ప్రస్తుత level వద్ద chasing చేయకండి.';
+  }
+  
+  const ctn=$('dr_reasons');
+  ctn.innerHTML='';
+  
+  let mWarning = '';
+  const mScore = (typeof DATA !== 'undefined' && DATA.market_health && DATA.market_health.score) 
+                 ? parseFloat(DATA.market_health.score) 
+                 : (window.MARKET_HEALTH_SCORE || 5.3);
+
+  if(mScore < 40) {
+    mWarning = ' ⚠️ Market Weak: Pullback risk ఉంది, position size 50% మాత్రమే తీసుకోండి.';
+  } else if(mScore >= 70) {
+    mWarning = ' ✅ Market Favorable: బ్రేక్‌అవుట్ మొమెంటమ్ బాగుంది, full size తీసుకోవచ్చు.';
+  } else {
+    mWarning = ' ⚖️ Market Neutral: నిబంధనల ప్రకారం stop-loss తప్పక పాటించండి.';
+  }
+
+  const sm = getSurvMeta(r);
+  if(sm){
+    mWarning += ` 🚨 హెచ్చరిక: ఈ స్టాక్ ఎక్స్చేంజ్ ${sm.label} పరిధిలో ఉంది. 100% మార్జిన్ & సర్క్యూట్ రిస్క్ ఉంటుంది.`;
+  }
+
+  let lines=[];
+  if(r.SimpleReasons && r.SimpleReasons.trim().length > 0 && r.SimpleReasons !== '[]'){
+    lines = r.SimpleReasons.split(' || ').map(s=>{
+      const idx = s.indexOf(':');
+      return idx > 0 ? {title: s.slice(0, idx).trim(), desc: s.slice(idx+1).trim()} : {title: 'కీలక అంశం', desc: s};
+    });
+    if(lines.length > 0){
+      lines[lines.length - 1].desc += mWarning;
+    }
+  } else {
+    const mt = getMultiTargets(r);
+    lines = [
+      {title: 'Multi-Target Strategy', desc: `T1 Rs ${fmt(mt.t1)} (+${mt.t1Pct}%) వద్ద 40% ప్రాఫిట్ బుక్ చేసి, SL ను కొన్న ధరకు మార్చండి. T2 Rs ${fmt(mt.t2)} (+${mt.t2Pct}%) కోర్ టార్గెట్.`},
+      {title: 'Risk Management', desc: `Safe Stop Rs ${fmt(r.Stop)} (${r.StopDistPct}% రిస్క్). Reward:Risk 1:${r.RR||'2.0'} తో ట్రేడింగ్‌కు అనుకూలంగా ఉంది.${mWarning}`},
+      {title: 'Runner Potential', desc: `T3 Extended Target Rs ${fmt(mt.t3)} (+${mt.t3Pct}%) వద్ద భారీ ర్యాలీ కోసం రన్నర్ క్వాంటిటీని రైడ్ చేయవచ్చు.`}
+    ];
+  }
+  
+  lines.forEach((item, idx)=>{
+    const el = document.createElement('div');
+    el.className = 'reason-item';
+    el.innerHTML = '<div class="reason-title">' + (idx+1) + '. ' + esc(item.title) + '</div><div class="reason-desc">' + esc(item.desc) + '</div>';
+    ctn.appendChild(el);
+  });
+  
+  const mt = getMultiTargets(r);
+  $('dr_price').textContent = 'Rs ' + fmt(r.Close || r.Entry);
+  $('dr_stop').textContent = 'Rs ' + fmt(r.Stop) + ' (' + r.StopDistPct + '% రిస్క్)';
+  
+  if($('dr_stop_tight')){
+    if(has(r.StopTight)){
+      $('dr_stop_tight').textContent = 'Rs ' + fmt(r.StopTight);
+      $('dr_stop_tight').className = 'neg';
+    } else {
+      $('dr_stop_tight').textContent = '-';
+      $('dr_stop_tight').className = 'na';
+    }
+  }
+  
+  $('dr_t1').textContent = 'Rs ' + fmt(mt.t1) + ' (+' + mt.t1Pct + '%)';
+  $('dr_t2').textContent = 'Rs ' + fmt(mt.t2) + ' (+' + mt.t2Pct + '%)';
+  $('dr_t3').textContent = 'Rs ' + fmt(mt.t3) + ' (+' + mt.t3Pct + '%)';
+  $('dr_stage').textContent = meta.code;
+  $('dr_chart_link').href = 'https://in.tradingview.com/chart/?symbol=NSE:' + encodeURIComponent(r.Symbol);
+  
+  calcPositionSize();
+  $('rationaleDrawer').style.display = 'flex';
+}
+
+function closeRationaleDrawer(){$('rationaleDrawer').style.display='none';}
+function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationaleDrawer();}
+
 function loadHist(){
   return fetch('data/history/index.json?v='+Date.now())
     .then(r=>r.ok?r.json():{})
@@ -725,8 +911,7 @@ function loadHist(){
         .catch(()=>{HIST[k]=null;});
     })));
 }
-
-function handleGlobalSearch(q){
+  function handleGlobalSearch(q){
   q = (q||'').trim().toUpperCase();
   const drop = $('search_results');
   if(!q){
@@ -937,7 +1122,8 @@ document.addEventListener('click', e => {
     if(drop) drop.style.display='none';
   }
 });
-  function rowCells(tab,r,ns){
+
+function rowCells(tab,r,ns){
   const cls=r.Band?r.Band.split(' ')[0]:'';
   const rs=RES[r.Symbol||r.sym];
   const al=(rs&&rs.n<=7)?'<span class="amb" title="Results in '+rs.n+' days">&#9888;</span>':'<span></span>';
@@ -947,7 +1133,7 @@ document.addEventListener('click', e => {
   if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
     rowVcp = ' <span class="tag vcp">💎 VCP</span>';
   } else if(r.IsDryUp === 'Yes' || (r.Reasons && r.Reasons.includes('dried up'))){
-    rowVcp = ' <span class="tag dryup">💧 Dry-up</span>';
+    rowVcp = ' <span class="tag dryup">💧 Vol Dry-up</span>';
   }
 
   const sm = getSurvMeta(r);
@@ -1061,399 +1247,6 @@ function renderItems(id,tab,items,hdr,emptyMsg){
       return '<div class="lrow"><div class="lhead'+(o?' open':'')+'" data-k="'+esc(k)+'" onclick="togRow(this)">'+i.cells+'</div>'
         +'<div class="lbody" style="display:'+(o?'block':'none')+'">'+i.card+'</div></div>';
     }).join('');
-}
-
-function buildEv(){
-  EV={};
-  (DATA.events||[]).forEach(e=>{
-    if(!e.symbol) return;
-    (EV[e.symbol]=EV[e.symbol]||[]).push(e);
-  });
-}
-
-function buildNew(){
-  NEWSET={ultra:new Set(),short:new Set()};
-  NEWOK=(DATA.perf||[]).length>0;
-  ['ultra','short'].forEach(k=>{
-    const first=(DATA[k]||[])[0];
-    const d=first?first.Date:'';
-    if(!d) return;
-    (DATA.perf||[]).forEach(r=>{
-      if(r.Scan==k&&r.SignalDate==d) NEWSET[k].add(r.Symbol);
-    });
-  });
-}
-
-function syncMinePrices(){
-  const arr = loadMine();
-  if(!arr || !arr.length) return;
-  let updated = false;
-  
-  arr.forEach(item => {
-    const cur = curPrice({sym: item.sym});
-    if(cur && cur.p && item.lastPrice !== cur.p){
-      item.lastPrice = cur.p;
-      item.lastPriceDate = cur.d || todayISO();
-      updated = true;
-    }
-  });
-  
-  if(updated){
-    saveMine(arr);
-    if(typeof curTab !== 'undefined' && curTab === 'mine'){
-      drawMine();
-    }
-  }
-}
-
-function updateDigest(){
-  const ds=[];
-  ['ultra','short','early','smart'].forEach(k=>{(DATA[k]||[]).forEach(r=>{if(r.Date&&r.Date!='Quarterly Filing') ds.push(r.Date);});});
-  ds.sort();
-  const d=ds.length?ds[ds.length-1]:'-';
-  $('d_date').textContent=d;
-
-  let freshCnt=0;
-  (DATA.early||[]).forEach(r=>{if(r.Stage=='Fresh'||r.Stage=='Ready') freshCnt++;});
-  const uNew=NEWSET['ultra']?NEWSET['ultra'].size:0;
-  $('d_new').textContent=(freshCnt+uNew)+' stocks (Early/Ultra)';
-
-  const dConv=(DATA.smart||[]).filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar').length;
-  $('d_smart').textContent=dConv+' stocks on radar';
-
-  const sCounts={};
-  ['ultra','short','early','multi','quality'].forEach(k=>{
-    (DATA[k]||[]).forEach(r=>{
-      const s=r.Sector;
-      if(s&&s!='n/a') sCounts[s]=(sCounts[s]||0)+1;
-    });
-  });
-  let topSec='-',topN=0;
-  Object.keys(sCounts).forEach(s=>{if(sCounts[s]>topN){topN=sCounts[s];topSec=s;}});
-  $('d_sector').textContent=topSec!='-'?(topSec+' ('+topN+' setups)'):'Diverse';
-}
-
-function openDigestPop(type){
-  const t=$('poptitle');
-  const b=$('popbody');
-  if(type=='fresh'){
-    t.textContent='⚡ Fresh Breakouts & Ready Setups Today';
-    const items=[];
-    (DATA.early||[]).forEach(r=>{
-      if(r.Stage=='Fresh'||r.Stage=='Ready') items.push({s:r.Symbol,lbl:r.Stage+' ('+r.Horizon+')',sub:'Score: '+r.Score+' | Close: Rs '+fmt(r.Close),tab:'early'});
-    });
-    const uRows=DATA.ultra||[];
-    const ns=NEWSET['ultra']||new Set();
-    uRows.filter(r=>ns.has(r.Symbol)).forEach(r=>{
-      items.push({s:r.Symbol,lbl:'Ultra Short (NEW)',sub:'Score: '+r.Score+' | Entry: Rs '+fmt(r.Entry),tab:'ultra'});
-    });
-    if(!items.length) b.innerHTML='<div class="exp">No fresh breakouts found for today.</div>';
-    else b.innerHTML='<div class="wrap"><table><tr><th>Stock</th><th>Setup Type</th><th>Details</th><th>Action</th></tr>'
-      +items.map(x=>'<tr><td><b>'+esc(x.s)+'</b></td><td><span class="tag new">'+esc(x.lbl)+'</span></td><td>'+esc(x.sub)+'</td><td><button class="chbtn" onclick="closeDigestPop();show(\''+x.tab+'\');">View</button></td></tr>').join('')
-      +'</table></div>';
-  } else if(type=='smart'){
-    t.textContent='🔥 Double Conviction (Smart Money + Radar)';
-    const rows=(DATA.smart||[]).filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar');
-    if(!rows.length) b.innerHTML='<div class="exp">No Smart Money stocks currently on radar.</div>';
-    else b.innerHTML='<div class="wrap"><table><tr><th>Stock</th><th>Investor</th><th>Holding</th><th>Technical Radar</th><th>Action</th></tr>'
-      +rows.map(r=>'<tr><td><b>'+esc(r.Symbol)+'</b></td><td>'+esc(r.Investor)+'</td><td>'+esc(r.HoldingPct)+'</td><td class="pos"><b>'+esc(r.RadarSetup)+'</b></td><td><button class="chbtn" onclick="closeDigestPop();show(\'smart\');">Inspect</button></td></tr>').join('')
-      +'</table></div>';
-  } else if(type=='sector'){
-    t.textContent='🏢 Top Sector Distribution Across Radar';
-    const sCounts={};
-    const src=[['ultra','Ultra Short'],['short','Short Term'],['early','Early Movers'],['multi','Multibagger'],['quality','Quality']];
-    src.forEach(a=>{
-      (DATA[a[0]]||[]).forEach(r=>{
-        const s=r.Sector||'n/a';
-        if(s!='n/a'){
-          sCounts[s]=sCounts[s]||{name:s,cnt:0,stocks:[]};
-          sCounts[s].cnt++;
-          if(sCounts[s].stocks.indexOf(r.Symbol)<0) sCounts[s].stocks.push(r.Symbol);
-        }
-      });
-    });
-    const list=Object.values(sCounts).sort((x,y)=>y.cnt-x.cnt);
-    if(!list.length) b.innerHTML='<div class="exp">No sector data available.</div>';
-    else b.innerHTML='<div class="wrap"><table><tr><th>Sector</th><th>Total Setups</th><th>Representative Stocks</th><th>Action</th></tr>'
-      +list.slice(0,8).map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td class="amb"><b>'+x.cnt+'</b></td><td class="exp">'+esc(x.stocks.slice(0,4).join(', '))+(x.stocks.length>4?'...':'')+'</td><td><button class="chbtn" onclick="closeDigestPop();show(\'sect\');">Heatmap</button></td></tr>').join('')
-      +'</table></div>';
-  } else if(type=='health'){
-    t.textContent='🩺 Market Health Overview';
-    const hTxt=$('mh_txt').textContent||'Market Health';
-    b.innerHTML='<div class="card" style="border:none">'
-      +'<div class="top"><span class="sym">'+esc(hTxt)+'</span></div>'
-      +'<div class="exp" style="margin:10px 0">Daily market health measures whether Nifty 50 and Nifty 500 are trading comfortably above their 50-day and 200-day moving averages, and tracks breadth across broader indices.</div>'
-      +'<div class="btns"><a href="/health" style="text-decoration:none"><button>Open Full Market Health Page</button></a></div>'
-      +'</div>';
-  }
-  $('popmodal').style.display='flex';
-}
-function closeDigestPop(){$('popmodal').style.display='none';}
-
-let CH=null;
-function chartOnly(r){
-  return '<button class="chbtn" data-s="'+esc(r.Symbol)+'" data-e="'+esc(r.Entry)+'" data-st="'+esc(r.Stop)+'" data-t="'+esc(r.Target)+'" onclick="event.stopPropagation();openChart(this)">Chart</button>';
-}
-function watchBtn(r){
-  if(loadMine().some(x=>x.sym==r.Symbol)) return '<button class="chbtn" style="margin-left:6px" disabled>&#9733; In My Stocks</button>';
-  return '<button class="chbtn" style="margin-left:6px" data-s="'+esc(r.Symbol)+'" onclick="event.stopPropagation();addFromCard(this)">&#9734; Watch</button>';
-}
-function chartBtn(r){return chartOnly(r)+watchBtn(r);}
-
-function openChart(btn){
-  const sym=btn.getAttribute('data-s');
-  const lv={e:btn.getAttribute('data-e'),s:btn.getAttribute('data-st'),t:btn.getAttribute('data-t')};
-  $('chtitle').textContent=sym;
-  $('chbody').innerHTML='<div class="exp">Loading chart...</div>';
-  $('chmodal').style.display='flex';
-  const go=()=>{
-    const d=CH[sym];
-    if(!d||!d.c||d.c.length<2){$('chbody').innerHTML='<div class="exp">Chart data not available for this stock yet (n/a).</div>';return;}
-    $('chbody').innerHTML=drawChart(d,lv);
-  };
-  if(CH){go();return;}
-  fetch('data/charts.json?v='+Date.now())
-    .then(r=>{if(!r.ok)throw new Error('nf');return r.json();})
-    .then(j=>{CH=j;go();})
-    .catch(()=>{$('chbody').innerHTML='<div class="exp">Chart data file (data/charts.json) not found yet. It is created by the daily run.</div>';});
-}
-function closeChart(){$('chmodal').style.display='none';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeChart();closeDigestPop();closeRationaleDrawer();closeHistoryModal();}});
-
-function drawChart(d,lv){
-  const n=d.c.length;
-  const W=720,H=360,L=8,R=64,T=14,B=24;
-  const vals=d.h.concat(d.l);
-  ['e','s','t'].forEach(k=>{if(has(lv[k])&&isFinite(+lv[k])) vals.push(+lv[k]);});
-  let mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals);
-  const pad=(mx-mn)*0.04||1;
-  mn-=pad; mx+=pad;
-  const y=v=>T+(mx-v)/(mx-mn)*(H-T-B);
-  const step=(W-L-R)/n, bw=Math.max(1,step*0.6);
-  let s='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;background:#0e1117;border-radius:8px">';
-  for(let i=0;i<=4;i++){
-    const v=mn+(mx-mn)*i/4, yy=y(v);
-    s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="#262d38" stroke-width="1"/>'
-      +'<text x="'+(W-R+4)+'" y="'+(yy+4)+'" fill="#8b96a5" font-size="11">'+v.toFixed(1)+'</text>';
-  }
-  for(let i=0;i<n;i++){
-    const x=L+step*i+step/2;
-    const up=d.c[i]>=d.o[i];
-    const col=up?'#2ea043':'#f85149';
-    s+='<line x1="'+x+'" x2="'+x+'" y1="'+y(d.h[i])+'" y2="'+y(d.l[i])+'" stroke="'+col+'" stroke-width="1"/>';
-    const yt=y(Math.max(d.o[i],d.c[i])), yb=y(Math.min(d.o[i],d.c[i]));
-    s+='<rect x="'+(x-bw/2)+'" y="'+yt+'" width="'+bw+'" height="'+Math.max(1,yb-yt)+'" fill="'+col+'"/>';
-  }
-  const lines=[['e','Entry','#388bfd'],['s','Stop','#f85149'],['t','Target','#2ea043']];
-  for(let j=0;j<lines.length;j++){
-    const item=lines[j];
-    const val=lv[item[0]];
-    if(has(val)&&isFinite(+val)){
-      const yy=y(+val);
-      s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+item[2]+'" stroke-width="1.5" stroke-dasharray="6 4"/>';
-      s+='<text x="'+(L+4)+'" y="'+(yy-4)+'" fill="' + item[2] + '" font-size="12" font-weight="700">' + item[1] + ' ' + (+val).toFixed(2) + '</text>';
-    }
-  }
-  s+='<text x="'+L+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11">'+d.d[0]+'</text>'
-    +'<text x="'+(W-R)+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11" text-anchor="end">'+d.d[n-1]+'</text>';
-  s+='</svg>';
-  s+='<div class="chleg">Daily candles, last '+n+' trading days. Dashed lines: Entry (blue), Stop-loss (red), Target (green).</div>';
-  return s;
-}
-
-function getTrailingAdvice(m, curP){
-  if(m.status !== 'Holding' || !m.buyPrice || !curP) return null;
-  const buy = +m.buyPrice;
-  const stop = +m.stop || 0;
-  const gainPct = ((curP - buy) / buy) * 100;
-
-  if(stop > 0){
-    if(curP <= stop){
-      return {
-        level: '🚨 Stop-Loss Hit!',
-        trailStop: stop,
-        msg: 'ప్రమాదం! ప్రస్తుత ధర (Rs '+curP+') మీ స్టాప్-లాస్ (Rs '+stop+') కంటే క్రిందకు పడిపోయింది. ఎగ్జిట్ అవ్వండి.',
-        cls: 'neg'
-      };
-    } else if(curP <= stop * 1.015){
-      return {
-        level: '⚠️ Near Stop-Loss',
-        trailStop: stop,
-        msg: 'హెచ్చరిక! ప్రస్తుత ధర స్టాప్-లాస్‌కు సమీపంలో ఉంది (ప్రస్తుత ధర: Rs '+curP+' | SL: Rs '+stop+').',
-        cls: 'amb'
-      };
-    }
-  }
-
-  if(gainPct >= 15){
-    const trailPrice = Math.round(curP * 0.93 * 100) / 100;
-    return {
-      level: 'Trend Lock (7% Trail)',
-      trailStop: trailPrice,
-      msg: '+'+gainPct.toFixed(1)+'% లాభంలో ఉంది. లాభాలు పోకుండా స్టాప్-లాస్‌ను Rs '+trailPrice+' కు ట్రైల్ చేయండి.',
-      cls: 'pos'
-    };
-  } else if(gainPct >= 10){
-    const lockPrice = Math.round(buy * 1.05 * 100) / 100;
-    return {
-      level: 'Lock +5% Profit',
-      trailStop: lockPrice,
-      msg: '+'+gainPct.toFixed(1)+'% పెరిగింది. 5% లాభం లాక్ చేయడానికి స్టాప్-లాస్‌ను Rs '+lockPrice+' కు పెంచండి.',
-      cls: 'pos'
-    };
-  } else if(gainPct >= 5){
-    return {
-      level: 'Breakeven Guard (Zero Risk)',
-      trailStop: buy,
-      msg: '+'+gainPct.toFixed(1)+'% లాభం వచ్చింది. స్టాప్-లాస్‌ను కొన్న ధరకు (Rs '+buy+') మార్చండి.',
-      cls: 'amb'
-    };
-  }
-  return null;
-}
-
-function updateTrailingStopAlerts(){
-  const mineRows = loadMine();
-  if(!mineRows.length) return;
-
-  mineRows.forEach(m => {
-    if(m.status === 'Holding' && m.buyPrice){
-      const c = curPrice(m);
-      const p = c ? c.p : (m.lastPrice || null);
-      if(p){
-        const tr = getTrailingAdvice(m, p);
-        if(tr){
-          const cards = document.querySelectorAll('#list_mine .card');
-          cards.forEach(el => {
-            if(el.textContent.includes(m.sym) && !el.querySelector('.trail-alert-box')){
-              const box = document.createElement('div');
-              box.className = 'trail-alert-box';
-              const isDanger = tr.cls === 'neg';
-              const isWarn = tr.cls === 'amb';
-              const boxBg = isDanger ? 'rgba(239,68,68,0.15)' : (isWarn ? 'rgba(245,158,11,0.15)' : 'rgba(46,160,67,0.12)');
-              const boxBorder = isDanger ? '#ef4444' : (isWarn ? '#f59e0b' : '#2ea043');
-              const txtColor = isDanger ? '#fca5a5' : (isWarn ? '#fcd34d' : '#7ee787');
-              const icon = isDanger ? '🚨' : (isWarn ? '⚠️' : '&#128640;');
-              box.style.cssText = 'margin-top:8px;padding:8px 12px;border-radius:6px;border-left:4px solid '+boxBorder+';background:'+boxBg+';color:'+txtColor+';font-size:12px;line-height:1.4;';
-              box.innerHTML = '<b>'+icon+' '+esc(tr.level)+'</b><br>'+esc(tr.msg);
-              el.appendChild(box);
-            }
-          });
-        }
-      }
-    }
-  });
-}
-setInterval(updateTrailingStopAlerts, 1500);
-
-function draw(){
-  const rows=(DATA[cur]||[]);
-  const sel=$('status');
-  const sts=[...new Set(rows.map(r=>r.Status))];
-  if(sel.options.length-1!=sts.length){
-    const v=sel.value;
-    sel.innerHTML='<option value="">All status</option>'+sts.map(s=>'<option>'+s+'</option>').join('');
-    sel.value=sts.includes(v)?v:'';
-  }
-  const b=$('band').value, st=sel.value;
-  const sv = $('surv_filter') ? $('surv_filter').value : '';
-  
-  const list=rows.filter(r=>{
-    if(b && r.Band!=b) return false;
-    if(st && r.Status!=st) return false;
-    const isSurv = !!getSurvMeta(r);
-    if(sv === 'safe' && isSurv) return false;
-    if(sv === 'surv' && !isSurv) return false;
-    return true;
-  }).sort((a,c)=>c.Score-a.Score);
-
-  const H=HIST[cur];
-  const curSyms=new Set(rows.map(r=>r.Symbol));
-  let ns;
-  if(H){
-    const ps=new Set(H.rows.map(x=>x.Symbol));
-    ns=new Set(rows.filter(r=>!ps.has(r.Symbol)).map(r=>r.Symbol));
-  } else {
-    ns=NEWSET[cur]||new Set();
-  }
-
-  const cards=list.map(r=>{
-    const cls=r.Band.split(' ')[0];
-    const meta=getStageMeta(r);
-    const mt = getMultiTargets(r);
-    
-    let vcpTag = '';
-    if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
-      vcpTag = '<span class="tag vcp">💎 VCP Tight</span>';
-    } else if(r.IsDryUp === 'Yes' || (r.Reasons && r.Reasons.includes('dried up'))){
-      vcpTag = '<span class="tag dryup">💧 Vol Dry-up</span>';
-    }
-
-    const sm = getSurvMeta(r);
-    const survBadge = sm ? sm.tag : '';
-    const trendBadge = getTrendDaysMeta(r.Symbol, cur);
-    const screenerBtn = getScreenerLink(r.Symbol);
-    const rsBadge = getRSBadge(r);
-
-    const tagList=[...new Set([
-      '<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>',
-      trendBadge,
-      vcpTag,
-      rsBadge,
-      survBadge,
-      ns.has(r.Symbol)?'NEW today':'',
-      r.Status,
-      r.Class,
-      tr(r.Setup),
-      r.Gap=='Yes'?'Gap-up':''
-    ].filter(Boolean))];
-
-    const tags=tagList.map(t=>t.startsWith('<span')?t:'<span class="tag'+(t=='NEW today'?' new':'')+'">'+t+'</span>').join('');
-    const why=has(r.Reasons)?'<div class="why"><div class="ft">Why this setup?</div>'+r.Reasons.split(' | ').map(x=>'<div>&#8226; '+x+'</div>').join('')+'</div>':'';
-    let wl=has(r.Warning)?fixWarn(tr(r.Warning).split('; ')):[];
-    if(has(r.PledgeOfPromoterPct)&&(+r.PledgeOfPromoterPct)>100){
-      wl=wl.filter(x=>x.toLowerCase().indexOf('pledge')<0);
-      wl.push('Promoter pledge shows '+r.PledgeOfPromoterPct+'% (over 100%), which cannot be right.');
-    }
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\')">'
-    +'<div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags">'+tags+'</div>'
-    +resLine(r.Symbol)
-    +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
-    +'<div class="n stop"><small>Safe Stop ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b>'+(has(r.StopTight)?'<small style="font-size:10px;color:var(--mut)">Tight: Rs '+fmt(r.StopTight)+'</small>':'')+'</div>'
-    +'<div class="n tgt"><small>T1 Safe (+'+mt.t1Pct+'%)</small><b>'+fmt(mt.t1)+'</b></div></div>'
-    +'<div class="targets-grid">'
-    +'<div class="n tgt"><small>T1 (+'+mt.t1Pct+'%) [Book 40%]</small><b>Rs '+fmt(mt.t1)+'</b></div>'
-    +'<div class="n tgt"><small>T2 (+'+mt.t2Pct+'%) [Core]</small><b>Rs '+fmt(mt.t2)+'</b></div>'
-    +'<div class="n tgt-run"><small>T3 (+'+mt.t3Pct+'%) [Runner]</small><b>Rs '+fmt(mt.t3)+'</b></div>'
-    +'</div>'
-    +'<div class="exp">'+explain(r)+' Last close: '+fmt(r.Close)+'.</div>'
-    +chartBtn(r)
-    +'<div style="font-size:11.5px;color:var(--b);margin-top:8px">&#9432; Tap card to inspect multi-targets, rationale &amp; position sizer</div>'
-    +(r.Boosters?'<div class="exp">Boosters: '+tr(r.Boosters)+'</div>':'')
-    +lvlHtml(r)
-    +why
-    +fundBox(r)
-    +evHtml(r.Symbol)
-    +(wl.length?'<div class="warn">&#9888; '+wl.join('<br>&#9888; ')+'</div>':'')
-    +'</div>';
-  });
-  const items=list.map((r,i)=>({sym:r.Symbol,cells:rowCells(cur,r,ns),card:cards[i]}));
-  renderItems('list',cur,items,HDR_SCAN,'No stocks match today.');
-  const d=rows[0]?rows[0].Date:'-';
-  $('meta').textContent='Data date: '+d+' | Showing '+list.length+' of '+rows.length+' stocks';
-  const nl=rows.filter(r=>ns.has(r.Symbol)).map(r=>r.Symbol);
-  const okNew=H||NEWOK;
-  const newLine='New today'+(okNew?' ('+nl.length+')':'')+': '+(okNew?(nl.length?nl.join(', '):'none'):'n/a')+'.';
-  let remLine;
-  if(H){
-    const openSet=new Set((DATA.perf||[]).filter(r=>r.Scan==cur&&(r.Result=='Open'||r.Result=='Pending')).map(r=>r.Symbol));
-    const rm=H.rows.filter(x=>!curSyms.has(x.Symbol)).map(x=>x.Symbol+(openSet.has(x.Symbol)?' (open trade)':''));
-    remLine='Removed ('+rm.length+'): '+(rm.length?rm.join(', '):'none')+'. Compared with '+H.date+'.';
-  } else {
-    remLine='Removed: n/a.';
-  }
-  $('chg').innerHTML='<div class="note"><b>Changes since yesterday:</b> '+newLine+'<br>'+remLine+'</div>';
 }
   function drawMulti(){
   const rows=DATA.multi||[];
