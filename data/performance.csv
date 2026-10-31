@@ -20,7 +20,7 @@ short,2026-10-05,GRAPHITE,Pullback,Standard,Early Watch,55.2,816.4,756.14,938.86
 exsh,2026-10-05,KTKBANK,Excluded,Standard,Early Watch,55.2,326.75,316.33,375.76,339.25,375.76,391.39,Trailed SL,Trailed SL 🛡️,9,2026-10-16,336.5,2.98,2026-10-12,,,4.99,343.05,,,,,,,,,,No
 exsh,2026-10-05,GRAPHITE,Excluded,Standard,Early Watch,55.2,816.4,756.14,938.86,888.71,938.86,1087.57,Stop hit,Stop hit 🛑,10,2026-10-19,756.14,-7.38,,,,5.52,861.5,,,,,,0.51,8,No,,No
 short,2026-10-05,COFORGE,Pullback,Standard,Early Watch,53.0,1852.0,1720.28,2129.8,2010.06,2129.8,2444.74,Open,T1 Hit 🎯,18,,2045.0,10.42,2026-10-30,,,11.33,2061.8,No,-,,,,,,,,No
-exsh,2026-10-05,COFORGE,Excluded,Standard,Early Watch,53.0,1852.0,1720.28,2129.8,2010.06,2129.8,2444.74,Open,T1 Hit 🎯,18,,2045.0,10.42,2026-10-30,,,11.33,2061.8,,,,,,,,,,Yes
+exsh,2026-10-05,COFORGE,Excluded,Standard,Early Watch,53.0,1852.0,1720.28,2129.8,2010.06,2129.8,2444.74,Open,T1 Hit 🎯,18,,2045.0,10.42,2026-10-30,,,11.33,2061.8,,,,,,,,,,No
 short,2026-10-05,BALRAMCHIN,Pullback,Standard,Early Watch,52.7,671.5,637.36,772.22,712.47,772.22,825.13,Trailed SL,Trailed SL 🛡️,12,2026-10-22,680.0,1.27,2026-10-06,,,9.61,736.0,No,-,,,,,,,,No
 exsh,2026-10-05,BALRAMCHIN,Excluded,Standard,Early Watch,52.7,671.5,637.36,772.22,712.47,772.22,825.13,Trailed SL,Trailed SL 🛡️,12,2026-10-22,680.0,1.27,2026-10-06,,,9.61,736.0,,,,,,,,,,No
 short,2026-10-05,USHAMART,Pullback,Standard,Early Watch,52.1,510.5,480.52,587.07,546.48,587.07,645.41,Stop hit,Stop hit 🛑,6,2026-10-13,480.52,-5.87,,,,2.53,523.4,No,-,,,,3.01,12,No,,No
@@ -126,7 +126,7 @@ exsh,2026-10-09,ARIS,Excluded,Standard,Early Watch,58.8,140.31,128.83,170.91,154
 exsh,2026-10-09,ABDL,Excluded,Standard,Early Watch,58.3,711.55,663.45,839.81,769.27,839.81,928.0,Stop hit,Stop hit 🛑,9,2026-10-23,663.45,-6.76,,,,7.78,766.9,,,,,,8.16,5,No,,No
 multi,2026-10-09,SJS,Multibagger,,Early Watch,56.7,1994.8,1556.75,2870.9,2520.46,2870.9,3966.02,Open,Active,14,,2075.8,4.06,,,,5.67,2108.0,,,,,,,,,,No
 exsh,2026-10-09,AUROPHARMA,Excluded,Standard,Early Watch,56.3,1693.0,1639.68,1835.2,1756.98,1835.2,1932.94,Stop hit,Stop hit 🛑,6,2026-10-19,1639.68,-3.15,,,,1.3,1715.0,,,,,,2.89,8,No,,No
-exsh,2026-10-09,MBAPL,Excluded,Standard,Early Watch,54.6,165.32,156.74,188.19,175.62,188.19,203.93,Stop hit,Stop hit 🛑,9,2026-10-23,156.74,-5.19,,,,5.49,174.4,,,,,,14.62,5,No,,Yes
+exsh,2026-10-09,MBAPL,Excluded,Standard,Early Watch,54.6,165.32,156.74,188.19,175.62,188.19,203.93,Stop hit,Stop hit 🛑,9,2026-10-23,156.74,-5.19,,,,5.49,174.4,,,,,,14.62,5,No,,No
 exsh,2026-10-09,SYRMA,Excluded,Standard,Early Watch,54.3,1719.9,1607.56,2019.47,1854.71,2019.47,2225.43,Stop hit,Stop hit 🛑,5,2026-10-16,1607.56,-6.53,,,,2.01,1754.4,,,,,,4.88,9,No,,No
 quality,2026-10-09,ASTRAMICRO,Quality,,Early Watch,52.6,1652.9,1322.32,2314.06,2049.6,2314.06,3140.51,Open,Active,14,,1514.7,-8.36,,,,2.55,1695.0,,,,,,,,,,No
 exsh,2026-10-09,SGMART,Excluded,Standard,Early Watch,51.7,775.6,729.94,897.36,830.39,897.36,981.07,Trailed SL,Trailed SL 🛡️,6,2026-10-19,842.0,8.56,2026-10-19,,,8.56,842.0,,,,,,,,,,No
@@ -212,10 +212,10 @@ exul,2026-10-16,PTC,Setup,Standard,Good Setup,,153.45,146.09,161.69,162.28,161.6
 exul,2026-10-16,PGIL,Setup,Standard,Good Setup,,1360.62,1210.6,1526.82,1540.64,1526.82,2035.71,Stop hit,Stop hit 🛑,2,2026-10-21,1210.6,-11.03,,,,-11.03,1360.62,,,,,,2.47,5,No,,No
 exul,2026-10-16,KTKBANK,Setup,Standard,Good Setup,,346.09,317.92,377.47,379.89,377.47,472.85,Stop hit,Stop hit 🛑,2,2026-10-21,317.92,-8.14,,,,-8.14,346.09,,,,,,1.65,5,No,,No
 exul,2026-10-16,DYNAMATECH,Setup,Standard,Good Setup,,14527.0,12864.29,16307.5,16522.25,16307.5,22009.19,Stop hit,Stop hit 🛑,2,2026-10-21,12864.29,-11.45,,,,-11.45,14527.0,,,,,,1.17,5,No,,No
-exul,2026-10-16,MBAPL,Setup,Standard,Good Setup,,174.75,157.79,192.86,195.1,192.86,251.07,Stop hit,Stop hit 🛑,4,2026-10-23,157.79,-9.71,,,,-9.71,174.75,,,,,,13.86,5,No,,Yes
+exul,2026-10-16,MBAPL,Setup,Standard,Good Setup,,174.75,157.79,192.86,195.1,192.86,251.07,Stop hit,Stop hit 🛑,4,2026-10-23,157.79,-9.71,,,,-9.71,174.75,,,,,,13.86,5,No,,No
 exul,2026-10-16,SONACOMS,Setup,Standard,Good Setup,,838.67,771.9,909.18,918.79,909.18,1139.13,Stop hit,Stop hit 🛑,2,2026-10-21,771.9,-7.96,,,,-7.96,838.67,,,,,,14.52,5,No,,No
 exul,2026-10-16,SOUTHBANK,Near Miss,Standard,Good Setup,,51.45,46.0,56.82,57.99,56.82,75.98,Expired,Expired,5,2026-10-26,52.7,2.43,,,,9.33,56.25,,,,,,,,,,No
-exul,2026-10-16,PPLPHARMA,Setup,Standard,Good Setup,,217.13,202.17,231.93,235.08,231.93,284.45,Stop hit,Stop hit 🛑,1,2026-10-19,197.0,-9.27,,,,-9.27,217.13,,,,,,3.23,5,No,,Yes
+exul,2026-10-16,PPLPHARMA,Setup,Standard,Good Setup,,217.13,202.17,231.93,235.08,231.93,284.45,Stop hit,Stop hit 🛑,1,2026-10-19,197.0,-9.27,,,,-9.27,217.13,,,,,,3.23,5,No,,No
 exul,2026-10-16,EDELWEISS,Setup,Standard,Good Setup,,146.29,130.41,161.93,165.35,161.93,217.75,Stop hit,Stop hit 🛑,1,2026-10-19,130.41,-10.86,,,,-10.86,146.29,,,,,,2.79,5,No,,No
 exul,2026-10-16,GODREJPROP,Setup,Standard,Good Setup,,1735.46,1642.25,1825.97,1847.31,1825.97,2154.91,Stop hit,Stop hit 🛑,1,2026-10-19,1605.0,-7.52,,,,-7.52,1735.46,,,,,,0.31,5,No,,No
 exul,2026-10-16,AUROPHARMA,Setup,Standard,Good Setup,,1743.48,1627.68,1854.46,1882.44,1854.46,2264.58,Stop hit,Stop hit 🛑,1,2026-10-19,1627.68,-6.64,,,,-6.64,1743.48,,,,,,0.57,5,No,,No
@@ -468,7 +468,7 @@ exul,2026-10-22,PHOENIXLTD,Setup,Standard,Good Setup,,2039.67,1871.94,2166.93,22
 exul,2026-10-22,TORNTPOWER,Setup,Standard,Good Setup,,1270.94,1214.27,1306.88,1338.94,1306.88,1525.96,Stop hit,Stop hit 🛑,1,2026-10-23,1195.0,-5.98,,,,-5.98,1270.94,No,-,,,,-0.08,5,No,,No
 exul,2026-10-22,TANLA,Near Miss,Standard,Good Setup,,581.3,519.02,617.51,656.04,617.51,861.56,Stop hit,Stop hit 🛑,5,2026-10-29,519.02,-10.71,,2026-10-29,,9.32,635.5,No,-,,,,23.89,1,Yes,1,Yes
 exul,2026-10-22,SAMHI,Setup,Standard,Good Setup,,162.03,149.48,168.8,177.09,168.8,218.51,Stop hit,Stop hit 🛑,1,2026-10-23,149.48,-7.75,,,,-7.75,162.03,No,-,,,,4.36,5,No,,No
-exul,2026-10-22,COFORGE,Setup,Standard,Good Setup,,1973.94,1870.88,2021.2,2097.61,2021.2,2437.71,Stop hit,Stop hit 🛑,2,2026-10-26,1844.2,-6.57,,,,1.2,1997.6,No,-,,,,11.8,4,Yes,4,Yes
+exul,2026-10-22,COFORGE,Setup,Standard,Good Setup,,1973.94,1870.88,2021.2,2097.61,2021.2,2437.71,Stop hit,Stop hit 🛑,2,2026-10-26,1844.2,-6.57,,,,1.2,1997.6,No,-,,,,11.8,4,Yes,4,No
 exsh,2026-10-22,HONASA,Pullback,Standard,Good Setup,,442.4,411.52,488.31,479.46,488.31,581.36,Open,Active,6,,442.1,-0.07,,,,3.24,456.75,No,-,,,,,,,,No
 exsh,2026-10-22,BLUESTONE,Pullback,Standard,Good Setup,,760.7,703.65,835.95,829.16,835.95,1017.43,Stop hit,Stop hit 🛑,1,2026-10-23,703.65,-7.5,,,,-7.5,760.7,No,-,,,,9.77,5,No,,No
 exsh,2026-10-22,AJANTPHARM,Pullback,Standard,Good Setup,,3270.6,3096.23,3475.07,3479.84,3475.07,4055.26,Trailed SL,Trailed SL 🛡️,3,2026-10-27,3479.84,6.4,2026-10-27,2026-10-27,,7.91,3529.3,No,-,,,,,,,,No
@@ -486,7 +486,7 @@ early,2026-10-23,IGIL,Breakout,Long Term,High Conviction,83.7,381.15,344.12,577.
 exea,2026-10-23,IGIL,Excluded,Standard,High Conviction,83.7,381.15,344.12,577.22,425.59,577.22,632.76,Open,Active,5,,397.75,4.36,,,,10.35,420.6,,,,,,,,,,No
 quality,2026-10-23,IGIL,Quality,,High Conviction,82.7,381.15,344.12,538.01,425.59,538.01,593.55,Open,Active,5,,397.75,4.36,,,,10.35,420.6,No,-,,,,,,,,No
 exul,2026-10-23,ECLERX,Setup,Standard,Good Setup,,2026.65,1815.22,2308.72,2280.37,2308.72,2978.09,Stop hit,Stop hit 🛑,4,2026-10-29,1815.22,-10.43,,,,-10.43,2026.65,No,-,,,,-8.56,1,No,,No
-exul,2026-10-23,ANANDRATHI,Near Miss,Standard,Good Setup,,2235.0,2117.45,2383.76,2376.06,2383.76,2763.98,Expired,Expired,5,2026-10-30,2252.0,0.76,,,,2.46,2290.0,No,-,,,,,,,,Yes
+exul,2026-10-23,ANANDRATHI,Near Miss,Standard,Good Setup,,2235.0,2117.45,2383.76,2376.06,2383.76,2763.98,Expired,Expired,5,2026-10-30,2252.0,0.76,,,,2.46,2290.0,No,-,,,,,,,,No
 exul,2026-10-23,CASTROLIND,Setup,Standard,Good Setup,,203.81,194.12,214.72,215.44,214.72,247.41,Stop hit,Stop hit 🛑,1,2026-10-26,190.55,-6.51,,,,-6.51,203.81,No,-,,,,0.38,4,No,,No
 exul,2026-10-23,GILLETTE,Near Miss,Standard,Good Setup,,7220.0,6888.74,7564.0,7617.51,7564.0,8710.67,Expired,Expired,5,2026-10-30,7077.0,-1.98,,,,2.34,7389.0,No,-,,,,,,,,No
 exul,2026-10-23,JSWCEMENT,Setup,Standard,Good Setup,,119.26,113.34,123.44,126.36,123.44,145.9,Stop hit,Stop hit 🛑,3,2026-10-28,113.34,-4.96,,,,-4.96,119.26,No,-,,,,2.71,2,No,,No
@@ -570,7 +570,7 @@ exul,2026-10-27,APLAPOLLO,Near Miss,Standard,Good Setup,,2213.9,2125.5,2270.1,23
 exul,2026-10-27,AGARWALEYE,Setup,Standard,Good Setup,,507.51,477.23,526.8,543.85,526.8,643.77,Stop hit,Stop hit 🛑,1,2026-10-28,474.85,-6.44,,,,-6.44,507.51,No,-,,,,11.4,2,Yes,2,No
 exul,2026-10-27,JSL,Setup,Standard,Good Setup,,761.12,714.55,786.05,817.0,786.05,970.69,Stop hit,Stop hit 🛑,1,2026-10-28,705.0,-7.37,,,,-7.37,761.12,No,-,,,,-2.43,2,No,,No
 exul,2026-10-27,ITCHOTELS,Near Miss,Standard,Good Setup,,166.3,153.68,173.0,181.44,173.0,223.09,Open,Active,3,,167.17,0.52,,,,3.73,172.5,No,-,,,,,,,,No
-exul,2026-10-27,PPLPHARMA,Setup,Standard,Good Setup,,212.82,202.02,218.5,225.78,218.5,261.42,Trailed SL,Trailed SL 🛡️,1,2026-10-28,225.78,6.09,2026-10-28,2026-10-28,,10.72,235.64,No,-,,,,,,,,Yes
+exul,2026-10-27,PPLPHARMA,Setup,Standard,Good Setup,,212.82,202.02,218.5,225.78,218.5,261.42,Trailed SL,Trailed SL 🛡️,1,2026-10-28,225.78,6.09,2026-10-28,2026-10-28,,10.72,235.64,No,-,,,,,,,,No
 exul,2026-10-27,GLENMARK,Setup,Standard,Good Setup,,2446.38,2272.15,2535.08,2655.46,2535.08,3230.41,Stop hit,Stop hit 🛑,1,2026-10-28,2268.0,-7.29,,,,-7.29,2446.38,No,-,,,,3.13,2,No,,No
 exul,2026-10-27,BEML,Setup,Standard,Good Setup,,2064.32,1895.47,2142.39,2266.94,2142.39,2824.15,Open,Active,3,,1988.6,-3.67,,,,-3.67,2064.32,No,-,,,,,,,,No
 exul,2026-10-27,EMCURE,Setup,Standard,Good Setup,,1991.07,1877.06,2044.02,2127.88,2044.02,2504.11,Stop hit,Stop hit 🛑,1,2026-10-28,1875.7,-5.79,,,,-5.79,1991.07,No,-,,,,0.6,2,No,,No
@@ -626,7 +626,7 @@ exea,2026-10-28,PPLPHARMA,Excluded,Standard,High Conviction,80.9,232.8,206.08,36
 exsh,2026-10-28,AARTIDRUGS,Excluded,Standard,Good Setup,66.9,447.9,422.62,515.3,478.24,515.3,561.66,Open,Active,2,,435.2,-2.84,,,,2.24,457.95,,,,,,,,,,No
 exul,2026-10-28,CANFINHOME,Setup,Standard,Good Setup,,759.02,703.61,831.9,825.51,831.9,1008.36,Open,Active,2,,719.6,-5.19,,,,-5.19,759.02,No,-,,,,,,,,No
 exul,2026-10-28,MCX,Setup,Standard,Good Setup,,3421.83,3170.62,3736.44,3723.28,3736.44,4552.27,Stop hit,Stop hit 🛑,1,2026-10-29,3170.62,-7.34,,,,-7.34,3421.83,No,-,,,,2.61,1,No,,No
-exul,2026-10-28,MBAPL,Setup,Standard,Good Setup,,174.75,157.68,194.09,195.23,194.09,251.56,Open,Active,2,,177.11,1.35,,,,2.81,179.66,No,-,,,,,,,,Yes
+exul,2026-10-28,MBAPL,Setup,Standard,Good Setup,,174.75,157.68,194.09,195.23,194.09,251.56,Open,Active,2,,177.11,1.35,,,,2.81,179.66,No,-,,,,,,,,No
 exul,2026-10-28,SHRIPISTON,Setup,Standard,Good Setup,,4852.69,4385.69,5321.54,5413.09,5321.54,6954.19,Stop hit,Stop hit 🛑,2,2026-10-30,4385.69,-9.62,,,,-9.62,4852.69,No,-,,,,,0,,,No
 exul,2026-10-28,LGEINDIA,Setup,Standard,Good Setup,,1828.65,1680.1,1974.02,2006.91,1974.02,2497.13,Stop hit,Stop hit 🛑,1,2026-10-29,1680.1,-8.12,,,,-8.12,1828.65,No,-,,,,0.09,1,No,,No
 exul,2026-10-28,ESCORTS,Setup,Standard,Good Setup,,2894.18,2745.51,3008.66,3072.58,3008.66,3563.19,Stop hit,Stop hit 🛑,1,2026-10-29,2701.0,-6.67,,,,-6.67,2894.18,No,-,,,,-2.78,1,No,,No
@@ -678,7 +678,7 @@ exul,2026-10-29,JSWENERGY,Breakout,Standard,Good Setup,,510.0,467.27,522.32,561.
 exul,2026-10-29,PNGJL,Setup,Standard,Good Setup,,620.14,568.39,634.7,682.24,634.7,853.01,Stop hit,Stop hit 🛑,1,2026-10-30,568.39,-8.34,,,,-8.34,620.14,No,-,,,,,0,,,No
 exul,2026-10-29,ZENSARTECH,Breakout,Standard,Good Setup,,537.3,480.36,553.1,605.63,553.1,793.53,Stop hit,Stop hit 🛑,1,2026-10-30,480.36,-10.6,,2026-10-30,,3.07,553.8,No,-,,,,,0,,,No
 exul,2026-10-29,CEMPRO,Near Miss,Standard,Good Setup,,1287.4,1076.32,1344.6,1540.7,1344.6,2237.26,Open,Active,1,,1265.0,-1.74,,,,0.82,1297.9,No,-,,,,,,,,No
-exul,2026-10-29,NHPC,Near Miss,Standard,Good Setup,,77.2,70.09,78.86,85.73,78.86,109.19,Open,Active,1,,77.74,0.7,,,,0.7,77.74,No,-,,,,,,,,Yes
+exul,2026-10-29,NHPC,Near Miss,Standard,Good Setup,,77.2,70.09,78.86,85.73,78.86,109.19,Open,Active,1,,77.74,0.7,,,,0.7,77.74,No,-,,,,,,,,No
 exul,2026-10-29,BSOFT,Breakout,Standard,Good Setup,,342.5,288.53,351.61,407.26,351.61,585.37,Open,Active,1,,323.0,-5.69,,,,-5.69,342.5,No,-,,,,,,,,No
 exsh,2026-10-29,APOLLOPIPE,Breakout,High Potential,Good Setup,,544.25,490.67,668.8,608.55,668.8,785.36,Open,Active,1,,501.95,-7.77,,,,-7.77,544.25,No,-,,,,,,,,No
 exsh,2026-10-29,WABAG,Breakout,Standard,Good Setup,,1862.8,1630.04,2141.9,2142.11,2141.9,2910.22,Open,Active,1,,1812.3,-2.71,,,,0.17,1866.0,No,-,,,,,,,,No
@@ -713,15 +713,15 @@ exea,2026-10-30,MBAPL,Excluded,Standard,High Conviction,87.6,177.11,157.32,274.4
 early,2026-10-30,MBAPL,Breakout,Long Term,High Conviction,87.2,177.11,157.32,274.45,206.8,274.45,295.88,Open,Active,0,,177.11,0.0,,,,0.0,177.11,No,-,,,,,,,,Yes
 early,2026-10-30,GESHIP,Breakout,Long Term,High Conviction,81.9,1593.6,1465.26,1978.62,1786.11,1978.62,2363.64,Open,Active,0,,1593.6,0.0,,,,0.0,1593.6,No,-,,,,,,,,Yes
 early,2026-10-30,LTTS,Breakout,Long Term,Good Setup,79.9,4280.2,3350.91,7068.08,5674.14,7068.08,9855.96,Open,Active,0,,4280.2,0.0,,,,0.0,4280.2,Yes,Vol Dry-up,,,,,,,,Yes
-exul,2026-10-30,ANANDRATHI,Setup,Standard,Good Setup,,2294.58,2042.66,2798.42,2596.89,2798.42,3176.31,Pending,Pending,0,,,,,,,0.0,2294.58,No,-,,,,,,,,Yes
-exul,2026-10-30,ATHERENERG,Breakout,Standard,Good Setup,,1756.0,1415.95,2436.09,2164.05,2436.09,2946.16,Open,Active,0,,1756.0,0.0,,,,0.0,1756.0,No,-,,,,,,,,Yes
-exul,2026-10-30,COFORGE,Breakout,Standard,Good Setup,,2045.0,1867.72,2399.56,2257.74,2399.56,2665.48,Open,Active,0,,2045.0,0.0,,,,0.0,2045.0,No,-,,,,,,,,Yes
 exul,2026-10-30,FORTIS,Setup,Standard,Good Setup,,822.64,742.36,983.21,918.98,983.21,1103.63,Pending,Pending,0,,,,,,,0.0,822.64,No,-,,,,,,,,Yes
 exul,2026-10-30,FSL,Setup,Standard,Good Setup,,312.12,269.28,397.82,363.54,397.82,462.09,Pending,Pending,0,,,,,,,0.0,312.12,No,-,,,,,,,,Yes
 exul,2026-10-30,LOTUSDEV,Setup,Standard,Good Setup,,250.2,222.3,305.99,283.68,305.99,347.84,Pending,Pending,0,,,,,,,0.0,250.2,No,-,,,,,,,,Yes
 exul,2026-10-30,TATAELXSI,Setup,Standard,Good Setup,,3922.83,3582.17,4604.16,4331.63,4604.16,5115.16,Pending,Pending,0,,,,,,,0.0,3922.83,No,-,,,,,,,,Yes
 exsh,2026-10-30,LOTUSDEV,Breakout,High Potential,Good Setup,,245.98,221.67,334.02,275.15,334.02,391.82,Open,Active,0,,245.98,0.0,,,,0.0,245.98,No,-,,,,,,,,Yes
 exsh,2026-10-30,ABCAPITAL,Pullback,Standard,Good Setup,,369.45,328.58,451.19,418.5,451.19,553.37,Open,Active,0,,369.45,0.0,,,,0.0,369.45,No,-,,,,,,,,Yes
+exul,2026-10-30,ANANDRATHI,Setup,Standard,Good Setup,,2294.58,2042.66,2798.42,2596.89,2798.42,3176.31,Open,Active,0,,2294.58,0.0,,,,0.0,2294.58,No,-,,,,,,,,No
+exul,2026-10-30,ATHERENERG,Breakout,Standard,Good Setup,,1756.0,1415.95,2436.09,2164.05,2436.09,2946.16,Open,Active,0,,1756.0,0.0,,,,0.0,1756.0,No,-,,,,,,,,No
+exul,2026-10-30,COFORGE,Breakout,Standard,Good Setup,,2045.0,1867.72,2399.56,2257.74,2399.56,2665.48,Open,Active,0,,2045.0,0.0,,,,0.0,2045.0,No,-,,,,,,,,No
 exul,2026-10-30,IGL,Setup,Standard,Good Setup,,148.2,138.22,155.12,160.18,155.12,193.11,Open,Active,0,,148.2,0.0,,,,0.0,148.2,No,-,,,,,,,,No
 exul,2026-10-30,TORNTPOWER,Setup,Standard,Good Setup,,1262.52,1193.28,1306.88,1345.61,1306.88,1574.1,Open,Active,0,,1262.52,0.0,,,,0.0,1262.52,No,-,,,,,,,,No
 exul,2026-10-30,PHOENIXLTD,Setup,Standard,Good Setup,,1983.86,1872.35,2035.6,2117.67,2035.6,2485.65,Open,Active,0,,1983.86,0.0,,,,0.0,1983.86,No,-,,,,,,,,No
