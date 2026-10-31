@@ -73,7 +73,7 @@ label{color:var(--mut);font-size:13px}
 .warn{margin-top:8px;color:var(--y);font-size:12.5px}
 .goodl{margin-top:8px;color:var(--g);font-size:12.5px}
 .foot{color:var(--mut);font-size:12px;margin-top:22px;border-top:1px solid var(--line);padding-top:10px}
-.err{color:var(--r)}
+.err{color:var(--r);font-weight:700}
 .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:12px}
 .st{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
 .st.clickable{cursor:pointer;transition:border-color .2s,background .2s}
@@ -387,6 +387,7 @@ th{color:var(--mut);font-weight:600}
 </div>
 
 <div id="miss" style="display:none">
+  <div class="note">Big movers (15%+ rally) missed by scans with diagnostic reasons.</div>
   <div class="bar">
     <select id="mscan" onchange="drawMiss()">
       <option value="">Both scans</option><option value="ultra">Ultra Short (15% in 5 days)</option><option value="short">Short Term (15% in 20 days)</option>
@@ -536,7 +537,6 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
     </div>
   </div>
 </div>
-
 <script>
 const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv'};
 const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['early','exea','Early Movers'],['newl','exnl','New Listing']];
@@ -691,9 +691,16 @@ function getMultiTargets(r){
   let t2 = r.Target2 ? parseFloat(r.Target2) : fallbackTgt;
   let t3 = r.Target3 ? parseFloat(r.Target3) : (en + 4.5 * risk);
 
+  // Guard: T3 ఎల్లప్పుడూ T2 కంటే ఎక్కువగా ఉండేలా చూడడం
+  t3 = Math.max(t3, t2 + (1.5 * risk));
+
   let t1Pct = r.Target1Pct ? parseFloat(r.Target1Pct) : (en > 0 ? ((t1 - en) / en) * 100 : 0);
   let t2Pct = r.Target2Pct ? parseFloat(r.Target2Pct) : (en > 0 ? ((t2 - en) / en) * 100 : 0);
   let t3Pct = r.Target3Pct ? parseFloat(r.Target3Pct) : (en > 0 ? ((t3 - en) / en) * 100 : 0);
+
+  if (t3Pct <= t2Pct && en > 0) {
+    t3Pct = ((t3 - en) / en) * 100;
+  }
 
   return {
     t1: t1, t1Pct: t1Pct.toFixed(1),
@@ -702,191 +709,326 @@ function getMultiTargets(r){
   };
 }
 
-function pledgeHtml(v,na){
-  if(!has(v)) return na;
-  const p=+v;
-  if(p>100) return '<b class="amb">data error ('+p+'%)</b>';
-  return '<b class="'+(p>=25?'neg':(p>=10?'amb':''))+'">'+p+'% of promoter shares</b>';
+function loadHist(){
+  return fetch('data/history/index.json?v='+Date.now())
+    .then(r=>r.ok?r.json():{})
+    .catch(()=>({}))
+    .then(idx=>Promise.all(['ultra','short'].map(k=>{
+      const first=(DATA[k]||[])[0];
+      const d=first?first.Date:'';
+      const prevs=(idx[k]||[]).filter(x=>x<d);
+      if(!d||!prevs.length){HIST[k]=null;return null;}
+      const p=prevs[prevs.length-1];
+      return fetch('data/history/'+k+'_'+p+'.csv?v='+Date.now())
+        .then(r=>{if(!r.ok)throw new Error('nf');return r.text();})
+        .then(t=>{HIST[k]={date:p,rows:parseCSV(t)};})
+        .catch(()=>{HIST[k]=null;});
+    })));
 }
 
-function fundBox(r){
-  if(r.FundChecked!=='Yes') return '';
-  const na='<b class="na">n/a</b>';
-  const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
-  const mc=has(r.MarketCapCr)?'<b>Rs '+fmt(r.MarketCapCr)+' crore</b>':na;
-  const sec=has(r.Sector)?'<b>'+r.Sector+'</b>':na;
-  const pro=has(r.PromoterPct)?'<b>'+r.PromoterPct+'%</b>':na;
-  const pl=pledgeHtml(r.PledgeOfPromoterPct,na);
-  let de=na;
-  if(has(r.DebtEquity)){
-    const d=+r.DebtEquity;
-    de='<b class="'+(d>2?'neg':(d>1?'amb':''))+'">'+d+'</b>';
+function handleGlobalSearch(q){
+  q = (q||'').trim().toUpperCase();
+  const drop = $('search_results');
+  if(!q){
+    drop.style.display='none';
+    drop.innerHTML='';
+    return;
   }
-  const nr=has(r.NextResults)?row('Next results','<b>'+r.NextResults+'</b>'):'';
-  return '<div class="fund"><div class="ft">Company snapshot</div>'
-    +row('Market cap',mc)+row('Sector',sec)+row('Promoter holding',pro)
-    +row('Promoter pledge',pl)+row('Debt / Equity',de)+nr+'</div>';
-}
+  
+  const activeTabs = {
+    early: 'Early Movers', ultra: 'Ultra Short', short: 'Short Term',
+    multi: 'Multibagger', quality: 'Quality', newl: 'New Listings', smart: 'Smart Money'
+  };
 
-function lvlHtml(r){
-  const mt = getMultiTargets(r);
-  return '<div class="why"><div class="ft">Multi-Target Blueprint &amp; Trailing Levels</div>'
-    +'<div>&#8226; <b>Target 1:</b> Rs '+fmt(mt.t1)+' (+'+mt.t1Pct+'%) &rarr; <i>Book 40% &amp; Trail SL to Cost (Zero Risk)</i></div>'
-    +'<div>&#8226; <b>Target 2:</b> Rs '+fmt(mt.t2)+' (+'+mt.t2Pct+'%) &rarr; <i>Core Swing Target (Lock Gains)</i></div>'
-    +'<div>&#8226; <b>Target 3:</b> Rs '+fmt(mt.t3)+' (+'+mt.t3Pct+'%) &rarr; <i>Runner Extension</i></div>'
-    +(has(r.RR)?'<div>&#8226; Reward:Risk 1:'+esc(r.RR)+'</div>':'')
-    +(has(r.StopReason)?'<div>&#8226; Stop Basis: '+esc(r.StopReason)+'</div>':'')
-    +'</div>';
-}
+  const resultsMap = {};
 
-function fixWarn(w){
-  const out=[];
-  w.forEach(x=>{
-    if(/^it may block/i.test(x.trim())&&out.length) out[out.length-1]+='; '+x.trim();
-    else out.push(x);
+  Object.keys(activeTabs).forEach(tabKey => {
+    (DATA[tabKey]||[]).forEach(r => {
+      const sym = (r.Symbol || r.sym || '').toUpperCase();
+      if(sym && sym.includes(q)){
+        if(!resultsMap[sym]){
+          resultsMap[sym] = {
+            sym: sym, isActive: true, activeTab: tabKey, activeTitle: activeTabs[tabKey],
+            activeRow: r, score: r.Score || '-', perfCount: 0, lastResult: 'Active',
+            close: r.Close || r.Entry || 0
+          };
+        } else {
+          resultsMap[sym].isActive = true;
+          resultsMap[sym].activeTab = tabKey;
+          resultsMap[sym].activeTitle = activeTabs[tabKey];
+        }
+      }
+    });
   });
-  return out;
+
+  (DATA.perf||[]).forEach(r => {
+    const sym = (r.Symbol || '').toUpperCase();
+    if(sym && sym.includes(q)){
+      if(!resultsMap[sym]){
+        resultsMap[sym] = {
+          sym: sym, isActive: false, activeTab: null, activeTitle: null,
+          activeRow: null, score: r.Score || '-', perfCount: 1,
+          lastResult: r.StageResult || r.Result || 'Closed',
+          close: r.ExitPrice || r.Entry || 0
+        };
+      } else {
+        resultsMap[sym].perfCount = (resultsMap[sym].perfCount || 0) + 1;
+        if(!resultsMap[sym].isActive){
+          resultsMap[sym].lastResult = r.StageResult || r.Result || 'Closed';
+        }
+      }
+    }
+  });
+
+  const matches = Object.values(resultsMap);
+  if(!matches.length){
+    drop.innerHTML = '<div style="padding:14px;color:var(--mut);font-size:13px;text-align:center;">ఈ స్టాక్ మన రాడార్ హిస్టరీలో ఎప్పుడూ నమోదు కాలేదు.</div>';
+    drop.style.display='block';
+    return;
+  }
+
+  drop.innerHTML = matches.slice(0, 10).map(m => {
+    const cp = curPrice({sym: m.sym});
+    const nowPrice = cp ? cp.p : m.close;
+    const sm = getSurvMeta(m.activeRow);
+    const survTag = sm ? ` ${sm.tag}` : '';
+
+    let statusBadge = '';
+    let subInfo = '';
+    if(m.isActive){
+      statusBadge = '<span class="status-pill status-green" style="font-size:10px;padding:1px 7px;">🟢 Active on Radar</span>';
+      subInfo = `<span style="color:var(--g)">${m.activeTitle}</span> &middot; Score: ${m.score}/100`;
+    } else {
+      statusBadge = '<span class="status-pill status-gold" style="font-size:10px;padding:1px 7px;">⚪ Past Signal</span>';
+      subInfo = `హిస్టారికల్ రికార్డ్స్: ${m.perfCount} ట్రేడ్స్ &middot; Result: ${m.lastResult}`;
+    }
+
+    return `<div class="search-item" onclick="openStockLifetimeAudit('${m.sym}')">
+      <div>
+        <div class="sym-name">${m.sym} ${statusBadge}${survTag}</div>
+        <div class="tab-name">${subInfo}</div>
+      </div>
+      <div style="text-align:right">
+        <b style="font-size:13px">Rs ${fmt(nowPrice)}</b>
+        <div style="font-size:11px;color:var(--b);font-weight:600;margin-top:2px">&#128337; Inspect History &#8594;</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  drop.style.display='block';
 }
 
-let EARLY_MAP={};
-
-function getStageMeta(r){
-  let badge=r.StageBadge;
-  let color=r.StageColor;
-  let code=r.StageCode;
-
-  if(!badge||badge==='WATCH'||badge==='-'){
-    if(r.Stage==='Fresh'||r.Band==='High Conviction'){
-      badge='PRIME ENTRY'; color='green'; code=r.Stage?'Stage 2A':'High Conviction';
-    }else if(r.Stage==='Ready'||r.Band==='Good Setup'){
-      badge='WATCHLIST'; color='gold'; code=r.Stage?'Stage 1B':'Good Setup';
-    }else{
-      badge='AVOID'; color='red'; code=r.Stage?'Stage 2B':'Early Watch';
+function openStockLifetimeAudit(sym){
+  $('search_results').style.display='none';
+  sym = sym.toUpperCase();
+  
+  const perfRows = (DATA.perf||[]).filter(r => (r.Symbol||'').toUpperCase() === sym).sort((a,b)=>String(b.SignalDate).localeCompare(String(a.SignalDate)));
+  
+  let activeTab = null;
+  let activeRow = null;
+  const tabNames = {early:'Early Movers', ultra:'Ultra Short', short:'Short Term', multi:'Multibagger', quality:'Quality', newl:'New Listings', smart:'Smart Money'};
+  for(let tk of Object.keys(tabNames)){
+    const r = (DATA[tk]||[]).find(x => (x.Symbol||x.sym||'').toUpperCase() === sym);
+    if(r){
+      activeTab = tabNames[tk];
+      activeRow = r;
+      break;
     }
   }
-  return {badge,color,code};
-}
 
-function calcPositionSize(){
-  if(!ACTIVE_ROW) return;
-  const r = ACTIVE_ROW;
-  const userRisk = parseFloat($('dr_user_risk').value) || 0;
-  const entry = parseFloat(r.Close || r.Entry) || 0;
-  const stop = parseFloat(r.Stop) || 0;
-  const mt = getMultiTargets(r);
+  const cp = curPrice({sym: sym});
+  const currentPrice = cp ? cp.p : (activeRow ? (activeRow.Close || activeRow.Entry) : (perfRows.length ? (perfRows[0].ExitPrice || perfRows[0].Entry) : 0));
   
-  const riskPerShare = Math.max(0.1, entry - stop);
-  let qty = 0;
-  if(riskPerShare > 0 && userRisk > 0){
-    qty = Math.floor(userRisk / riskPerShare);
-  }
-  
-  const totalCap = qty * entry;
-  const profitT1 = (qty * 0.40) * Math.max(0, mt.t1 - entry);
-  const profitT2 = qty * Math.max(0, mt.t2 - entry);
-  
-  $('dr_calc_qty').textContent = qty.toLocaleString('en-IN') + ' shares';
-  $('dr_calc_cap').textContent = 'Rs ' + totalCap.toLocaleString('en-IN', {maximumFractionDigits: 0});
-  $('dr_calc_profit_t1').textContent = '+Rs ' + profitT1.toLocaleString('en-IN', {maximumFractionDigits: 0});
-  $('dr_calc_profit_t2').textContent = '+Rs ' + profitT2.toLocaleString('en-IN', {maximumFractionDigits: 0});
-}
+  $('hist_title').innerHTML = `${sym} &mdash; <span style="color:var(--tx);font-size:16px">Rs ${fmt(currentPrice)}</span>`;
+  $('hist_tv_link').href = 'https://in.tradingview.com/chart/?symbol=NSE:' + encodeURIComponent(sym);
 
-function openRationale(sym, tabType){
-  const tab = tabType || cur;
-  const rows = (DATA[tab]||[]);
-  const r = rows.find(x=>x.Symbol===sym) || EARLY_MAP[sym];
-  if(!r) return;
-  
-  ACTIVE_ROW = r;
-  $('dr_title').textContent=r.Symbol+' — Investment Scrutiny';
-  const meta=getStageMeta(r);
-  
-  $('dr_badge').textContent=meta.badge;
-  $('dr_icon').textContent=meta.color==='green'?'🟢':(meta.color==='gold'?'🟡':'🔴');
-  
-  const bnr=$('dr_banner');
-  bnr.className='status-banner banner-'+meta.color;
-  
-  if(meta.badge==='PRIME ENTRY'){
-    $('dr_sub').textContent='High Conviction Setup: అనుకూలమైన Risk:Reward తో Fresh Momentum.';
-  }else if(meta.badge==='WATCHLIST'){
-    $('dr_sub').textContent='Consolidation Watch: Price tightening తో Volume Dry-up Setup.';
-  }else{
-    $('dr_sub').textContent='Extended Run-up: Pullback risk ఉంది, ప్రస్తుత level వద్ద chasing చేయకండి.';
-  }
-  
-  const ctn=$('dr_reasons');
-  ctn.innerHTML='';
-  
-  let mWarning = '';
-  const mScore = (typeof DATA !== 'undefined' && DATA.market_health && DATA.market_health.score) 
-                 ? parseFloat(DATA.market_health.score) 
-                 : (window.MARKET_HEALTH_SCORE || 5.3);
-
-  if(mScore < 40) {
-    mWarning = ' ⚠️ Market Weak: Pullback risk ఉంది, position size 50% మాత్రమే తీసుకోండి.';
-  } else if(mScore >= 70) {
-    mWarning = ' ✅ Market Favorable: బ్రేక్‌అవుట్ మొమెంటమ్ బాగుంది, full size తీసుకోవచ్చు.';
+  const ab = $('hist_active_banner');
+  if(activeRow){
+    const entryP = +(activeRow.Close || activeRow.Entry);
+    const stopP = +(activeRow.Stop || 0);
+    const mt = getMultiTargets(activeRow);
+    let distStop = stopP > 0 ? (((currentPrice - stopP)/currentPrice)*100).toFixed(1) : '-';
+    ab.innerHTML = `<div class="status-banner banner-green" style="margin-bottom:12px;padding:10px 14px;">
+      <div>
+        <div class="banner-title" style="font-size:14px">🟢 ప్రస్తుతం రాడార్‌లో యాక్టివ్‌గా ఉంది (${activeTab})</div>
+        <div class="banner-sub" style="font-size:12px">Entry: Rs ${fmt(entryP)} | Stop: Rs ${fmt(stopP)} (-${distStop}%) | T1: Rs ${fmt(mt.t1)} (+${mt.t1Pct}%) | T2: Rs ${fmt(mt.t2)} (+${mt.t2Pct}%)</div>
+      </div>
+    </div>`;
   } else {
-    mWarning = ' ⚖️ Market Neutral: నిబంధనల ప్రకారం stop-loss తప్పక పాటించండి.';
+    ab.innerHTML = `<div class="status-banner banner-gold" style="margin-bottom:12px;padding:8px 14px;">
+      <div class="banner-sub" style="font-size:12.5px;color:#e3b341;">⚪ ప్రస్తుతం ఈ స్టాక్ ఏ రాడార్ ట్యాబ్‌లోనూ లైవ్‌లో లేదు (గత సిగ్నల్స్ రికార్డ్ క్రింద చూడండి).</div>
+    </div>`;
+  }
+
+  const totalSignals = perfRows.length;
+  const targetHits = perfRows.filter(r => r.Result === 'Target hit' || (r.StageResult && r.StageResult.includes('T1')) || (r.StageResult && r.StageResult.includes('T2'))).length;
+  const stopHits = perfRows.filter(r => r.Result === 'Stop hit' && (!r.StageResult || !r.StageResult.includes('Trailed'))).length;
+  const trailedCount = perfRows.filter(r => r.Result === 'Trailed SL' || (r.StageResult && r.StageResult.includes('Trailed'))).length;
+  const hitRate = (targetHits + stopHits) > 0 ? Math.round((targetHits / (targetHits + stopHits)) * 100) + '%' : '-';
+
+  const box = (lbl, val, cls) => `<div class="st"><small>${lbl}</small><b class="${cls||''}">${val}</b></div>`;
+  $('hist_stats_summary').innerHTML = box('మొత్తం సిగ్నల్స్', totalSignals || (activeRow ? '1 (Active)' : '0'))
+    + box('Target Reached 🎯', targetHits, 'pos')
+    + box('Trailed SL (Cost SL) 🛡️', trailedCount, 'amb')
+    + box('Stop Hit 🛑', stopHits, 'neg')
+    + box('చారిత్రక విన్-రేట్', hitRate, 'pos');
+
+  if(!perfRows.length){
+    if(activeRow){
+      const mt = getMultiTargets(activeRow);
+      $('hist_table').innerHTML = `<tr><th>సిగ్నల్ తేదీ</th><th>ట్యాబ్ (Scan)</th><th>ఎంట్రీ</th><th>స్టాప్‌లాస్</th><th>T1 / T2 టార్గెట్స్</th><th>ముగింపు తేదీ</th><th>ఫలితం</th><th>పీక్ ర్యాలీ</th><th>P/L %</th></tr>
+      <tr>
+        <td>${activeRow.Date || '-'}</td>
+        <td><b>${activeTab}</b></td>
+        <td>Rs ${fmt(activeRow.Entry || activeRow.Close)}</td>
+        <td class="neg">Rs ${fmt(activeRow.Stop)}</td>
+        <td class="pos">T1: Rs ${fmt(mt.t1)}<br>T2: Rs ${fmt(mt.t2)}</td>
+        <td>-</td>
+        <td><span class="status-pill status-green">Open (Active)</span></td>
+        <td class="pos">+${activeRow.GainPct || '0.0'}%</td>
+        <td>-</td>
+      </tr>`;
+    } else {
+      $('hist_table').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:16px;color:var(--mut);">ఈ స్టాక్‌కు సంబంధించి ఎలాంటి గత సిగ్నల్స్ నమోదు కాలేదు.</td></tr>';
+    }
+  } else {
+    $('hist_table').innerHTML = `<tr><th>సిగ్నల్ తేదీ</th><th>ట్యాబ్ (Scan)</th><th>ఎంట్రీ</th><th>స్టాప్‌లాస్</th><th>T1 / T2 టార్గెట్స్</th><th>ముగింపు తేదీ</th><th>స్టేజ్ ఫలితం</th><th>పీక్ ర్యాలీ</th><th>నికర లాభనష్టం</th></tr>`
+      + perfRows.map(r => {
+        let resBadge = r.StageResult || r.Result;
+        if(resBadge.includes('T3')) resBadge = '<b class="pur">T3 Hit 🚀</b>';
+        else if(resBadge.includes('T2')) resBadge = '<b class="pos">T2 Hit 🎯🎯</b>';
+        else if(resBadge.includes('T1')) resBadge = '<b class="pos">T1 Hit 🎯</b>';
+        else if(resBadge.includes('Trailed')) resBadge = '<b class="amb">Trailed SL 🛡️</b>';
+        else if(resBadge.includes('Stop')) resBadge = '<b class="neg">Stop hit 🛑</b>';
+        else if(resBadge === 'Open' || resBadge === 'Pending' || resBadge === 'Active') resBadge = '<span class="status-pill status-green">Open ⏳</span>';
+
+        const pnl = r.PnLPct !== '' ? (parseFloat(r.PnLPct) >= 0 ? '+' : '') + r.PnLPct + '%' : '-';
+        const pnlCls = r.PnLPct !== '' ? (parseFloat(r.PnLPct) >= 0 ? 'pos' : 'neg') : '';
+
+        const peak = parseFloat(r.PeakGainPct);
+        const peakTxt = (!isNaN(peak) && peak > 0) ? `+${peak.toFixed(1)}%` : '-';
+        const scanName = SCAN_LBL[r.Scan] || r.Scan;
+
+        const t1Display = r.Target1 ? `T1: Rs ${fmt(r.Target1)}` : `Tgt: Rs ${fmt(r.Target)}`;
+        const t2Display = r.Target2 ? `<br><small style="color:var(--mut)">T2: Rs ${fmt(r.Target2)}</small>` : '';
+
+        return `<tr>
+          <td>${r.SignalDate || '-'}</td>
+          <td><b>${scanName}</b></td>
+          <td>Rs ${fmt(r.Entry)}</td>
+          <td class="neg">Rs ${fmt(r.Stop)}</td>
+          <td class="pos">${t1Display}${t2Display}</td>
+          <td>${r.ResultDate || (r.Result==='Open'?'నడుస్తోంది':'-')}</td>
+          <td>${resBadge}</td>
+          <td class="pos" style="font-weight:700">${peakTxt}</td>
+          <td class="${pnlCls}" style="font-weight:700">${pnl}</td>
+        </tr>`;
+      }).join('');
+  }
+
+  $('historyModal').style.display = 'flex';
+}
+
+function closeHistoryModal(){$('historyModal').style.display='none';}
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('.search-wrapper')){
+    const drop = $('search_results');
+    if(drop) drop.style.display='none';
+  }
+});
+  function rowCells(tab,r,ns){
+  const cls=r.Band?r.Band.split(' ')[0]:'';
+  const rs=RES[r.Symbol||r.sym];
+  const al=(rs&&rs.n<=7)?'<span class="amb" title="Results in '+rs.n+' days">&#9888;</span>':'<span></span>';
+  let info,extra;
+  
+  let rowVcp = '';
+  if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
+    rowVcp = ' <span class="tag vcp">💎 VCP</span>';
+  } else if(r.IsDryUp === 'Yes' || (r.Reasons && r.Reasons.includes('dried up'))){
+    rowVcp = ' <span class="tag dryup">💧 Dry-up</span>';
   }
 
   const sm = getSurvMeta(r);
-  if(sm){
-    mWarning += ` 🚨 హెచ్చరిక: ఈ స్టాక్ ఎక్స్చేంజ్ ${sm.label} పరిధిలో ఉంది. 100% మార్జిన్ & సర్క్యూట్ రిస్క్ ఉంటుంది.`;
-  }
+  const rowSurv = sm ? ` ${sm.tag}` : '';
+  const screenerBtn = getScreenerLink(r.Symbol || r.sym);
+  const rsBadge = getRSBadge(r);
 
-  let lines=[];
-  if(r.SimpleReasons && r.SimpleReasons.trim().length > 0 && r.SimpleReasons !== '[]'){
-    lines = r.SimpleReasons.split(' || ').map(s=>{
-      const idx = s.indexOf(':');
-      return idx > 0 ? {title: s.slice(0, idx).trim(), desc: s.slice(idx+1).trim()} : {title: 'కీలక అంశం', desc: s};
-    });
-    if(lines.length > 0){
-      lines[lines.length - 1].desc += mWarning;
+  if(tab=='smart'){
+    const isRadar=r.RadarSetup&&r.RadarSetup!='Not on radar';
+    const isOverlap=(+r.OverlapCount)>=2;
+    let badge='';
+    if(isOverlap) badge+='<span class="tag overlap">&#128101; '+(+r.OverlapCount)+' Invs</span> ';
+    if(isRadar) badge+='<span class="pos">&#128293; Radar</span>';
+    else if(!isOverlap) badge='<span class="na">Sole pick</span>';
+    return '<span><b>'+esc(r.Symbol)+'</b>'+screenerBtn+rowSurv+'</span>'
+      +'<span><b>'+esc(r.Investor)+'</b></span>'
+      +'<span class="hm"><span class="tag smart">'+esc(r.Type)+'</span></span>'
+      +'<span>'+esc(r.Action)+'</span>'
+      +'<span><b>'+esc(r.HoldingPct)+'</b></span>'
+      +'<span class="hm">'+esc(r.Category)+'</span>'
+      +'<span class="hm">'+badge+'</span>'
+      +al;
+  }
+  if(tab=='mine'){
+    const c=r._cur;
+    const pct=r._pct;
+    const hit=r._hit;
+    const pcls=pct===null?'':(pct>=0?'pos':'neg');
+    const ptxt=pct===null?'n/a':((pct>=0?'+':'')+pct.toFixed(2)+'%');
+    const hitTxt=hit?(hit.c=='neg'?'Stop touched':(hit.c=='pos'?'Target reached':'Open')):'Open';
+    const hitCls=hit?(hit.c=='neg'?'r':(hit.c=='pos'?'g':'')):'';
+    
+    const curP = c ? c.p : (r.lastPrice || null);
+    const tr = getTrailingAdvice(r, curP);
+    let trailBadge = '';
+    if(tr){
+      trailBadge = ' <span class="tag '+(tr.cls==='pos'?'new':'late')+'" style="margin-left:4px">&#128640; '+tr.level+'</span>';
     }
-  } else {
+
+    return '<span><b>'+esc(r.sym)+'</b>'+screenerBtn+rowSurv+trailBadge+'</span>'
+      +'<span><span class="tag'+(r.status=='Holding'?' hold':'')+'">'+esc(r.status)+'</span></span>'
+      +'<span class="hm"><b>'+(c?fmt(c.p):'n/a')+'</b></span>'
+      +'<span>'+nz(r.entry)+'</span>'
+      +'<span class="r">'+nz(r.stop)+'</span>'
+      +'<span class="g">'+nz(r.target)+'</span>'
+      +'<span class="hm"><b class="'+pcls+'">'+ptxt+'</b> &middot; <span class="'+hitCls+'">'+hitTxt+'</span></span>'
+      +al;
+  }
+  if(tab=='ultra'||tab=='short'||tab=='early'){
+    const meta=getStageMeta(r);
+    const trendBadge = getTrendDaysMeta(r.Symbol, tab);
     const mt = getMultiTargets(r);
-    lines = [
-      {title: 'Multi-Target Strategy', desc: `T1 Rs ${fmt(mt.t1)} (+${mt.t1Pct}%) వద్ద 40% ప్రాఫిట్ బుక్ చేసి, SL ను కొన్న ధరకు మార్చండి. T2 Rs ${fmt(mt.t2)} (+${mt.t2Pct}%) కోర్ టార్గెట్.`},
-      {title: 'Risk Management', desc: `Safe Stop Rs ${fmt(r.Stop)} (${r.StopDistPct}% రిస్క్). Reward:Risk 1:${r.RR||'2.0'} తో ట్రేడింగ్‌కు అనుకూలంగా ఉంది.${mWarning}`},
-      {title: 'Runner Potential', desc: `T3 Extended Target Rs ${fmt(mt.t3)} (+${mt.t3Pct}%) వద్ద భారీ ర్యాలీ కోసం రన్నర్ క్వాంటిటీని రైడ్ చేయవచ్చు.`}
-    ];
-  }
-  
-  lines.forEach((item, idx)=>{
-    const el = document.createElement('div');
-    el.className = 'reason-item';
-    el.innerHTML = '<div class="reason-title">' + (idx+1) + '. ' + esc(item.title) + '</div><div class="reason-desc">' + esc(item.desc) + '</div>';
-    ctn.appendChild(el);
-  });
-  
-  const mt = getMultiTargets(r);
-  $('dr_price').textContent = 'Rs ' + fmt(r.Close || r.Entry);
-  $('dr_stop').textContent = 'Rs ' + fmt(r.Stop) + ' (' + r.StopDistPct + '% రిస్క్)';
-  
-  if($('dr_stop_tight')){
-    if(has(r.StopTight)){
-      $('dr_stop_tight').textContent = 'Rs ' + fmt(r.StopTight);
-      $('dr_stop_tight').className = 'neg';
-    } else {
-      $('dr_stop_tight').textContent = '-';
-      $('dr_stop_tight').className = 'na';
-    }
-  }
-  
-  $('dr_t1').textContent = 'Rs ' + fmt(mt.t1) + ' (+' + mt.t1Pct + '%)';
-  $('dr_t2').textContent = 'Rs ' + fmt(mt.t2) + ' (+' + mt.t2Pct + '%)';
-  $('dr_t3').textContent = 'Rs ' + fmt(mt.t3) + ' (+' + mt.t3Pct + '%)';
-  $('dr_stage').textContent = meta.code;
-  $('dr_chart_link').href = 'https://in.tradingview.com/chart/?symbol=NSE:' + encodeURIComponent(r.Symbol);
-  
-  calcPositionSize();
-  $('rationaleDrawer').style.display = 'flex';
-}
+    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span> ' + trendBadge + rowVcp + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
+    extra='Risk '+r.StopDistPct+'% &middot; T1 +'+mt.t1Pct+'% &middot; T2 +'+mt.t2Pct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
 
-function closeRationaleDrawer(){$('rationaleDrawer').style.display='none';}
-function handleDrawerOverlay(e){if(e.target.id==='rationaleDrawer') closeRationaleDrawer();}
+    const tgCell = `<span><b class="g">T1: ${fmt(mt.t1)}</b><br><small style="color:var(--mut)">T2: ${fmt(mt.t2)}</small></span>`;
+
+    return '<span><b>'+esc(r.Symbol)+'</b>'+screenerBtn+rowSurv+'</span>'
+      +'<span><span class="score '+cls+'">'+r.Score+'</span></span>'
+      +'<span class="hm">'+info+'</span>'
+      +'<span>'+fmt(r.Entry)+'</span>'
+      +'<span class="r">'+fmt(r.Stop)+'</span>'
+      +tgCell
+      +'<span class="hm">'+extra+'</span>'
+      +al;
+  } else if(tab=='newl'){
+    info=esc(r.ListedOn||'n/a') + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
+    extra='Since listing '+r['ChangeSinceListing%']+'% &middot; '+r.DataDays+' days of data';
+  } else {
+    info=esc(r.Sector||'n/a') + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
+    extra=roeLbl(r)+' '+r.ROCE+'% &middot; Sales '+r.SalesCAGR3+'% &middot; Profit '+r.ProfitCAGR3+'%';
+  }
+  return '<span><b>'+esc(r.Symbol)+'</b>'+screenerBtn+rowSurv+'</span>'
+    +'<span><span class="score '+cls+'">'+r.Score+'</span></span>'
+    +'<span class="hm">'+info+'</span>'
+    +'<span>'+fmt(r.Entry)+'</span>'
+    +'<span class="r">'+fmt(r.Stop)+'</span>'
+    +'<span class="g">'+fmt(r.Target)+'</span>'
+    +'<span class="hm">'+extra+'</span>'
+    +al;
+}
 
 let PROF={};
 function profHtml(sym){
@@ -920,6 +1062,133 @@ function renderItems(id,tab,items,hdr,emptyMsg){
         +'<div class="lbody" style="display:'+(o?'block':'none')+'">'+i.card+'</div></div>';
     }).join('');
 }
+
+function buildEv(){
+  EV={};
+  (DATA.events||[]).forEach(e=>{
+    if(!e.symbol) return;
+    (EV[e.symbol]=EV[e.symbol]||[]).push(e);
+  });
+}
+
+function buildNew(){
+  NEWSET={ultra:new Set(),short:new Set()};
+  NEWOK=(DATA.perf||[]).length>0;
+  ['ultra','short'].forEach(k=>{
+    const first=(DATA[k]||[])[0];
+    const d=first?first.Date:'';
+    if(!d) return;
+    (DATA.perf||[]).forEach(r=>{
+      if(r.Scan==k&&r.SignalDate==d) NEWSET[k].add(r.Symbol);
+    });
+  });
+}
+
+function syncMinePrices(){
+  const arr = loadMine();
+  if(!arr || !arr.length) return;
+  let updated = false;
+  
+  arr.forEach(item => {
+    const cur = curPrice({sym: item.sym});
+    if(cur && cur.p && item.lastPrice !== cur.p){
+      item.lastPrice = cur.p;
+      item.lastPriceDate = cur.d || todayISO();
+      updated = true;
+    }
+  });
+  
+  if(updated){
+    saveMine(arr);
+    if(typeof curTab !== 'undefined' && curTab === 'mine'){
+      drawMine();
+    }
+  }
+}
+
+function updateDigest(){
+  const ds=[];
+  ['ultra','short','early','smart'].forEach(k=>{(DATA[k]||[]).forEach(r=>{if(r.Date&&r.Date!='Quarterly Filing') ds.push(r.Date);});});
+  ds.sort();
+  const d=ds.length?ds[ds.length-1]:'-';
+  $('d_date').textContent=d;
+
+  let freshCnt=0;
+  (DATA.early||[]).forEach(r=>{if(r.Stage=='Fresh'||r.Stage=='Ready') freshCnt++;});
+  const uNew=NEWSET['ultra']?NEWSET['ultra'].size:0;
+  $('d_new').textContent=(freshCnt+uNew)+' stocks (Early/Ultra)';
+
+  const dConv=(DATA.smart||[]).filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar').length;
+  $('d_smart').textContent=dConv+' stocks on radar';
+
+  const sCounts={};
+  ['ultra','short','early','multi','quality'].forEach(k=>{
+    (DATA[k]||[]).forEach(r=>{
+      const s=r.Sector;
+      if(s&&s!='n/a') sCounts[s]=(sCounts[s]||0)+1;
+    });
+  });
+  let topSec='-',topN=0;
+  Object.keys(sCounts).forEach(s=>{if(sCounts[s]>topN){topN=sCounts[s];topSec=s;}});
+  $('d_sector').textContent=topSec!='-'?(topSec+' ('+topN+' setups)'):'Diverse';
+}
+
+function openDigestPop(type){
+  const t=$('poptitle');
+  const b=$('popbody');
+  if(type=='fresh'){
+    t.textContent='⚡ Fresh Breakouts & Ready Setups Today';
+    const items=[];
+    (DATA.early||[]).forEach(r=>{
+      if(r.Stage=='Fresh'||r.Stage=='Ready') items.push({s:r.Symbol,lbl:r.Stage+' ('+r.Horizon+')',sub:'Score: '+r.Score+' | Close: Rs '+fmt(r.Close),tab:'early'});
+    });
+    const uRows=DATA.ultra||[];
+    const ns=NEWSET['ultra']||new Set();
+    uRows.filter(r=>ns.has(r.Symbol)).forEach(r=>{
+      items.push({s:r.Symbol,lbl:'Ultra Short (NEW)',sub:'Score: '+r.Score+' | Entry: Rs '+fmt(r.Entry),tab:'ultra'});
+    });
+    if(!items.length) b.innerHTML='<div class="exp">No fresh breakouts found for today.</div>';
+    else b.innerHTML='<div class="wrap"><table><tr><th>Stock</th><th>Setup Type</th><th>Details</th><th>Action</th></tr>'
+      +items.map(x=>'<tr><td><b>'+esc(x.s)+'</b></td><td><span class="tag new">'+esc(x.lbl)+'</span></td><td>'+esc(x.sub)+'</td><td><button class="chbtn" onclick="closeDigestPop();show(\''+x.tab+'\');">View</button></td></tr>').join('')
+      +'</table></div>';
+  } else if(type=='smart'){
+    t.textContent='🔥 Double Conviction (Smart Money + Radar)';
+    const rows=(DATA.smart||[]).filter(r=>r.RadarSetup&&r.RadarSetup!='Not on radar');
+    if(!rows.length) b.innerHTML='<div class="exp">No Smart Money stocks currently on radar.</div>';
+    else b.innerHTML='<div class="wrap"><table><tr><th>Stock</th><th>Investor</th><th>Holding</th><th>Technical Radar</th><th>Action</th></tr>'
+      +rows.map(r=>'<tr><td><b>'+esc(r.Symbol)+'</b></td><td>'+esc(r.Investor)+'</td><td>'+esc(r.HoldingPct)+'</td><td class="pos"><b>'+esc(r.RadarSetup)+'</b></td><td><button class="chbtn" onclick="closeDigestPop();show(\'smart\');">Inspect</button></td></tr>').join('')
+      +'</table></div>';
+  } else if(type=='sector'){
+    t.textContent='🏢 Top Sector Distribution Across Radar';
+    const sCounts={};
+    const src=[['ultra','Ultra Short'],['short','Short Term'],['early','Early Movers'],['multi','Multibagger'],['quality','Quality']];
+    src.forEach(a=>{
+      (DATA[a[0]]||[]).forEach(r=>{
+        const s=r.Sector||'n/a';
+        if(s!='n/a'){
+          sCounts[s]=sCounts[s]||{name:s,cnt:0,stocks:[]};
+          sCounts[s].cnt++;
+          if(sCounts[s].stocks.indexOf(r.Symbol)<0) sCounts[s].stocks.push(r.Symbol);
+        }
+      });
+    });
+    const list=Object.values(sCounts).sort((x,y)=>y.cnt-x.cnt);
+    if(!list.length) b.innerHTML='<div class="exp">No sector data available.</div>';
+    else b.innerHTML='<div class="wrap"><table><tr><th>Sector</th><th>Total Setups</th><th>Representative Stocks</th><th>Action</th></tr>'
+      +list.slice(0,8).map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td class="amb"><b>'+x.cnt+'</b></td><td class="exp">'+esc(x.stocks.slice(0,4).join(', '))+(x.stocks.length>4?'...':'')+'</td><td><button class="chbtn" onclick="closeDigestPop();show(\'sect\');">Heatmap</button></td></tr>').join('')
+      +'</table></div>';
+  } else if(type=='health'){
+    t.textContent='🩺 Market Health Overview';
+    const hTxt=$('mh_txt').textContent||'Market Health';
+    b.innerHTML='<div class="card" style="border:none">'
+      +'<div class="top"><span class="sym">'+esc(hTxt)+'</span></div>'
+      +'<div class="exp" style="margin:10px 0">Daily market health measures whether Nifty 50 and Nifty 500 are trading comfortably above their 50-day and 200-day moving averages, and tracks breadth across broader indices.</div>'
+      +'<div class="btns"><a href="/health" style="text-decoration:none"><button>Open Full Market Health Page</button></a></div>'
+      +'</div>';
+  }
+  $('popmodal').style.display='flex';
+}
+function closeDigestPop(){$('popmodal').style.display='none';}
 
 let CH=null;
 function chartOnly(r){
@@ -1077,129 +1346,6 @@ function updateTrailingStopAlerts(){
 }
 setInterval(updateTrailingStopAlerts, 1500);
 
-function rowCells(tab,r,ns){
-  const cls=r.Band?r.Band.split(' ')[0]:'';
-  const rs=RES[r.Symbol||r.sym];
-  const al=(rs&&rs.n<=7)?'<span class="amb" title="Results in '+rs.n+' days">&#9888;</span>':'<span></span>';
-  let info,extra;
-  
-  let rowVcp = '';
-  if(r.IsVCP === 'Yes' || (r.Reasons && r.Reasons.includes('coiling'))){
-    rowVcp = ' <span class="tag vcp">💎 VCP</span>';
-  } else if(r.IsDryUp === 'Yes' || (r.Reasons && r.Reasons.includes('dried up'))){
-    rowVcp = ' <span class="tag dryup">💧 Dry-up</span>';
-  }
-
-  const sm = getSurvMeta(r);
-  const rowSurv = sm ? ` ${sm.tag}` : '';
-  const screenerBtn = getScreenerLink(r.Symbol || r.sym);
-  const rsBadge = getRSBadge(r);
-
-  if(tab=='smart'){
-    const isRadar=r.RadarSetup&&r.RadarSetup!='Not on radar';
-    const isOverlap=(+r.OverlapCount)>=2;
-    let badge='';
-    if(isOverlap) badge+='<span class="tag overlap">&#128101; '+(+r.OverlapCount)+' Invs</span> ';
-    if(isRadar) badge+='<span class="pos">&#128293; Radar</span>';
-    else if(!isOverlap) badge='<span class="na">Sole pick</span>';
-    return '<span><b>'+esc(r.Symbol)+'</b>'+screenerBtn+rowSurv+'</span>'
-      +'<span><b>'+esc(r.Investor)+'</b></span>'
-      +'<span class="hm"><span class="tag smart">'+esc(r.Type)+'</span></span>'
-      +'<span>'+esc(r.Action)+'</span>'
-      +'<span><b>'+esc(r.HoldingPct)+'</b></span>'
-      +'<span class="hm">'+esc(r.Category)+'</span>'
-      +'<span class="hm">'+badge+'</span>'
-      +al;
-  }
-  if(tab=='mine'){
-    const c=r._cur;
-    const pct=r._pct;
-    const hit=r._hit;
-    const pcls=pct===null?'':(pct>=0?'pos':'neg');
-    const ptxt=pct===null?'n/a':((pct>=0?'+':'')+pct.toFixed(2)+'%');
-    const hitTxt=hit?(hit.c=='neg'?'Stop touched':(hit.c=='pos'?'Target reached':'Open')):'Open';
-    const hitCls=hit?(hit.c=='neg'?'r':(hit.c=='pos'?'g':'')):'';
-    
-    const curP = c ? c.p : (r.lastPrice || null);
-    const tr = getTrailingAdvice(r, curP);
-    let trailBadge = '';
-    if(tr){
-      trailBadge = ' <span class="tag '+(tr.cls==='pos'?'new':'late')+'" style="margin-left:4px">&#128640; '+tr.level+'</span>';
-    }
-
-    return '<span><b>'+esc(r.sym)+'</b>'+screenerBtn+rowSurv+trailBadge+'</span>'
-      +'<span><span class="tag'+(r.status=='Holding'?' hold':'')+'">'+esc(r.status)+'</span></span>'
-      +'<span class="hm"><b>'+(c?fmt(c.p):'n/a')+'</b></span>'
-      +'<span>'+nz(r.entry)+'</span>'
-      +'<span class="r">'+nz(r.stop)+'</span>'
-      +'<span class="g">'+nz(r.target)+'</span>'
-      +'<span class="hm"><b class="'+pcls+'">'+ptxt+'</b> &middot; <span class="'+hitCls+'">'+hitTxt+'</span></span>'
-      +al;
-  }
-  if(tab=='ultra'||tab=='short'||tab=='early'){
-    const meta=getStageMeta(r);
-    const trendBadge = getTrendDaysMeta(r.Symbol, tab);
-    const mt = getMultiTargets(r);
-    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span> ' + trendBadge + rowVcp + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
-    extra='Risk '+r.StopDistPct+'% &middot; T1 +'+mt.t1Pct+'% &middot; T2 +'+mt.t2Pct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
-
-    const tgCell = `<span><b class="g">T1: ${fmt(mt.t1)}</b><br><small style="color:var(--mut)">T2: ${fmt(mt.t2)}</small></span>`;
-
-    return '<span><b>'+esc(r.Symbol)+'</b>'+screenerBtn+rowSurv+'</span>'
-      +'<span><span class="score '+cls+'">'+r.Score+'</span></span>'
-      +'<span class="hm">'+info+'</span>'
-      +'<span>'+fmt(r.Entry)+'</span>'
-      +'<span class="r">'+fmt(r.Stop)+'</span>'
-      +tgCell
-      +'<span class="hm">'+extra+'</span>'
-      +al;
-  } else if(tab=='newl'){
-    info=esc(r.ListedOn||'n/a') + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
-    extra='Since listing '+r['ChangeSinceListing%']+'% &middot; '+r.DataDays+' days of data';
-  } else {
-    info=esc(r.Sector||'n/a') + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
-    extra=roeLbl(r)+' '+r.ROCE+'% &middot; Sales '+r.SalesCAGR3+'% &middot; Profit '+r.ProfitCAGR3+'%';
-  }
-  return '<span><b>'+esc(r.Symbol)+'</b>'+screenerBtn+rowSurv+'</span>'
-    +'<span><span class="score '+cls+'">'+r.Score+'</span></span>'
-    +'<span class="hm">'+info+'</span>'
-    +'<span>'+fmt(r.Entry)+'</span>'
-    +'<span class="r">'+fmt(r.Stop)+'</span>'
-    +'<span class="g">'+fmt(r.Target)+'</span>'
-    +'<span class="hm">'+extra+'</span>'
-    +al;
-}
-
-function evHtml(sym){
-  const list=EV[sym]||[];
-  if(!list.length) return '';
-  const bad=['Default/Insolvency (warning)','Disruption/Suspension (warning)','Auditor change (check)'];
-  const seen={},lines=[];
-  const today=new Date();today.setHours(0,0,0,0);
-  list.forEach(e=>{
-    const k=e.category+'|'+e.date;
-    if(seen[k]) return;
-    seen[k]=1;
-    let cls='pos',txt=esc(e.category)+', '+esc(e.date);
-    if(bad.indexOf(e.category)>=0) cls='neg';
-    if(e.category=='Results date'){
-      cls='amb';
-      const dd=parseD(e.date);
-      if(dd){
-        const n=Math.round((dd-today)/86400000);
-        txt='Results (board meeting) on '+esc(e.date)+(n>=0?' (in '+n+' days)':'');
-      }
-    }
-    if(/BUY$/.test(e.category)) txt+=' | '+esc(e.detail);
-    if(e.link&&e.link.indexOf('https://')==0) txt+=' <a href="'+esc(e.link)+'" target="_blank" rel="noopener">details</a>';
-    lines.push({cls:cls,txt:txt});
-  });
-  const order={neg:0,amb:1,pos:2};
-  lines.sort((a,b)=>order[a.cls]-order[b.cls]);
-  return '<div class="fund"><div class="ft">Recent events (NSE)</div>'
-    +lines.slice(0,5).map(l=>'<div class="evl '+l.cls+'">&#8226; '+l.txt+'</div>').join('')+'</div>';
-}
-
 function draw(){
   const rows=(DATA[cur]||[]);
   const sel=$('status');
@@ -1309,8 +1455,7 @@ function draw(){
   }
   $('chg').innerHTML='<div class="note"><b>Changes since yesterday:</b> '+newLine+'<br>'+remLine+'</div>';
 }
-
-function drawMulti(){
+  function drawMulti(){
   const rows=DATA.multi||[];
   const sel=$('msector');
   const secs=[...new Set(rows.map(r=>r.Sector).filter(Boolean))].sort();
