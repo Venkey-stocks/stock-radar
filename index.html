@@ -2763,17 +2763,13 @@ function drawTurnaround(){
   const flt = $('t_filter') ? $('t_filter').value : '';
   
   const list = rows.filter(r => {
-    const tVal = (r['టర్నరౌండ్'] || r.Turnaround || r.is_turnaround || '').toString().toLowerCase();
-    const isT = tVal === 'yes' || tVal === 'అవును' || tVal === 'true';
+    const isT = String(r.Turnaround || '').toLowerCase() === 'yes';
     if(flt === 'turnaround' && !isT) return false;
     if(flt === 'growth' && isT) return false;
     return true;
-  }).sort((a,b) => (+b.Score || +b['స్కోర్'] || 0) - (+a.Score || +a['స్కోర్'] || 0));
+  }).sort((a,b) => (+b.Score || 0) - (+a.Score || 0));
 
-  const tCount = rows.filter(r => {
-    const tVal = (r['టర్నరౌండ్'] || r.Turnaround || r.is_turnaround || '').toString().toLowerCase();
-    return tVal === 'yes' || tVal === 'అవును' || tVal === 'true';
-  }).length;
+  const tCount = rows.filter(r => String(r.Turnaround || '').toLowerCase() === 'yes').length;
   const gCount = rows.length - tCount;
   
   const box = (lbl, val, cls) => `<div class="st"><small>${lbl}</small><b class="${cls||''}">${val}</b></div>`;
@@ -2785,30 +2781,38 @@ function drawTurnaround(){
   }
 
   if($('ttable')){
-    $('ttable').innerHTML = '<thead><tr><th>సింబల్</th><th>రకం</th><th>స్కోర్</th><th>ధర</th><th>సేల్స్ YoY</th><th>ప్రాఫిట్ YoY</th><th>వాల్యూమ్</th><th>విశ్లేషణ / కారణం</th></tr></thead><tbody>'
+    $('ttable').innerHTML = '<thead><tr><th>సింబల్</th><th>రకం</th><th>స్కోర్</th><th>ధర</th><th>సేల్స్ YoY</th><th>ప్రాఫిట్ YoY (PAT)</th><th>వాల్యూమ్</th><th>తీర్పు / స్టేటస్</th></tr></thead><tbody>'
       + (list.length ? list.map(r => {
-          const tVal = (r['టర్నరౌండ్'] || r.Turnaround || r.is_turnaround || '').toString().toLowerCase();
-          const isT = tVal === 'yes' || tVal === 'అవును' || tVal === 'true';
+          const isT = String(r.Turnaround || '').toLowerCase() === 'yes';
           const badge = isT 
             ? '<span class="status-pill status-green">🟢 Turnaround</span>' 
             : '<span class="status-pill status-purple">🚀 Growth Leader</span>';
           
-          const sym = r.Symbol || r.symbol || r['సింబల్'] || '';
+          const sym = r.Symbol || '';
           const screener = typeof getScreenerLink === 'function' ? getScreenerLink(sym) : '';
-          const score = r.Score || r['స్కోర్'] || '-';
-          const closeVal = r.Close || r.Price || r.Entry || r['ధర'] || '';
-          const px = closeVal ? 'Rs ' + fmt(closeVal) : '-';
+          const score = r.Score || '-';
           
-          const sVal = r.SalesYoY || r.QSalesYoY || r.SalesGrowth || r['సేల్స్'];
+          // అసలైన ఫీల్డ్స్: CurPrice, Sales_Growth%, PAT_Growth%, VolRatio, Verdict
+          const px = r.CurPrice ? 'Rs ' + fmt(r.CurPrice) : '-';
+          
+          const sVal = r['Sales_Growth%'];
           const sYoY = has(sVal) ? (parseFloat(sVal) >= 0 ? '+' : '') + sVal + '%' : '-';
           
-          const pVal = r.ProfitYoY || r.QProfitYoY || r.ProfitGrowth || r['ప్రాఫిట్'];
-          const pYoY = has(pVal) ? (parseFloat(pVal) >= 0 ? '+' : '') + pVal + '%' : '-';
+          const pVal = r['PAT_Growth%'];
+          let pYoY = '-';
+          let pCls = 'pos';
+          if(has(pVal)){
+            if(String(pVal).includes('Loss to Profit') || isT){
+              pYoY = 'నష్టం &rarr; లాభం 🟢';
+              pCls = 'pos';
+            } else {
+              pYoY = (parseFloat(pVal) >= 0 ? '+' : '') + pVal + '%';
+              pCls = parseFloat(pVal) >= 0 ? 'pos' : 'neg';
+            }
+          }
           
-          const volVal = r.VolRatio || r.VolumeRatio || r['వాల్యూమ్'];
-          const vol = volVal ? volVal + 'x' : '-';
-          
-          const reason = r.Reason || r.Reasons || r['కారణం'] || 'Strong quarterly performance';
+          const vol = r.VolRatio ? r.VolRatio + 'x' : '-';
+          const verdict = r.Verdict || (isT ? 'Super Turnaround' : 'Strong Growth');
 
           return `<tr>
             <td><b>${esc(sym)}</b>${screener}</td>
@@ -2816,9 +2820,9 @@ function drawTurnaround(){
             <td><b>${score}</b></td>
             <td>${px}</td>
             <td class="${parseFloat(sVal)>=0?'pos':'neg'}"><b>${sYoY}</b></td>
-            <td class="${parseFloat(pVal)>=0?'pos':'neg'}"><b>${pYoY}</b></td>
+            <td class="${pCls}"><b>${pYoY}</b></td>
             <td>${vol}</td>
-            <td style="color:var(--mut);font-size:12px;">${esc(reason)}</td>
+            <td style="color:var(--tx);font-weight:600;font-size:12px;">${esc(verdict)}</td>
           </tr>`;
         }).join('') : '<tr><td colspan="8" style="text-align:center;padding:16px;">ఎటువంటి రికార్డులు లభించలేదు.</td></tr>')
       + '</tbody>';
