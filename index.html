@@ -34,6 +34,10 @@ label{color:var(--mut);font-size:13px}
 .tag.asm{border-color:#d29922;color:#e3b341;background:rgba(210,153,34,0.15);font-weight:700}
 .tag.gsm{border-color:#f85149;color:#ff7b72;background:rgba(248,81,73,0.15);font-weight:700}
 .tag.trend{border-color:#10b981;color:#10b981;background:rgba(16,185,129,0.15);font-weight:700}
+.tag.leader{border-color:#f0883e;color:#ffab70;background:rgba(240,136,62,0.15);font-weight:700}
+.tag.rs{border-color:#388bfd;color:#79c0ff;background:rgba(56,139,253,0.12);font-weight:600}
+.screener-link{color:#58a6ff;text-decoration:none;font-weight:600;font-size:12px;margin-left:6px;display:inline-flex;align-items:center;gap:3px;border:1px solid rgba(56,139,253,0.3);padding:1px 6px;border-radius:4px;background:rgba(56,139,253,0.08);vertical-align:middle}
+.screener-link:hover{background:rgba(56,139,253,0.2);color:#79c0ff;text-decoration:underline}
 .status-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;letter-spacing:.4px;display:inline-flex;align-items:center;gap:4px}
 .status-green{background:rgba(46,160,67,.2);color:#3fb950;border:1px solid rgba(46,160,67,.4)}
 .status-gold{background:rgba(210,153,34,.2);color:#d29922;border:1px solid rgba(210,153,34,.4)}
@@ -116,7 +120,7 @@ th{color:var(--mut);font-weight:600}
 .stale{background:rgba(248,81,73,.15);border:1px solid var(--r);color:var(--r);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13.5px;font-weight:600}
 .stale.amb{background:rgba(210,153,34,.15);border-color:var(--y);color:var(--y)}
 .lst{display:grid;grid-template-columns:1fr;gap:6px}
-.lhdr,.lhead{display:grid;grid-template-columns:1.2fr .8fr 1.5fr .9fr .9fr .9fr 2fr 24px;gap:8px;align-items:center}
+.lhdr,.lhead{display:grid;grid-template-columns:1.5fr .7fr 1.5fr .8fr .8fr .8fr 2fr 24px;gap:8px;align-items:center}
 .lhdr{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:0 12px}
 .lrow{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .lhead{padding:9px 12px;cursor:pointer;font-size:13.5px}
@@ -127,7 +131,7 @@ th{color:var(--mut);font-weight:600}
 .lbody .card{border:none;padding:4px}
 .hmc{text-align:center;font-weight:600}
 .hmtop{white-space:normal;min-width:200px;color:var(--mut);font-size:12px}
-@media(max-width:700px){.lhdr,.lhead{grid-template-columns:1.2fr .8fr .9fr .9fr .9fr 22px;gap:6px}.hm{display:none!important}.lhead{font-size:13px;padding:9px 8px}}
+@media(max-width:700px){.lhdr,.lhead{grid-template-columns:1.4fr .7fr .8fr .8fr .8fr 22px;gap:6px}.hm{display:none!important}.lhead{font-size:13px;padding:9px 8px}}
 .calc-box{background:#0e1117;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:14px}
 .calc-box .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .calc-box input{width:110px;padding:5px 8px;font-size:13px;text-align:right}
@@ -165,7 +169,6 @@ th{color:var(--mut);font-weight:600}
   <a class="mh" id="mh" href="/health" style="margin-bottom:0"><span class="dot"></span><span id="mh_txt">Market Health</span></a>
   <a class="mh" href="/events" style="margin-bottom:0">Events</a>
   
-  <!-- Universal Stock Lifetime Archive Search Bar -->
   <div class="search-wrapper">
     <span class="search-icon">&#128269;</span>
     <input type="text" id="global_search" placeholder="Search any stock (Active or Past)..." oninput="handleGlobalSearch(this.value)">
@@ -189,7 +192,6 @@ th{color:var(--mut);font-weight:600}
   <button id="t_sect" onclick="show('sect')">Sectors</button>
 </div>
 
-<!-- Global View & Surveillance Bar -->
 <div class="bar" id="viewbar">
   <label>View</label>
   <button id="v_list" onclick="setView('list')">List</button>
@@ -457,7 +459,6 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
   </div>
 </div>
 
-<!-- Lifetime Stock Lifecycle Audit Modal -->
 <div id="historyModal" onclick="if(event.target===this)closeHistoryModal()">
   <div class="chbox" style="max-width:920px">
     <div class="chhead">
@@ -610,7 +611,6 @@ function togRow(h){
   ROWOPEN[k]=o;
 }
 
-// ===== Lifetime Global Search (Active + Closed Archive) =====
 function handleGlobalSearch(q){
   q = (q||'').trim().toUpperCase();
   const drop = $('search_results');
@@ -632,7 +632,6 @@ function handleGlobalSearch(q){
 
   const resultsMap = {};
 
-  // 1. Check Active Radar
   Object.keys(activeTabs).forEach(tabKey => {
     (DATA[tabKey]||[]).forEach(r => {
       const sym = (r.Symbol || r.sym || '').toUpperCase();
@@ -658,7 +657,6 @@ function handleGlobalSearch(q){
     });
   });
 
-  // 2. Check Lifetime Performance Archive
   (DATA.perf||[]).forEach(r => {
     const sym = (r.Symbol || '').toUpperCase();
     if(sym && sym.includes(q)){
@@ -746,7 +744,6 @@ function openStockLifetimeAudit(sym){
   $('hist_title').innerHTML = `${sym} &mdash; <span style="color:var(--tx);font-size:16px">Rs ${fmt(currentPrice)}</span>`;
   $('hist_tv_link').href = 'https://in.tradingview.com/chart/?symbol=NSE:' + encodeURIComponent(sym);
 
-  // Active status banner
   const ab = $('hist_active_banner');
   if(activeRow){
     const entryP = +(activeRow.Close || activeRow.Entry);
@@ -766,7 +763,6 @@ function openStockLifetimeAudit(sym){
     </div>`;
   }
 
-  // Summary box
   const totalSignals = perfRows.length;
   const targetHits = perfRows.filter(r => r.Result === 'Target hit').length;
   const stopHits = perfRows.filter(r => r.Result === 'Stop hit').length;
@@ -780,7 +776,6 @@ function openStockLifetimeAudit(sym){
     + box('Open / Active', openCount + (activeRow && !openCount ? 1 : 0), 'amb')
     + box('చారిత్రక విన్-రేట్', hitRate, 'pos');
 
-  // Table rows
   if(!perfRows.length){
     if(activeRow){
       $('hist_table').innerHTML = `<tr><th>సిగ్నల్ తేదీ</th><th>ట్యాబ్ (Scan)</th><th>ఎంట్రీ</th><th>స్టాప్‌లాస్</th><th>టార్గెట్</th><th>ముగింపు తేదీ</th><th>ఫలితం</th><th>పీక్ ర్యాలీ</th><th>P/L %</th></tr>
@@ -838,6 +833,25 @@ document.addEventListener('click', e => {
     if(drop) drop.style.display='none';
   }
 });
+  function getScreenerLink(sym){
+  if(!sym) return '';
+  const clean = String(sym).replace('.NS','').replace('.BO','').trim();
+  return `<a href="https://www.screener.in/company/${encodeURIComponent(clean)}/consolidated/" target="_blank" rel="noopener" class="screener-link" onclick="event.stopPropagation()">📊 Screener</a>`;
+}
+
+function getRSBadge(r){
+  if(!r) return '';
+  const rsVal = r.RS !== undefined && r.RS !== '' ? parseFloat(r.RS) : null;
+  const isLeader = r.IsLeader === 'Yes' || String(r.IsLeader).toLowerCase() === 'true';
+  let badges = '';
+  if(isLeader){
+    badges += '<span class="tag leader">👑 True Leader</span> ';
+  }
+  if(rsVal !== null && !isNaN(rsVal)){
+    badges += `<span class="tag rs">RS ${rsVal.toFixed(0)}</span>`;
+  }
+  return badges;
+}
 
 function exportToExcel(){
   const tab = cur;
@@ -1098,6 +1112,8 @@ function rowCells(tab,r,ns){
 
   const sm = getSurvMeta(r);
   const rowSurv = sm ? ` ${sm.tag}` : '';
+  const screenerBtn = getScreenerLink(r.Symbol || r.sym);
+  const rsBadge = getRSBadge(r);
 
   if(tab=='smart'){
     const isRadar=r.RadarSetup&&r.RadarSetup!='Not on radar';
@@ -1106,7 +1122,7 @@ function rowCells(tab,r,ns){
     if(isOverlap) badge+='<span class="tag overlap">&#128101; '+(+r.OverlapCount)+' Invs</span> ';
     if(isRadar) badge+='<span class="pos">&#128293; Radar</span>';
     else if(!isOverlap) badge='<span class="na">Sole pick</span>';
-    return '<span><b>'+esc(r.Symbol)+'</b>'+rowSurv+'</span>'
+    return '<span><b>'+esc(r.Symbol)+'</b>'+screenerBtn+rowSurv+'</span>'
       +'<span><b>'+esc(r.Investor)+'</b></span>'
       +'<span class="hm"><span class="tag smart">'+esc(r.Type)+'</span></span>'
       +'<span>'+esc(r.Action)+'</span>'
@@ -1131,7 +1147,7 @@ function rowCells(tab,r,ns){
       trailBadge = ' <span class="tag '+(tr.cls==='pos'?'new':'late')+'" style="margin-left:4px">&#128640; '+tr.level+'</span>';
     }
 
-    return '<span><b>'+esc(r.sym)+'</b>'+rowSurv+trailBadge+'</span>'
+    return '<span><b>'+esc(r.sym)+'</b>'+screenerBtn+rowSurv+trailBadge+'</span>'
       +'<span><span class="tag'+(r.status=='Holding'?' hold':'')+'">'+esc(r.status)+'</span></span>'
       +'<span class="hm"><b>'+(c?fmt(c.p):'n/a')+'</b></span>'
       +'<span>'+nz(r.entry)+'</span>'
@@ -1143,16 +1159,16 @@ function rowCells(tab,r,ns){
   if(tab=='ultra'||tab=='short'||tab=='early'){
     const meta=getStageMeta(r);
     const trendBadge = getTrendDaysMeta(r.Symbol, tab);
-    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span> ' + trendBadge + rowVcp + rowSurv;
+    info='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span> ' + trendBadge + rowVcp + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
     extra='Risk '+r.StopDistPct+'% &middot; Target +'+r.TargetPct+'%'+(has(r.RR)?' &middot; R:R 1:'+r.RR:'');
   } else if(tab=='newl'){
-    info=esc(r.ListedOn||'n/a') + rowSurv;
+    info=esc(r.ListedOn||'n/a') + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
     extra='Since listing '+r['ChangeSinceListing%']+'% &middot; '+r.DataDays+' days of data';
   } else {
-    info=esc(r.Sector||'n/a') + rowSurv;
+    info=esc(r.Sector||'n/a') + (rsBadge ? ' ' + rsBadge : '') + rowSurv;
     extra=roeLbl(r)+' '+r.ROCE+'% &middot; Sales '+r.SalesCAGR3+'% &middot; Profit '+r.ProfitCAGR3+'%';
   }
-  return '<span><b>'+esc(r.Symbol)+'</b>'+rowSurv+'</span>'
+  return '<span><b>'+esc(r.Symbol)+'</b>'+screenerBtn+rowSurv+'</span>'
     +'<span><span class="score '+cls+'">'+r.Score+'</span></span>'
     +'<span class="hm">'+info+'</span>'
     +'<span>'+fmt(r.Entry)+'</span>'
@@ -1205,8 +1221,7 @@ function renderItems(id,tab,items,hdr,emptyMsg){
         +'<div class="lbody" style="display:'+(o?'block':'none')+'">'+i.card+'</div></div>';
     }).join('');
 }
-
-function parseCSV(t){
+  function parseCSV(t){
   const rows=[];let r=[],f='',q=false;
   for(let i=0;i<t.length;i++){
     const c=t[i];
@@ -1529,7 +1544,7 @@ function drawChart(d,lv){
     if(has(val)&&isFinite(+val)){
       const yy=y(+val);
       s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="'+item[2]+'" stroke-width="1.5" stroke-dasharray="6 4"/>';
-      s+='<text x="'+(L+4)+'" y="'+(yy-4)+'" fill daylight="'+item[2]+'" fill="'+item[2]+'" font-size="12" font-weight="700">'+item[1]+' '+(+val).toFixed(2)+'</text>';
+      s+='<text x="'+(L+4)+'" y="'+(yy-4)+'" fill="'+item[2]+'" font-size="12" font-weight="700">'+item[1]+' '+(+val).toFixed(2)+'</text>';
     }
   }
   s+='<text x="'+L+'" y="'+(H-6)+'" fill="#8b96a5" font-size="11">'+d.d[0]+'</text>'
@@ -1678,11 +1693,14 @@ function draw(){
     const sm = getSurvMeta(r);
     const survBadge = sm ? sm.tag : '';
     const trendBadge = getTrendDaysMeta(r.Symbol, cur);
+    const screenerBtn = getScreenerLink(r.Symbol);
+    const rsBadge = getRSBadge(r);
 
     const tagList=[...new Set([
       '<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>',
       trendBadge,
       vcpTag,
+      rsBadge,
       survBadge,
       ns.has(r.Symbol)?'NEW today':'',
       r.Status,
@@ -1699,7 +1717,7 @@ function draw(){
       wl.push('Promoter pledge shows '+r.PledgeOfPromoterPct+'% (over 100%), which cannot be right.');
     }
     return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\')">'
-    +'<div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
     +'<div class="tags">'+tags+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
@@ -1766,9 +1784,11 @@ function drawMulti(){
     const de=has(r.DebtEquity)?'<b class="'+(+r.DebtEquity>1?'amb':'')+'">'+r.DebtEquity+'</b>':na;
     const sm = getSurvMeta(r);
     const survBadge = sm ? sm.tag : '';
+    const screenerBtn = getScreenerLink(r.Symbol);
+    const rsBadge = getRSBadge(r);
 
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'multi\')"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+survBadge+'</div>'
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'multi\')"><div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+(rsBadge?' '+rsBadge:'')+survBadge+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
@@ -1823,9 +1843,11 @@ function drawQuality(){
     const de=has(r.DebtEquity)?'<b class="'+(+r.DebtEquity>1?'amb':'')+'">'+r.DebtEquity+'</b>':na;
     const sm = getSurvMeta(r);
     const survBadge = sm ? sm.tag : '';
+    const screenerBtn = getScreenerLink(r.Symbol);
+    const rsBadge = getRSBadge(r);
 
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'quality\')"><div class="top"><span class="sym">'+r.Symbol+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+survBadge+'</div>'
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'quality\')"><div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+(rsBadge?' '+rsBadge:'')+survBadge+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
@@ -1868,9 +1890,11 @@ function drawNewl(){
     const ch=+r['ChangeSinceListing%'], r20=+r['Return20d%'];
     const sm = getSurvMeta(r);
     const survBadge = sm ? sm.tag : '';
+    const screenerBtn = getScreenerLink(r.Symbol);
+    const rsBadge = getRSBadge(r);
 
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'newl\')"><div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">Listed '+esc(r.ListedOn)+'</span><span class="tag">'+esc(r.DataDays)+' days of data</span>'+survBadge+'</div>'
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'newl\')"><div class="top"><span class="sym">'+esc(r.Symbol)+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">Listed '+esc(r.ListedOn)+'</span><span class="tag">'+esc(r.DataDays)+' days of data</span>'+(rsBadge?' '+rsBadge:'')+survBadge+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.RiskPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
@@ -1924,9 +1948,12 @@ function drawEarly(){
 
     const sm = getSurvMeta(r);
     const survBadge = sm ? sm.tag : '';
+    const screenerBtn = getScreenerLink(r.Symbol);
+    const rsBadge = getRSBadge(r);
 
     const tags='<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>'
       +vcpTag
+      +(rsBadge?' '+rsBadge:'')
       +survBadge
       +'<span class="tag">'+esc(meta.code)+'</span>'
       +'<span class="tag">'+esc(r.Horizon)+'</span>'
@@ -1943,7 +1970,7 @@ function drawEarly(){
     const wl=has(r.Warning)?r.Warning.split('; '):[];
       
     return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'early\')">'
-    +'<div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="top"><span class="sym">'+esc(r.Symbol)+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
     +'<div class="tags">'+tags+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
@@ -1991,8 +2018,9 @@ function drawSmart(){
     const mc=(r.MarketCapCr&&r.MarketCapCr!='n/a')?'<b>Rs '+fmt(r.MarketCapCr)+' cr</b> ('+esc(r.Category)+')':'n/a';
     const row=(l,v)=>'<div class="row"><span>'+l+'</span>'+v+'</div>';
     const mockR={Symbol:r.Symbol,Entry:r.ClosePrice,Stop:'',Target:''};
+    const screenerBtn = getScreenerLink(r.Symbol);
 
-    return '<div class="card"><div class="top"><span class="sym">'+esc(r.Symbol)+'</span><span class="tag smart">'+esc(r.Type)+'</span></div>'
+    return '<div class="card"><div class="top"><span class="sym">'+esc(r.Symbol)+screenerBtn+'</span><span class="tag smart">'+esc(r.Type)+'</span></div>'
       +'<div class="tags"><span class="tag">'+esc(r.Category)+'</span><span class="tag">'+esc(r.Sector||'Sector n/a')+'</span><span class="tag hold">'+esc(r.Action)+'</span>'
       +(isOverlap?'<span class="tag overlap">&#128101; '+(+r.OverlapCount)+' Investors</span>':'')+'</div>'
       +resLine(r.Symbol)
@@ -2115,10 +2143,11 @@ function drawMine2(){
     const s=esc(m.sym);
     const btn=(a,l)=>'<button data-s="'+s+'" onclick="mineAct(this,\''+a+'\')">'+l+'</button>';
     const lv={Symbol:m.sym,Entry:m.entry==null?'':m.entry,Stop:m.stop==null?'':m.stop,Target:m.target==null?'':m.target};
+    const screenerBtn = getScreenerLink(m.sym);
     
     m._cur=c; m._pct=pct; m._hit=hit;
 
-    const card='<div class="card"><div class="top"><span class="sym">'+s+'</span><span class="'+(k||'exp')+'" style="font-weight:700;font-size:16px">'+(pct===null?'n/a':(pct>=0?'+':'')+pct.toFixed(2)+'%')+'</span></div>'
+    const card='<div class="card"><div class="top"><span class="sym">'+s+screenerBtn+'</span><span class="'+(k||'exp')+'" style="font-weight:700;font-size:16px">'+(pct===null?'n/a':(pct>=0?'+':'')+pct.toFixed(2)+'%')+'</span></div>'
     +'<div class="tags"><span class="tag'+(m.status=='Holding'?' hold':'')+'">'+m.status+'</span><span class="tag">'+(m.src=='manual'?'Added manually':'From radar')+'</span></div>'
     +resLine(m.sym)
     +'<div class="exp">'+since+'.<br>Latest price: <b>'+(c?fmt(c.p):'n/a')+'</b>'+(c?' ('+esc(c.d)+')':'')+pl+'</div>'
@@ -2273,7 +2302,7 @@ function drawResults(){
    +(rows.length?rows.map(r=>{
      const n=daysTo(r.Date);
      const t=tag[r.Symbol];
-     return '<tr><td>'+esc(r.Date)+'</td><td class="'+(n<=7?'amb':'')+'">'+whenTxt(n)+'</td><td><b>'+esc(r.Symbol)+'</b></td><td>'+esc(r.Company)+'</td><td class="'+(t?'pos':'')+'">'+(t?esc(t.join(', ')):'-')+'</td><td>'+esc(r.Purpose)+'</td></tr>';
+     return '<tr><td>'+esc(r.Date)+'</td><td class="'+(n<=7?'amb':'')+'">'+whenTxt(n)+'</td><td><b>'+esc(r.Symbol)+'</b>'+getScreenerLink(r.Symbol)+'</td><td>'+esc(r.Company)+'</td><td class="'+(t?'pos':'')+'">'+(t?esc(t.join(', ')):'-')+'</td><td>'+esc(r.Purpose)+'</td></tr>';
    }).join(''):'<tr><td colspan="6">No results dates found.</td></tr>');
   $('meta').textContent='Upcoming results dates | '+rows.length+' shown';
 }
@@ -2413,8 +2442,9 @@ function drawPerf(){
      const vcpBadge = isVcp ? `<span class="tag vcp" style="margin-left:4px;background:rgba(56,139,253,0.18);color:#58a6ff;padding:2px 6px;border-radius:4px;font-size:11px;">💎 ${esc(vcpTypeLabel)}</span>` : '';
      const sm = getSurvMeta(r);
      const survBadge = sm ? ` ${sm.tag}` : '';
+     const screenerBtn = getScreenerLink(r.Symbol);
 
-     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b>'+vcpBadge+survBadge+'</td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td><td class="'+peakCls+'" style="font-weight:700">'+peakGainTxt+'</td><td>'+wsBadge+'</td></tr>';
+     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b>'+screenerBtn+vcpBadge+survBadge+'</td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td>'+fmt(r.Target)+'</td><td>'+r.Result+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td><td class="'+peakCls+'" style="font-weight:700">'+peakGainTxt+'</td><td>'+wsBadge+'</td></tr>';
    }).join(''):'<tr><td colspan="13">ఈ ఫిల్టర్‌కు సరిపోయే సిగ్నల్స్ లేవు.</td></tr>');
    
   const filterLabel = PERF_RESULT_FILTER ? ` [ఫిల్టర్: ${PERF_RESULT_FILTER}]` : '';
@@ -2461,7 +2491,8 @@ function drawMiss(){
      const k=r.Result=='Caught'?'pos':(r.Result=='Missed'?'neg':'amb');
      const sm = getSurvMeta(r);
      const survTag = sm ? ` ${sm.tag}` : '';
-     return '<tr><td>'+r.Date+'</td><td>'+(r.Scan=='ultra'?'Ultra':(r.Scan=='short'?'Short':'Early'))+'</td><td><b>'+r.Symbol+'</b>'+survTag+'</td><td>'+fmt(r.Close)+'</td><td>'+fmt(r.PeakClose)+'</td><td class="pos">+'+r.GainPct+'%</td><td>'+r.Days+'</td><td class="'+k+'">'+r.Result+'</td><td>'+(r.Reason||'-')+'</td></tr>';
+     const screenerBtn = getScreenerLink(r.Symbol);
+     return '<tr><td>'+r.Date+'</td><td>'+(r.Scan=='ultra'?'Ultra':(r.Scan=='short'?'Short':'Early'))+'</td><td><b>'+r.Symbol+'</b>'+screenerBtn+survTag+'</td><td>'+fmt(r.Close)+'</td><td>'+fmt(r.PeakClose)+'</td><td class="pos">+'+r.GainPct+'%</td><td>'+r.Days+'</td><td class="'+k+'">'+r.Result+'</td><td>'+(r.Reason||'-')+'</td></tr>';
    }).join(''):'<tr><td colspan="9">No big movers found for this selection.</td></tr>');
   $('meta').textContent='Miss Report | '+rows.length+' shown';
 }
@@ -2517,8 +2548,9 @@ function drawExcl(){
         const mainReason = r.Reason || (has(r.RR) && +r.RR < 2.0 ? 'Reward:Risk below 1:2' : 'Risk rule exceeded');
         const isWideStop = mainReason.toLowerCase().includes('stop-loss too far');
         const reasonCls = isWideStop ? 'neg' : 'amb';
+        const screenerBtn = getScreenerLink(r.Symbol);
         
-        return '<tr><td>'+esc(r.Date||'-')+'</td><td>'+esc(r._l)+'</td><td><b>'+esc(r.Symbol)+'</b>'+survBadge+'</td><td>'+fmt(r.Entry)+'</td><td class="neg">'+fmt(r.Stop)+'</td><td class="pos">'+fmt(r.Target)+'</td><td>1:'+esc(r.RR)+'</td><td class="'+reasonCls+'"><b>'+esc(mainReason)+'</b></td><td>'+esc(r.StopReason||'-')+'</td><td>'+esc(r.TargetReason||'-')+'</td></tr>';
+        return '<tr><td>'+esc(r.Date||'-')+'</td><td>'+esc(r._l)+'</td><td><b>'+esc(r.Symbol)+'</b>'+screenerBtn+survBadge+'</td><td>'+fmt(r.Entry)+'</td><td class="neg">'+fmt(r.Stop)+'</td><td class="pos">'+fmt(r.Target)+'</td><td>1:'+esc(r.RR)+'</td><td class="'+reasonCls+'"><b>'+esc(mainReason)+'</b></td><td>'+esc(r.StopReason||'-')+'</td><td>'+esc(r.TargetReason||'-')+'</td></tr>';
       }).join(''):'<tr><td colspan="10">Nothing excluded for this selection.</td></tr>');
   }
 
