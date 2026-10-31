@@ -229,9 +229,13 @@ for scan, f in LONG.items():
         s_type, s_asm, s_gsm = get_surv_info(r)
 
         risk = max(0.1, entry - stop)
-        t1 = fnum(r.get("Target1")) or round(entry + 1.2 * risk, 2)
-        t2 = fnum(r.get("Target2")) or round(target, 2)
-        t3 = fnum(r.get("Target3")) or round(entry + 4.5 * risk, 2)
+    t1 = fnum(r.get("Target1")) if fnum(r.get("Target1")) else round(entry + 1.2 * risk, 2)
+    t2 = fnum(r.get("Target2")) if fnum(r.get("Target2")) else round(target, 2)
+    # T3 ఎల్లప్పుడూ T2 కంటే ఎక్కువగా ఉండేలా చూడటం
+    calc_t3 = round(max(entry + 4.5 * risk, t2 + 1.5 * risk), 2)
+    t3 = fnum(r.get("Target3")) if fnum(r.get("Target3")) else calc_t3
+    if t3 <= t2:
+        t3 = round(t2 + 1.5 * risk, 2)
 
         add.append({"Scan": scan, "Date": date, "Symbol": sym, "Status": LABEL[scan],
                     "Class": "", "Band": r.get("Band", ""), "Score": fnum(r.get("Score")),
@@ -333,6 +337,9 @@ if "Class" not in sig.columns:
 sig["Class"] = sig["Class"].fillna("")
 sig["Date"] = pd.to_datetime(sig["Date"])
 sig = sig.sort_values(["Date", "Score"], ascending=[True, False])
+for tc in ("Target1", "Target2", "Target3"):
+    if tc not in sig.columns:
+        sig[tc] = None
 
 out = []
 last_idx = {}
