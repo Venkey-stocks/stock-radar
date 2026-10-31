@@ -202,7 +202,7 @@ def analyze(sym, g):
     clean_sym = sym.upper().replace(".NS", "").strip()
     surv_status = SURV_MAP.get(clean_sym, "")
 
-    # ---------- TARGET ----------
+    # ---------- MULTI-LEVEL TARGETS (T1, T2, T3) ----------
     hi250 = h[-251:] if len(h) >= 251 else h
     piv = pd.Series(hi250).rolling(11, center=True).max().values
     levels = hi250[hi250 == piv]
@@ -215,16 +215,29 @@ def analyze(sym, g):
         next_res = lvl
         lvl_name = "52-week high" if abs(lvl - high52) < 1e-9 else "swing high"
         if lvl > cap_price:
-            target = cap_price
+            target2 = cap_price
             target_reason = "Nearest resistance (%s Rs %.1f) is far; capped at %.0f ATR for a short trade" % (
                 lvl_name, lvl, MAX_TARGET_ATR)
         else:
-            target = lvl
+            target2 = lvl
             target_reason = "Nearest resistance: %s Rs %.1f (+%.1f%%)" % (lvl_name, lvl, (lvl / entry - 1) * 100)
     else:
-        target = entry + NO_RES_ATR * atr
+        target2 = entry + NO_RES_ATR * atr
         target_reason = "No overhead resistance found; %.0f ATR projection (estimate)" % NO_RES_ATR
+
+    # T1: 1.2R (Safe Target - 1-5 రోజుల అల్ట్రా స్వింగ్‌లో క్విక్ ప్రాఫిట్ & బ్రేక్‌ఈవెన్ లాక్)
+    target1 = entry + (1.2 * risk)
+    # T2: కనీసం 2.0R లేదా రెసిస్టెన్స్ లెవెల్ (ప్రధాన అల్ట్రా స్వింగ్ టార్గెట్)
+    target2 = max(target2, entry + (2.0 * risk))
+    # T3: 3.5R (అల్ట్రా స్కాన్ ఎక్స్‌టెండెడ్ మొమెంటమ్ రన్నర్)
+    target3 = entry + (3.5 * risk)
+
+    target = target2
     target_pct = (target / entry - 1) * 100
+    t1_pct = (target1 / entry - 1) * 100
+    t2_pct = (target2 / entry - 1) * 100
+    t3_pct = (target3 / entry - 1) * 100
+
     rr = (target - entry) / risk
 
     if stop_pct > MAX_STOP_PCT:
@@ -232,8 +245,11 @@ def analyze(sym, g):
         rej_rows.append({
             "Date": date_str, "Symbol": sym, "Status": status,
             "Close": round(close, 2), "Entry": round(entry, 2),
-            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2), "Target": round(target, 2),
+            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2),
+            "Target": round(target, 2), "Target1": round(target1, 2),
+            "Target2": round(target2, 2), "Target3": round(target3, 2),
             "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
+            "Target1Pct": round(t1_pct, 1), "Target2Pct": round(t2_pct, 1), "Target3Pct": round(t3_pct, 1),
             "RR": round(rr, 2), "Reason": f"Stop-loss too far ({stop_pct:.1f}%, limit {MAX_STOP_PCT:.1f}%)",
             "StopReason": stop_reason, "TargetReason": target_reason,
             "Surveillance": surv_status
@@ -245,8 +261,11 @@ def analyze(sym, g):
         rej_rows.append({
             "Date": date_str, "Symbol": sym, "Status": status,
             "Close": round(close, 2), "Entry": round(entry, 2),
-            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2), "Target": round(target, 2),
+            "Stop": round(stop, 2), "StopTight": round(stop_tight, 2),
+            "Target": round(target, 2), "Target1": round(target1, 2),
+            "Target2": round(target2, 2), "Target3": round(target3, 2),
             "StopDistPct": round(stop_pct, 2), "TargetPct": round(target_pct, 1),
+            "Target1Pct": round(t1_pct, 1), "Target2Pct": round(t2_pct, 1), "Target3Pct": round(t3_pct, 1),
             "RR": round(rr, 2), "Reason": "Reward:Risk below 1:2",
             "StopReason": stop_reason, "TargetReason": target_reason,
             "Surveillance": surv_status
@@ -357,6 +376,9 @@ def analyze(sym, g):
         "Date": date_str, "Symbol": sym, "Status": status, "Score": s, "Band": band,
         "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
         "StopTight": round(stop_tight, 2), "Target": round(target, 2),
+        "Target1": round(target1, 2), "Target1Pct": round(t1_pct, 1),
+        "Target2": round(target2, 2), "Target2Pct": round(t2_pct, 1),
+        "Target3": round(target3, 2), "Target3Pct": round(t3_pct, 1),
         "StopDistPct": round(stop_pct, 2), "RR": round(rr, 2),
         "StopReason": stop_reason, "TargetReason": target_reason,
         "VolRatio": round(vol_ratio, 2),
@@ -381,15 +403,17 @@ for sym, g in groups.items():
     except Exception as e:
         print("దాటవేసాం", sym, e)
 
-columns = ["Date", "Symbol", "Status", "Score", "Band", "Close", "Entry", "Stop", "StopTight", "Target",
+columns = ["Date", "Symbol", "Status", "Score", "Band", "Close", "Entry", "Stop", "StopTight",
+           "Target", "Target1", "Target1Pct", "Target2", "Target2Pct", "Target3", "Target3Pct",
            "StopDistPct", "RR", "StopReason", "TargetReason", "VolRatio", "TargetPct",
            "Resistance", "High52", "Gap", "Warning", "Reasons", "Events", "EventAdj",
            "Surveillance", "ASM", "GSM", "RS", "IsLeader"]
 out = pd.DataFrame(rows, columns=columns)
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
-rej_cols = ["Date", "Symbol", "Status", "Close", "Entry", "Stop", "StopTight", "Target", "StopDistPct",
-            "TargetPct", "RR", "Reason", "StopReason", "TargetReason", "Surveillance"]
+rej_cols = ["Date", "Symbol", "Status", "Close", "Entry", "Stop", "StopTight",
+            "Target", "Target1", "Target1Pct", "Target2", "Target2Pct", "Target3", "Target3Pct",
+            "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason", "Surveillance"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
 os.makedirs("data/history", exist_ok=True)
@@ -403,4 +427,4 @@ print(f"Stop-loss > {MAX_STOP_PCT}% వల్ల తిరస్కరించ�
 print("మొత్తం అల్ట్రా స్కాన్ ఫలితాలు:", len(out))
 if len(out) > 0:
     print(out["Status"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Status", "Score", "Band", "Entry", "Stop", "Target", "RR", "RS", "IsLeader"]].to_string(index=False))
+    print(out.head(10)[["Symbol", "Status", "Score", "Band", "Entry", "Stop", "Target1", "Target2", "Target3", "RR", "RS", "IsLeader"]].to_string(index=False))
