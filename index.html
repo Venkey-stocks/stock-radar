@@ -1885,6 +1885,210 @@ function buildNew(){
   });
 }
 
+function loadMine(){try{return JSON.parse(localStorage.getItem('mystocks')||'[]')||[];}catch(e){return [];}}
+function saveMine(a){try{localStorage.setItem('mystocks',JSON.stringify(a));}catch(e){alert('Could not save in this browser.');}}
+function updTab(){const n=loadMine().length;$('t_mine').textContent='My Stocks'+(n?' ('+n+')':'');}
+function redrawCur(){if(cur=='multi')drawMulti();else if(cur=='quality')drawQuality();else if(cur=='newl')drawNewl();else if(cur=='early')drawEarly();else if(cur=='mine')drawMine();else if(cur=='smart')drawSmart();else draw();}
+
+function findRow(sym){
+  const order=['short','ultra','early','multi','quality','newl'];
+  for(let i=0;i<order.length;i++){
+    const r=(DATA[order[i]]||[]).find(x=>x.Symbol==sym);
+    if(r) return r;
+  }
+  return null;
+}
+
+function ensureCH(){
+  if(CH) return Promise.resolve();
+  return fetch('data/charts.json?v='+Date.now())
+    .then(r=>r.ok?r.json():{})
+    .then(j=>{CH=j;})
+    .catch(()=>{});
+}
+
+function curPrice(m){
+  const d=CH&&CH[m.sym];
+  if(d&&d.c&&d.c.length) return {p:+d.c[d.c.length-1],d:d.d[d.d.length-1]};
+  const r=findRow(m.sym);
+  if(r&&has(r.Close)) return {p:+r.Close,d:r.Date};
+  if(m.lastPrice) return {p:+m.lastPrice,d:(m.lastDate||'entered by you')+' (entered by you)'};
+  if(m.src=='manual'&&m.addPrice) return {p:+m.addPrice,d:m.addDate+' (price you entered)'};
+  return null;
+}
+
+function hitInfo(m){
+  const d=CH&&CH[m.sym];
+  if(!d||!d.d||!d.d.length||!/^\d{4}-\d{2}-\d{2}/.test(String(d.d[0]))) return null;
+  const from=(m.status=='Holding'&&m.holdDate)?m.holdDate:m.addDate;
+  if(!/^\d{4}-\d{2}-\d{2}/.test(String(from))) return null;
+  for(let i=0;i<d.d.length;i++){
+    if(String(d.d[i])<=String(from)) continue;
+    const st=m.stop!=null&&d.l[i]<=m.stop;
+    const tg=m.target!=null&&d.h[i]>=m.target;
+    if(st) return {t:'Stop-loss level touched on '+d.d[i],c:'neg'};
+    if(tg) return {t:'Target level touched on '+d.d[i],c:'pos'};
+  }
+  return {t:'Stop-loss and target not touched since '+from,c:'na'};
+}
+
+function mineDetails(m){
+  const r=findRow(m.sym);
+  let h='';
+  if(!r){
+    h+='<div class="exp">This stock is not on today\'s radar lists. Check screener.in.</div>';
+  } else {
+    let wl=has(r.Warning)?fixWarn(tr(r.Warning).split('; ')):[];
+    h+=(wl.length?'<div class="warn">&#9888; '+wl.join('<br>&#9888; ')+'</div>':'<div class="exp">No warnings in today\'s radar data.</div>');
+    h+=fundBox(r);
+  }
+  if(PROF[m.sym]) h+=profHtml(m.sym);
+  h+=evHtml(m.sym);
+  return h;
+}
+
+function drawMine(){if(typeof syncMinePrices==='function')syncMinePrices();ensureCH().then(drawMine2);}
+
+function drawMine2(){
+  if(cur!='mine') return;
+  const arr=loadMine();
+  updTab();
+  const rows=arr.slice().sort((a,b)=>(a.status==b.status?0:(a.status=='Holding'?-1:1))||String(b.addDate).localeCompare(String(a.addDate)));
+  const pcts=[];
+  const items=rows.map(m=>{
+    const c=curPrice(m);
+    const base=m.status=='Holding'?+m.buyPrice:+m.addPrice;
+    const pct=(c&&base>0)?(c.p-base)/base*100:null;
+    if(pct!==null) pcts.push(pct);
+    const hit=hitInfo(m);
+    const k=pct===null?'':(pct>=0?'pos':'neg');
+    const since=m.status=='Holding'?('You bought at '+fmt(m.buyPrice)+(m.holdDate?' on '+m.holdDate:'')):('Added on '+m.addDate+' at '+fmt(m.addPrice));
+    let pl='';
+    if(m.status=='Holding'&&m.qty&&c) pl=' | P/L Rs '+fmt((c.p-m.buyPrice)*m.qty)+' ('+m.qty+' shares)';
+    let below='';
+    if(c&&m.stop!=null&&c.p<=m.stop&&!(hit&&hit.c=='neg')) below='<div class="warn">&#9888; Last close is at or below your stop-loss level.</div>';
+    const s=esc(m.sym);
+    const btn=(a,l)=>'<button data-s="'+s+'" onclick="mineAct(this,\''+a+'\')">'+l+'</button>';
+    const lv={Symbol:m.sym,Entry:m.entry==null?'':m.entry,Stop:m.stop==null?'':m.stop,Target:m.target==null?'':m.target};
+    const screenerBtn = getScreenerLink(m.sym);
+    
+    m._cur=c; m._pct=pct; m._hit=hit;
+
+    const card='<div class="card"><div class="top"><span class="sym">'+s+screenerBtn+'</span><span class="'+(k||'exp')+'" style="font-weight:700;font-size:16px">'+(pct===null?'n/a':(pct>=0?'+':'')+pct.toFixed(2)+'%')+'</span></div>'
+    +'<div class="tags"><span class="tag'+(m.status=='Holding'?' hold':'')+'">'+m.status+'</span><span class="tag">'+(m.src=='manual'?'Added manually':'From radar')+'</span></div>'
+    +resLine(m.sym)
+    +'<div class="exp">'+since+'.<br>Latest price: <b>'+(c?fmt(c.p):'n/a')+'</b>'+(c?' ('+esc(c.d)+')':'')+pl+'</div>'
+    +'<div class="nums"><div class="n"><small>Entry</small><b>'+nz(m.entry)+'</b></div>'
+    +'<div class="n stop"><small>Stop-loss</small><b>'+nz(m.stop)+'</b></div>'
+    +'<div class="n tgt"><small>Target</small><b>'+nz(m.target)+'</b></div></div>'
+    +below
+    +'<div class="btns">'+btn('det',OPEN[m.sym]?'Hide details':'Red flags &amp; events')
+    +btn('edit','Edit levels')
+    +(m.status=='Watching'?btn('hold','Mark as Holding'):btn('watch','Back to Watching'))
+    +btn('price','Update price')+btn('rm','Remove')+'</div>'
+    +(OPEN[m.sym]?mineDetails(m):'')
+    +(c&&CH&&CH[m.sym]?chartOnly(lv):'')
+    +'</div>';
+
+    return {sym:m.sym, cells:rowCells('mine',m,null), card:card};
+  });
+
+  renderItems('list_mine','mine',items,HDR_MINE,'Nothing here yet. Tap "&#9734; Watch" on a radar card.');
+  const hold=arr.filter(m=>m.status=='Holding').length, watch=arr.length-hold;
+  const avg=pcts.length?pcts.reduce((a,b)=>a+b,0)/pcts.length:null;
+  const box=(l,v,c)=>'<div class="st"><small>'+l+'</small><b class="'+(c||'')+'">'+v+'</b></div>';
+  $('nstats').innerHTML=box('Holding',hold)+box('Watching',watch)+box('Average change',avg===null?'n/a':(avg>=0?'+':'')+avg.toFixed(2)+'%',avg===null?'':(avg>=0?'pos':'neg'));
+  $('meta').textContent='My Stocks | saved in this browser only | '+arr.length+' stocks';
+}
+
+function addFromCard(btn){
+  const sym=btn.getAttribute('data-s');
+  const r=(DATA[cur]||[]).find(x=>x.Symbol==sym);
+  if(!r) return;
+  const arr=loadMine();
+  if(arr.some(x=>x.sym==sym)){alert(sym+' is already in My Stocks.');return;}
+  const price=has(r.Close)?+r.Close:+r.Entry;
+  arr.push({sym:sym,status:'Watching',src:cur,addDate:r.Date||todayISO(),addPrice:price,
+    entry:has(r.Entry)?+r.Entry:null,stop:has(r.Stop)?+r.Stop:null,target:has(r.Target)?+r.Target:null});
+  saveMine(arr);
+  updTab();
+  redrawCur();
+}
+
+function addManual(){
+  const sym=$('nsym').value.trim().toUpperCase();
+  if(!sym){alert('Enter an NSE symbol first.');return;}
+  const arr=loadMine();
+  if(arr.some(x=>x.sym==sym)){alert(sym+' is already in My Stocks.');return;}
+  const num=s=>{s=String(s).trim();if(s==='')return null;const v=+s;return(isFinite(v)&&v>0)?v:NaN;};
+  let price=num($('nprice').value),en=num($('nentry').value),st=num($('nstop').value),tg=num($('ntarget').value);
+  const r=findRow(sym);
+  const c=curPrice({sym:sym});
+  if(r){
+    if(en===null&&has(r.Entry)) en=+r.Entry;
+    if(st===null&&has(r.Stop)) st=+r.Stop;
+    if(tg===null&&has(r.Target)) tg=+r.Target;
+  }
+  let date=todayISO();
+  if(price===null&&c){price=c.p;date=c.d;}
+  if(price===null){alert('Please enter current price.');return;}
+  const stat=$('nstat').value;
+  const effectiveBuy = (en !== null && en > 0) ? en : price;
+  const m={sym:sym,status:stat,src:'manual',addDate:date,addPrice:effectiveBuy,entry:en,stop:st,target:tg};
+  if(stat=='Holding'){m.buyPrice=effectiveBuy;m.holdDate=todayISO();m.qty=null;}
+  arr.push(m);
+  saveMine(arr);
+  ['nsym','nprice','nentry','nstop','ntarget'].forEach(i=>{$(i).value='';});
+  drawMine();
+}
+
+function mineAct(btn,act){
+  const sym=btn.getAttribute('data-s');
+  let arr=loadMine();
+  const m=arr.find(x=>x.sym==sym);
+  if(!m) return;
+  const ask=(label,v)=>{
+    const s=prompt(label+' (leave empty to keep)',v==null?'':v);
+    if(s===null||String(s).trim()==='') return v;
+    const x=+s;
+    return(isFinite(x)&&x>0)?x:v;
+  };
+  if(act=='det'){OPEN[sym]=!OPEN[sym];}
+  else if(act=='rm'){
+    if(!confirm('Remove '+sym+' from My Stocks?')) return;
+    arr=arr.filter(x=>x.sym!=sym);
+  }
+  else if(act=='edit'){
+    m.entry=ask('Entry price',m.entry);
+    m.stop=ask('Stop-loss price',m.stop);
+    m.target=ask('Target price',m.target);
+  }
+  else if(act=='hold'){
+    const c=curPrice(m);
+    const def=c?c.p:m.addPrice;
+    const b=prompt('Your actual buy price for '+sym+'?',def);
+    if(b===null) return;
+    const bv=+b;
+    if(!isFinite(bv)||bv<=0){alert('Enter a valid price.');return;}
+    const q=prompt('Quantity bought (optional)','');
+    m.status='Holding';m.buyPrice=bv;m.holdDate=todayISO();
+    m.qty=(q&&isFinite(+q)&&+q>0)?+q:null;
+  }
+  else if(act=='watch'){
+    m.status='Watching';delete m.buyPrice;delete m.holdDate;delete m.qty;
+  }
+  else if(act=='price'){
+    const c=curPrice(m);
+    const p=prompt('Latest price for '+sym,c?c.p:'');
+    if(p===null) return;
+    const pv=+p;
+    if(!isFinite(pv)||pv<=0){alert('Enter a valid price.');return;}
+    m.lastPrice=pv;m.lastDate=todayISO();
+  }
+  saveMine(arr);
+  drawMine();
+}
+
 function syncMinePrices(){
   const arr = loadMine();
   if(!arr || !arr.length) return;
