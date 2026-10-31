@@ -2972,13 +2972,7 @@ function exportToExcel(){
       const mt = typeof getMultiTargets === 'function' ? getMultiTargets(r) : {t1: r.target, t2: r.target, t3: r.target};
       csv += [r.sym, r.status || 'Watching', buyP, curP, r.entry || 'n/a', r.stop || 'n/a', (mt.t1?mt.t1.toFixed(2):'n/a'), (mt.t2?mt.t2.toFixed(2):'n/a'), (mt.t3?mt.t3.toFixed(2):'n/a'), pct + '%', '"' + trailAlert + '"', trailStop].join(',') + '\n';
     });
-    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.setAttribute('download', filename);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+    document.body.removeChild(link);
 }
 
 function drawTurnaround(){
@@ -3049,6 +3043,7 @@ function drawTurnaround(){
 
   $('meta').textContent = 'Quarterly Turnaround & Growth | మొత్తం ' + rows.length + ' లో ' + list.length + ' స్టాక్స్ చూపిస్తున్నాం';
 }
+
 function exportTurnaroundToCSV(){
   const rows = DATA.turnaround || [];
   if(!rows.length){
@@ -3067,7 +3062,6 @@ function exportTurnaroundToCSV(){
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-}
 }
 </script>
 </body>
