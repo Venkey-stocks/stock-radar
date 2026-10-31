@@ -229,10 +229,9 @@ for scan, f in LONG.items():
         s_type, s_asm, s_gsm = get_surv_info(r)
 
         risk = max(0.1, entry - stop)
-    risk = max(0.1, entry - stop)
         t1 = fnum(r.get("Target1")) or round(entry + 1.2 * risk, 2)
         t2 = fnum(r.get("Target2")) or round(target, 2)
-        t3 = fnum(r.get("Target3")) or round(entry + 4.5 * risk, 2)
+        t3 = fnum(r.get("Target3")) or round(max(entry + 4.5 * risk, t2 + 1.5 * risk), 2)
 
         add.append({"Scan": scan, "Date": date, "Symbol": sym, "Status": LABEL[scan],
                     "Class": "", "Band": r.get("Band", ""), "Score": fnum(r.get("Score")),
