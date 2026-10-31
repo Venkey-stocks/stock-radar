@@ -416,6 +416,25 @@ rej_cols = ["Date", "Symbol", "Status", "Close", "Entry", "Stop", "StopTight",
             "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason", "Surveillance"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
+# ---------- డూప్లికేట్ నివారణ లాజిక్ (Radar vs Excluded) ----------
+# 1. ఈ అల్ట్రా స్కాన్ లో సెలెక్ట్ అయిన రాడార్ స్టాక్స్ సింబల్స్
+selected_syms = set(out["Symbol"].dropna().astype(str).str.upper().tolist())
+
+# 2. ఇతర రాడార్ ఫైల్స్ (short_term, early_movers) ఉంటే వాటి సింబల్స్ కూడా జోడించడం
+for other_radar_file in ["data/short_term.csv", "data/early_movers.csv"]:
+    if os.path.exists(other_radar_file):
+        try:
+            odf = pd.read_csv(other_radar_file)
+            if "Symbol" in odf.columns:
+                selected_syms.update(odf["Symbol"].dropna().astype(str).str.upper().tolist())
+        except Exception:
+            pass
+
+# 3. రాడార్ లో సెలెక్ట్ అయిన ఏ ఒక్క స్టాక్ కూడా ఎక్స్‌క్లూడెడ్ జాబితాలో ఉండకూడదు
+rej_out["Symbol_Clean"] = rej_out["Symbol"].astype(str).str.upper()
+rej_out = rej_out[~rej_out["Symbol_Clean"].isin(selected_syms)].drop(columns=["Symbol_Clean"])
+
+# ---------- ఫైల్స్ సేవ్ చేయడం ----------
 os.makedirs("data/history", exist_ok=True)
 out.to_csv("data/ultra_short.csv", index=False)
 out.to_csv("data/history/ultra_%s.csv" % date_str, index=False)
