@@ -751,6 +751,25 @@ rej_cols = ["Date", "Symbol", "Status", "Stage", "Horizon", "Close", "Entry", "S
             "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason", "Surveillance"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
+# ---------- డూప్లికేట్ నివారణ లాజిక్ (Radar vs Excluded) ----------
+# 1. ఈ early movers స్కాన్ లో సెలెక్ట్ అయిన స్టాక్స్ సింబల్స్
+selected_syms = set(out["Symbol"].dropna().astype(str).str.upper().tolist())
+
+# 2. Ultra మరియు Short-term ఫైల్స్ లో ఉన్న స్టాక్స్ ని కూడా కలపడం
+for other_radar_file in ["data/ultra_short.csv", "data/short_term.csv"]:
+    if os.path.exists(other_radar_file):
+        try:
+            odf = pd.read_csv(other_radar_file)
+            if "Symbol" in odf.columns:
+                selected_syms.update(odf["Symbol"].dropna().astype(str).str.upper().tolist())
+        except Exception:
+            pass
+
+# 3. రాడార్ లో ఉన్న స్టాక్స్ ఎక్స్‌క్లూడెడ్ ఫైల్ లో లేకుండా ఫిల్టర్ చేయడం
+rej_out["Symbol_Clean"] = rej_out["Symbol"].astype(str).str.upper()
+rej_out = rej_out[~rej_out["Symbol_Clean"].isin(selected_syms)].drop(columns=["Symbol_Clean"])
+
+# ---------- ఫైల్స్ సేవ్ చేయడం ----------
 os.makedirs("data/history", exist_ok=True)
 out.to_csv("data/early_movers.csv", index=False)
 out.to_csv("data/history/early_%s.csv" % date_str, index=False)
