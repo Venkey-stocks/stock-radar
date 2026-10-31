@@ -192,6 +192,7 @@ th{color:var(--mut);font-weight:600}
   <button id="t_miss" onclick="show('miss')">Miss Report</button>
   <button id="t_excl" onclick="show('excl')">Excluded</button>
   <button id="t_sect" onclick="show('sect')">Sectors</button>
+  <button id="t_turnaround" onclick="show('turnaround')">🔄 Quarterly Turnaround</button>
 </div>
 
 <div class="bar" id="viewbar">
@@ -444,6 +445,20 @@ th{color:var(--mut);font-weight:600}
   <div class="wrap"><table id="stable"></table></div>
 </div>
 
+<div id="turnaround" style="display:none">
+  <div class="note">Quarterly Turnaround: కంపెనీల తాజా త్రైమాసిక ఫలితాల ఆధారంగా నష్టం నుండి లాభాల్లోకి వచ్చినవి (Turnaround) మరియు అసాధారణ వృద్ధి కనబరిచిన కంపెనీలు.</div>
+  <div class="bar">
+    <select id="t_filter" onchange="drawTurnaround()">
+      <option value="">అన్ని ఫలితాలు (All)</option>
+      <option value="turnaround">కేవలం టర్నరౌండ్ (Turnaround Only)</option>
+      <option value="growth">హై గ్రోత్ లీడర్లు (Growth Leaders)</option>
+    </select>
+    <button onclick="exportTurnaroundToCSV()" style="margin-left:auto;background:#238636;border-color:#2ea043;font-weight:600">&#128229; Export to Excel</button>
+  </div>
+  <div class="stats" id="t_stats"></div>
+  <div class="wrap"><table id="ttable"></table></div>
+</div>
+
 <div class="foot">
 Data: Yahoo Finance end-of-day prices, scanned automatically after market close. Research aid only, not investment advice.
 </div>
@@ -538,7 +553,7 @@ Data: Yahoo Finance end-of-day prices, scanned automatically after market close.
   </div>
 </div>
 <script>
-const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv'};
+const FILES={ultra:'data/ultra_short.csv',short:'data/short_term.csv',perf:'data/performance.csv',miss:'data/miss_report.csv',multi:'data/multibagger.csv',quality:'data/quality.csv',newl:'data/newlistings.csv',early:'data/early_movers.csv',events:'data/events.csv',results:'data/results_calendar.csv',exul:'data/ultra_rejected.csv',exsh:'data/short_rejected.csv',exnl:'data/newlistings_rejected.csv',exea:'data/early_rejected.csv',smart:'data/smart_money.csv',turnaround:'data/q2_turnaround.csv'};
 const EX_SRC=[['ultra','exul','Ultra'],['short','exsh','Short'],['early','exea','Early Movers'],['newl','exnl','New Listing']];
 const STALE_DAYS=3;
 let cur='ultra',DATA={},EV={};
@@ -2714,7 +2729,7 @@ function drawSect(){
 
 function show(k){
   cur=k;
-  ['ultra','short','early','multi','quality','newl','smart','mine','results','perf','miss','excl','sect'].forEach(x=>{$('t_'+x).className=k==x?'on':'';});
+  ['ultra','short','early','multi','quality','newl','smart','mine','results','perf','miss','excl','sect','turnaround'].forEach(x=>{if($('t_'+x))$('t_'+x).className=k==x?'on':'';});
   const scanTab=(k=='ultra'||k=='short');
   $('viewbar').style.display=(scanTab||k=='early'||k=='multi'||k=='quality'||k=='newl'||k=='mine'||k=='smart')?'flex':'none';
   syncView();
@@ -2723,7 +2738,9 @@ function show(k){
   $('early').style.display=k=='early'?'block':'none';$('multi').style.display=k=='multi'?'block':'none';
   $('quality').style.display=k=='quality'?'block':'none';$('newl').style.display=k=='newl'?'block':'none';
   $('smart').style.display=k=='smart'?'block':'none';$('mine').style.display=k=='mine'?'block':'none';
-  $('results').style.display=k=='results'?'block':'none';$('bar_scan').style.display=scanTab?'flex':'none';
+  $('results').style.display=k=='results'?'block':'none';
+  if($('turnaround')) $('turnaround').style.display=k=='turnaround'?'block':'none';
+  $('bar_scan').style.display=scanTab?'flex':'none';
   $('chg').style.display=scanTab?'block':'none';$('list').style.display=scanTab?'grid':'none';
   if(k=='perf'){drawPerf();return;}
   if(k=='miss'){drawMiss();return;}
@@ -2736,10 +2753,10 @@ function show(k){
   if(k=='smart'){drawSmart();return;}
   if(k=='mine'){drawMine();return;}
   if(k=='results'){drawResults();return;}
+  if(k=='turnaround'){drawTurnaround();return;}
   $('status').innerHTML='<option value="">All status</option>';
   draw();
 }
-
 function checkStale(){
   const box=$('stale');
   const ds=[];
@@ -2773,6 +2790,7 @@ Promise.all([load('ultra'),load('short')])
  .then(()=>load('smart').catch(()=>{DATA.smart=[];}))
  .then(()=>load('events').catch(()=>{DATA.events=[];}))
  .then(()=>load('results').catch(()=>{DATA.results=[];}))
+ .then(()=>load('turnaround').catch(()=>{DATA.turnaround=[];}))
  .then(()=>Promise.all(['exul','exsh','exnl','exea'].map(k=>load(k).catch(()=>{DATA[k]=[];}))))
  .then(()=>loadHist())
  .then(()=>{buildEv();buildNew();buildRes();checkStale();updateDigest();updTab();show('ultra');})
@@ -2955,63 +2973,83 @@ function exportToExcel(){
       csv += [r.sym, r.status || 'Watching', buyP, curP, r.entry || 'n/a', r.stop || 'n/a', (mt.t1?mt.t1.toFixed(2):'n/a'), (mt.t2?mt.t2.toFixed(2):'n/a'), (mt.t3?mt.t3.toFixed(2):'n/a'), pct + '%', '"' + trailAlert + '"', trailStop].join(',') + '\n';
     });
     const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    return;
-  }
-
-  const rows = DATA[tab] || [];
-  if(!rows.length){
-    alert('Download cheyadaniki ee tab lo data ledu!');
-    return;
-  }
-
-  let exportRows = [];
-  if(tab == 'early'){
-    const b = $('yband').value, sg = $('ystage').value, hz = $('yhor').value;
-    exportRows = rows.filter(r => (!b || r.Band == b) && (!sg || r.Stage == sg) && (!hz || r.Horizon == hz));
-  } else if(tab == 'multi'){
-    const b = $('mband2').value, mc = $('mcap').value, sc = $('msector').value;
-    exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc) && (!mc || (+r.MarketCapCr) <= (+mc)));
-  } else if(tab == 'quality'){
-    const b = $('qband_sel').value, sc = $('qsector').value;
-    exportRows = rows.filter(r => (!b || r.Band == b) && (!sc || r.Sector == sc));
-  } else {
-    exportRows = rows;
-  }
-
-  if(!exportRows.length){
-    alert('Filters ki taggattu data ledu!');
-    return;
-  }
-
-  // కాలమ్స్ లో T1, T2, T3 ఉండేలా చేయడం
-  const rawHeaders = Object.keys(exportRows[0]);
-  const headers = [...rawHeaders];
-  if(!headers.includes('Target1')) headers.push('Target1');
-  if(!headers.includes('Target2')) headers.push('Target2');
-  if(!headers.includes('Target3')) headers.push('Target3');
-
-  let csv = headers.join(',') + '\n';
-  exportRows.forEach(r => {
-    const mt = typeof getMultiTargets === 'function' ? getMultiTargets(r) : null;
-    csv += headers.map(h => {
-      let val = r[h];
-      if(h === 'Target1' && (!val || val === '')) val = mt ? mt.t1.toFixed(2) : '';
-      if(h === 'Target2' && (!val || val === '')) val = mt ? mt.t2.toFixed(2) : (r.Target || '');
-      if(h === 'Target3' && (!val || val === '')) val = mt ? mt.t3.toFixed(2) : '';
-      return '"' + (val !== undefined ? String(val).replace(/"/g, '""') : '') + '"';
-    }).join(',') + '\n';
-  });
-
-  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function drawTurnaround(){
+  const rows = DATA.turnaround || [];
+  const flt = $('t_filter') ? $('t_filter').value : '';
+  
+  const list = rows.filter(r => {
+    const isT = String(r.Turnaround || r.is_turnaround || '').toLowerCase() === 'yes';
+    if(flt === 'turnaround' && !isT) return false;
+    if(flt === 'growth' && isT) return false;
+    return true;
+  }).sort((a,b) => (+b.Score || 0) - (+a.Score || 0));
+
+  const tCount = rows.filter(r => String(r.Turnaround || r.is_turnaround || '').toLowerCase() === 'yes').length;
+  const gCount = rows.length - tCount;
+  
+  const box = (lbl, val, cls) => `<div class="st"><small>${lbl}</small><b class="${cls||''}">${val}</b></div>`;
+  if($('t_stats')){
+    $('t_stats').innerHTML = box('మొత్తం ఫలితాలు', rows.length)
+      + box('Turnaround Champions 🟢', tCount, 'pos')
+      + box('Growth Leaders 🚀', gCount, 'pur')
+      + box('చూపిస్తున్నవి', list.length);
+  }
+
+  if($('ttable')){
+    $('ttable').innerHTML = '<tr><th>సింబల్</th><th>రకం</th><th>స్కోర్</th><th>ధర</th><th>సేల్స్ YoY</th><th>ప్రాఫిట్ YoY</th><th>వాల్యూమ్</th><th>విశ్లేషణ / కారణం</th></tr>'
+      + (list.length ? list.map(r => {
+          const isT = String(r.Turnaround || r.is_turnaround || '').toLowerCase() === 'yes';
+          const badge = isT 
+            ? '<span class="status-pill status-green">🟢 Turnaround</span>' 
+            : '<span class="status-pill status-purple">🚀 Growth Leader</span>';
+          
+          const screener = getScreenerLink(r.Symbol);
+          const score = r.Score || '-';
+          const px = r.Close ? 'Rs ' + fmt(r.Close) : '-';
+          const sYoY = has(r.SalesYoY) ? (parseFloat(r.SalesYoY) >= 0 ? '+' : '') + r.SalesYoY + '%' : '-';
+          const pYoY = has(r.ProfitYoY) ? (parseFloat(r.ProfitYoY) >= 0 ? '+' : '') + r.ProfitYoY + '%' : '-';
+          const vol = r.VolRatio ? r.VolRatio + 'x' : '-';
+          const reason = r.Reason || r.Reasons || 'Strong quarterly results';
+
+          return `<tr>
+            <td><b>${esc(r.Symbol)}</b>${screener}</td>
+            <td>${badge}</td>
+            <td><b>${score}</b></td>
+            <td>${px}</td>
+            <td class="${parseFloat(r.SalesYoY)>=0?'pos':'neg'}"><b>${sYoY}</b></td>
+            <td class="${parseFloat(r.ProfitYoY)>=0?'pos':'neg'}"><b>${pYoY}</b></td>
+            <td>${vol}</td>
+            <td style="color:var(--mut);font-size:12px;">${esc(reason)}</td>
+          </tr>`;
+        }).join('') : '<tr><td colspan="8">ఎటువంటి రికార్డులు లభించలేదు.</td></tr>');
+  }
+
+  $('meta').textContent = 'Quarterly Turnaround & Growth | మొత్తం ' + rows.length + ' లో ' + list.length + ' స్టాక్స్ చూపిస్తున్నాం';
+}
+
+function exportTurnaroundToCSV(){
+  const rows = DATA.turnaround || [];
+  if(!rows.length){
+    alert('Export చేయడానికి టర్నరౌండ్ డేటా లేదు!');
+    return;
+  }
+  const headers = Object.keys(rows[0]);
+  let csv = headers.join(',') + '\n';
+  rows.forEach(r => {
+    csv += headers.map(h => '"' + (r[h] !== undefined ? String(r[h]).replace(/"/g, '""') : '') + '"').join(',') + '\n';
+  });
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute('download', 'Quarterly_Turnaround_' + new Date().toISOString().slice(0,10) + '.csv');
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
