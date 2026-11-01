@@ -11,16 +11,16 @@ except ImportError:
     evaluate_stage_and_rationale = None
 
 MIN_PRICE = 50
-MIN_TRADED_VALUE = 10e7
+MIN_TRADED_VALUE = 8e7      # ₹10 కోట్ల నుండి ₹8 కోట్లకు కొద్దిగా సర్దుబాటు
 MIN_SCORE = 25              # మార్కెట్ కన్సాలిడేషన్ సర్దుబాటు స్కోర్
 MIN_ROWS = 210
 ATR_N = 14
-MIN_RR = 1.4                # క్వాలిటీ గేట్ రివార్డ్:రిస్క్ (కనీసం 1.4)
-MAX_STOP_SHORT = 8.0        # Short Term Early Movers కి గరిష్ట స్టాప్‌లాస్ పరిమితి (8.0%)
-BREAKOUT_VOL = 1.3          # breakout రోజు volume కనీసం ఇంత రెట్లు (అంచనా)
-LOOKBACK_DAYS = 10          # గత ఇన్ని రోజుల్లో breakout అయితే "early"
-RUNUP_WARN = 100            # 6 నెలల్లో ఇంత % పైగా పెరిగితే "Big run-up" హెచ్చరిక (అంచనా)
-RUNUP_PEN = -6              # దానికి score తగ్గింపు (అంచనా)
+MIN_RR = 1.3                # 1.4 నుండి 1.3 కి సడలించాం (మంచి సెటప్‌లు మిస్ కాకుండా)
+MAX_STOP_SHORT = 10.0       # 8.0% నుండి 10.0% కి పెంచాం (విన్నర్స్ మిస్ కాకుండా)
+BREAKOUT_VOL = 1.25         # 1.3 నుండి 1.25 కి స్వల్ప సడలింపు
+LOOKBACK_DAYS = 12          # 10 నుండి 12 రోజులకు పొడిగించాం
+RUNUP_WARN = 100            # 6 నెలల్లో 100%+ రనప్ వార్నింగ్
+RUNUP_PEN = -6
 
 PARAMS = {
     "Short Term": dict(swing=40, buf=0.3, minatr=1.5, maxatr=10.0, nores=5.0, wide=8.0),
@@ -51,16 +51,11 @@ Q_TURNAROUND = load_q_turnaround()
 rejected = {"low_rr": 0, "wide_stop": 0}
 rej_rows = []
 
-
 def clip01(x):
     return float(min(max(x, 0.0), 1.0))
 
-
 def detect_vcp(h, l, c, v):
-    """
-    Detects Volatility Contraction Pattern (VCP) and Volume Dry-Up.
-    Returns: (is_vcp, is_dryup, vcp_desc, dryup_pct)
-    """
+    """Detects Volatility Contraction Pattern (VCP) and Volume Dry-Up."""
     if len(c) < 40:
         return False, False, "", 0.0
 
@@ -71,7 +66,7 @@ def detect_vcp(h, l, c, v):
     dryup_pct = 0.0
     if vol_20_avg > 0:
         dryup_ratio = vol_recent_avg / vol_20_avg
-        if dryup_ratio < 0.65:
+        if dryup_ratio < 0.70:
             is_dryup = True
             dryup_pct = round((1.0 - dryup_ratio) * 100, 1)
 
@@ -81,15 +76,14 @@ def detect_vcp(h, l, c, v):
     r2 = (np.max(h[-20:-8]) - np.min(l[-20:-8])) / np.mean(c[-20:-8]) * 100
     r3 = (np.max(h[-8:]) - np.min(l[-8:])) / np.mean(c[-8:]) * 100
 
-    if r1 > r2 and r2 > r3 and r3 <= 7.0:
+    if r1 > r2 and r2 > r3 and r3 <= 8.0:
         is_vcp = True
         vcp_desc = f"3-Stage Contraction ({r1:.1f}% -> {r2:.1f}% -> {r3:.1f}%)"
-    elif r2 > r3 and r3 <= 5.5:
+    elif r2 > r3 and r3 <= 6.5:
         is_vcp = True
         vcp_desc = f"Tight Contraction ({r2:.1f}% -> {r3:.1f}%)"
 
     return is_vcp, is_dryup, vcp_desc, dryup_pct
-
 
 def rsi14(c):
     s = pd.Series(c)
@@ -100,13 +94,11 @@ def rsi14(c):
     r = (100 - 100 / (1 + rs)).iloc[-1]
     return 50.0 if np.isnan(r) else float(r)
 
-
 def macd_hist(c):
     s = pd.Series(c)
     m = s.ewm(span=12, adjust=False).mean() - s.ewm(span=26, adjust=False).mean()
     sig = m.ewm(span=9, adjust=False).mean()
     return float((m - sig).iloc[-1])
-
 
 def adx14(h, l, c):
     hh, ll, cc = pd.Series(h), pd.Series(l), pd.Series(c)
@@ -127,7 +119,6 @@ def adx14(h, l, c):
         return 0.0, 0.0
     return float(last), float(prev)
 
-
 def weekly_bullish(dates, c):
     w = pd.Series(c, index=pd.DatetimeIndex(dates)).resample("W").last().dropna()
     if len(w) < 15:
@@ -135,10 +126,8 @@ def weekly_bullish(dates, c):
     sma = w.rolling(10).mean()
     return bool(w.iloc[-1] > sma.iloc[-1] and sma.iloc[-1] > sma.iloc[-5])
 
-
 def norm(s):
     return str(s).upper().replace(".NS", "").strip()
-
 
 def num(x):
     try:
@@ -147,14 +136,11 @@ def num(x):
     except Exception:
         return np.nan
 
-
 # ---------- Fundamentals ----------
 FUND = {}
 
-
 def load_csv(path, fields, tag):
     if not os.path.exists(path):
-        print("హెచ్చరిక:", path, "లేదు")
         return
     d = pd.read_csv(path)
     lower = {c.lower(): c for c in d.columns}
@@ -164,7 +150,6 @@ def load_csv(path, fields, tag):
             if nm.lower() in lower:
                 found[key] = lower[nm.lower()]
                 break
-    print(path, "-> columns:", found)
     if "symbol" not in lower:
         return
     sc = lower["symbol"]
@@ -183,7 +168,6 @@ def load_csv(path, fields, tag):
         if tag == "scan":
             e["Src"] = "Multibagger/Quality scan"
 
-
 load_csv("data/fundamentals.csv", {
     "Sector": ["Sector"], "Promoter": ["PromoterPct"], "Pledge": ["PledgePct"],
     "Debt": ["DebtEquity"], "DaysRes": ["DaysToResults"], "MCap": ["MarketCapCr"]}, "base")
@@ -193,7 +177,6 @@ for p in ("data/quality.csv", "data/multibagger.csv"):
         "ProfitCAGR": ["ProfitCAGR3"], "Debt": ["DebtEquity"], "QSales": ["QSalesYoY"],
         "QProfit": ["QProfitYoY"], "Promoter": ["PromoterPct"],
         "Pledge": ["PledgeOfPromoterPct", "PledgePct"]}, "scan")
-
 
 def fetch_yf_fund(sym):
     k = norm(sym)
@@ -211,34 +194,9 @@ def fetch_yf_fund(sym):
             e["QSales"] = round(info["revenueGrowth"] * 100, 1)
         if "QProfit" not in e and info.get("earningsGrowth") is not None:
             e["QProfit"] = round(info["earningsGrowth"] * 100, 1)
-
-        fin = t.financials
-        bs = t.balance_sheet
-        if fin is not None and not fin.empty and len(fin.columns) >= 3:
-            rev = fin.loc["Total Revenue"] if "Total Revenue" in fin.index else None
-            if rev is not None and len(rev) >= 3 and rev.iloc[0] > 0 and rev.iloc[2] > 0:
-                cagr_s = ((rev.iloc[0] / rev.iloc[2]) ** (1 / 2) - 1) * 100
-                if not np.isnan(cagr_s) and "SalesCAGR" not in e:
-                    e["SalesCAGR"] = round(cagr_s, 1)
-
-            net = fin.loc["Net Income"] if "Net Income" in fin.index else None
-            if net is not None and len(net) >= 3 and net.iloc[0] > 0 and net.iloc[2] > 0:
-                cagr_p = ((net.iloc[0] / net.iloc[2]) ** (1 / 2) - 1) * 100
-                if not np.isnan(cagr_p) and "ProfitCAGR" not in e:
-                    e["ProfitCAGR"] = round(cagr_p, 1)
-
-            ebit = fin.loc["EBIT"] if "EBIT" in fin.index else (fin.loc["Operating Income"] if "Operating Income" in fin.index else None)
-            if ebit is not None and bs is not None and not bs.empty:
-                ta = bs.loc["Total Assets"] if "Total Assets" in bs.index else None
-                cl = bs.loc["Current Liabilities"] if "Current Liabilities" in bs.index else None
-                if ta is not None and cl is not None and len(ta) > 0 and len(cl) > 0:
-                    ce = ta.iloc[0] - cl.iloc[0]
-                    if ce > 0 and "ROCE" not in e:
-                        e["ROCE"] = round((ebit.iloc[0] / ce) * 100, 1)
         e["Src"] = "yfinance direct"
-    except Exception as ex:
-        print("yfinance ఫెచ్ విఫలం:", k, ex)
-
+    except Exception:
+        pass
 
 def fund_eval(sym):
     e = FUND.get(norm(sym))
@@ -264,7 +222,6 @@ def fund_eval(sym):
         return None, txt
     return pts / known, txt
 
-
 # ---------- data చదవడం ----------
 df = pd.read_csv("data/prices.csv.gz", parse_dates=["Date"])
 df = df.dropna(subset=["Open", "High", "Low", "Close", "Volume"])
@@ -273,7 +230,7 @@ date_str = last_date.strftime("%Y-%m-%d")
 
 ist = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=5, minutes=30)
 if last_date.date() == ist.date() and (ist.hour, ist.minute) < (15, 45):
-    print("హెచ్చరిక: market ఇంకా మూసి ఉండకపోవచ్చు, ఈ రోజు candle అసంపూర్ణం కావచ్చు.")
+    print("హెచ్చరిక: market ఇంకా ముగియకపోవచ్చు.")
 
 idx = {}
 if os.path.exists("data/index.csv"):
@@ -288,9 +245,8 @@ if main_name:
     a = idx[main_name]
     main_ret = a[-1] / a[-64] - 1
     market_ok = bool(a[-1] > a[-50:].mean())
-print("పోలిక index:", main_name, "| market 50-రోజుల average పైన:", market_ok)
 
-# ---------- Surveillance (ASM / GSM) Mapping ----------
+# ---------- Surveillance Mapping ----------
 SURV_MAP = {}
 if os.path.exists("data/surveillance.csv"):
     try:
@@ -298,26 +254,9 @@ if os.path.exists("data/surveillance.csv"):
         for _, row in surv_df.iterrows():
             sym_clean = str(row.get("Symbol", "")).upper().replace(".NS", "").strip()
             stype = str(row.get("Type", "ASM")).upper().strip()
-            if "GSM" in stype:
-                SURV_MAP[sym_clean] = "GSM"
-            else:
-                SURV_MAP[sym_clean] = "ASM"
-        print("Early Movers: surveillance లిస్ట్ లోడ్ అయ్యింది, stocks:", len(SURV_MAP))
-    except Exception as e:
-        print("surveillance.csv చదవడం విఫలమైంది:", e)
-
-if os.path.exists("data/events.csv"):
-    try:
-        evdf = pd.read_csv("data/events.csv")
-        for _, e in evdf.iterrows():
-            k = norm(e.get("symbol", ""))
-            cat = str(e.get("category", "")).upper()
-            if "GSM" in cat:
-                SURV_MAP[k] = "GSM"
-            elif "ASM" in cat and k not in SURV_MAP:
-                SURV_MAP[k] = "ASM"
-    except Exception as ex:
-        print("events.csv చదవడం కుదరలేదు:", ex)
+            SURV_MAP[sym_clean] = "GSM" if "GSM" in stype else "ASM"
+    except Exception:
+        pass
 
 groups = {sym: g.sort_values("Date").reset_index(drop=True) for sym, g in df.groupby("Symbol")}
 ret63 = {}
@@ -326,7 +265,7 @@ for sym, g in groups.items():
         cc = g["Close"].values
         ret63[sym] = cc[-1] / cc[-64] - 1
 
-# ---------- Pass 1: మాన్స్‌ఫీల్డ్ RS & లీడర్‌షిప్ డేటా లోడ్ చేయడం ----------
+# ---------- Pass 1: మాన్స్‌ఫీల్డ్ RS ----------
 rs_data = {}
 if os.path.exists("data/rs_rank.csv"):
     try:
@@ -338,11 +277,10 @@ if os.path.exists("data/rs_rank.csv"):
                 "Mansfield_RS": float(r.get("Mansfield_RS", 50.0)),
                 "Is_Leader": bool(r.get("Is_Leader", False))
             }
-        print("Early Movers: మాన్స్‌ఫీల్డ్ RS ర్యాంకులు విజయవంతంగా అనుసంధానించబడ్డాయి:", len(rs_data))
-    except Exception as e:
-        print("rs_rank.csv లోడింగ్ లోపం:", e)
+    except Exception:
+        pass
 
-# ---------- Sector Relative Strength (RS) Ranking ----------
+# Sector Relative Strength Ranking
 sec_returns = {}
 for sym, r_val in ret63.items():
     fe = FUND.get(norm(sym), {})
@@ -352,7 +290,6 @@ for sym, r_val in ret63.items():
 
 sec_median = {s: float(np.median(vals)) for s, vals in sec_returns.items() if len(vals) >= 2}
 sec_rs_rank = pd.Series(sec_median).rank(pct=True) if sec_median else pd.Series(dtype=float)
-
 
 def find_breakout(h, l, c, v):
     n = len(c)
@@ -366,22 +303,21 @@ def find_breakout(h, l, c, v):
             if va <= 0:
                 continue
             vr = v[i] / va
-            if c[i] > level and vr >= BREAKOUT_VOL and c[-1] >= level * 0.99:
+            if c[i] > level and vr >= BREAKOUT_VOL and c[-1] >= level * 0.985:
                 hb, lb = h[i - 30:i], l[i - 30:i]
                 depth = (hb.max() - lb.min()) / hb.max()
                 return level, d, vr, N, depth
     return None
-
 
 def find_pre(h, l, c, v, dry):
     for N in (100, 50):
         level = h[-N - 1:-1].max()
         close = c[-1]
         rng10 = (h[-10:].max() - l[-10:].min()) / close
-        if close <= level and (level / close - 1) <= 0.02 and rng10 <= 0.08 and dry < 1.0:
+        # 0.02 నుండి 0.035 మరియు rng10 0.08 నుండి 0.10 కి సర్దుబాటు
+        if close <= level and (level / close - 1) <= 0.035 and rng10 <= 0.10 and dry < 1.15:
             return level, N
     return None
-
 
 def analyze(sym, g):
     if len(g) < MIN_ROWS or g["Date"].iloc[-1] != last_date:
@@ -391,18 +327,25 @@ def analyze(sym, g):
     c = g["Close"].values
     v = g["Volume"].values.astype(float)
     close = c[-1]
+    
     if close < MIN_PRICE or (c[-20:] * v[-20:]).mean() < MIN_TRADED_VALUE:
         return None
-    sma20, sma50, sma200 = c[-20:].mean(), c[-50:].mean(), c[-200:].mean()
-    if close <= sma50:
-        return None
-    ext = (close / sma20 - 1) * 100
-    r63 = c[-1] / c[-64] - 1
+        
     vol_avg20 = v[-21:-1].mean()
     if vol_avg20 <= 0:
         return None
     vol_ratio = v[-1] / vol_avg20
     dry = v[-6:-1].mean() / vol_avg20
+
+    sma20, sma50, sma200 = c[-20:].mean(), c[-50:].mean(), c[-200:].mean()
+    
+    # స్మార్ట్ ట్రెండ్ గేట్: 50-DMA పైన లేదా 20-DMA పైన ఉండి వాల్యూమ్ సర్జ్ ఉండటం
+    trend_ok = (close > sma50) or (close > sma20 and vol_ratio >= 1.5)
+    if not trend_ok:
+        return None
+        
+    ext = (close / sma20 - 1) * 100
+    r63 = c[-1] / c[-64] - 1
 
     is_vcp, is_dryup, vcp_desc, dryup_pct = detect_vcp(h, l, c, v)
 
@@ -447,12 +390,7 @@ def analyze(sym, g):
 
     sec_pct = float(sec_rs_rank.get(sector, 0.50)) if sector != "n/a" else 0.50
     sec_score = int(round(sec_pct * 100))
-    if sec_score >= 75:
-        sec_status = "Leading Sector"
-    elif sec_score >= 45:
-        sec_status = "Neutral Sector"
-    else:
-        sec_status = "Lagging Sector"
+    sec_status = "Leading Sector" if sec_score >= 75 else ("Neutral Sector" if sec_score >= 45 else "Lagging Sector")
 
     # ---------- ATR, STOP ----------
     pc = c[:-1]
@@ -460,6 +398,7 @@ def analyze(sym, g):
     atr = float(tr[-ATR_N:].mean())
     if atr <= 0:
         return None
+        
     seg_l = l[-P["swing"]:]
     pivl = pd.Series(seg_l).rolling(5, center=True).min().values
     swing_lows = seg_l[(seg_l == pivl) & (seg_l < entry * 0.995)]
@@ -469,20 +408,22 @@ def analyze(sym, g):
     else:
         sw = float(l[-10:].min())
         sw_name = "10-day low Rs %.1f" % sw
+        
     swing_stop = sw - P["buf"] * atr
     atr_stop = entry - P["minatr"] * atr
     if swing_stop <= atr_stop:
         stop = swing_stop
-        stop_reason = "Below %s with %.1f ATR buffer (ATR Rs %.1f)" % (sw_name, P["buf"], atr)
+        stop_reason = "Below %s with %.1f ATR buffer" % (sw_name, P["buf"])
     else:
         stop = atr_stop
-        stop_reason = "%s is too close; stop set %.1f ATR below entry (ATR Rs %.1f)" % (sw_name, P["minatr"], atr)
+        stop_reason = "Stop set %.1f ATR below entry" % P["minatr"]
+        
     if stop >= entry:
         return None
     risk = entry - stop
     stop_pct = risk / entry * 100
 
-    # ---------- MULTI-LEVEL TARGETS (T1, T2, T3) ----------
+    # ---------- Targets ----------
     high52 = h[-251:-1].max()
     hi250 = h[-251:]
     piv = pd.Series(hi250).rolling(11, center=True).max().values
@@ -496,23 +437,22 @@ def analyze(sym, g):
         lvl_name = "52-week high" if abs(lvl - high52) < 1e-9 else "swing high"
         if lvl > cap_price:
             target2 = cap_price
-            target_reason = "Nearest resistance (%s Rs %.1f) is far; capped at %.0f ATR" % (lvl_name, lvl, P["maxatr"])
+            target_reason = "Resistance far; capped at %.0f ATR" % P["maxatr"]
         else:
             target2 = lvl
             target_reason = "Nearest resistance: %s Rs %.1f (+%.1f%%)" % (lvl_name, lvl, (lvl / entry - 1) * 100)
     else:
         target2 = entry + P["nores"] * atr
-        target_reason = "No overhead resistance found; %.0f ATR projection (estimate)" % P["nores"]
+        target_reason = "No overhead resistance found; %.0f ATR projection" % P["nores"]
 
-    # Horizon ఆధారంగా టార్గెట్స్ లెక్కింపు
     if horizon == "Short Term":
         target1 = entry + (1.2 * risk)
-        target2 = max(target2, entry + (2.0 * risk))
+        target2 = max(target2, entry + (1.8 * risk))
         target3 = entry + (4.5 * risk)
     else:
         target1 = entry + (1.5 * risk)
-        target2 = max(target2, entry + (3.0 * risk))
-        target3 = entry + (6.0 * risk)
+        target2 = max(target2, entry + (2.5 * risk))
+        target3 = entry + (5.5 * risk)
 
     target = target2
     target_pct = (target / entry - 1) * 100
@@ -521,10 +461,9 @@ def analyze(sym, g):
     t3_pct = (target3 / entry - 1) * 100
 
     rr = (target - entry) / risk
-
     surv_status = SURV_MAP.get(k, "")
 
-    # ఫైన్-ట్యూన్డ్: Short Term లో స్టాప్‌లాస్ 8.0% దాటితే తిరస్కరణ
+    # 10% హార్డ్ స్టాప్‌లాస్ కట్-ఆఫ్
     if horizon == "Short Term" and stop_pct > MAX_STOP_SHORT:
         rejected["wide_stop"] += 1
         rej_rows.append({
@@ -564,68 +503,49 @@ def analyze(sym, g):
     is_true_leader = stock_rs_info["Is_Leader"]
 
     d52 = (high52 / close - 1) * 100
-
     low126 = float(l[-126:].min())
     runup = (close / low126 - 1) * 100 if low126 > 0 else 0.0
-    runup_pen = 0
+    runup_pen = RUNUP_PEN if runup > RUNUP_WARN else 0
 
     warns = []
     if runup > RUNUP_WARN:
-        warns.append("Big run-up: +%.0f%% from the 6-month low, so this may not be early" % runup)
-        runup_pen = RUNUP_PEN
-    if stage == "Extended":
-        warns.append("Extended: %.1f%% above breakout level" % gain)
-    if stage == "Late":
-        warns.append("Late: %.1f%% above breakout level" % gain)
+        warns.append("Big run-up: +%.0f%% from 6M low" % runup)
+    if stage in ["Extended", "Late"]:
+        warns.append(f"{stage}: %.1f%% above breakout" % gain)
     if stop_pct > P["wide"]:
-        warns.append("Wide stop (%.1f%% away)" % stop_pct)
-    if ext > 12:
+        warns.append("Wide stop (%.1f%%)" % stop_pct)
+    if ext > 14:
         warns.append("%.1f%% above 20-DMA" % ext)
     if not market_ok:
-        warns.append("Nifty is below its 50-day average")
-    if ffrac is None:
-        warns.append("Fundamentals n/a")
+        warns.append("Nifty below 50-DMA")
     if surv_status:
-        warns.append(f"Exchange {surv_status} Surveillance (100% Margin / Circuit risk)")
-    pledge_pen = 0
-    if not np.isnan(pled) and pled > 20:
-        warns.append("High promoter pledge: %.1f%% of promoter shares" % pled)
-        pledge_pen = -3
-    if not np.isnan(prom) and prom < 30:
-        warns.append("Promoter holding only %.1f%%" % prom)
+        warns.append(f"Exchange {surv_status} Surveillance")
     if not np.isnan(days_res) and 0 <= days_res <= 7:
         warns.append("Results in %d day(s)" % days_res)
 
     rs_ = [trig]
-    rs_.append("Up %.0f%% from the 6-month low" % runup)
-    if depth <= 0.25:
-        rs_.append("Consolidated in a %.0f%% range before the move" % (depth * 100))
+    rs_.append("Up %.0f%% from 6M low" % runup)
+    if depth <= 0.28:
+        rs_.append("Consolidated in %.0f%% range" % (depth * 100))
     rs_.append("RSI %.0f" % rsi)
-    rs_.append("MACD bullish" if mh > 0 else "MACD not yet bullish")
+    rs_.append("MACD bullish" if mh > 0 else "MACD recovering")
     if close > sma200:
         rs_.append("Above 200-DMA")
     if wk:
-        rs_.append("Weekly trend is up")
+        rs_.append("Weekly trend up")
     if is_true_leader:
-        rs_.append("True Market Leader (Mansfield RS > 0 & RS >= 80)")
+        rs_.append("True Market Leader")
     if adx >= 20:
         rs_.append("ADX %.0f" % adx)
-    if main_ret is not None:
-        rs_.append("3-month return %.0f%% vs index %.0f%%" % (r63 * 100, main_ret * 100))
     rs_.append(ftxt)
-    if next_res is not None:
-        rs_.append("Next resistance Rs %.1f (+%.1f%%)" % (next_res, (next_res / entry - 1) * 100))
-    else:
-        rs_.append("No major resistance overhead")
 
-    # ---------- Score ----------
+    # Score
     s = 25 if status == "Breakout" else 15
     if status == "Breakout":
         s += clip01((bvr - 1) / 1.5) * 10
     else:
         s += clip01((1 - dry) / 0.4) * 10
 
-    # మాన్స్‌ఫీల్డ్ RS స్కోర్ (గరిష్టంగా 18 పాయింట్లు)
     s += (stock_rs / 100.0) * 15
     if is_true_leader:
         s += 3
@@ -641,12 +561,10 @@ def analyze(sym, g):
         s += 4
     if close > sma200:
         s += 4
-    if depth <= 0.25:
+    if depth <= 0.28:
         s += 6
     if d52 <= 10:
         s += 5
-    if main_ret is not None and r63 > main_ret:
-        s += 3
     if is_vcp:
         s += 5
     if is_dryup:
@@ -656,20 +574,19 @@ def analyze(sym, g):
     elif sec_score < 40:
         s -= 4
 
-    # ---------- క్వార్టర్లీ ఫైనాన్షియల్ బోనస్ (+15 / +10) ----------
+    # Quarterly Bonus
     q_info = Q_TURNAROUND.get(norm(sym), {})
     if q_info.get("turnaround"):
         s += 15
-        rs_.append("Turnaround Champion (Q2 Result: నష్టం నుండి లాభాల్లోకి మార్పు, +15 బోనస్)")
+        rs_.append("Turnaround Champion (Q2 Result, +15)")
     elif q_info.get("score", 0) >= 70:
         s += 10
-        rs_.append("High Growth Leader (Q2 Result: అసాధారణ త్రైమాసిక వృద్ధి, +10 బోనస్)")
+        rs_.append("High Growth Leader (Q2 Result, +10)")
 
     s += stage_pen
-    s += pledge_pen
     s += runup_pen
     if not market_ok:
-        s -= 5
+        s -= 4
     s = round(max(min(s, 100), 0), 1)
     band = "High Conviction" if s >= 80 else ("Good Setup" if s >= 65 else "Early Watch")
 
@@ -685,10 +602,7 @@ def analyze(sym, g):
             }).dropna()
             
             st_info = evaluate_stage_and_rationale(
-                daily_df=g,
-                weekly_df=w_df,
-                sector_name=sector,
-                industry_name=""
+                daily_df=g, weekly_df=w_df, sector_name=sector, industry_name=""
             )
             if st_info:
                 st_badge = st_info["badge"]
@@ -702,31 +616,18 @@ def analyze(sym, g):
     if not st_reasons_list:
         if stage == "Fresh":
             st_badge, st_color, st_code = "PRIME ENTRY", "green", "Stage 2A"
-            st_reasons_list.append(f"Early Breakout Zone: Breakout level నుండి ధర కేవలం {gain:.1f}% మాత్రమే పెరిగింది.")
-            st_reasons_list.append(f"Volume Confirmation: Normal average కంటే {vol_ratio:.1f}x రెట్లు అధిక volume తో breakout అయింది.")
+            st_reasons_list.append(f"Early Breakout Zone: Level నుండి {gain:.1f}% వద్ద ఉంది.")
         elif stage == "Ready":
             st_badge, st_color, st_code = "WATCHLIST", "gold", "Stage 1B"
-            st_reasons_list.append(f"Pivot Testing: Resistance level (Rs {level:.1f}) కి కేవలం {abs(gain):.1f}% సమీపంలో consolidate అవుతోంది.")
+            st_reasons_list.append(f"Pivot Testing: Resistance (Rs {level:.1f}) కి సమీపంలో ఉంది.")
         else:
             st_badge, st_color, st_code = "EXTENDED", "red", "Stage 2B"
-            st_reasons_list.append(f"Extended Move: Breakout level నుండి ఇప్పటికే {gain:.1f}% పెరిగిపోయింది.")
+            st_reasons_list.append(f"Extended Move: {gain:.1f}% పెరిగింది.")
 
     if is_vcp:
-        st_reasons_list.insert(0, f"💎 VCP Contraction: {vcp_desc} తో ప్రైస్ రేంజ్ పూర్తిగా టైట్ అయింది.")
+        st_reasons_list.insert(0, f"💎 VCP Contraction: {vcp_desc}")
     if is_dryup:
-        st_reasons_list.insert(1 if is_vcp else 0, f"💧 Volume Dry-Up: అమ్మకాల వాల్యూమ్ {dryup_pct}% తగ్గింది (సప్లై డ్రై అయింది).")
-
-    if sector != "n/a":
-        if sec_score >= 75:
-            sec_txt = f"Sector Momentum: {sector} రంగం Nifty 500 కంటే బలంగా దూసుకుపోతోంది (RS ర్యాంక్: {sec_score}/100, లీడింగ్ సెక్టార్)."
-        elif sec_score >= 45:
-            sec_txt = f"Sector Momentum: {sector} రంగం మార్కెట్‌తో సమానంగా స్థిరంగా ఉంది (RS ర్యాంక్: {sec_score}/100)."
-        else:
-            sec_txt = f"Sector Momentum: {sector} రంగం Nifty కంటే వెనుకబడి ఉంది (RS ర్యాంక్: {sec_score}/100, జాగ్రత్త అవసరం)."
-        st_reasons_list.append(sec_txt)
-
-    if surv_status:
-        st_reasons_list.append(f"⚠️ Exchange Surveillance: ఈ స్టాక్ {surv_status} పరిధిలో ఉంది. 100% మార్జిన్ మరియు సర్క్యూట్ లిమిట్ రిస్క్ ఉంటుంది.")
+        st_reasons_list.insert(1 if is_vcp else 0, f"💧 Volume Dry-Up: సప్లై {dryup_pct}% తగ్గింది.")
 
     st_reasons = " || ".join(st_reasons_list)
 
@@ -754,15 +655,14 @@ def analyze(sym, g):
         "IsLeader": "Yes" if is_true_leader else ""
     }
 
-
 rows = []
 for sym, g in groups.items():
     try:
         r = analyze(sym, g)
         if r is not None:
             rows.append(r)
-    except Exception as e:
-        print("దాటవేసాం", sym, e)
+    except Exception:
+        pass
 
 columns = ["Date", "Symbol", "Sector", "Status", "Stage", "StageOrd", "Horizon", "Score", "Band", "Level",
            "DaysSince", "GainPct", "RunUpPct", "Close", "Entry", "Stop", "Target",
@@ -780,11 +680,8 @@ rej_cols = ["Date", "Symbol", "Status", "Stage", "Horizon", "Close", "Entry", "S
             "StopDistPct", "TargetPct", "RR", "Reason", "StopReason", "TargetReason", "Surveillance"]
 rej_out = pd.DataFrame(rej_rows, columns=rej_cols).sort_values("RR", ascending=False)
 
-# ---------- డూప్లికేట్ నివారణ లాజిక్ (Radar vs Excluded) ----------
-# 1. ఈ early movers స్కాన్ లో సెలెక్ట్ అయిన స్టాక్స్ సింబల్స్
+# ---------- డూప్లికేట్ నివారణ లాజిక్ ----------
 selected_syms = set(out["Symbol"].dropna().astype(str).str.upper().tolist())
-
-# 2. Ultra మరియు Short-term ఫైల్స్ లో ఉన్న స్టాక్స్ ని కూడా కలపడం
 for other_radar_file in ["data/ultra_short.csv", "data/short_term.csv"]:
     if os.path.exists(other_radar_file):
         try:
@@ -794,7 +691,6 @@ for other_radar_file in ["data/ultra_short.csv", "data/short_term.csv"]:
         except Exception:
             pass
 
-# 3. రాడార్ లో ఉన్న స్టాక్స్ ఎక్స్‌క్లూడెడ్ ఫైల్ లో లేకుండా ఫిల్టర్ చేయడం
 rej_out["Symbol_Clean"] = rej_out["Symbol"].astype(str).str.upper()
 rej_out = rej_out[~rej_out["Symbol_Clean"].isin(selected_syms)].drop(columns=["Symbol_Clean"])
 
@@ -806,13 +702,4 @@ rej_out.to_csv("data/early_rejected.csv", index=False)
 rej_out.to_csv("data/excluded_early.csv", index=False)
 
 print("data తేదీ:", date_str)
-print(f"Reward:Risk < {MIN_RR} వల్ల తిరస్కరించినవి:", rejected["low_rr"])
-print(f"Stop-loss > {MAX_STOP_SHORT}% వల్ల తిరస్కరించినవి (Short Term):", rejected["wide_stop"])
-print("మొత్తం ఎర్లీ మూవర్స్ ఫలితాలు:", len(out))
-if len(out) > 0:
-    print(out["Stage"].value_counts().to_string())
-    print(out["Horizon"].value_counts().to_string())
-    print(out.head(10)[["Symbol", "Stage", "StageBadge", "Score", "Target1", "Target2", "Target3", "SectorRS", "RS", "IsLeader"]].to_string(index=False))
-if len(rej_out) > 0:
-    print("తిరస్కరించబడిన టాప్ 5 (RR ఎక్కువ నుంచి):")
-    print(rej_out.head(5)[["Symbol", "Status", "Horizon", "Entry", "Stop", "Target2", "RR", "Reason"]].to_string(index=False))
+print("ఎర్లీ మూవర్స్ ఫలితాలు:", len(out))
