@@ -28,6 +28,26 @@ PARAMS = {
 }
 STAGES = [(3, "Fresh", 0, 0), (8, "Early", -4, 2), (15, "Extended", -10, 3), (9999, "Late", -15, 4)]
 
+def load_q_turnaround():
+    p = 'data/q2_turnaround.csv'
+    if not os.path.exists(p):
+        return {}
+    try:
+        df = pd.read_csv(p)
+        m = {}
+        for _, r in df.iterrows():
+            sym = str(r.get('Symbol', '')).replace('.NS', '').replace('.BO', '').strip().upper()
+            if not sym:
+                continue
+            is_turn = str(r.get('Turnaround', '')).strip().lower() == 'yes'
+            score = float(r.get('Score', 0) or 0)
+            m[sym] = {'turnaround': is_turn, 'score': score}
+        return m
+    except Exception:
+        return {}
+
+Q_TURNAROUND = load_q_turnaround()
+
 rejected = {"low_rr": 0, "wide_stop": 0}
 rej_rows = []
 
@@ -635,6 +655,15 @@ def analyze(sym, g):
         s += 4
     elif sec_score < 40:
         s -= 4
+
+    # ---------- క్వార్టర్లీ ఫైనాన్షియల్ బోనస్ (+15 / +10) ----------
+    q_info = Q_TURNAROUND.get(norm(sym), {})
+    if q_info.get("turnaround"):
+        s += 15
+        rs_.append("Turnaround Champion (Q2 Result: నష్టం నుండి లాభాల్లోకి మార్పు, +15 బోనస్)")
+    elif q_info.get("score", 0) >= 70:
+        s += 10
+        rs_.append("High Growth Leader (Q2 Result: అసాధారణ త్రైమాసిక వృద్ధి, +10 బోనస్)")
 
     s += stage_pen
     s += pledge_pen
