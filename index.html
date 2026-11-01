@@ -2052,6 +2052,13 @@ function draw(){
       vcpTag = '<span class="tag dryup">💧 Vol Dry-up</span>';
     }
 
+    let qBadge = '';
+    if(r.Reasons && r.Reasons.includes('Turnaround Champion')){
+      qBadge = '<span class="tag" style="border-color:#2ea043;color:#3fb950;background:rgba(46,160,67,0.15);font-weight:700;">🟢 Turnaround</span>';
+    } else if(r.Reasons && r.Reasons.includes('High Growth Leader')){
+      qBadge = '<span class="tag" style="border-color:#a371f7;color:#d2a8ff;background:rgba(163,113,247,0.15);font-weight:700;">🚀 Q-Growth</span>';
+    }
+
     const sm = getSurvMeta(r);
     const survBadge = sm ? sm.tag : '';
     const trendBadge = getTrendDaysMeta(r.Symbol, cur);
@@ -2062,6 +2069,7 @@ function draw(){
       '<span class="status-pill status-'+meta.color+'">&#9679; '+meta.badge+'</span>',
       trendBadge,
       vcpTag,
+      qBadge,
       rsBadge,
       survBadge,
       ns.has(r.Symbol)?'NEW today':'',
