@@ -156,7 +156,12 @@ th{color:var(--mut);font-weight:600}
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px;">
   <div>
     <h1 style="margin:0;">Venkey's Stock Radar</h1>
-    <div class="sub" id="meta" style="margin-bottom:0;">Loading...</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:2px;flex-wrap:wrap;">
+  <div class="sub" id="meta" style="margin-bottom:0;">Loading...</div>
+  <span id="data_freshness_badge" style="font-size:11px;padding:2px 8px;border-radius:12px;background:#21262d;color:#8b949e;display:inline-flex;align-items:center;gap:4px;font-weight:600;border:1px solid #30363d;">
+    <span style="height:6px;width:6px;border-radius:50%;background:#8b949e;display:inline-block;"></span> Checking...
+  </span>
+</div>
   </div>
   <div class="search-wrapper" style="margin:0;max-width:320px;">
     <span class="search-icon">&#128269;</span>
@@ -165,6 +170,13 @@ th{color:var(--mut);font-weight:600}
   </div>
 </div>
 <div id="stale"></div>
+  <!-- Auto-Refresh Notification Bar -->
+<div id="new_data_banner" style="display:none;background:#1f6feb22;border:1px solid #388bfd;border-radius:8px;padding:8px 14px;margin-bottom:12px;display:none;align-items:center;justify-content:space-between;color:#58a6ff;font-size:12px;">
+  <div style="display:flex;align-items:center;gap:6px;">
+    <span>⚡ <b>సరికొత్త స్కాన్ పూర్తయింది!</b> తాజా డేటా అందుబాటులో ఉంది.</span>
+  </div>
+  <button onclick="location.reload(true)" style="background:#238636;color:#ffffff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-weight:600;font-size:11px;">ఇప్పుడే రిఫ్రెష్ చేయండి</button>
+</div>
 
 <div class="digest" id="digest_box">
   <div class="digest-head">
@@ -3208,6 +3220,55 @@ function exportTurnaroundToCSV(){
   link.click();
   document.body.removeChild(link);
 }
+  // Data Freshness & Background Auto-Check Logic
+(function setupDataFreshnessTracker() {
+  let initialMarketTime = null;
+
+  function checkFreshness(isInitial = false) {
+    fetch('data/market_health.json?v=' + Date.now())
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+
+        // Auto-refresh alert banner if file updated on GitHub
+        if (d.Generated_At || d.Date) {
+          const currentStamp = d.Generated_At || d.Date;
+          if (isInitial) {
+            initialMarketTime = currentStamp;
+          } else if (initialMarketTime && currentStamp !== initialMarketTime) {
+            const banner = document.getElementById('new_data_banner');
+            if (banner) banner.style.display = 'flex';
+          }
+        }
+
+        // Live Freshness Badge Update
+        const badge = document.getElementById('data_freshness_badge');
+        if (badge && d.Date) {
+          const todayStr = new Date().toISOString().split('T')[0];
+          const isToday = (d.Date === todayStr);
+
+          if (isToday) {
+            badge.style.background = '#23863622';
+            badge.style.borderColor = '#2ea043';
+            badge.style.color = '#3fb950';
+            badge.innerHTML = '<span style="height:6px;width:6px;border-radius:50%;background:#3fb950;box-shadow:0 0 6px #3fb950;display:inline-block;"></span> 🟢 Fresh (Today Close)';
+          } else {
+            badge.style.background = '#d2992222';
+            badge.style.borderColor = '#d29922';
+            badge.style.color = '#e3b341';
+            badge.innerHTML = '<span style="height:6px;width:6px;border-radius:50%;background:#e3b341;display:inline-block;"></span> 🟠 ' + d.Date + ' Close';
+          }
+        }
+      })
+      .catch(() => {});
+  }
+
+  // First check on load
+  checkFreshness(true);
+
+  // Check every 3 minutes silently for background updates
+  setInterval(() => checkFreshness(false), 3 * 60 * 1000);
+})();
 </script>
 </body>
 </html>
