@@ -569,6 +569,39 @@ columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close
            "RSI", "ADX", "Boosters", "High52", "Warning", "Reasons", "Events", "EventAdj",
            "Surveillance", "ASM", "GSM", "RS", "IsLeader"]
 out = pd.DataFrame(rows, columns=columns)
+
+# ---------- Quarterly Turnaround & Growth Scoring Boost ----------
+turnaround_file = "data/q2_turnaround.csv"
+if os.path.exists(turnaround_file) and len(out) > 0:
+    try:
+        df_q = pd.read_csv(turnaround_file)
+        t_champs = set(df_q[df_q["Turnaround"].astype(str).str.upper() == "YES"]["Symbol"].astype(str).str.upper().tolist())
+        g_leaders = set(df_q[(df_q["Turnaround"].astype(str).str.upper() != "YES") & (pd.to_numeric(df_q["Score"], errors='coerce') >= 70)]["Symbol"].astype(str).str.upper().tolist())
+
+        for idx_row, row_val in out.iterrows():
+            sym_clean = str(row_val["Symbol"]).replace(".NS", "").strip().upper()
+            bonus = 0
+            tag = ""
+
+            if sym_clean in t_champs:
+                bonus = 15
+                tag = "Q2 Turnaround Champion (+15)"
+            elif sym_clean in g_leaders:
+                bonus = 10
+                tag = "Q2 High Growth Leader (+10)"
+
+            if bonus > 0:
+                new_score = round(min(100.0, float(row_val["Score"]) + bonus), 1)
+                out.at[idx_row, "Score"] = new_score
+                out.at[idx_row, "Band"] = "High Conviction" if new_score >= 80 else ("Good Setup" if new_score >= 65 else "Early Watch")
+                
+                old_reasons = str(row_val.get("Reasons", ""))
+                out.at[idx_row, "Reasons"] = f"{tag} | {old_reasons}" if old_reasons else tag
+
+        print(f"Quarterly Boost వర్తింపజేయబడింది: {len(t_champs)} Turnarounds, {len(g_leaders)} Growth Leaders ట్రాక్ అయ్యాయి.")
+    except Exception as ex_q:
+        print("హెచ్చరిక: turnaround boost లోపం:", ex_q)
+
 out = out[out["Score"] >= MIN_SCORE].sort_values("Score", ascending=False)
 
 rej_cols = ["Date", "Symbol", "Status", "Class", "Setup", "Close", "Entry", "Stop", "StopTight",
