@@ -436,8 +436,11 @@ th{color:var(--mut);font-weight:600}
       <option value="safe">🛡️ Safe Only (No ASM/GSM)</option>
       <option value="surv">⚠️ ASM / GSM Only</option>
     </select>
-    <select id="prad" onchange="drawPerf()">
-      <option value="">On radar: all</option><option value="still">Still on radar</option><option value="removed">Removed (not on radar now)</option>
+    <select id="prad" onchange="drawPerf()" style="border-color:var(--b);font-weight:600;">
+      <option value="radar_only" selected>On radar: Radar Only (నిజమైన రాడార్)</option>
+      <option value="">On radar: all (మొత్తం + ఎక్స్‌క్లూడెడ్)</option>
+      <option value="still">Still on radar</option>
+      <option value="removed">Removed (not on radar now)</option>
     </select>
     <label>From</label><input type="date" id="pfrom" onchange="drawPerf()">
     <label>To</label><input type="date" id="pto" onchange="drawPerf()">
@@ -2581,7 +2584,12 @@ function drawPerf(){
     if(cl && r.Class!=cl) return false;
     if(f && r.SignalDate<f) return false;
     if(t && r.SignalDate>t) return false;
-    if(rd && (rd=='removed'?r.NowOnRadar=='No':r.NowOnRadar=='Yes')) return false;
+    if(rd === 'radar_only') {
+      const isExcl = String(r.Scan).startsWith('ex') || String(r.Scan).toLowerCase().includes('excl') || String(r.SignalStatus).toLowerCase().includes('excluded');
+      if(isExcl) return false;
+    } else if(rd && (rd=='removed'?r.NowOnRadar=='No':r.NowOnRadar=='Yes')) {
+      return false;
+    }
     if(vcpFilter=='vcp' && !checkVcp(r)) return false;
     
     const isSurv = !!getSurvMeta(r);
@@ -2638,7 +2646,7 @@ function drawPerf(){
 
   window._lastPerfFiltered = displayRows;
     
-  $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Setup</th><th>Score</th><th>Entry</th><th>Stop</th><th>T1 / T2 / T3</th><th>Stage Result</th><th>Exit/Last</th><th>P/L %</th><th>Peak Gain %</th></tr>'
+  $('ptable').innerHTML='<tr><th>Signal date</th><th>Scan</th><th>Stock</th><th>Setup</th><th>Score</th><th>Entry</th><th>Stop</th><th>T1 / T2 / T3</th><th>Stage Result</th><th>Exit/Last</th><th>P/L %</th><th>Peak Gain %</th><th>Whipsaw (Fake SL)</th><th>After Stop Max %</th><th>Days to Tgt</th></tr>'
    +(displayRows.length?displayRows.map(r=>{
      const c=r.PnLPct===''?'':(+r.PnLPct>=0?'pos':'neg');
      let stBadge = r.StageResult || r.Result;
@@ -2665,8 +2673,17 @@ function drawPerf(){
      const t2Txt = r.Target2 ? `<br><small style="color:var(--g)">T2: ${fmt(r.Target2)}</small>` : '';
      const t3Txt = r.Target3 ? `<br><small style="color:var(--p)">T3: ${fmt(r.Target3)}</small>` : '';
 
-     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b>'+screenerBtn+vcpBadge+survBadge+'</td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td><b>'+t1Txt+'</b>'+t2Txt+t3Txt+'</td><td>'+stBadge+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td><td class="'+peakCls+'" style="font-weight:700">'+peakGainTxt+'</td></tr>';
-   }).join(''):'<tr><td colspan="12">ఈ ఫిల్టర్‌కు సరిపోయే సిగ్నల్స్ లేవు.</td></tr>');
+     // కొత్తగా జోడించిన Whipsaw & After Stop ఫీల్డ్స్
+     const isWs = r.Whipsaw === "Yes" || (r.DaysToTargetAfterStop && r.DaysToTargetAfterStop !== "");
+     const wsBadge = isWs ? '<span class="status-pill status-red" style="font-size:10px;">Yes (Fake SL)</span>' : (r.Result === 'Stop hit' ? '<span style="color:var(--mut);">No</span>' : '-');
+     
+     const afterMaxVal = parseFloat(r.AfterStopMaxPct);
+     const hasAfterMax = !isNaN(afterMaxVal) && afterMaxVal > 0;
+     const afterMaxTxt = hasAfterMax ? `<b class="pos">+${afterMaxVal.toFixed(1)}%</b>` : (r.AfterStopMaxPct ? r.AfterStopMaxPct : '-');
+     const daysToTgtTxt = r.DaysToTargetAfterStop ? `${r.DaysToTargetAfterStop}d` : '-';
+
+     return '<tr><td>'+r.SignalDate+'</td><td>'+(SCAN_LBL[r.Scan]||r.Scan)+'</td><td><b>'+r.Symbol+'</b>'+screenerBtn+vcpBadge+survBadge+'</td><td>'+r.SignalStatus+'</td><td>'+r.Score+'</td><td>'+fmt(r.Entry)+'</td><td>'+fmt(r.Stop)+'</td><td><b>'+t1Txt+'</b>'+t2Txt+t3Txt+'</td><td>'+stBadge+'</td><td>'+(r.ExitPrice===''?'-':fmt(r.ExitPrice))+'</td><td class="'+c+'">'+(r.PnLPct===''?'-':r.PnLPct+'%')+'</td><td class="'+peakCls+'" style="font-weight:700">'+peakGainTxt+'</td><td>'+wsBadge+'</td><td>'+afterMaxTxt+'</td><td style="color:var(--mut);">'+daysToTgtTxt+'</td></tr>';
+   }).join(''):'<tr><td colspan="15">ఈ ఫిల్టర్‌కు సరిపోయే సిగ్నల్స్ లేవు.</td></tr>');
    
   const filterLabel = PERF_RESULT_FILTER ? ` [ఫిల్టర్: ${PERF_RESULT_FILTER}]` : '';
   const vcpLabel = vcpFilter === 'vcp' ? ' [💎 VCP Setups Only]' : '';
