@@ -682,18 +682,18 @@ function getQBadge(sym){
   if(!found) return '';
   const isT = String(found.Turnaround||'').toLowerCase() === 'yes';
   if(isT){
-    return '<span class="status-pill status-green" style="font-size:11px;padding:2px 6px;margin-left:4px;">🟢 Turnaround</span>';
+    return '<span class="status-pill status-green" style="font-size:10px;padding:1px 5px;margin-left:4px;font-weight:600;">Turnaround</span>';
   }
   const sc = parseFloat(found.Score) || 0;
   if(sc >= 70){
-    return '<span class="status-pill status-purple" style="font-size:11px;padding:2px 6px;margin-left:4px;">🚀 Q-Growth</span>';
+    return '<span class="status-pill status-purple" style="font-size:10px;padding:1px 5px;margin-left:4px;font-weight:600;">Q-Growth</span>';
   }
   return '';
 }
 function getScreenerLink(sym){
   if(!sym) return '';
   const clean = String(sym).replace('.NS','').replace('.BO','').trim();
-  return `<a href="https://www.screener.in/company/${encodeURIComponent(clean)}/consolidated/" target="_blank" rel="noopener" class="screener-link" onclick="event.stopPropagation()">📊 Screener</a>`;
+  return `<a href="https://www.screener.in/company/${encodeURIComponent(clean)}/consolidated/" target="_blank" rel="noopener" class="screener-link" onclick="event.stopPropagation()" style="font-size:10px;padding:1px 4px;">Screener</a>`;
 }
 
 function getRSBadge(r){
