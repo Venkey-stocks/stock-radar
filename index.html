@@ -83,11 +83,16 @@ label{color:var(--mut);font-size:13px}
 .st b{font-size:17px}
 .pos{color:var(--g)}.neg{color:var(--r)}.amb{color:var(--y)}.pur{color:var(--p)}
 .wrap{overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch}
-table{border-collapse:collapse;font-size:12.5px}
-th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;white-space:nowrap}
-#ptable{width:max-content;min-width:1380px}
-#ptable th,#ptable td{padding:5px 7px}
+table{border-collapse:collapse;font-size:12px}
+th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;white-space:nowrap}
 th{color:var(--mut);font-weight:600}
+
+/* Performance Table Tight Layout (అన్ని కాలమ్స్ ఒకే స్క్రీన్‌పై సరిపోయేలా స్పేసింగ్ ఫిక్స్) */
+#ptable{width:100%;font-size:11.5px;table-layout:auto}
+#ptable th,#ptable td{padding:4px 5px}
+#ptable th:nth-child(3),#ptable td:nth-child(3){max-width:125px;width:125px} /* Stock గ్యాప్ తగ్గించాం */
+#ptable th:nth-child(4),#ptable td:nth-child(4){max-width:75px;width:75px}   /* Setup */
+#ptable th:nth-child(8),#ptable td:nth-child(8){line-height:1.2}              /* Targets */
 .rs{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px}
 .rs div{display:flex;justify-content:space-between;gap:12px;padding:2px 0}
 .fund{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
