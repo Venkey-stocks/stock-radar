@@ -655,7 +655,7 @@ function getTrendDaysMeta(sym, scanType){
       days = Math.max(1, Math.round((today - sigDate) / 86400000) + 1);
     }
   }
-  return `<span class="tag trend">🔄 ${days} trend day${days > 1 ? 's' : ''}</span>`;
+  return `<span class="tag trend" style="font-size:11px;padding:1px 6px">${days}d</span>`;
 }
 
 function syncView(){
@@ -702,10 +702,10 @@ function getRSBadge(r){
   const isLeader = r.IsLeader === 'Yes' || String(r.IsLeader).toLowerCase() === 'true';
   let badges = '';
   if(isLeader){
-    badges += '<span class="tag leader">👑 True Leader</span> ';
+    badges += '<span class="tag leader" title="True Market Leader" style="padding:1px 5px">👑</span> ';
   }
   if(rsVal !== null && !isNaN(rsVal)){
-    badges += `<span class="tag rs">RS ${rsVal.toFixed(0)}</span>`;
+    badges += `<span class="tag rs" style="font-size:11px;padding:1px 5px">RS ${rsVal.toFixed(0)}</span>`;
   }
   return badges;
 }
