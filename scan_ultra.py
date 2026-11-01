@@ -192,6 +192,17 @@ def analyze(sym, g):
         stop = safe_atr_stop
         stop_reason = "Safe stop set %.2f ATR below entry" % (ATR_MIN_STOP + 0.25)
 
+    # ---------- కనీస స్టాప్‌లాస్ రక్షణ (Minimum 5.0% Floor / 1.5 ATR) ----------
+    MIN_STOP_FLOOR_PCT = 5.0
+    min_floor_price = entry * (1 - MIN_STOP_FLOOR_PCT / 100.0)
+    atr_floor_price = entry - (1.5 * atr)
+    protective_floor = min(min_floor_price, atr_floor_price)
+
+    # స్టాప్‌లాస్ 4% లోపు మరీ టైట్‌గా ఉంటే ఫ్లోర్ వద్దకు జరపడం
+    if stop > protective_floor:
+        stop = protective_floor
+        stop_reason = "Min Stop Floor applied (5.0% / 1.5 ATR to prevent whipsaw)"
+
     if stop >= entry:
         return None
     risk = entry - stop
