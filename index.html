@@ -87,12 +87,19 @@ table{border-collapse:collapse;font-size:12px}
 th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;white-space:nowrap}
 th{color:var(--mut);font-weight:600}
 
-/* Performance Table Tight Layout (అన్ని కాలమ్స్ ఒకే స్క్రీన్‌పై సరిపోయేలా స్పేసింగ్ ఫిక్స్) */
-#ptable{width:100%;font-size:11.5px;table-layout:auto}
-#ptable th,#ptable td{padding:4px 5px}
-#ptable th:nth-child(3),#ptable td:nth-child(3){max-width:125px;width:125px} /* Stock గ్యాప్ తగ్గించాం */
-#ptable th:nth-child(4),#ptable td:nth-child(4){max-width:75px;width:75px}   /* Setup */
-#ptable th:nth-child(8),#ptable td:nth-child(8){line-height:1.2}              /* Targets */
+/* Performance Table Compact Full-Fit Layout (15 కాలమ్స్ ఒకే స్క్రీన్‌పై సరిపోయేలా అమరిక) */
+#ptable{width:100%;font-size:11px;table-layout:auto}
+#ptable th,#ptable td{padding:3px 4px}
+#ptable th:nth-child(1),#ptable td:nth-child(1){width:70px} /* Date */
+#ptable th:nth-child(2),#ptable td:nth-child(2){width:72px} /* Scan */
+#ptable th:nth-child(3),#ptable td:nth-child(3){width:105px;max-width:105px} /* Stock */
+#ptable th:nth-child(4),#ptable td:nth-child(4){width:65px}  /* Setup */
+#ptable th:nth-child(5),#ptable td:nth-child(5){width:38px;text-align:center} /* Score */
+#ptable th:nth-child(8),#ptable td:nth-child(8){line-height:1.15;width:68px}  /* Targets */
+#ptable th:nth-child(9),#ptable td:nth-child(9){width:65px}  /* Result */
+#ptable th:nth-child(13),#ptable td:nth-child(13){width:60px} /* Whipsaw */
+#ptable th:nth-child(14),#ptable td:nth-child(14){width:60px} /* Post-Stop */
+#ptable th:nth-child(15),#ptable td:nth-child(15){width:35px;text-align:center} /* Days */
 .rs{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px}
 .rs div{display:flex;justify-content:space-between;gap:12px;padding:2px 0}
 .fund{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
