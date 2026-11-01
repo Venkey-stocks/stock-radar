@@ -1168,7 +1168,8 @@ function rowCells(tab,r,ns){
 
   const sm = getSurvMeta(r);
   const rowSurv = sm ? ` ${sm.tag}` : '';
-  const screenerBtn = getScreenerLink(r.Symbol || r.sym);
+  const qBadge = getQBadge(r.Symbol || r.sym);
+  const screenerBtn = getScreenerLink(r.Symbol || r.sym) + (qBadge ? ' ' + qBadge : '');
   const rsBadge = getRSBadge(r);
 
   if(tab=='smart'){
