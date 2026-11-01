@@ -1,5 +1,5 @@
-TOTAL EVENTS: 1187
-BY CATEGORY: {'Results date': 979, 'Acquisition/Merger': 57, 'Order win': 38, 'Default/Insolvency (warning)': 33, 'Expansion/Production': 28, 'Bulk BUY': 18, 'Auditor change (check)': 14, 'Buyback': 10, 'Block BUY': 7, 'Fund raise (Rights/QIP)': 1, 'Preferential issue': 1, 'Disruption/Suspension (warning)': 1}
+TOTAL EVENTS: 1126
+BY CATEGORY: {'Results date': 927, 'Acquisition/Merger': 58, 'Order win': 33, 'Default/Insolvency (warning)': 33, 'Expansion/Production': 27, 'Bulk BUY': 18, 'Auditor change (check)': 11, 'Buyback': 9, 'Block BUY': 7, 'Fund raise (Rights/QIP)': 1, 'Preferential issue': 1, 'Disruption/Suspension (warning)': 1}
 
 KEPT BUYERS (deals | name)
 3 | SOCIETE GENERALE
