@@ -181,11 +181,12 @@ th{color:var(--mut);font-weight:600}
 
 
 <!-- Ultra-Slim Nifty 500 Market Breadth Strip -->
-<div id="breadth_box" style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:6px 14px;margin-bottom:12px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
-  <div style="flex:1;min-width:240px;display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:22px;">
+<!-- Ultra-Slim Nifty 500 Market Breadth Strip -->
+<div id="breadth_box" style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:8px 16px;margin-bottom:12px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+  <div style="flex:1;min-width:260px;display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:20px;">
     <!-- 20-DMA -->
-    <div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">
+    <div style="padding-right:8px;border-right:1px solid rgba(38,45,56,0.6);">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:4px;">
         <span style="color:#8b96a5;">&gt; 20-DMA (Short)</span>
         <b id="mb_p20_txt" style="color:#e6edf3;">0%</b>
       </div>
@@ -195,8 +196,8 @@ th{color:var(--mut);font-weight:600}
     </div>
 
     <!-- 50-DMA -->
-    <div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">
+    <div style="padding-right:8px;border-right:1px solid rgba(38,45,56,0.6);">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:4px;">
         <span style="color:#8b96a5;">&gt; 50-DMA (Mid)</span>
         <b id="mb_p50_txt" style="color:#e6edf3;">0%</b>
       </div>
@@ -207,7 +208,7 @@ th{color:var(--mut);font-weight:600}
 
     <!-- 200-DMA -->
     <div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:4px;">
         <span style="color:#8b96a5;">&gt; 200-DMA (Trend)</span>
         <b id="mb_p200_txt" style="color:#e6edf3;">0%</b>
       </div>
@@ -217,7 +218,7 @@ th{color:var(--mut);font-weight:600}
     </div>
   </div>
 
-  <div style="font-size:11px;color:#8b96a5;border-left:1px solid #262d38;padding-left:12px;display:flex;gap:12px;align-items:center;white-space:nowrap;" id="mb_adv_dec_box">
+  <div style="font-size:11px;color:#8b96a5;border-left:1px solid #262d38;padding-left:16px;display:flex;gap:14px;align-items:center;white-space:nowrap;" id="mb_adv_dec_box">
     <div>Adv/Dec: <b id="mb_adv_dec" style="color:#e6edf3;">-- / --</b></div>
     <div>52W H/L: <b id="mb_hl" style="color:#e6edf3;">-- / --</b></div>
   </div>
