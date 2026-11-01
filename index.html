@@ -675,7 +675,21 @@ function togRow(h){
   h.classList.toggle('open',o);
   ROWOPEN[k]=o;
 }
-
+function getQBadge(sym){
+  if(!sym || !DATA.turnaround) return '';
+  const s = String(sym).replace('.NS','').replace('.BO','').trim().toUpperCase();
+  const found = DATA.turnaround.find(x => String(x.Symbol||'').replace('.NS','').replace('.BO','').trim().toUpperCase() === s);
+  if(!found) return '';
+  const isT = String(found.Turnaround||'').toLowerCase() === 'yes';
+  if(isT){
+    return '<span class="status-pill status-green" style="font-size:11px;padding:2px 6px;margin-left:4px;">🟢 Turnaround</span>';
+  }
+  const sc = parseFloat(found.Score) || 0;
+  if(sc >= 70){
+    return '<span class="status-pill status-purple" style="font-size:11px;padding:2px 6px;margin-left:4px;">🚀 Q-Growth</span>';
+  }
+  return '';
+}
 function getScreenerLink(sym){
   if(!sym) return '';
   const clean = String(sym).replace('.NS','').replace('.BO','').trim();
