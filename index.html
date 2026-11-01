@@ -3061,97 +3061,24 @@ function exportPerfToCSV() {
 }
 function exportToExcel(){
   const tab = cur;
-  let filename = (tab || 'stocks') + '_export.csv';
-
-  if(tab === 'mine'){
-    const mine = loadMine();
-    if(!mine || !mine.length){
-      alert('My Stocks lo export cheyadaniki data ledu!');
-      return;
-    }
-    filename = 'my_stocks_portfolio.csv';
-    let csv = 'Symbol,Status,Buy Price,Current Price,Entry,Stop Loss,Target 1,Target 2,Target 3,Return %,Trailing Alert,Trailing Stop Level\n';
-    mine.forEach(r => {
-      const c = curPrice({sym: r.sym});
-      const curP = c ? c.p : (r.lastPrice || r.buyPrice || 0);
-      const buyP = r.buyPrice || r.entry || curP;
-      const pct = buyP > 0 ? (((curP - buyP) / buyP) * 100).toFixed(2) : '0.00';
-      const tr = typeof getTrailingAdvice === 'function' ? getTrailingAdvice(r, curP) : null;
-      const trailAlert = tr ? tr.level : 'No Alert';
-      const trailStop = (tr && tr.suggestedStop) ? tr.suggestedStop : (r.stop || 'n/a');
-      const mt = typeof getMultiTargets === 'function' ? getMultiTargets(r) : {t1: r.target, t2: r.target, t3: r.target};
-      csv += [r.sym, r.status || 'Watching', buyP, curP, r.entry || 'n/a', r.stop || 'n/a', (mt.t1?mt.t1.toFixed(2):'n/a'), (mt.t2?mt.t2.toFixed(2):'n/a'), (mt.t3?mt.t3.toFixed(2):'n/a'), pct + '%', '"' + trailAlert + '"', trailStop].join(',') + '\n';
-    });
-    document.body.removeChild(link);
-}
-
-function drawTurnaround(){
-  const rows = DATA.turnaround || [];
-  const flt = $('t_filter') ? $('t_filter').value : '';
-  
-  const list = rows.filter(r => {
-    const tVal = (r['టర్నరౌండ్'] || r.Turnaround || r.is_turnaround || '').toString().toLowerCase();
-    const isT = tVal === 'yes' || tVal === 'అవును' || tVal === 'true';
-    if(flt === 'turnaround' && !isT) return false;
-    if(flt === 'growth' && isT) return false;
-    return true;
-  }).sort((a,b) => (+b.Score || +b['స్కోర్'] || 0) - (+a.Score || +a['స్కోర్'] || 0));
-
-  const tCount = rows.filter(r => {
-    const tVal = (r['టర్నరౌండ్'] || r.Turnaround || r.is_turnaround || '').toString().toLowerCase();
-    return tVal === 'yes' || tVal === 'అవును' || tVal === 'true';
-  }).length;
-  const gCount = rows.length - tCount;
-  
-  const box = (lbl, val, cls) => `<div class="st"><small>${lbl}</small><b class="${cls||''}">${val}</b></div>`;
-  if($('t_stats')){
-    $('t_stats').innerHTML = box('మొత్తం స్టాక్స్', rows.length)
-      + box('Turnaround Champions 🟢', tCount, 'pos')
-      + box('Growth Leaders 🚀', gCount, 'pur')
-      + box('చూపిస్తున్నవి', list.length);
+  let rows = DATA[tab] || [];
+  if(tab === 'mine') rows = loadMine();
+  if(!rows.length){
+    alert('Export చేయడానికి ఈ ట్యాబ్‌లో డేటా లేదు!');
+    return;
   }
-
-  if($('ttable')){
-    $('ttable').innerHTML = '<thead><tr><th>సింబల్</th><th>రకం</th><th>స్కోర్</th><th>ధర</th><th>సేల్స్ YoY</th><th>ప్రాఫిట్ YoY</th><th>వాల్యూమ్</th><th>విశ్లేషణ / కారణం</th></tr></thead><tbody>'
-      + (list.length ? list.map(r => {
-          const tVal = (r['టర్నరౌండ్'] || r.Turnaround || r.is_turnaround || '').toString().toLowerCase();
-          const isT = tVal === 'yes' || tVal === 'అవును' || tVal === 'true';
-          const badge = isT 
-            ? '<span class="status-pill status-green">🟢 Turnaround</span>' 
-            : '<span class="status-pill status-purple">🚀 Growth Leader</span>';
-          
-          const sym = r.Symbol || r.symbol || r['సింబల్'] || '';
-          const screener = typeof getScreenerLink === 'function' ? getScreenerLink(sym) : '';
-          const score = r.Score || r['స్కోర్'] || '-';
-          const closeVal = r.Close || r.Price || r.Entry || r['ధర'] || '';
-          const px = closeVal ? 'Rs ' + fmt(closeVal) : '-';
-          
-          const sVal = r.SalesYoY || r.QSalesYoY || r.SalesGrowth || r['సేల్స్'];
-          const sYoY = has(sVal) ? (parseFloat(sVal) >= 0 ? '+' : '') + sVal + '%' : '-';
-          
-          const pVal = r.ProfitYoY || r.QProfitYoY || r.ProfitGrowth || r['ప్రాఫిట్'];
-          const pYoY = has(pVal) ? (parseFloat(pVal) >= 0 ? '+' : '') + pVal + '%' : '-';
-          
-          const volVal = r.VolRatio || r.VolumeRatio || r['వాల్యూమ్'];
-          const vol = volVal ? volVal + 'x' : '-';
-          
-          const reason = r.Reason || r.Reasons || r['కారణం'] || 'Strong quarterly performance';
-
-          return `<tr>
-            <td><b>${esc(sym)}</b>${screener}</td>
-            <td>${badge}</td>
-            <td><b>${score}</b></td>
-            <td>${px}</td>
-            <td class="${parseFloat(sVal)>=0?'pos':'neg'}"><b>${sYoY}</b></td>
-            <td class="${parseFloat(pVal)>=0?'pos':'neg'}"><b>${pYoY}</b></td>
-            <td>${vol}</td>
-            <td style="color:var(--mut);font-size:12px;">${esc(reason)}</td>
-          </tr>`;
-        }).join('') : '<tr><td colspan="8" style="text-align:center;padding:16px;">ఎటువంటి రికార్డులు లభించలేదు.</td></tr>')
-      + '</tbody>';
-  }
-
-  $('meta').textContent = 'Quarterly Turnaround & Growth | మొత్తం ' + rows.length + ' లో ' + list.length + ' స్టాక్స్ చూపిస్తున్నాం';
+  const headers = Object.keys(rows[0]).filter(k => !k.startsWith('_'));
+  let csv = headers.join(',') + '\n';
+  rows.forEach(r => {
+    csv += headers.map(h => '"' + (r[h] !== undefined ? String(r[h]).replace(/"/g, '""') : '') + '"').join(',') + '\n';
+  });
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute('download', (tab || 'stocks') + '_export_' + new Date().toISOString().slice(0,10) + '.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 function exportTurnaroundToCSV(){
@@ -3172,7 +3099,6 @@ function exportTurnaroundToCSV(){
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  }
 }
 </script>
 </body>
