@@ -4,19 +4,19 @@ import numpy as np
 import pandas as pd
 
 MIN_PRICE = 50              # కనీస ధర
-MIN_TRADED_VALUE = 8e7      # ₹10 కోట్ల నుండి ₹8 కోట్లకు కొద్దిగా సడలించాం (మంచి స్మాల్ క్యాప్స్ కోసం)
+MIN_TRADED_VALUE = 8e7      # ₹8 కోట్లు
 MIN_SCORE = 20              # కనీస స్కోర్
 MIN_ROWS = 70               # కనీసం ఇన్ని రోజుల data ఉండాలి
-MAX_STOP_PCT = 10.0         # 8.0% నుండి 10.0% కి పెంచాం (విన్నర్స్ మిస్ కాకుండా)
+MAX_STOP_PCT = 10.0         # 10.0% గరిష్ట స్టాప్‌లాస్
 
 # ---- Stop / Target (టెక్నికల్) ----
 ATR_N = 14                  # ATR కాలం
 SWING_LOOKBACK = 30         # swing low కోసం గత రోజులు
 ATR_BUFFER = 0.25           # swing low కింద ATR బఫర్
 ATR_MIN_STOP = 1.0          # stop కనీసం ఇన్ని ATR దూరం
-NO_RES_ATR = 3.5            # 3.0 నుండి 3.5 కి సర్దుబాటు
+NO_RES_ATR = 3.5            # overhead resistance లేనప్పుడు ప్రొజెక్షన్
 MAX_TARGET_ATR = 7.0        # target గరిష్టం
-MIN_RR = 1.3                # 1.4 నుండి 1.3 కి సడలించాం
+MIN_RR = 1.3                # కనీస రిస్క్-రివార్డ్
 WIDE_STOP_PCT = 8.0         # 8% దాటితే "Wide stop" హెచ్చరిక
 
 # ---- Event score ----
@@ -41,7 +41,7 @@ date_str = last_date.strftime("%Y-%m-%d")
 
 ist = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=5, minutes=30)
 if last_date.date() == ist.date() and (ist.hour, ist.minute) < (15, 45):
-    print("హెచ్చరిక: market ఇంకా ముగియకపోవచ్చు, ఈ రోజు candle అసంపూర్ణం కావచ్చు.")
+    print(f"హెచ్చరిక: Market ఇంకా నడుస్తోంది ({ist.strftime('%I:%M %p')}). ఈ రోజు candle అసంపూర్ణం కావచ్చు.")
 
 # ---------- Events & Surveillance ----------
 EV = {}
@@ -110,7 +110,7 @@ def analyze(sym, g):
     if (c[-20:] * v[-20:]).mean() < MIN_TRADED_VALUE:
         return None
         
-    # 2 రోజుల ర్యాలీ పరిమితిని 10% నుండి 14% కి సడలించాం
+    # 2 రోజుల ర్యాలీ పరిమితి 14%
     if close / c[-3] - 1 > 0.14:
         return None
 
@@ -133,10 +133,10 @@ def analyze(sym, g):
     contr = rng[-11:-1].mean() / rng[-51:-1].mean() if len(rng) > 51 else 1.0
     dry = v[-6:-1].mean() / vol_avg20
 
-    # ---------- Status (స్మార్ట్ ఫిల్టర్ అప్‌గ్రేడ్) ----------
+    # ---------- Status ----------
     cp_need = 0.5 if (gap and close >= o[-1]) else 0.60
     if above:
-        if close > res * 1.10:     # 1.08 నుండి 1.10 కి కాస్త వెసులుబాటు
+        if close > res * 1.10:
             return None
         if vol_ratio >= 1.6 and close_pos >= cp_need:
             status = "Breakout"
@@ -145,13 +145,11 @@ def analyze(sym, g):
         else:
             return None
     else:
-        # రెసిస్టెన్స్ కింద ఉన్న సెటప్‌లు (విన్నర్స్ మిస్ కాకుండా)
         if 0 <= dist_res <= 2.0 and vol_ratio >= 1.5:
             status = "Near Miss"
         elif 0 <= dist_res <= 10.0 and contr < 1.20 and dry < 1.20:
             status = "Setup"
         elif 10.0 < dist_res <= 16.0 and vol_ratio >= 2.0 and close_pos >= 0.7:
-            # బాటమ్ రివర్సల్ విన్నర్ల కోసం కొత్త కేటగిరీ (AGIIL, SBFC లాంటివి క్యాచ్ అవ్వడానికి)
             status = "Setup"
         else:
             return None
@@ -198,7 +196,6 @@ def analyze(sym, g):
     atr_floor_price = entry - (1.5 * atr)
     protective_floor = min(min_floor_price, atr_floor_price)
 
-    # స్టాప్‌లాస్ 4% లోపు మరీ టైట్‌గా ఉంటే ఫ్లోర్ వద్దకు జరపడం
     if stop > protective_floor:
         stop = protective_floor
         stop_reason = "Min Stop Floor applied (5.0% / 1.5 ATR to prevent whipsaw)"
@@ -370,10 +367,11 @@ def analyze(sym, g):
     s = round(max(min(s, 100), 0), 1)
 
     band = "High Conviction" if s >= 80 else ("Good Setup" if s >= 65 else "Early Watch")
+    setup_name = "Breakout Setup" if status == "Breakout" else ("Near Breakout" if status == "Near Miss" else "Base Contraction")
 
     return {
-        "Date": date_str, "Symbol": sym, "Status": status, "Score": s, "Band": band,
-        "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
+        "Date": date_str, "Symbol": sym, "Status": status, "Class": "Standard", "Score": s, "Band": band,
+        "Setup": setup_name, "Close": round(close, 2), "Entry": round(entry, 2), "Stop": round(stop, 2),
         "StopTight": round(stop_tight, 2), "Target": round(target, 2),
         "Target1": round(target1, 2), "Target1Pct": round(t1_pct, 1),
         "Target2": round(target2, 2), "Target2Pct": round(t2_pct, 1),
@@ -404,7 +402,7 @@ for sym, g in groups.items():
 columns = ["Date", "Symbol", "Status", "Class", "Score", "Band", "Setup", "Close", "Entry", "Stop", "StopTight",
            "Target", "Target1", "Target1Pct", "Target2", "Target2Pct", "Target3", "Target3Pct",
            "StopDistPct", "RR", "StopReason", "TargetReason", "TargetPct", "VolRatio",
-           "RSI", "ADX", "Boosters", "High52", "Warning", "Reasons", "Events", "EventAdj",
+           "High52", "Gap", "Warning", "Reasons", "Events", "EventAdj",
            "Surveillance", "ASM", "GSM", "RS", "IsLeader"]
 out = pd.DataFrame(rows, columns=columns)
 
@@ -435,7 +433,7 @@ if os.path.exists(turnaround_file) and len(out) > 0:
                 old_reasons = str(row_val.get("Reasons", ""))
                 out.at[idx_row, "Reasons"] = f"{tag} | {old_reasons}" if old_reasons else tag
 
-        print(f"Ultra Short: Turnaround Boost పూర్తయింది.")
+        print("Ultra Short: Turnaround Boost పూర్తయింది.")
     except Exception as ex_q:
         pass
 
