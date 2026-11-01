@@ -694,12 +694,24 @@ for other_radar_file in ["data/ultra_short.csv", "data/short_term.csv"]:
 rej_out["Symbol_Clean"] = rej_out["Symbol"].astype(str).str.upper()
 rej_out = rej_out[~rej_out["Symbol_Clean"].isin(selected_syms)].drop(columns=["Symbol_Clean"])
 
-# ---------- ఫైల్స్ సేవ్ చేయడం ----------
+# ---------- ఫైల్స్ సేవ్ చేయడం & ఎక్స్‌క్లూడెడ్ హిస్టరీ అపెండ్ లాజిక్ ----------
 os.makedirs("data/history", exist_ok=True)
 out.to_csv("data/early_movers.csv", index=False)
 out.to_csv("data/history/early_%s.csv" % date_str, index=False)
 rej_out.to_csv("data/early_rejected.csv", index=False)
-rej_out.to_csv("data/excluded_early.csv", index=False)
+
+# ఎక్స్‌క్లూడెడ్ హిస్టరీ ఓవర్‌రైట్ అవ్వకుండా పాత రికార్డులకు జోడించడం (Append)
+ex_file = "data/excluded_early.csv"
+if os.path.exists(ex_file):
+    try:
+        old_rej = pd.read_csv(ex_file)
+        combined_rej = pd.concat([old_rej, rej_out], ignore_index=True)
+        combined_rej = combined_rej.drop_duplicates(subset=["Date", "Symbol", "Status"], keep="last")
+        combined_rej.sort_values(by=["Date", "RR"], ascending=[False, False]).to_csv(ex_file, index=False)
+    except Exception:
+        rej_out.to_csv(ex_file, index=False)
+else:
+    rej_out.to_csv(ex_file, index=False)
 
 print("data తేదీ:", date_str)
 print("ఎర్లీ మూవర్స్ ఫలితాలు:", len(out))
