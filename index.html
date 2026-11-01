@@ -796,13 +796,18 @@ function getStageMeta(r){
 
   if(!badge||badge==='WATCH'||badge==='-'){
     if(r.Stage==='Fresh'||r.Band==='High Conviction'){
-      badge='PRIME ENTRY'; color='green'; code=r.Stage?'Stage 2A':'High Conviction';
+      badge='PRIME'; color='green'; code=r.Stage?'Stage 2A':'High Conviction';
     }else if(r.Stage==='Ready'||r.Band==='Good Setup'){
-      badge='WATCHLIST'; color='gold'; code=r.Stage?'Stage 1B':'Good Setup';
+      badge='WATCH'; color='gold'; code=r.Stage?'Stage 1B':'Good Setup';
     }else{
       badge='AVOID'; color='red'; code=r.Stage?'Stage 2B':'Early Watch';
     }
   }
+
+  // Label ni neat ga compact cheyadam
+  if(badge === 'PRIME ENTRY') badge = 'PRIME';
+  if(badge === 'WATCHLIST') badge = 'WATCH';
+
   return {badge,color,code};
 }
 
