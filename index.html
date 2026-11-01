@@ -153,8 +153,17 @@ th{color:var(--mut);font-weight:600}
 </style>
 </head>
 <body>
-<h1>Venkey's Stock Radar</h1>
-<div class="sub" id="meta">Loading...</div>
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px;">
+  <div>
+    <h1 style="margin:0;">Venkey's Stock Radar</h1>
+    <div class="sub" id="meta" style="margin-bottom:0;">Loading...</div>
+  </div>
+  <div class="search-wrapper" style="margin:0;max-width:320px;">
+    <span class="search-icon">&#128269;</span>
+    <input type="text" id="global_search" placeholder="Search any stock (Active or Past)..." oninput="handleGlobalSearch(this.value)">
+    <div class="search-results-dropdown" id="search_results"></div>
+  </div>
+</div>
 <div id="stale"></div>
 
 <div class="digest" id="digest_box">
@@ -170,16 +179,7 @@ th{color:var(--mut);font-weight:600}
   </div>
 </div>
 
-<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
-  <a class="mh" id="mh" href="/health" style="margin-bottom:0"><span class="dot"></span><span id="mh_txt">Market Health</span></a>
-  <a class="mh" href="/events" style="margin-bottom:0">Events</a>
-  
-  <div class="search-wrapper">
-    <span class="search-icon">&#128269;</span>
-    <input type="text" id="global_search" placeholder="Search any stock (Active or Past)..." oninput="handleGlobalSearch(this.value)">
-    <div class="search-results-dropdown" id="search_results"></div>
-  </div>
-</div>
+
 <!-- Nifty 500 Market Breadth Speedometer Gauge Box -->
 <div id="breadth_box" style="background:#161b22;border:1px solid #30363d;border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;box-shadow:0 4px 12px rgba(0,0,0,.25);">
   <div style="min-width:140px;display:flex;flex-direction:column;justify-content:center;border-right:1px solid #262d38;padding-right:14px;">
