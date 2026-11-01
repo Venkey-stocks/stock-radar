@@ -2956,34 +2956,48 @@ Promise.all([load('ultra'),load('short')])
  .catch(e=>{$('meta').innerHTML='<span class="err">Data error: '+e.message+'</span>';});
 
 fetch('data/market_health.json?v='+Date.now())
- .then(r=>r.ok?r.text():'')
- .then(t=>{
-    t=(t||'').trim();
-    if(t.charAt(0)!=='{') return;
-    const d=JSON.parse(t);
-    const st=['Favorable','Cautious','Weak'].indexOf(d.Status)>=0?d.Status:'Unknown';
-    const sc=isFinite(+d.Score)?(' ('+d.Score+'/100)'):'';
-    $('mh').className='mh '+st;
-    $('mh_txt').textContent='Market Health: '+st+sc;
-    const dh=$('d_health');
-    if(dh){
-      dh.className=st=='Favorable'?'pos':(st=='Weak'?'neg':'amb');
-      dh.textContent=st+sc;
+ .then(r=>r.ok?r.json():null)
+ .then(d=>{
+    if(!d) return;
+    const st = ['Favorable','Cautious','Weak'].indexOf(d.Status)>=0 ? d.Status : 'Unknown';
+    const sc = isFinite(+d.Score) ? d.Score : 0;
+    
+    // Top badge updates
+    if($('mh')) $('mh').className = 'mh ' + st;
+    if($('mh_txt')) $('mh_txt').textContent = 'Market Health: ' + st + ' (' + sc + '/100)';
+    if($('d_health')){
+      $('d_health').className = st=='Favorable'?'pos':(st=='Weak'?'neg':'amb');
+      $('d_health').textContent = st + ' (' + sc + '/100)';
+    }
+
+    // Breadth Box UI Binding
+    if($('mb_score')) $('mb_score').textContent = sc;
+    const pill = $('mb_status_pill');
+    if(pill){
+      pill.textContent = st.toUpperCase();
+      pill.className = 'status-pill ' + (st==='Favorable'?'status-green':(st==='Weak'?'status-red':'status-gold'));
+    }
+
+    if(d.Breadth){
+      const b = d.Breadth;
+      const setBar = (txtId, barId, val, defaultCol) => {
+        if($(txtId)) $(txtId).textContent = val + '%';
+        const bar = $(barId);
+        if(bar){
+          bar.style.width = Math.min(100, Math.max(0, val)) + '%';
+          bar.style.background = val >= 50 ? '#2ea043' : (val >= 30 ? '#d29922' : '#f85149');
+        }
+      };
+
+      setBar('mb_p20_txt', 'mb_p20_bar', b.p20 || 0);
+      setBar('mb_p50_txt', 'mb_p50_bar', b.p50 || 0);
+      setBar('mb_p200_txt', 'mb_p200_bar', b.p200 || 0);
+
+      if($('mb_adv_dec')) $('mb_adv_dec').innerHTML = `<span class="pos">${b.adv||0}</span> / <span class="neg">${b.dec||0}</span>`;
+      if($('mb_hl')) $('mb_hl').innerHTML = `<span class="pos">${b.nh||0}</span> / <span class="neg">${b.nl||0}</span>`;
     }
  })
  .catch(()=>{});
-
-fetch('data/profiles.json?v='+Date.now())
- .then(r=>r.ok?r.json():null)
- .then(j=>{
-    if(j&&j.profiles){
-      PROF=j.profiles;
-      if(DATA.ultra&&cur=='sect') drawSect();
-      else if(DATA.ultra&&['ultra','short','early','multi','quality','newl','mine','smart'].indexOf(cur)>=0) redrawCur();
-  }
- })
- .catch(()=>{});
-
 function exportMissToCSV() {
   const data = window._lastMissFiltered || [];
   if (!data.length) {
