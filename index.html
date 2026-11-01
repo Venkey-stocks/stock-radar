@@ -928,9 +928,9 @@ function openRationale(sym, tabType){
   const bnr=$('dr_banner');
   bnr.className='status-banner banner-'+meta.color;
   
-  if(meta.badge==='PRIME ENTRY'){
+  if(meta.badge==='PRIME' || meta.badge==='PRIME ENTRY'){
     $('dr_sub').textContent='High Conviction Setup: అనుకూలమైన Risk:Reward తో Fresh Momentum.';
-  }else if(meta.badge==='WATCHLIST'){
+  }else if(meta.badge==='WATCH' || meta.badge==='WATCHLIST'){
     $('dr_sub').textContent='Consolidation Watch: Price tightening తో Volume Dry-up Setup.';
   }else{
     $('dr_sub').textContent='Extended Run-up: Pullback risk ఉంది, ప్రస్తుత level వద్ద chasing చేయకండి.';
