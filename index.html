@@ -82,9 +82,11 @@ label{color:var(--mut);font-size:13px}
 .st small{display:block;color:var(--mut);font-size:11px}
 .st b{font-size:17px}
 .pos{color:var(--g)}.neg{color:var(--r)}.amb{color:var(--y)}.pur{color:var(--p)}
-.wrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;white-space:nowrap}
+.wrap{overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;white-space:nowrap}
+#ptable{width:max-content;min-width:1380px}
+#ptable th,#ptable td{padding:5px 7px}
 th{color:var(--mut);font-weight:600}
 .rs{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px}
 .rs div{display:flex;justify-content:space-between;gap:12px;padding:2px 0}
@@ -448,7 +450,9 @@ th{color:var(--mut);font-weight:600}
     <button onclick="exportPerfToCSV()" style="margin-left:auto;background:#238636;border-color:#2ea043;font-weight:600">&#128229; Export to Excel</button>
   </div>
   <div class="stats" id="pstats"></div>
-  <div class="wrap"><table id="ptable"></table></div>
+  <div class="wrap" style="overflow-x:auto;width:100%;border:1px solid var(--line);border-radius:8px;">
+    <table id="ptable"></table>
+  </div>
 </div>
 
 <div id="miss" style="display:none">
