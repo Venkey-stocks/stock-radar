@@ -2291,9 +2291,6 @@ function drawNewl(){
     const survBadge = sm ? sm.tag : '';
     const screenerBtn = getScreenerLink(r.Symbol);
     const rsBadge = getRSBadge(r);
-
-    const screenerBtn = getScreenerLink(r.Symbol);
-    const rsBadge = getRSBadge(r);
     const qBadge = getQBadge(r.Symbol);
 
     return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'multi\')"><div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
