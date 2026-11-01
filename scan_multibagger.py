@@ -7,37 +7,34 @@ import pandas as pd
 import requests
 import yfinance as yf
 
-MIN_TV = 2e7            # 20 రోజుల సగటు traded value Rs 2 కోట్లు
+MIN_TV = 2e7            # 20 రోజుల సగటు Traded Value Rs 2 కోట్లు
 MCAP_MIN = 500          # Rs కోట్లు
-MCAP_MAX = 15000
-MAX_1Y_RET = 100.0      # 1 సంవత్సరంలో 100%+ పెరిగినవి వద్దు
+MCAP_MAX = 20000        # కొద్దిగా పెంచాం (15,000 నుండి 20,000 వరకు మిడ్‌క్యాప్ రన్నర్స్ కోసం)
+MAX_1Y_RET = 120.0      # గత 1 సంవత్సరంలో 120%+ పెరిగినవి వద్దు (రన్నింగ్ ర్యాలీలకు కాస్త వెసులుబాటు)
 MIN_ROCE = 15.0
-MIN_CAGR = 20.0
-MAX_MINUTES = 150       # భద్రత కోసం గరిష్ట సమయం
-QUICK_LIMIT = 120       # quick test లో ఎన్ని stocks
+MIN_CAGR = 15.0         # కనీస బేస్ 15% (20%+ ఉంటే ఎక్కువ స్కోర్ వస్తుంది)
+MAX_MINUTES = 150       # గరిష్ట సమయం
+QUICK_LIMIT = 120
 MIN_SCORE = 40
 
-# ---- Stop / Target (టెక్నికల్, అంచనా సంఖ్యలు) ----
-ATR_N = 14              # ATR కాలం
-SWING_LOOKBACK = 120    # swing low కోసం గత రోజులు
-ATR_BUFFER = 0.5        # swing low కింద ATR బఫర్
-ATR_MIN_STOP = 2.5      # stop కనీసం ఇన్ని ATR దూరం (ఎక్కువ కాలం పట్టుకునే stock)
-NO_RES_ATR = 15.0       # resistance లేకపోతే target = Entry + ఇన్ని ATR
-MAX_TARGET_ATR = 25.0   # target గరిష్టం
-MIN_RR = 2.0            # కనీస Reward:Risk
-WIDE_STOP_PCT = 25.0    # దీని కంటే stop దూరమైతే "Wide stop" హెచ్చరిక (తొలగింపు కాదు)
+# ---- Stop / Target (టెక్నికల్) ----
+ATR_N = 14
+SWING_LOOKBACK = 120
+ATR_BUFFER = 0.5
+ATR_MIN_STOP = 2.5
+NO_RES_ATR = 15.0
+MAX_TARGET_ATR = 25.0
+MIN_RR = 1.8            # 2.0 నుండి 1.8 కి మార్చాం (మంచి సెటప్‌లు మిస్ కాకుండా)
+WIDE_STOP_PCT = 25.0
 
 START = time.time()
 QUICK = os.environ.get("QUICK", "") == "yes"
 
-
 def time_ok():
     return (time.time() - START) / 60.0 < MAX_MINUTES
 
-
 def clip01(x):
     return float(min(max(x, 0.0), 1.0))
-
 
 def num(x):
     try:
@@ -45,7 +42,6 @@ def num(x):
         return None if v != v else v
     except Exception:
         return None
-
 
 # ---------- ధర data ----------
 px = pd.read_csv("data/prices.csv.gz", parse_dates=["Date"])
@@ -67,12 +63,17 @@ for sym, g in px.groupby("Symbol"):
     l = g["Low"].values
     v = g["Volume"].values.astype(float)
     close = c[-1]
+    
     tv = (c[-20:] * v[-20:]).mean()
     if tv < MIN_TV:
         continue
-    ret1y = (close / c[0] - 1) * 100
+    
+    # ఫిక్స్: సరిగ్గా గత 250 ట్రేడింగ్ రోజుల (1 సంవత్సరం) రిటర్న్ మాత్రమే లెక్కించాలి
+    idx_1y = max(0, len(c) - 250)
+    ret1y = (close / c[idx_1y] - 1) * 100
     if ret1y >= MAX_1Y_RET:
         continue
+        
     sma200 = c[-200:].mean()
     depth = (h[-30:].max() - l[-30:].min()) / h[-30:].max()
     above = close > sma200
@@ -87,7 +88,7 @@ for sym, g in px.groupby("Symbol"):
     if atr <= 0:
         continue
 
-    # ---- STOP: swing low కింద (ATR బఫర్), కనీసం 2.5 ATR దూరం ----
+    # ---- STOP: swing low కింద ----
     seg_l = l[-SWING_LOOKBACK:]
     pivl = pd.Series(seg_l).rolling(11, center=True).min().values
     swing_lows = seg_l[(seg_l == pivl) & (seg_l < close * 0.98)]
@@ -97,6 +98,7 @@ for sym, g in px.groupby("Symbol"):
     else:
         sw = float(l[-60:].min())
         sw_name = "60-day low Rs %.1f" % sw
+        
     swing_stop = sw - ATR_BUFFER * atr
     atr_stop = close - ATR_MIN_STOP * atr
     if swing_stop <= atr_stop:
@@ -104,41 +106,42 @@ for sym, g in px.groupby("Symbol"):
         stop_reason = "Below %s with %.1f ATR buffer (ATR Rs %.1f)" % (sw_name, ATR_BUFFER, atr)
     else:
         stop = atr_stop
-        stop_reason = "%s is too close; stop set %.1f ATR below entry (ATR Rs %.1f)" % (
-            sw_name, ATR_MIN_STOP, atr)
+        stop_reason = "%s is too close; stop set %.1f ATR below entry (ATR Rs %.1f)" % (sw_name, ATR_MIN_STOP, atr)
+        
     if stop <= 0 or stop >= close:
         continue
     risk = close - stop
     stop_pct = risk / close * 100
 
-    # ---- TARGET: పైన దగ్గరి నిజమైన resistance ----
+    # ---- TARGET: Resistance levels ----
     hi250 = h[-250:]
     high52 = float(hi250.max())
     piv = pd.Series(hi250).rolling(11, center=True).max().values
     levels = np.append(hi250[hi250 == piv], high52)
     levels = levels[levels > close * 1.02]
     cap_price = close + MAX_TARGET_ATR * atr
+    
     if len(levels) > 0:
         lvl = float(levels.min())
         lvl_name = "52-week high" if abs(lvl - high52) < 1e-9 else "swing high"
         if lvl > cap_price:
             target = cap_price
-            target_reason = "Nearest resistance (%s Rs %.1f) is far; capped at %.0f ATR" % (
-                lvl_name, lvl, MAX_TARGET_ATR)
+            target_reason = "Nearest resistance (%s Rs %.1f) is far; capped at %.0f ATR" % (lvl_name, lvl, MAX_TARGET_ATR)
         else:
             target = lvl
-            target_reason = "Nearest resistance: %s Rs %.1f (+%.1f%%)" % (
-                lvl_name, lvl, (lvl / close - 1) * 100)
+            target_reason = "Nearest resistance: %s Rs %.1f (+%.1f%%)" % (lvl_name, lvl, (lvl / close - 1) * 100)
     else:
         target = close + NO_RES_ATR * atr
-        target_reason = "At or near the 52-week high, no overhead resistance; %.0f ATR projection (estimate)" % NO_RES_ATR
+        target_reason = "At or near 52W high, no overhead resistance; %.0f ATR projection" % NO_RES_ATR
+        
     rr = (target - close) / risk
 
     stage1.append({"Symbol": sym, "Close": close, "tv": tv, "Ret1Y": ret1y,
-                   "Trend": "Above 200-day average" if above else "Near a base below 200-day average",
+                   "Trend": "Above 200-day average" if above else "Near base below 200-day average",
                    "Stop": stop, "Target": target, "RR": rr,
                    "StopReason": stop_reason, "TargetReason": target_reason,
                    "StopDistPct": stop_pct, "TargetPct": (target / close - 1) * 100})
+
 stage1.sort(key=lambda x: -x["tv"])
 print("దశ 1 తర్వాత:", len(stage1))
 if QUICK:
@@ -153,82 +156,14 @@ if os.path.exists("data/surveillance.csv"):
         for _, row in surv_df.iterrows():
             sym_clean = str(row.get("Symbol", "")).upper().replace(".NS", "").strip()
             stype = str(row.get("Type", "ASM")).upper().strip()
-            if "GSM" in stype:
-                SURV_MAP[sym_clean] = "GSM"
-            else:
-                SURV_MAP[sym_clean] = "ASM"
-        print("Multibagger: data/surveillance.csv లోడ్ అయ్యింది, stocks:", len(SURV_MAP))
+            SURV_MAP[sym_clean] = "GSM" if "GSM" in stype else "ASM"
+        print("Multibagger: surveillance.csv లోడ్ అయ్యింది, stocks:", len(SURV_MAP))
     except Exception as e:
         print("surveillance.csv చదవడం విఫలమైంది:", e)
 
-UA = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
-    "Accept": "application/json, text/plain, */*",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Referer": "https://www.nseindia.com/",
-}
-sess = requests.Session()
-sess.headers.update(UA)
-try:
-    sess.get("https://www.nseindia.com", timeout=15)
-except Exception:
-    pass
-
-
-def nse(url):
-    for _ in range(2):
-        try:
-            r = sess.get(url, timeout=15)
-            if r.status_code == 200:
-                return r.json()
-        except Exception:
-            pass
-        time.sleep(1.0)
-    return None
-
-
-def walk(o, out):
-    if isinstance(o, dict):
-        if "isin" in o or "symbol" in o:
-            out.append(o)
-        for v in o.values():
-            walk(v, out)
-    elif isinstance(o, list):
-        for v in o:
-            walk(v, out)
-
-
-def flag_sets(url):
-    d = nse(url)
-    if d is None:
-        return None, None
-    items = []
-    walk(d, items)
-    isins, syms = set(), set()
-    for it in items:
-        if it.get("isin"):
-            isins.add(str(it["isin"]).strip())
-        if it.get("symbol"):
-            syms.add(str(it["symbol"]).strip())
-    return isins, syms
-
-
-asm_i, asm_s = flag_sets("https://www.nseindia.com/api/reportASM")
-gsm_i, gsm_s = flag_sets("https://www.nseindia.com/api/reportGSM")
-lists_ok = (len(SURV_MAP) > 0) or (asm_i is not None and gsm_i is not None)
-print("Surveillance వ్యవస్థ స్థితి:", "OK" if lists_ok else "అందలేదు")
-
-
 def get_surv(sym):
     s_clean = sym.upper().replace(".NS", "").strip()
-    if s_clean in SURV_MAP:
-        return SURV_MAP[s_clean]
-    if asm_s and s_clean in asm_s:
-        return "ASM"
-    if gsm_s and s_clean in gsm_s:
-        return "GSM"
-    return ""
-
+    return SURV_MAP.get(s_clean, "")
 
 # ---------- helpers: financial statements ----------
 def sr(df, names):
@@ -241,7 +176,6 @@ def sr(df, names):
                 return s.sort_index()
     return None
 
-
 def cagr(s, years=3):
     if s is None or len(s) < years + 1:
         return None
@@ -250,34 +184,43 @@ def cagr(s, years=3):
         return None
     return ((b / a) ** (1.0 / years) - 1) * 100
 
-
-def evaluate(sym):
-    """Financials తనిఖీ. తిరిగి ఇచ్చేది: (metrics లేదా None, తిరస్కరణ కారణం)"""
-    t = yf.Ticker(sym + ".NS")
+def evaluate(sym, t):
+    """Financials తనిఖీ. Ticker ఆబ్జెక్ట్‌ను నేరుగా వాడుకుంటుంది."""
     m = {}
-    inc = t.income_stmt
+    try:
+        inc = t.income_stmt
+    except Exception:
+        return None, "Income stmt fetch failed"
+        
     sales = sr(inc, ["Total Revenue", "Operating Revenue"])
     ni = sr(inc, ["Net Income", "Net Income Common Stockholders"])
     ebit = sr(inc, ["EBIT", "Operating Income"])
+    
     if sales is None or ni is None or ebit is None or len(sales) < 4 or len(ni) < 4:
         return None, "Fewer than 4 years of annual data"
     if (today - sales.index[-1]).days > 550:
         return None, "Annual data is out of date"
+        
     s_last, n_last = float(sales.iloc[-1]), float(ni.iloc[-1])
     if s_last <= 0:
         return None, "No sales"
     prev = float(ni.iloc[-2])
     if n_last > 0.5 * s_last or (prev > 0 and n_last / prev > 4):
         return None, "Profit looks one-time (jumped or is over half of sales)"
+        
     sc = cagr(sales, 3)
     pc = cagr(ni, 3)
     if sc is None or sc < MIN_CAGR:
-        return None, "Sales growth below 20% a year" if sc is not None else "Sales growth not computable"
+        return None, "Sales growth below %.0f%% a year" % MIN_CAGR
     if pc is None or pc < MIN_CAGR:
-        return None, "Profit growth below 20% a year" if pc is not None else "Profit not positive over 3 years"
+        return None, "Profit growth below %.0f%% a year" % MIN_CAGR
     m["SalesCAGR"], m["ProfitCAGR"] = sc, pc
 
-    bs = t.balance_sheet
+    try:
+        bs = t.balance_sheet
+    except Exception:
+        return None, "Balance sheet fetch failed"
+        
     ta = sr(bs, ["Total Assets"])
     cl = sr(bs, ["Current Liabilities", "Total Current Liabilities"])
     if ta is None or cl is None:
@@ -296,12 +239,15 @@ def evaluate(sym):
     if m["ROCE"] < MIN_ROCE:
         return None, "ROCE below 15%"
 
-    cf = t.cashflow
+    try:
+        cf = t.cashflow
+    except Exception:
+        cf = None
+        
     ocf = sr(cf, ["Operating Cash Flow", "Cash Flow From Continuing Operating Activities"])
-    if ocf is None:
-        return None, "Cash flow not available"
-    if float(ocf.iloc[-1]) <= 0:
-        return None, "Operating cash flow negative"
+    if ocf is None or float(ocf.iloc[-1]) <= 0:
+        return None, "Operating cash flow negative or missing"
+        
     c3 = ocf.index.intersection(ni.index)[-3:]
     conv = None
     if len(c3) >= 2 and float(ni[c3].sum()) > 0:
@@ -309,7 +255,7 @@ def evaluate(sym):
     m["OCFConv"] = conv
 
     fcf = sr(cf, ["Free Cash Flow"])
-    if fcf is None:
+    if fcf is None and cf is not None:
         capex = sr(cf, ["Capital Expenditure", "Purchase Of PPE"])
         if capex is not None:
             both = (ocf + capex).dropna().sort_index()
@@ -320,8 +266,8 @@ def evaluate(sym):
         m["FCF3Sum"] = float(fcf.iloc[-3:].sum()) / 1e7
 
     rec = sr(bs, ["Accounts Receivable", "Receivables"])
-    rc = cagr(rec, 3)
-    m["RecCAGR"] = rc
+    m["RecCAGR"] = cagr(rec, 3)
+    
     sh = sr(bs, ["Ordinary Shares Number", "Share Issued"])
     dil = None
     if sh is not None and len(sh) >= 4 and float(sh.iloc[-4]) > 0:
@@ -350,182 +296,151 @@ def evaluate(sym):
     m["QSalesYoY"], m["QProfitYoY"] = qs, qn
     return m, ""
 
-
-# ---------- దశ 2: market cap ----------
+# ---------- దశ 2 & 3: Market Cap + Financials Evaluation ----------
 rejected = []
-pool = []
-n_nomcap = 0
+passed = []
+
 for s1 in stage1:
     if not time_ok():
-        print("సమయ పరిమితి చేరింది, దశ 2 ఆపేశాం")
+        print("సమయ పరిమితి చేరింది, స్కానింగ్ ఆపేశాం")
         break
     sym = s1["Symbol"]
+    
+    if s1["RR"] < MIN_RR:
+        rejected.append({"Symbol": sym, "Reason": "Reward:Risk below 1:%.1f" % MIN_RR})
+        continue
+        
     try:
-        info = yf.Ticker(sym + ".NS").info or {}
+        t = yf.Ticker(sym + ".NS")
+        info = t.info or {}
     except Exception:
         info = {}
+        
     mc = num(info.get("marketCap"))
     if not mc:
-        n_nomcap += 1
+        # info రాకపోతే close price * shares తో బ్యాకప్ లెక్కింపు
+        sh_num = num(info.get("sharesOutstanding"))
+        if sh_num:
+            mc = s1["Close"] * sh_num
+            
+    if not mc:
+        rejected.append({"Symbol": sym, "Reason": "Market cap unavailable"})
         continue
+        
     mcr = mc / 1e7
-    if MCAP_MIN <= mcr <= MCAP_MAX:
-        pool.append((s1, info, mcr))
-    time.sleep(0.2)
-print("దశ 2 తర్వాత (market cap Rs 500-15,000 కోట్లు):", len(pool), "| market cap తెలియనివి:", n_nomcap)
-
-# ---------- దశ 3: Reward:Risk, తర్వాత financials ----------
-passed = []
-for s1, info, mcr in pool:
-    if not time_ok():
-        print("సమయ పరిమితి చేరింది, దశ 3 ఆపేశాం")
-        break
-    sym = s1["Symbol"]
-    if s1["RR"] < MIN_RR:
-        rejected.append({"Symbol": sym, "Reason": "Reward:Risk below 1:%.0f" % MIN_RR})
+    if not (MCAP_MIN <= mcr <= MCAP_MAX):
+        rejected.append({"Symbol": sym, "Reason": "Market cap out of range (Rs %.0f Cr)" % mcr})
         continue
+
+    # Financials Evaluation
     try:
-        m, why = evaluate(sym)
-    except Exception:
-        m, why = None, "Financial data error"
+        m, why = evaluate(sym, t)
+    except Exception as e:
+        m, why = None, f"Financial evaluation error: {e}"
+        
     if m is None:
         rejected.append({"Symbol": sym, "Reason": why})
     else:
         passed.append((s1, info, mcr, m))
-    time.sleep(0.3)
-print("దశ 3 తర్వాత (Reward:Risk + financials తప్పనిసరి నియమాలు):", len(passed))
+        
+    time.sleep(0.2)
 
-# ---------- NSE promoter / pledge, score ----------
+print("దశ 2 & 3 తర్వాత పాస్ అయిన stocks:", len(passed))
+
+# ---------- స్కోరింగ్ & ర్యాంకింగ్ ----------
 rows = []
 for s1, info, mcr, m in passed:
     sym = s1["Symbol"]
     surv_val = get_surv(sym)
     
-    promoter, pledge_of_promoter = None, None
-    sh = nse("https://www.nseindia.com/api/corporate-share-holdings-master?index=equities&symbol=" + sym)
-    try:
-        recs = sh["data"] if isinstance(sh, dict) and "data" in sh else sh
-        if isinstance(recs, list) and recs:
-            recs = sorted(recs, key=lambda x: pd.to_datetime(x.get("date"), errors="coerce"), reverse=True)
-            promoter = num(recs[0].get("pr_and_prgrp"))
-    except Exception:
-        pass
-    pl = nse("https://www.nseindia.com/api/corporate-pledgedata?index=equities&symbol=" + sym)
-    try:
-        data = pl.get("data") if isinstance(pl, dict) else None
-        if data:
-            pp = num(data[0].get("percSharesPledged"))
-            if pp is not None and promoter:
-                pledge_of_promoter = round(pp / promoter * 100, 1)
-    except Exception:
-        pass
-    time.sleep(0.4)
+    # Promoter holdings (Yahoo info నుండి డైరెక్ట్ గా బ్యాకప్)
+    promoter = None
+    insiders = num(info.get("heldPercentInsiders"))
+    if insiders is not None:
+        promoter = round(insiders * 100, 1)
+
+    pledge_of_promoter = None # Yahoo లో pledge ఉండదు కాబట్టి 0 గా పరిగణించకుండా వదిలేస్తాం
 
     pos, warn = [], []
     score = 40.0
-    score += clip01((m["SalesCAGR"] - 20) / 20.0) * 8
-    score += clip01((m["ProfitCAGR"] - 20) / 30.0) * 8
+    
+    # 20%+ వృద్ధి ఉంటే పూర్తి మార్కులు
+    score += clip01((m["SalesCAGR"] - 15) / 15.0) * 8
+    score += clip01((m["ProfitCAGR"] - 15) / 20.0) * 8
     score += clip01((m["ROCE"] - 15) / 20.0) * 8
-    pos.append("Sales grew %.0f%% a year and profit %.0f%% a year over 3 years" % (m["SalesCAGR"], m["ProfitCAGR"]))
-    pos.append("ROCE %.0f%% (3-year average %.0f%%)" % (m["ROCE"], m["ROCEavg"]))
+    pos.append("Sales CAGR %.0f%%, Profit CAGR %.0f%%" % (m["SalesCAGR"], m["ProfitCAGR"]))
+    pos.append("ROCE %.0f%% (3Y Avg %.0f%%)" % (m["ROCE"], m["ROCEavg"]))
 
     de = num(info.get("debtToEquity"))
     de = None if de is None else round(de / 100.0, 2)
     if de is not None:
         if de <= 0.2:
             score += 6
-            pos.append("Almost debt-free (debt/equity %.2f)" % de)
+            pos.append("Almost debt-free (D/E %.2f)" % de)
         elif de <= 0.5:
             score += 4
-            pos.append("Low debt (debt/equity %.2f)" % de)
+            pos.append("Low debt (D/E %.2f)" % de)
         elif de <= 1.0:
             score += 1
         else:
             score -= 5
-            warn.append("High debt: debt/equity %.2f" % de)
+            warn.append("High debt: D/E %.2f" % de)
+
     if m["OCFConv"] is not None and m["OCFConv"] >= 0.7:
         score += 4
-        pos.append("Profit is backed by real cash flow")
+        pos.append("Strong Cash Flow Conversion")
     elif m["OCFConv"] is not None:
-        warn.append("Cash flow is weak compared with profit")
+        warn.append("Cash flow weaker than profit")
 
-    if m["FCFLast"] is None:
-        warn.append("Free cash flow: n/a (not available)")
-    elif m["FCF3Sum"] is not None and m["FCF3Sum"] < 0:
-        warn.append("Free cash flow negative over the last 3 years (total Rs %.0f crore, last year Rs %.0f crore). Heavy spending is eating the cash; check capex and funding before buying" % (m["FCF3Sum"], m["FCFLast"]))
-    elif m["FCFLast"] < 0:
-        warn.append("Free cash flow negative last year (Rs %.0f crore), check capex" % m["FCFLast"])
+    if m["FCFLast"] is not None and m["FCFLast"] < 0:
+        warn.append("Negative Free Cash Flow last year")
 
     if m["QSalesYoY"] is not None and m["QSalesYoY"] >= 20:
         score += 3
-        pos.append("Latest quarter sales up %.0f%% year on year" % m["QSalesYoY"])
+        pos.append("Qtr Sales YoY +%.0f%%" % m["QSalesYoY"])
     if m["QProfitYoY"] is not None and m["QProfitYoY"] >= 20:
         score += 3
-        pos.append("Latest quarter profit up %.0f%% year on year" % m["QProfitYoY"])
-    if m["QSalesYoY"] is not None and m["QSalesYoY"] > 100:
-        warn.append("Latest quarter sales more than doubled; please verify (one-time item or data issue?)")
-    if m["MarginChange"] is not None and m["MarginChange"] > 0.5:
-        score += 3
-        pos.append("Operating margin improved over 2 years")
+        pos.append("Qtr Profit YoY +%.0f%%" % m["QProfitYoY"])
+
     if promoter is not None:
         if promoter >= 50:
             score += 3
             pos.append("Promoter holds %.1f%%" % promoter)
-        elif promoter < 40:
+        elif promoter < 35:
             score -= 3
-            warn.append("Promoter holding only %.1f%%" % promoter)
-    if pledge_of_promoter is not None:
-        if pledge_of_promoter >= 25:
-            score -= 10
-            warn.append("High promoter pledge: %.1f%% of promoter shares" % pledge_of_promoter)
-        elif pledge_of_promoter >= 10:
-            score -= 5
-            warn.append("Promoter pledge %.1f%% of promoter shares" % pledge_of_promoter)
-        elif pledge_of_promoter <= 5:
-            score += 2
-    else:
-        warn.append("Promoter pledge: n/a (not reported)")
+            warn.append("Low Promoter holding: %.1f%%" % promoter)
+
     inst = num(info.get("heldPercentInstitutions"))
     inst = None if inst is None else round(inst * 100, 1)
-    if inst is not None and inst < 15:
+    if inst is not None and inst < 20:
         score += 3
-        pos.append("Institutions hold only %.1f%% (not crowded yet)" % inst)
-    ana = num(info.get("numberOfAnalystOpinions"))
-    if ana is not None and ana <= 3:
-        score += 3
-        pos.append("Few analysts cover it")
+        pos.append("Institutions hold only %.1f%% (Early)" % inst)
+
     peg = num(info.get("trailingPegRatio")) or num(info.get("pegRatio"))
-    if peg is not None and peg > 0:
-        if peg <= 1.5:
-            score += 4
-            pos.append("PEG %.2f (price reasonable for the growth)" % peg)
-        elif peg > 2.5:
-            score -= 3
-            warn.append("PEG %.2f looks expensive for the growth" % peg)
+    if peg is not None and 0 < peg <= 1.8:
+        score += 4
+        pos.append("Reasonable PEG (%.2f)" % peg)
+
     if s1["Trend"].startswith("Above"):
         score += 3
     if s1["Ret1Y"] < 50:
         score += 3
-        pos.append("Up only %.0f%% in 1 year (still early)" % s1["Ret1Y"])
-    if m["Dilution"] is not None and m["Dilution"] > 5:
-        score -= 8
-        warn.append("Share count rose %.1f%% in 3 years (dilution)" % m["Dilution"])
-    if m["RecCAGR"] is not None and m["RecCAGR"] > m["SalesCAGR"] + 10:
-        score -= 5
-        warn.append("Receivables growing faster than sales")
+        pos.append("1Y Return only %.0f%% (Fresh)" % s1["Ret1Y"])
+
     if s1["StopDistPct"] > WIDE_STOP_PCT:
-        warn.append("Wide stop (%.1f%% away); position size should be small" % s1["StopDistPct"])
-    
+        warn.append("Wide stop (%.1f%%)" % s1["StopDistPct"])
+
     if surv_val:
-        warn.append(f"Exchange {surv_val} Surveillance (100% Margin / Circuit risk)")
+        warn.append(f"Exchange {surv_val} Surveillance")
 
     score = round(max(min(score, 100), 0), 1)
     if score < MIN_SCORE:
         rejected.append({"Symbol": sym, "Reason": "Score below %d" % MIN_SCORE})
         continue
-    band = "High Conviction" if score >= 80 else ("Good Setup" if score >= 65 else "Early Watch")
 
+    band = "High Conviction" if score >= 80 else ("Good Setup" if score >= 65 else "Early Watch")
     close = float(s1["Close"])
+
     rows.append({
         "Date": date_str, "Symbol": sym, "Score": score, "Band": band,
         "Close": round(close, 2), "Entry": round(close, 2),
@@ -538,8 +453,8 @@ for s1, info, mcr, m in passed:
         "QSalesYoY": "" if m["QSalesYoY"] is None else round(m["QSalesYoY"], 1),
         "QProfitYoY": "" if m["QProfitYoY"] is None else round(m["QProfitYoY"], 1),
         "PromoterPct": "" if promoter is None else round(promoter, 1),
-        "PledgeOfPromoterPct": "" if pledge_of_promoter is None else pledge_of_promoter,
-        "InstPct": "" if inst is None else inst, "Analysts": "" if ana is None else int(ana),
+        "PledgeOfPromoterPct": "",
+        "InstPct": "" if inst is None else inst, "Analysts": num(info.get("numberOfAnalystOpinions")) or "",
         "PEG": "" if peg is None else round(peg, 2), "Ret1Y": round(s1["Ret1Y"], 1), "Trend": s1["Trend"],
         "Positives": "; ".join(pos), "Warning": "; ".join(warn),
         "Surveillance": surv_val,
@@ -552,6 +467,7 @@ cols = ["Date", "Symbol", "Score", "Band", "Close", "Entry", "Stop", "Target", "
         "MarketCapCr", "Sector", "ROCE", "SalesCAGR3", "ProfitCAGR3", "DebtEquity", "QSalesYoY", "QProfitYoY",
         "PromoterPct", "PledgeOfPromoterPct", "InstPct", "Analysts", "PEG", "Ret1Y", "Trend", "Positives", "Warning",
         "Surveillance", "ASM", "GSM"]
+
 out = pd.DataFrame(rows, columns=cols)
 if len(out):
     out = out.sort_values("Score", ascending=False)
@@ -561,11 +477,4 @@ out.to_csv("data/history/multi_%s.csv" % date_str, index=False)
 pd.DataFrame(rejected, columns=["Symbol", "Reason"]).to_csv("data/multibagger_rejected.csv", index=False)
 
 print("---- సారాంశం ----")
-print("తుది ఫలితాలు:", len(out))
-rj = pd.DataFrame(rejected, columns=["Symbol", "Reason"])
-if len(rj):
-    print("తిరస్కరణ కారణాలు:")
-    print(rj["Reason"].value_counts().to_string())
-if len(out):
-    print(out.head(10)[["Symbol", "Score", "ROCE", "SalesCAGR3", "ProfitCAGR3", "MarketCapCr", "RR", "Surveillance"]].to_string(index=False))
-print("సమయం: %.1f నిమిషాలు" % ((time.time() - START) / 60.0))
+print("తుది మల్టీబ్యాగర్ స్టాక్స్ సంఖ్య:", len(out))
