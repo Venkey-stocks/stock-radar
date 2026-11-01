@@ -6,7 +6,7 @@ on:
     - cron: '30 5 * * 1-5'
     # 01:30 PM IST (Monday to Friday) -> UTC 08:00
     - cron: '0 8 * * 1-5'
-  workflow_dispatch: # కావాలనుకున్నప్పుడు మ్యాన్యువల్ గా బటన్ నొక్కి రన్ చేయడానికి
+  workflow_dispatch: # Manually trigger cheyadaniki button
 
 jobs:
   intraday_scan:
@@ -29,12 +29,12 @@ jobs:
 
       - name: Fetch Live/Intraday Prices
         run: |
-          # తాజా ధరలను త్వరగా ఫెచ్ చేసే స్క్రిప్ట్ (కేవలం లైవ్ ధరల అప్‌డేట్)
+          # Market hours lo prices fast ga fetch chese script
           python fetch_data.py || true
 
       - name: Run Ultra Short Scanner
         run: |
-          # కేవలం 1-5 రోజుల అల్ట్రా షార్ట్ స్కాన్ మాత్రమే రన్ అవుతుంది
+          # 1-5 days Ultra Short scanner run avuthundi
           python ultra_short.py
 
       - name: Update Market Health & Freshness Timestamp
@@ -60,6 +60,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/ultra_short.csv data/market_health.json data/prices.csv.gz || true
+          git add data/ultra_short.csv data/ultra_rejected.csv data/excluded_ultra.csv data/market_health.json data/prices.csv.gz || true
           git diff --quiet && git diff --staged --quiet || git commit -m "⚡ Intraday Ultra Scan Updated [skip ci]"
           git push
