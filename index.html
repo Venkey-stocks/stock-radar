@@ -210,7 +210,10 @@ th{color:var(--mut);font-weight:600}
     <option value="surv">⚠️ ASM / GSM Only</option>
   </select>
   
-  <button onclick="exportToExcel()" style="margin-left:auto;background:#238636;border-color:#2ea043;font-weight:600">&#128229; Export to Excel</button>
+  <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+  <button id="btn_tv_copy" onclick="copyTradingViewWatchlist()" style="background:#1e53e5;border-color:#388bfd;font-weight:600;padding:6px 12px;border-radius:6px;color:#fff;cursor:pointer;">📋 Copy to TradingView</button>
+  <button onclick="exportToExcel()" style="background:#238636;border-color:#2ea043;font-weight:600;padding:6px 12px;border-radius:6px;color:#fff;cursor:pointer;">&#128229; Export to Excel</button>
+</div>
 </div>
 
 <div class="bar" id="bar_scan">
