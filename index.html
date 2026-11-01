@@ -2184,9 +2184,10 @@ function drawMulti(){
     const survBadge = sm ? sm.tag : '';
     const screenerBtn = getScreenerLink(r.Symbol);
     const rsBadge = getRSBadge(r);
+    const qBadge = getQBadge(r.Symbol);
 
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'multi\')"><div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+(rsBadge?' '+rsBadge:'')+survBadge+'</div>'
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'quality\')"><div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+(qBadge?' '+qBadge:'')+(rsBadge?' '+rsBadge:'')+survBadge+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Price (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.StopDistPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
@@ -2291,8 +2292,12 @@ function drawNewl(){
     const screenerBtn = getScreenerLink(r.Symbol);
     const rsBadge = getRSBadge(r);
 
-    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'newl\')"><div class="top"><span class="sym">'+esc(r.Symbol)+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
-    +'<div class="tags"><span class="tag">Listed '+esc(r.ListedOn)+'</span><span class="tag">'+esc(r.DataDays)+' days of data</span>'+(rsBadge?' '+rsBadge:'')+survBadge+'</div>'
+    const screenerBtn = getScreenerLink(r.Symbol);
+    const rsBadge = getRSBadge(r);
+    const qBadge = getQBadge(r.Symbol);
+
+    return '<div class="card clickable" onclick="openRationale(\''+esc(r.Symbol)+'\', \'multi\')"><div class="top"><span class="sym">'+r.Symbol+screenerBtn+'</span><span class="score '+cls+'">'+r.Score+' &middot; '+r.Band+'</span></div>'
+    +'<div class="tags"><span class="tag">'+(r.Sector||'Sector n/a')+'</span><span class="tag">'+(r.Trend||'')+'</span>'+(qBadge?' '+qBadge:'')+(rsBadge?' '+rsBadge:'')+survBadge+'</div>'
     +resLine(r.Symbol)
     +'<div class="nums"><div class="n"><small>Entry (buy zone)</small><b>'+fmt(r.Entry)+'</b></div>'
     +'<div class="n stop"><small>Stop-loss ('+r.RiskPct+'%)</small><b>'+fmt(r.Stop)+'</b></div>'
