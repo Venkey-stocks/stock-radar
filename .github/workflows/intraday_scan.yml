@@ -1,0 +1,65 @@
+name: Intraday Ultra Scan (11:00 AM & 1:30 PM)
+
+on:
+  schedule:
+    # 11:00 AM IST (Monday to Friday) -> UTC 05:30
+    - cron: '30 5 * * 1-5'
+    # 01:30 PM IST (Monday to Friday) -> UTC 08:00
+    - cron: '0 8 * * 1-5'
+  workflow_dispatch: # కావాలనుకున్నప్పుడు మ్యాన్యువల్ గా బటన్ నొక్కి రన్ చేయడానికి
+
+jobs:
+  intraday_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy yfinance requests
+
+      - name: Fetch Live/Intraday Prices
+        run: |
+          # తాజా ధరలను త్వరగా ఫెచ్ చేసే స్క్రిప్ట్ (కేవలం లైవ్ ధరల అప్‌డేట్)
+          python fetch_data.py || true
+
+      - name: Run Ultra Short Scanner
+        run: |
+          # కేవలం 1-5 రోజుల అల్ట్రా షార్ట్ స్కాన్ మాత్రమే రన్ అవుతుంది
+          python ultra_short.py
+
+      - name: Update Market Health & Freshness Timestamp
+        run: |
+          python -c "
+          import json, datetime
+          ist = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=5, minutes=30)
+          time_str = ist.strftime('%I:%M %p IST')
+          date_str = ist.strftime('%Y-%m-%d')
+          try:
+              with open('data/market_health.json', 'r') as f:
+                  d = json.load(f)
+          except:
+              d = {}
+          d['Date'] = date_str
+          d['Generated_At'] = f'{date_str} {time_str}'
+          d['Intraday_Run'] = time_str
+          with open('data/market_health.json', 'w') as f:
+              json.dump(d, f, indent=2)
+          "
+
+      - name: Commit and Push Intraday Data
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ultra_short.csv data/market_health.json data/prices.csv.gz || true
+          git diff --quiet && git diff --staged --quiet || git commit -m "⚡ Intraday Ultra Scan Updated [skip ci]"
+          git push
