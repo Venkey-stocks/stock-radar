@@ -3058,7 +3058,59 @@ function exportPerfToCSV() {
   a.click();
   document.body.removeChild(a);
 }
-function exportToExcel(){
+function copyTradingViewWatchlist(){
+  const tab = cur;
+  let rows = [];
+
+  if(tab === 'mine'){
+    rows = loadMine().map(m => m.sym);
+  } else if(tab === 'turnaround'){
+    rows = (DATA.turnaround || []).map(r => r.Symbol || r.symbol);
+  } else {
+    const listEl = document.getElementById(tab === 'ultra' || tab === 'short' ? 'list' : 'list_' + tab);
+    if(listEl){
+      const symEls = listEl.querySelectorAll('.sym');
+      symEls.forEach(el => {
+        const sym = el.childNodes[0].textContent.trim();
+        if(sym) rows.push(sym);
+      });
+    }
+    if(!rows.length && DATA[tab]){
+      rows = DATA[tab].map(r => r.Symbol);
+    }
+  }
+
+  const uniqueSyms = [...new Set(rows.filter(Boolean))].map(s => {
+    s = s.replace('.NS', '').replace('.BO', '').trim().toUpperCase();
+    return 'NSE:' + s;
+  });
+
+  if(!uniqueSyms.length){
+    alert('కాపీ చేయడానికి ఈ ట్యాబ్‌లో స్టాక్స్ లేవు!');
+    return;
+  }
+
+  const copyText = uniqueSyms.join(', ');
+
+  navigator.clipboard.writeText(copyText).then(() => {
+    const btn = document.getElementById('btn_tv_copy');
+    if(btn){
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '✅ Copied (' + uniqueSyms.length + ')!';
+      btn.style.background = '#2ea043';
+      btn.style.borderColor = '#2ea043';
+
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.background = '#1e53e5';
+        btn.style.borderColor = '#388bfd';
+      }, 2000);
+    }
+  }).catch(err => {
+    prompt('ఈ క్రింది లిస్ట్‌ను మాన్యువల్‌గా కాపీ చేసుకోండి:', copyText);
+  });
+}
+  function exportToExcel(){
   const tab = cur;
   let rows = DATA[tab] || [];
   if(tab === 'mine') rows = loadMine();
